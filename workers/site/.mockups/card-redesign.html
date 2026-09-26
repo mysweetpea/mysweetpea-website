@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Service Card Redesign — Pick a Direction</title>
+<style>
+:root{
+  --bg:#0C1316; --card:rgba(20,30,34,.72); --card-edge:linear-gradient(180deg,rgba(143,175,181,.14),rgba(143,175,181,0) 40%);
+  --primary:#8FAFB5; --primary-dim:#6B9AA6; --sage:#A3C9B6; --text:#EDF3F4; --dim:#A9BEC2; --faint:#7d969c;
+  --gold:#D9A86C; --error:#D98C8C; --border:rgba(143,175,181,.16); --r-lg:18px; --r-md:12px;
+  --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono',Menlo,monospace;
+  --serif:'Instrument Serif',Georgia,serif; --sans:Inter,'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);padding:48px 24px 96px;
+  background-image:radial-gradient(1200px 600px at 70% -10%,rgba(143,175,181,.07),transparent 60%)}
+.wrap{max-width:1060px;margin:0 auto}
+header.gallery-head{margin-bottom:44px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--sage)}
+h1{font-family:var(--serif);font-weight:400;font-size:40px;margin:10px 0 8px}
+.lede{color:var(--dim);max-width:70ch;line-height:1.65;font-size:15px}
+.lede b{color:var(--text);font-weight:600}
+.variant{margin-top:64px}
+.v-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+.v-tag{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:.14em}
+.v-name{font-family:var(--serif);font-size:24px;font-weight:400}
+.v-note{color:var(--faint);font-size:13.5px;margin-bottom:20px;max-width:78ch;line-height:1.6}
+.stage{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.stage .card-slot{flex:0 1 480px}
+
+/* ---------- shared card atoms ---------- */
+.svc-card{position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.svc-card::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:var(--card-edge);pointer-events:none}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--sage);display:inline-block;position:relative;flex:none}
+.status-dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(163,201,182,.4);animation:ping 2.4s ease-out infinite}
+@keyframes ping{0%{transform:scale(.6);opacity:.9}80%,100%{transform:scale(1.5);opacity:0}}
+.gh-chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;
+  color:var(--dim);border:1px solid var(--border);border-radius:999px;padding:3px 9px;text-transform:uppercase}
+.gh-chip svg{width:11px;height:11px;fill:currentColor}
+.tier-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--gold);border:1px solid rgba(217,168,108,.45);border-radius:999px;padding:4px 11px;
+  background:rgba(217,168,108,.07)}
+.tier-pill img{width:11px;height:11px}
+.icon-chip{display:grid;place-items:center;border-radius:14px;background:rgba(143,175,181,.08);
+  border:1px solid rgba(143,175,181,.22);box-shadow:0 0 22px rgba(143,175,181,.12) inset}
+.icon-chip img{width:60%;height:60%;object-fit:contain}
+.meta-row{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--faint)}
+.blurb{color:var(--dim);font-size:14.5px;line-height:1.62}
+
+/* ---------- A. SHOWCASE ---------- */
+.A .shot{display:block;position:relative;margin:14px 18px 0;border-radius:var(--r-md);overflow:hidden;
+  border:1px solid rgba(143,175,181,.18)}
+.A .shot img{display:block;width:100%;aspect-ratio:16/9.5;object-fit:cover;object-position:top;
+  transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.A .svc-card:hover .shot img{transform:scale(1.035)}
+.A .shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 62%,rgba(12,19,22,.55));pointer-events:none}
+.A .inner{padding:18px 18px 20px}
+.A .top{display:flex;align-items:center;gap:13px}
+.A .icon-chip{width:46px;height:46px;flex:none}
+.A .top h3{font-family:var(--serif);font-weight:400;font-size:23px;letter-spacing:.01em}
+.A .top .sub{margin-top:3px}
+.A .mid{display:flex;align-items:center;justify-content:space-between;margin:16px 2px 10px}
+.A .blurb{margin-top:2px}
+
+/* ---------- B. ICON-FORWARD TICKET (refined current) ---------- */
+.B .inner{display:flex;gap:18px;padding:20px 20px 22px;align-items:stretch}
+.B .left{flex:1;min-width:0}
+.B .right{flex:none;width:118px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  border-left:1px dashed rgba(143,175,181,.28);padding-left:18px}
+.B .icon-chip{width:74px;height:74px}
+.B .icon-chip img{width:58%;height:58%}
+.B .stub-uptime{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);display:flex;align-items:center;gap:6px}
+.B .stub-uptime .bar{width:52px;height:3px;border-radius:2px;background:rgba(163,201,182,.25);overflow:hidden}
+.B .stub-uptime .bar i{display:block;height:100%;width:100%;background:var(--sage);border-radius:2px}
+.B .title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.B h3{font-family:var(--serif);font-weight:400;font-size:26px}
+.B .meta-row{margin:9px 0 12px}
+.B .pills{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+/* ---------- C. HEARTBEAT LEDGER ---------- */
+.C .svc-card{background:linear-gradient(180deg,rgba(20,30,34,.78),rgba(16,24,28,.72))}
+.C .inner{padding:20px 22px 18px}
+.C .row1{display:flex;align-items:center;gap:14px}
+.C .icon-chip{width:44px;height:44px}
+.C h3{font-family:var(--serif);font-weight:400;font-size:24px;flex:1}
+.C .row2{display:flex;align-items:center;justify-content:space-between;margin:13px 0 0;padding-bottom:14px;
+  border-bottom:1px solid rgba(143,175,181,.12)}
+.C .blurb{margin:14px 0 16px}
+.C .hb{display:flex;gap:3px;align-items:flex-end;height:16px}
+.C .hb i{width:4px;border-radius:1.5px;background:rgba(163,201,182,.5);display:block}
+.C .hb i:nth-child(1){height:35%}.C .hb i:nth-child(2){height:55%}.C .hb i:nth-child(3){height:45%}
+.C .hb i:nth-child(4){height:70%}.C .hb i:nth-child(5){height:60%}.C .hb i:nth-child(6){height:85%}
+.C .hb i:nth-child(7){height:55%}.C .hb i:nth-child(8){height:75%}.C .hb i:nth-child(9){height:100%;background:var(--sage)}
+.C .foot{display:flex;align-items:center;justify-content:space-between}
+.C .foot .up{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--faint)}
+
+/* ---------- D. POSTER ---------- */
+.D .svc-card{display:flex;flex-direction:column}
+.D .head{display:flex;align-items:center;gap:12px;padding:16px 18px 14px}
+.D .icon-chip{width:40px;height:40px}
+.D h3{font-family:var(--serif);font-weight:400;font-size:22px;flex:1}
+.D .shot{position:relative;margin:0 18px;border-radius:var(--r-md);overflow:hidden;border:1px solid rgba(143,175,181,.18)}
+.D .shot img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:top}
+.D .shot .play{position:absolute;inset:0;display:grid;place-items:center;background:rgba(12,19,22,.18);
+  opacity:0;transition:opacity .3s}
+.D .svc-card:hover .play{opacity:1}
+.D .play span{width:52px;height:52px;border-radius:50%;background:rgba(12,19,22,.72);border:1px solid rgba(143,175,181,.5);
+  display:grid;place-items:center;box-shadow:0 0 30px rgba(143,175,181,.35)}
+.D .play svg{width:18px;height:18px;fill:var(--text);margin-left:3px}
+.D .inner{padding:14px 18px 18px}
+.D .foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px}
+
+/* ---------- E. DEMO-SLOT (video-ready) ---------- */
+.E .shot{display:block;position:relative;margin:14px 18px 0;border-radius:var(--r-md);overflow:hidden;
+  border:1px solid rgba(143,175,181,.2)}
+.E .shot img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:top;
+  transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+.E .svc-card:hover .shot img{transform:scale(1.04)}
+.E .shot .scrim{position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(12,19,22,.72));pointer-events:none}
+.E .shot .badge{position:absolute;left:12px;bottom:11px;display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--text);
+  background:rgba(12,19,22,.66);border:1px solid rgba(143,175,181,.35);border-radius:999px;padding:5px 11px;backdrop-filter:blur(6px)}
+.E .badge .status-dot{width:6px;height:6px}
+.E .shot .zoom-hint{position:absolute;right:12px;bottom:11px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;
+  color:var(--dim);opacity:0;transition:opacity .3s}
+.E .svc-card:hover .zoom-hint{opacity:1}
+.E .inner{padding:16px 18px 19px}
+.E .top{display:flex;align-items:center;gap:12px}
+.E .icon-chip{width:42px;height:42px}
+.E h3{font-family:var(--serif);font-weight:400;font-size:22px;flex:1}
+.E .meta-row{margin:11px 0 9px}
+.E .foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="gallery-head">
+  <span class="eyebrow">Services Page · Card Redesign</span>
+  <h1>Five directions, one identity</h1>
+  <p class="lede">All five keep the glass card, glow border, pulse dot, mono voice and gold tier rule.
+  The real question each one answers differently: <b>what deserves the space</b> — the screenshot you already have (A, D, E),
+  the icon (B, C), or the live heartbeat (C)? Reply with a letter — or mix (e.g. “A but with C’s heartbeat strip”).
+  Seerr’s real screenshot + real copy used throughout.</p>
+</header>
+
+<!-- ============ A ============ -->
+<section class="variant A">
+  <div class="v-head"><span class="v-tag">A</span><span class="v-name">Showcase</span></div>
+  <p class="v-note">The screenshot becomes the card’s hero — biggest visual upgrade, zero new assets. Icon chip + title lead,
+  meta under, image strip with hover zoom, blurb last. Reads like Linear/Raycast product cards.</p>
+  <div class="stage"><div class="card-slot">
+    <div class="svc-card">
+      <div class="inner">
+        <div class="top">
+          <div class="icon-chip"><img src="../assets/icons/seerr.svg" alt=""></div>
+          <div><h3>Seerr</h3><div class="meta-row sub"><span class="status-dot"></span>LIVE<span>·</span><span class="gh-chip"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GITHUB</span></div></div>
+        </div>
+      </div>
+      <span class="shot"><img src="../assets/screenshots/seerr.webp" alt="Seerr screenshot"></span>
+      <div class="inner" style="padding-top:14px">
+        <div class="mid"><p class="blurb">Request any shows, movies and animes — they appear in Jellyfin automatically.</p></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px"><span class="tier-pill"><img src="../assets/icons/icon-ui-leaf.svg" alt="">Sweet Pea Tier</span></div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ B ============ -->
+<section class="variant B">
+  <div class="v-head"><span class="v-tag">B</span><span class="v-name">Icon-Forward Ticket</span></div>
+  <p class="v-note">Your current ticket, rebalanced: the service icon is promoted out of the stub into a big glass chip,
+  the stub slims into a quiet sidebar with just uptime + a micro bar, typography opens up (serif title, airier rhythm).</p>
+  <div class="stage"><div class="card-slot">
+    <div class="svc-card">
+      <div class="inner">
+        <div class="left">
+          <div class="title-row"><h3>Seerr</h3><span class="tier-pill"><img src="../assets/icons/icon-ui-leaf.svg" alt="">Sweet Pea Tier</span></div>
+          <div class="meta-row"><span class="status-dot"></span>LIVE<span>·</span><span class="gh-chip"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GITHUB</span></div>
+          <p class="blurb">Request any shows, movies and animes — they appear in Jellyfin automatically.</p>
+          <div class="pills"></div>
+        </div>
+        <div class="right">
+          <div class="icon-chip"><img src="../assets/icons/seerr.svg" alt=""></div>
+          <div class="stub-uptime"><span class="bar"><i></i></span>100%</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ C ============ -->
+<section class="variant C">
+  <div class="v-head"><span class="v-tag">C</span><span class="v-name">Heartbeat Ledger</span></div>
+  <p class="v-note">Borrows the status page’s signature: a 9-tick heartbeat strip + mono uptime, under a hairline rule.
+  Icon stays compact, tier pill anchors the footer. The most “operations you can see” of the five.</p>
+  <div class="stage"><div class="card-slot">
+    <div class="svc-card">
+      <div class="inner">
+        <div class="row1">
+          <div class="icon-chip"><img src="../assets/icons/seerr.svg" alt=""></div>
+          <h3>Seerr</h3>
+          <span class="gh-chip"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GITHUB</span>
+        </div>
+        <div class="row2">
+          <span class="meta-row"><span class="status-dot"></span>LIVE</span>
+          <span class="hb"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p class="blurb">Request any shows, movies and animes — they appear in Jellyfin automatically.</p>
+        <div class="foot">
+          <span class="up">24H · 100%</span>
+          <span class="tier-pill"><img src="../assets/icons/icon-ui-leaf.svg" alt="">Sweet Pea Tier</span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ D ============ -->
+<section class="variant D">
+  <div class="v-head"><span class="v-tag">D</span><span class="v-name">Poster</span></div>
+  <p class="v-note">Vertical rhythm: header row → large 4:3 screenshot with a hover play-glow → blurb → footer meta.
+  The play-glow is a wink at the video demos you have planned — the slot is already shaped for them.</p>
+  <div class="stage"><div class="card-slot">
+    <div class="svc-card">
+      <div class="head">
+        <div class="icon-chip"><img src="../assets/icons/seerr.svg" alt=""></div>
+        <h3>Seerr</h3>
+        <span class="tier-pill"><img src="../assets/icons/icon-ui-leaf.svg" alt="">Sweet Pea Tier</span>
+      </div>
+      <span class="shot">
+        <img src="../assets/screenshots/seerr.webp" alt="Seerr screenshot">
+        <span class="play"><span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span></span>
+      </span>
+      <div class="inner">
+        <p class="blurb">Request any shows, movies and animes — they appear in Jellyfin automatically.</p>
+        <div class="foot">
+          <span class="meta-row"><span class="status-dot"></span>LIVE<span>·</span><span class="gh-chip"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GITHUB</span></span>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ============ E ============ -->
+<section class="variant E">
+  <div class="v-head"><span class="v-tag">E</span><span class="v-name">Demo Slot (video-ready)</span></div>
+  <p class="v-note">Like A, but the media window is built as the future video slot: 16:9, bottom scrim, a small
+  “LIVE PREVIEW” pill, and a zoom hint on hover. When you record the demo videos later, the
+  <code>&lt;img&gt;</code> becomes a <code>&lt;video&gt;</code> and nothing else changes.</p>
+  <div class="stage"><div class="card-slot">
+    <div class="svc-card">
+      <div class="inner" style="padding-bottom:0">
+        <div class="top">
+          <div class="icon-chip"><img src="../assets/icons/seerr.svg" alt=""></div>
+          <h3>Seerr</h3>
+          <span class="tier-pill"><img src="../assets/icons/icon-ui-leaf.svg" alt="">Sweet Pea Tier</span>
+        </div>
+      </div>
+      <span class="shot">
+        <img src="../assets/screenshots/seerr.webp" alt="Seerr screenshot">
+        <span class="scrim"></span>
+        <span class="badge"><span class="status-dot"></span>LIVE PREVIEW</span>
+        <span class="zoom-hint">HOVER TO PREVIEW</span>
+      </span>
+      <div class="inner">
+        <div class="meta-row"><span class="status-dot"></span>LIVE<span>·</span><span class="gh-chip"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>GITHUB</span></div>
+        <p class="blurb" style="margin-top:9px">Request any shows, movies and animes — they appear in Jellyfin automatically.</p>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+</div>
+</body>
+</html>

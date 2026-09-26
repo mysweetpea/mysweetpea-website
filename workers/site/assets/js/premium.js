@@ -216,7 +216,7 @@
         vaultwarden: 1, matrix: 2, affine: 3, koalasync: 4,
         jellyfin: 5, seerr: 6, nextcloud: 7, immich: 8, openwebui: 9
     };
-    function applyHeartbeat(hb) {
+    function applyHeartbeat(hb, uptimeList) {
         /* Card dots */
         var cards = document.querySelectorAll('.service-card[data-service]');
         if (cards.length) {
@@ -241,6 +241,32 @@
                 dot.setAttribute('aria-label', up ? 'Status: operational' : 'Status: down');
             });
         }
+        var hbCards = document.querySelectorAll('.service-card[data-service]');
+        hbCards.forEach(function (card) {
+            var id = SERVICE_MONITORS[card.getAttribute('data-service')];
+            var list = (hb && id) ? hb[id] : null;
+            var strip = card.querySelector('.hb-strip');
+            if (strip) {
+                var ticks = strip.querySelectorAll('i');
+                var beats = (list && list.length) ? list.slice(-ticks.length) : [];
+                var pad = ticks.length - beats.length;
+                for (var i = 0; i < ticks.length; i++) {
+                    var cls = 't-none';
+                    if (i >= pad) {
+                        var st = beats[i - pad].status;
+                        if (st === 0) cls = 't-down';
+                        else if (st === 1) cls = 't-up';
+                        else cls = 't-up t-dim';
+                    }
+                    ticks[i].className = cls;
+                }
+            }
+            var upEl = card.querySelector('.hb-uptime');
+            if (upEl) {
+                var uptime = (uptimeList && id) ? uptimeList[id + '_24'] : undefined;
+                upEl.textContent = (typeof uptime === 'number') ? '24H · ' + Math.round(uptime * 100) + '%' : '24H · —';
+            }
+        });
         /* Footer pill */
         var footerStatus = document.getElementById('footerStatus');
         var footerStatusText = document.getElementById('footerStatusText');
@@ -275,6 +301,10 @@
             dot.title = 'Status unknown';
             dot.setAttribute('aria-label', 'Status: unknown');
         });
+        document.querySelectorAll('.hb-strip').forEach(function (strip) {
+            strip.querySelectorAll('i').forEach(function (tick) { tick.className = 't-none'; });
+        });
+        document.querySelectorAll('.hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
         var footerStatus = document.getElementById('footerStatus');
         var footerStatusText = document.getElementById('footerStatusText');
         if (footerStatus && footerStatusText) {
@@ -287,7 +317,7 @@
         .then(function (data) {
             var hb = data && data.heartbeatList;
             if (!hb) throw new Error('no heartbeatList');
-            applyHeartbeat(hb);
+            applyHeartbeat(hb, data && data.uptimeList);
         })
         .catch(function () { markAllUnknown(); });
 
