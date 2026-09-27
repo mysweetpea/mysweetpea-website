@@ -235,10 +235,11 @@
                     return;
                 }
                 var up = list[list.length - 1].status === 1;
+                var wasDown = list.some(function (b) { return b.status !== 1; });
                 dot.classList.remove('status-down', 'status-unknown');
                 if (!up) dot.classList.add('status-down');
-                dot.title = up ? 'Operational' : 'Down';
-                dot.setAttribute('aria-label', up ? 'Status: operational' : 'Status: down');
+                dot.title = up ? (wasDown ? 'Recovered in last 24h' : 'Operational') : 'Down';
+                dot.setAttribute('aria-label', up ? (wasDown ? 'Status: recovered after outage' : 'Status: operational') : 'Status: down');
             });
         }
         var hbCards = document.querySelectorAll('.service-card[data-service]');
@@ -259,6 +260,7 @@
             var bar = card.querySelector('.hbar');
             if (bar) {
                 var fill = bar.firstElementChild;
+                var fmt = function (p) { return p >= 99.95 ? Math.round(p) : p.toFixed(2); };
                 if (typeof uptime === 'number') {
                     var pct = uptime * 100;
                     fill.style.width = pct + '%';
@@ -272,12 +274,12 @@
                     fill.classList.remove('hbar-low', 'hbar-degraded');
                     if (wasDown) {
                         fill.classList.add('hbar-low');
-                        bar.title = 'Down right now \u2014 24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                        bar.title = 'Down right now \u2014 24h uptime: ' + fmt(pct) + '%';
                     } else if (pct < 99.5) {
                         fill.classList.add('hbar-degraded');
-                        bar.title = 'Recovering \u2014 back up, 24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                        bar.title = 'Recovering \u2014 back up, 24h uptime: ' + fmt(pct) + '%';
                     } else {
-                        bar.title = '24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                        bar.title = '24h uptime: ' + fmt(pct) + '%';
                     }
                 } else {
                     fill.style.width = '0%';

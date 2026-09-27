@@ -3035,8 +3035,12 @@ body[data-page='services'] .hbar i.hbar-low {
     box-shadow: inset 0 0 4px color-mix(in srgb, var(--error) 45%, transparent); }
 /* recovering: amber — was down inside the 24h window, up now */
 body[data-page='services'] .hbar i.hbar-degraded {
-    background: linear-gradient(90deg, color-mix(in srgb, #D9A86C 72%, transparent), #D9A86C);
-    box-shadow: inset 0 0 4px rgba(217, 168, 108, .5); }
+    background: linear-gradient(90deg, color-mix(in srgb, var(--gold, #D9A86C) 72%, transparent), var(--gold, #D9A86C));
+    box-shadow: inset 0 0 4px color-mix(in srgb, var(--gold, #D9A86C) 50%, transparent); }
+/* state present but window fully lost: keep a sliver visible so 'down' never
+   renders identical to the honest no-data empty state */
+body[data-page='services'] .hbar i.hbar-low,
+body[data-page='services'] .hbar i.hbar-degraded { min-width: 5px; }
 [data-theme='light'] body[data-page='services'] .hbar { background: rgba(51, 86, 95, .10); box-shadow: inset 0 0 0 1px rgba(51, 86, 95, .12); }
 [data-theme='light'] body[data-page='services'] .hbar i {
     background: linear-gradient(90deg, color-mix(in srgb, var(--sage) 80%, transparent), var(--sage));
