@@ -8258,3 +8258,22 @@ body[data-page='pricing'] .hiw-selective{
 }
 [data-theme='light'] body[data-page='pricing'] .hiw-selective{border-left-color:#7A5A20;background:rgba(122,90,32,.06)}
 /* == END HIW selectivity note == */
+
+/* == TIER SELECTIVITY EMPHASIS (form/pricing/home/about) == */
+body[data-page='form'] .form-selective{
+  margin:10px 0 0;padding:10px 14px;
+  border:1px solid var(--border);border-left:2px solid var(--gold);
+  border-radius:var(--radius-sm);background:color-mix(in srgb,var(--gold) 4%,transparent);
+  font-size:.85rem;line-height:1.55;color:var(--text-dim);
+}
+[data-theme='light'] body[data-page='form'] .form-selective{border-left-color:#7A5A20;background:rgba(122,90,32,.06)}
+body[data-page='pricing'] .tier-subnote{
+  margin-top:8px;font-family:var(--t-font-mono);font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);
+;white-space:nowrap}
+body[data-page='home'] .gw-note{
+  margin:12px 0 0;text-align:center;
+  font-size:.85rem;line-height:1.55;color:var(--text-faint);
+}
+/* about P·05 reuses .about-x-prow — no new rules needed */
+/* == END TIER SELECTIVITY EMPHASIS == */
