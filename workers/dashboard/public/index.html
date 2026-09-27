@@ -546,7 +546,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-btn.primary:hover{color:var(--bg)}
 .hm-banner-acct{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px 28px 18px;border-top:1px solid var(--border);position:relative}
 .hm-banner-acct::before{content:'YOUR ACCOUNT';position:absolute;top:-7px;left:28px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.56rem;font-weight:600;letter-spacing:.18em;color:var(--text-faint);background:linear-gradient(120deg,var(--v-soft) 0%,var(--c-soft) 45%,transparent 75%),var(--card);padding:0 8px}
-.hm-tile-banner{width:auto;padding:12px 13px;box-shadow:none;background:rgba(19,21,36,.45)}
+.hm-banner-acct .hm-tile-banner{width:100%;min-width:0;padding:12px 13px;box-shadow:none;background:rgba(19,21,36,.45)}
 .hm-tile-banner .hm-tile-th{margin-bottom:8px}
 .hm-tile-banner .hm-tile-lbl{font-size:.8rem}
 .hm-tile-banner .hm-tile-sub{font-size:.64rem}
@@ -1217,6 +1217,13 @@ a.hm-req{text-decoration:none;color:var(--text)}
 @media (min-width:761px) and (max-width:1180px){
   .site-back .sb-txt{display:none}
 }
+</style>
+<style>/* home bento pair (B-v3): services 5fr | updates 7fr, collapse <960px */
+.hm-pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+.hm-pair>.hm-sec{min-width:0}
+.hm-pair .hm-rail{min-width:0}
+.hm-pair .hm-sec{margin-bottom:0}
+@media(max-width:960px){.hm-pair{grid-template-columns:1fr}}
 </style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
@@ -2139,8 +2146,8 @@ function guideDetailHtml(key) {
     '<div class="hm-banner-acct" id="hm-banner-acct"></div>' +
     '</div>' +
     '<a class="hm-hero" id="hm-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
-    '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
-    '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' +
+    '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
+    '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
     '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
