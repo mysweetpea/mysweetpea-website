@@ -232,12 +232,29 @@
                     dot.classList.add('status-unknown');
                     dot.title = 'Status unknown';
                     dot.setAttribute('aria-label', 'Status: unknown');
+                    var meta2 = dot.parentElement;
+                    var lab2 = meta2 ? meta2.querySelector('.sp-txt') : null;
+                    if (meta2) meta2.classList.remove('state-down', 'state-degraded');
+                    if (lab2) lab2.textContent = 'UNKNOWN';
                     return;
                 }
                 var up = list[list.length - 1].status === 1;
                 var wasDown = list.some(function (b) { return b.status !== 1; });
-                dot.classList.remove('status-down', 'status-unknown');
-                if (!up) dot.classList.add('status-down');
+                var meta = dot.parentElement; /* .sp-meta wraps dot + label */
+                var lab = meta ? meta.querySelector('.sp-txt') : null;
+                if (meta) meta.classList.remove('state-down', 'state-degraded');
+                dot.classList.remove('status-down', 'status-unknown', 'status-degraded');
+                if (!up) {
+                    dot.classList.add('status-down');
+                    if (meta) meta.classList.add('state-down');
+                    if (lab) lab.textContent = 'DOWN';
+                } else if (wasDown) {
+                    dot.classList.add('status-degraded');
+                    if (meta) meta.classList.add('state-degraded');
+                    if (lab) lab.textContent = 'RECOVERING';
+                } else if (lab) {
+                    lab.textContent = 'LIVE';
+                }
                 dot.title = up ? (wasDown ? 'Recovered in last 24h' : 'Operational') : 'Down';
                 dot.setAttribute('aria-label', up ? (wasDown ? 'Status: recovered after outage' : 'Status: operational') : 'Status: down');
             });
@@ -321,6 +338,10 @@
             dot.classList.add('status-unknown');
             dot.title = 'Status unknown';
             dot.setAttribute('aria-label', 'Status: unknown');
+            var meta3 = dot.parentElement;
+            var lab3 = meta3 ? meta3.querySelector('.sp-txt') : null;
+            if (meta3) meta3.classList.remove('state-down', 'state-degraded');
+            if (lab3) lab3.textContent = 'UNKNOWN';
         });
         document.querySelectorAll('.service-card[data-service] .hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
         document.querySelectorAll('.service-card[data-service] .hbar i').forEach(function (fill) {
