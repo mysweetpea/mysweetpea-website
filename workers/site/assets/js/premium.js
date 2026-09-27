@@ -304,7 +304,7 @@
         document.querySelectorAll('.hb-strip').forEach(function (strip) {
             strip.querySelectorAll('i').forEach(function (tick) { tick.className = 't-none'; });
         });
-        document.querySelectorAll('.hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
+        document.querySelectorAll('.service-card[data-service] .hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
         var footerStatus = document.getElementById('footerStatus');
         var footerStatusText = document.getElementById('footerStatusText');
         if (footerStatus && footerStatusText) {

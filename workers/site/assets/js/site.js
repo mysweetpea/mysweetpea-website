@@ -588,7 +588,7 @@
             nameEl.querySelectorAll('.live-badge, .status-dot, .acct-pill, .sp-meta').forEach(function (n) { n.remove(); });
             var soon = card.hasAttribute('data-tier') && card.getAttribute('data-tier') === 'coming-soon';
             var name = nameEl.textContent.trim();
-            var icon = card.querySelector('.service-icon img') || card.querySelector('.ticket-stub img');
+            var icon = card.querySelector('.icon-chip img') || card.querySelector('.service-icon img');
             var desc = card.querySelector('p');
             var kw = (card.getAttribute('data-keywords') || '').trim();
             parsed.push({
@@ -819,7 +819,7 @@
             setTimeout(function() {
                 btn.classList.remove(cls);
                 if (label) label.textContent = savedLabel;
-                else if (btn.children.length === 0) btn.textContent = text;
+                else if (btn.children.length === 0) btn.textContent = savedLabel;
             }, 2000);
         }
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1017,7 +1017,7 @@
                     homeStatus.classList.remove('degraded', 'offline');
                     homeStatus.classList.add('online');
                 } else {
-                    homeStatusText.textContent = down.length + ' of 9 services down: ' + down.join(', ');
+                    homeStatusText.textContent = down.length + ' of ' + STATUS_TOTAL + ' services down: ' + down.join(', ');
                     homeStatus.classList.remove('online');
                     homeStatus.classList.add('offline');
                 }
@@ -1177,6 +1177,7 @@
             return;
         }
         if (action === 'back-to-top') {
+            event.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }

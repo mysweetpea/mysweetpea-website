@@ -3044,6 +3044,7 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
 [data-theme='light'] body[data-page='services'] .hb-strip i.t-up { background: rgba(78, 124, 136, .45); }
 [data-theme='light'] body[data-page='services'] .hb-strip i:nth-child(9) { background: var(--sage); }
 [data-theme='light'] body[data-page='services'] .hb-strip i.t-none { background: rgba(78, 124, 136, .16); }
+[data-theme='light'] body[data-page='services'] .hb-strip i.t-down { background: #B3402F; }
 [data-theme='light'] body[data-page='services'] .icon-chip { background: rgba(78, 124, 136, .07);
     border-color: rgba(78, 124, 136, .22);
     box-shadow: none; }
