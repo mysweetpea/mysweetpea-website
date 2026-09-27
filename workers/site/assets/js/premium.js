@@ -243,6 +243,20 @@
         }
         var hbCards = document.querySelectorAll('.service-card[data-service]');
         hbCards.forEach(function (card) {
+            /* 24h bar: one thin fill whose width = real 24h uptime. The tick
+               strip only covers Kuma's last ~100 checks (~1.6h) - this bar is
+               what makes a rough day (e.g. 67.8%) visible at a glance. */
+            var inner = card.querySelector('.card-inner');
+            var foot = card.querySelector('.card-foot');
+            if (inner && foot && !card.querySelector('.hbar')) {
+                var bar = document.createElement('div');
+                bar.className = 'hbar';
+                bar.setAttribute('aria-hidden', 'true');
+                bar.innerHTML = '<i></i>';
+                inner.insertBefore(bar, foot);
+            }
+            var strip = card.querySelector('.hb-strip');
+            if (strip) strip.title = 'Last ~100 health checks (about 1.6 hours)';
             var id = SERVICE_MONITORS[card.getAttribute('data-service')];
             var list = (hb && id) ? hb[id] : null;
             var strip = card.querySelector('.hb-strip');
@@ -271,6 +285,20 @@
                     upEl.textContent = '24H · ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
                 } else {
                     upEl.textContent = '24H · —';
+                }
+            }
+            var bar = card.querySelector('.hbar');
+            if (bar) {
+                var fill = bar.firstElementChild;
+                if (typeof uptime === 'number') {
+                    var pct = uptime * 100;
+                    fill.style.width = pct + '%';
+                    fill.classList.toggle('hbar-low', pct < 99.5);
+                    bar.title = '24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                } else {
+                    fill.style.width = '0%';
+                    fill.classList.remove('hbar-low');
+                    bar.title = '';
                 }
             }
         });
@@ -312,6 +340,11 @@
             strip.querySelectorAll('i').forEach(function (tick) { tick.className = 't-none'; });
         });
         document.querySelectorAll('.service-card[data-service] .hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
+        document.querySelectorAll('.service-card[data-service] .hbar i').forEach(function (fill) {
+            fill.style.width = '0%';
+            fill.classList.remove('hbar-low');
+            if (fill.parentElement) fill.parentElement.title = '';
+        });
         var footerStatus = document.getElementById('footerStatus');
         var footerStatusText = document.getElementById('footerStatusText');
         if (footerStatus && footerStatusText) {

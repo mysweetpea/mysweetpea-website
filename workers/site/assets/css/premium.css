@@ -3038,6 +3038,19 @@ body[data-page='services'] .card-foot { display: flex; align-items: center; just
 body[data-page='services'] .hb-uptime { font-family: var(--t-font-mono);
     font-size: 10.5px; letter-spacing: .14em; color: var(--text-faint);
     font-variant-numeric: tabular-nums; }
+
+/* 24h uptime bar: fill width = real 24h uptime (set by premium.js).
+   Sits directly above the ledger row so every card shows it at the
+   same height. Sage when healthy, error tint below 99.5%. */
+body[data-page='services'] .hbar { height: 3px; border-radius: 2px;
+    background: rgba(143, 175, 181, .12); overflow: hidden;
+    margin-top: auto; margin-bottom: 10px; }
+body[data-page='services'] .hbar i { display: block; height: 100%; width: 0%;
+    border-radius: 2px; background: var(--sage);
+    transition: width .6s ease, background .3s ease; }
+body[data-page='services'] .hbar i.hbar-low { background: var(--error); }
+[data-theme='light'] body[data-page='services'] .hbar { background: rgba(51, 86, 95, .10); }
+[data-theme='light'] body[data-page='services'] .hbar i.hbar-low { background: #B3402F; }
 /* footer pill belongs on the RIGHT of .card-foot — undo the old
    "pill on its own row" order override from the Sep 20 polish block */
 body[data-page='services'] .service-card .card-foot .tier-pill { order: 0; align-self: auto; }
