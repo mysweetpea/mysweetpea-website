@@ -243,38 +243,7 @@
         }
         var hbCards = document.querySelectorAll('.service-card[data-service]');
         hbCards.forEach(function (card) {
-            /* 24h bar: one thin fill whose width = real 24h uptime. The tick
-               strip only covers Kuma's last ~100 checks (~1.6h) - this bar is
-               what makes a rough day (e.g. 67.8%) visible at a glance. */
-            var inner = card.querySelector('.card-inner');
-            var foot = card.querySelector('.card-foot');
-            if (inner && foot && !card.querySelector('.hbar')) {
-                var bar = document.createElement('div');
-                bar.className = 'hbar';
-                bar.setAttribute('aria-hidden', 'true');
-                bar.innerHTML = '<i></i>';
-                inner.insertBefore(bar, foot);
-            }
-            var strip = card.querySelector('.hb-strip');
-            if (strip) strip.title = 'Last ~100 health checks (about 1.6 hours)';
             var id = SERVICE_MONITORS[card.getAttribute('data-service')];
-            var list = (hb && id) ? hb[id] : null;
-            var strip = card.querySelector('.hb-strip');
-            if (strip) {
-                var ticks = strip.querySelectorAll('i');
-                var beats = (list && list.length) ? list.slice(-ticks.length) : [];
-                var pad = ticks.length - beats.length;
-                for (var i = 0; i < ticks.length; i++) {
-                    var cls = 't-none';
-                    if (i >= pad) {
-                        var st = beats[i - pad].status;
-                        if (st === 0) cls = 't-down';
-                        else if (st === 1) cls = 't-up';
-                        else cls = 't-up t-dim';
-                    }
-                    ticks[i].className = cls;
-                }
-            }
             var upEl = card.querySelector('.hb-uptime');
             if (upEl) {
                 var uptime = (uptimeList && id) ? uptimeList[id + '_24'] : undefined;
@@ -282,7 +251,7 @@
                    really is >= 99.95% (Math.round turned a real 99.58% into 100%). */
                 if (typeof uptime === 'number') {
                     var pct = uptime * 100;
-                    upEl.textContent = '24H · ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                    upEl.textContent = '24H · ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '% UPTIME';
                 } else {
                     upEl.textContent = '24H · —';
                 }
@@ -335,9 +304,6 @@
             dot.classList.add('status-unknown');
             dot.title = 'Status unknown';
             dot.setAttribute('aria-label', 'Status: unknown');
-        });
-        document.querySelectorAll('.hb-strip').forEach(function (strip) {
-            strip.querySelectorAll('i').forEach(function (tick) { tick.className = 't-none'; });
         });
         document.querySelectorAll('.service-card[data-service] .hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
         document.querySelectorAll('.service-card[data-service] .hbar i').forEach(function (fill) {

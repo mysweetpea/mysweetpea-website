@@ -2997,30 +2997,9 @@ body[data-page='services'] .row1 h3 { font-family: 'Instrument Serif', 'Instrume
     font-weight: 400; font-size: 24px; letter-spacing: .01em; flex: 1; min-width: 0; }
 body[data-page='services'] .row1 .gh-link { flex: none; }
 
-/* row2: status meta + heartbeat strip over a hairline */
-body[data-page='services'] .row2 { display: flex; align-items: center; justify-content: space-between;
-    margin: 13px 0 12px; padding-bottom: 12px;
-    border-bottom: 1px solid rgba(143, 175, 181, .12); }
-
-/* heartbeat strip: 9 ticks; varied heights per tick (from mockup, as-is) */
-body[data-page='services'] .hb-strip { display: flex; gap: 3px; align-items: flex-end; height: 16px; flex: none; }
-body[data-page='services'] .hb-strip i { display: block; width: 4px; height: 60%;
-    border-radius: 1.5px; background: rgba(163, 201, 182, .5);
-    transition: height .3s ease, background .3s ease, opacity .3s ease; }
-body[data-page='services'] .hb-strip i.t-up { background: rgba(163, 201, 182, .5); }
-body[data-page='services'] .hb-strip i:nth-child(1) { height: 35%; }
-body[data-page='services'] .hb-strip i:nth-child(2) { height: 55%; }
-body[data-page='services'] .hb-strip i:nth-child(3) { height: 45%; }
-body[data-page='services'] .hb-strip i:nth-child(4) { height: 70%; }
-body[data-page='services'] .hb-strip i:nth-child(5) { height: 60%; }
-body[data-page='services'] .hb-strip i:nth-child(6) { height: 85%; }
-body[data-page='services'] .hb-strip i:nth-child(7) { height: 55%; }
-body[data-page='services'] .hb-strip i:nth-child(8) { height: 75%; }
-body[data-page='services'] .hb-strip i:nth-child(9) { height: 100%; background: var(--sage); }
-/* state colors — declared after the nth-child heights so they can override tick 9 */
-body[data-page='services'] .hb-strip i.t-down { background: var(--error); height: 100%; }
-body[data-page='services'] .hb-strip i.t-none { background: rgba(143, 175, 181, .14); height: 30%; }
-body[data-page='services'] .hb-strip i.t-dim { opacity: .45; }
+/* row2: status meta + 24h bar, sits between blurb and ledger row */
+body[data-page='services'] .row2 { display: flex; align-items: center; gap: 12px;
+    margin: 2px 0 4px; }
 
 /* blurb + footer ledger row */
 body[data-page='services'] .svc-blurb { margin: 14px 0 16px;
@@ -3032,9 +3011,8 @@ body[data-page='services'] .svc-blurb { margin: 14px 0 16px;
 body[data-page='services'] .service-card { display: flex; flex-direction: column; }
 body[data-page='services'] .service-card .card-inner { display: flex; flex-direction: column; flex: 1; }
 body[data-page='services'] .svc-blurb { flex: 1; }
-body[data-page='services'] .card-foot { margin-top: auto; padding-top: 12px; }
 body[data-page='services'] .card-foot { display: flex; align-items: center; justify-content: space-between;
-    margin-top: 12px; }
+    margin-top: auto; padding-top: 12px; }
 body[data-page='services'] .hb-uptime { font-family: var(--t-font-mono);
     font-size: 10.5px; letter-spacing: .14em; color: var(--text-faint);
     font-variant-numeric: tabular-nums; }
@@ -3042,9 +3020,9 @@ body[data-page='services'] .hb-uptime { font-family: var(--t-font-mono);
 /* 24h uptime bar: fill width = real 24h uptime (set by premium.js).
    Sits directly above the ledger row so every card shows it at the
    same height. Sage when healthy, error tint below 99.5%. */
-body[data-page='services'] .hbar { height: 3px; border-radius: 2px;
+body[data-page='services'] .hbar { height: 4px; border-radius: 2px;
     background: rgba(143, 175, 181, .12); overflow: hidden;
-    margin-top: auto; margin-bottom: 10px; }
+    flex: 1; min-width: 0; }
 body[data-page='services'] .hbar i { display: block; height: 100%; width: 0%;
     border-radius: 2px; background: var(--sage);
     transition: width .6s ease, background .3s ease; }
@@ -3061,20 +3039,13 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
 
 /* light theme: ticks + chip + hairline need darker ink on the sage-tinted card
    (dark-theme rgba(163,201,182,.5) is near-invisible on the light surface) */
-[data-theme='light'] body[data-page='services'] .hb-strip i,
-[data-theme='light'] body[data-page='services'] .hb-strip i.t-up { background: rgba(78, 124, 136, .45); }
-[data-theme='light'] body[data-page='services'] .hb-strip i:nth-child(9) { background: var(--sage); }
-[data-theme='light'] body[data-page='services'] .hb-strip i.t-none { background: rgba(78, 124, 136, .16); }
-[data-theme='light'] body[data-page='services'] .hb-strip i.t-down { background: #B3402F; }
 [data-theme='light'] body[data-page='services'] .icon-chip { background: rgba(78, 124, 136, .07);
     border-color: rgba(78, 124, 136, .22);
     box-shadow: none; }
-[data-theme='light'] body[data-page='services'] .row2 { border-bottom-color: rgba(51, 86, 95, .16); }
 [data-theme='light'] body[data-page='services'] .tier-pill-soon { color: var(--sage);
     background: rgba(78, 124, 136, .08);
     border-color: rgba(78, 124, 136, .35);
     box-shadow: none; }
 
 @media (prefers-reduced-motion: reduce) {
-    body[data-page='services'] .hb-strip i { transition: none; }
 }
