@@ -1222,12 +1222,21 @@ a.hm-req{text-decoration:none;color:var(--text)}
 </style>
 <style>/* home bento pair (B-v3): services 5fr | updates 7fr, collapse <960px */
 .hm-pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:stretch}
+#hm-svc-rail{display:grid;grid-template-columns:1fr;gap:8px;overflow:visible;padding:2px 2px 4px}
+.hm-svcrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:linear-gradient(180deg,rgba(151,146,255,.05),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1);text-decoration:none;color:var(--text);transition:border-color var(--t-fast),transform var(--t-fast),box-shadow var(--t-fast)}
+.hm-svcrow:hover{border-color:var(--border-primary);transform:translateY(-1px);box-shadow:var(--e2)}
+.hm-svcrow .hm-orb-plate{width:42px;height:42px;border-radius:12px;flex:none;box-shadow:0 4px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(197,213,216,.08)}
+.hm-svcrow .hm-orb-plate img{width:26px;height:26px}
+.hm-svcrow-main{min-width:0;flex:1}
+.hm-svcrow .hm-orb-nm{font-size:.84rem}
+.hm-svcrow .hm-orb-bl{min-height:0;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-svcrow .hm-orb-up{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.6rem;letter-spacing:.12em;color:var(--text-dim);font-variant-numeric:tabular-nums;background:rgba(8,9,15,.5);border:1px solid var(--border);border-radius:99px;padding:2px 9px}
 .hm-pair.hm-pair-solo{grid-template-columns:minmax(0,1fr)}
 #hm-un-rail{align-items:flex-start}
 .hm-pair>.hm-sec{min-width:0}
 .hm-pair .hm-rail{min-width:0}
 .hm-pair @media(min-width:761px){#hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}}
-.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:1fr;gap:8px;overflow-x:visible;overflow-y:auto;max-height:266px;padding:2px 2px 6px;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.25) transparent}
+.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:2px 2px 4px}
 .hm-pair #hm-updates .hm-rail::-webkit-scrollbar{display:none}
 .hm-pair #hm-updates .upd-card{padding:10px 13px;gap:10px}
 .hm-pair .hm-sec{margin-bottom:0}
@@ -2962,10 +2971,11 @@ function guideDetailHtml(key) {
       '</a>';
   }
   function hmSvcOrb(s) {
-    return '<a class="hm-card hm-orb" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' +
-      '<span class="hm-orb-plate"><img src="' + esc(s.icon) + '" alt="" width="32" height="32" loading="lazy"></span>' +
-      '<span class="hm-orb-nm">' + esc(s.name) + '<span class="hm-orb-dot unknown" data-hm-dot="' + esc(s.name) + '"></span></span>' +
-      '<span class="hm-orb-bl">' + esc(s.blurb) + '</span><span class="hm-orb-open">Open &rarr;</span></a>';
+    return '<a class="hm-card hm-svcrow" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' +
+      '<span class="hm-orb-plate"><img src="' + esc(s.icon) + '" alt="" width="30" height="30" loading="lazy"></span>' +
+      '<span class="hm-svcrow-main"><span class="hm-orb-nm">' + esc(s.name) + '<span class="hm-orb-dot unknown" data-hm-dot="' + esc(s.name) + '"></span></span>' +
+      '<span class="hm-orb-bl">' + esc(s.blurb) + '</span></span>' +
+      '<span class="hm-orb-up" data-hm-hb="' + esc(s.name) + '"></span></a>';
   }
   const HM_DOT_MATCH = {
     'Jellyfin': ['jellyfin', 'moonfin', 'media'],
@@ -4073,8 +4083,8 @@ function relFuture(v) {
   var LAST = null;
   var ticks = 0;
   var iv = setInterval(function(){
-    var rows = document.querySelectorAll('.hm-orb .hm-orb-hb-row').length;
-    var orbs = document.querySelectorAll('.hm-orb').length;
+    var rows = document.querySelectorAll('.hm-orb .hm-orb-hb-row, .hm-svcrow .hm-orb-up').length;
+    var orbs = document.querySelectorAll('.hm-orb, .hm-svcrow').length;
     if (!orbs || (rows >= orbs && LAST)) { if (++ticks > 300) clearInterval(iv); return; }
     ensureStrips();
     if (LAST) fill(LAST);
