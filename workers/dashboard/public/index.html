@@ -194,7 +194,7 @@ img.svc-ico{object-fit:contain;padding:3px}
 /* ---- phase 6: branding, aesthetics & ux polish ---- */
 .brand img{width:28px;height:28px;border-radius:8px;flex:none}
 .gate-logo{display:block;width:72px;height:72px;margin:0 auto 18px;border-radius:var(--radius);filter:drop-shadow(0 8px 24px rgba(0,0,0,.35))}
-section h3::before{content:"";display:inline-block;width:3px;height:18px;border-radius:99px;background:var(--sage);margin-right:10px;vertical-align:-3px}
+section h3::before{content:"";display:inline-block;width:3px;height:14px;border-radius:99px;background:linear-gradient(180deg,var(--primary-bright),var(--sage));opacity:.8;margin-right:10px;vertical-align:-2px}
 .hero{background:radial-gradient(600px 240px at 85% -20%,rgba(163,201,182,.08),transparent 60%),var(--card)}
 ::selection{background:rgba(217,168,108,.35)}
 :focus-visible{outline:2px solid var(--sage);outline-offset:2px}
@@ -534,7 +534,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-date{color:var(--text-faint);font-size:.72rem;margin-top:2px;font-variant-numeric:tabular-nums}
 .hm-id .tier-line{margin:8px 0 0}
 .hm-stats{display:flex;margin-left:auto;flex-wrap:wrap}
-.hm-stat{padding:4px 24px;border-left:1px solid var(--border)}
+.hm-stat{padding:4px 22px;border-left:1px solid var(--border)}
 .hm-stat:first-child{border-left:0}
 .hm-stat .n{font-size:1.45rem;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--text)}
 .hm-stat .l{color:var(--text-faint);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;margin-top:2px}
@@ -553,9 +553,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 @media(max-width:900px){.hm-banner-acct{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.hm-banner-acct{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 16px 14px}}
 .hm-sec{display:block}
-.hm-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px;margin-bottom:2px}
-.hm-h2{font-family:'Fraunces','Inter',Georgia,serif;font-weight:500;font-size:1.15rem;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;margin:0}
-.hm-accent{width:22px;height:3px;border-radius:99px;background:linear-gradient(90deg,var(--v),var(--c));flex:none}
+.hm-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px;margin-bottom:6px}
+.hm-h2{font-family:'Fraunces','Inter',Georgia,serif;font-weight:500;font-size:1.15rem;letter-spacing:-.01em;display:flex;align-items:center;gap:0;margin:0}
+.hm-accent{display:none}
 .hm-more{font-size:.76rem;font-weight:600;color:var(--text-faint);background:none;border:0;padding:0;font-family:inherit;cursor:pointer;text-decoration:none;transition:color var(--t-fast);display:inline-flex;align-items:center;min-height:24px}
 .hm-more:hover{color:var(--c)}
 .hm-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 12px;scrollbar-width:thin}
@@ -569,12 +569,12 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-g1{background:linear-gradient(160deg,rgba(69,214,200,.35),rgba(19,21,36,.92))}
 .hm-g2{background:linear-gradient(160deg,rgba(217,168,108,.35),rgba(19,21,36,.92))}
 /* continue hero */
-.hm-hero{display:block;position:relative;overflow:hidden;height:280px;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--e2);background:linear-gradient(135deg,var(--v-soft),transparent 60%),var(--card);text-decoration:none;color:var(--text)}
+.hm-hero{display:block;position:relative;overflow:hidden;height:280px;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--e2);background:radial-gradient(700px 300px at 85% 20%,rgba(139,126,246,.16),transparent 65%),radial-gradient(500px 260px at 15% 110%,rgba(69,214,200,.1),transparent 60%),linear-gradient(135deg,var(--v-soft),transparent 60%),var(--card);text-decoration:none;color:var(--text)}
 .hm-hero-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.hm-hero-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,9,15,.92) 0%,rgba(8,9,15,.5) 48%,rgba(8,9,15,0) 80%),linear-gradient(0deg,rgba(8,9,15,.8),rgba(8,9,15,0) 40%)}
+.hm-hero-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(8,9,15,.9) 0%,rgba(8,9,15,.42) 46%,rgba(8,9,15,.08) 78%,rgba(8,9,15,.28) 100%),linear-gradient(0deg,rgba(8,9,15,.78),rgba(8,9,15,0) 42%)}
 .hm-hero-inner{position:absolute;left:30px;right:30px;bottom:24px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .hm-hero-copy{min-width:0}
-.hm-kicker{display:block;font-size:.64rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--c);margin-bottom:8px}
+.hm-kicker{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--c);margin-bottom:9px}
 .hm-hero-title{display:block;font-family:'Fraunces','Inter',Georgia,serif;font-weight:500;font-size:2rem;line-height:1.05;letter-spacing:-.01em}
 .hm-hero-meta{display:block;color:var(--text-dim);font-size:.8rem;margin-top:8px;font-variant-numeric:tabular-nums}
 .hm-hero-side{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none}
@@ -597,15 +597,16 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-chip.appr{background:rgba(217,168,108,.13);color:var(--gold);border:1px solid rgba(217,168,108,.4)}
 .hm-chip.ready{background:var(--c-soft);color:var(--c);border:1px solid rgba(69,214,200,.4)}
 .hm-journey{display:flex;align-items:center;flex:1;min-width:0}
-.hm-jd{width:9px;height:9px;border-radius:50%;background:rgba(151,146,255,.18);flex:none}
+.hm-jd{width:8px;height:8px;border-radius:50%;background:rgba(151,146,255,.22);flex:none}
 .hm-jd.done{background:var(--v)}
-.hm-jd.now{background:var(--bg);border:2px solid var(--c);box-shadow:0 0 0 2px rgba(69,214,200,.18);animation:hm-pulse 2s ease infinite}
+.hm-jd.now{background:var(--c);box-shadow:0 0 0 3px rgba(69,214,200,.16);animation:hm-pulse 2.4s ease infinite}
 @keyframes hm-pulse{50%{box-shadow:0 0 0 5px rgba(69,214,200,.07)}}
-.hm-jl{flex:1;height:2px;background:rgba(151,146,255,.14);min-width:8px}
+.hm-jl{flex:1;height:2px;background:rgba(151,146,255,.12);min-width:10px;border-radius:99px}
 .hm-jl.on{background:linear-gradient(90deg,var(--v),var(--c))}
 /* service orbs */
 .hm-orb{width:150px;display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 10px 14px;border-radius:18px;background:linear-gradient(180deg,rgba(151,146,255,.07),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1),inset 0 1px 0 rgba(197,213,216,.06);text-align:center;text-decoration:none;color:var(--text)}
-.hm-orb:hover{border-color:var(--border-primary)}
+.hm-orb:hover{border-color:var(--border-primary);box-shadow:var(--e2)}
+.hm-orb:hover .hm-orb-plate{transform:translateY(-2px)}
 .hm-orb-plate{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;background:rgba(8,9,15,.55);border:1px solid var(--border);box-shadow:0 7px 18px rgba(0,0,0,.4),inset 0 1px 0 rgba(197,213,216,.08);transition:transform var(--t-fast)}
 .hm-orb:hover .hm-orb-plate{transform:translateY(-3px) scale(1.06)}
 .hm-orb-plate img{width:32px;height:32px;object-fit:contain}
@@ -618,7 +619,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-orb-open{font-size:.7rem;font-weight:600;color:var(--c);opacity:0;transform:translateY(3px);transition:all var(--t-fast)}
 .hm-orb:hover .hm-orb-open{opacity:1;transform:none}
 /* keep watching + up next wide cards */
-.hm-wide{width:300px;display:block;position:relative;overflow:hidden;aspect-ratio:16/9;border-radius:var(--radius-sm);border:1px solid var(--border);background:linear-gradient(135deg,var(--v-soft),transparent 60%),var(--card);box-shadow:var(--e1);text-decoration:none;color:var(--text)}
+.hm-wide{width:340px;display:block;position:relative;overflow:hidden;aspect-ratio:16/9;border-radius:var(--radius-sm);border:1px solid var(--border);background:linear-gradient(135deg,var(--v-soft),transparent 60%),var(--card);box-shadow:var(--e1);text-decoration:none;color:var(--text)}
 .hm-wide:hover{box-shadow:var(--e2)}
 .hm-un{width:240px}
 .hm-wide-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -626,7 +627,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-glyph{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(8,9,15,.55);backdrop-filter:blur(6px);opacity:0;transition:opacity var(--t-fast);color:var(--text)}
 .hm-glyph svg{width:14px;height:14px}
 .hm-wide:hover .hm-glyph{opacity:1}
-.hm-wide-meta{position:absolute;left:14px;right:14px;bottom:12px}
+.hm-wide-meta{position:absolute;left:0;right:0;bottom:0;padding:26px 14px 12px;background:linear-gradient(0deg,rgba(8,9,15,.82),rgba(8,9,15,0))}
 .hm-wide-t{display:block;font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hm-wide-e{display:block;color:var(--text-dim);font-size:.72rem;margin:2px 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hm-bar{display:block;height:4px;border-radius:99px;background:rgba(151,146,255,.16);overflow:hidden}
@@ -649,6 +650,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-tile-sub{display:block;color:var(--text-faint);font-size:.7rem;margin-top:1px}
 /* recently added poster cards */
 .hm-pcard{width:128px;display:block;text-decoration:none;color:var(--text)}
+.hm-pcard:hover .hm-poster{box-shadow:var(--e2),0 0 0 1px var(--border-primary)}
 .hm-poster{position:relative;aspect-ratio:2/3;border-radius:12px;display:grid;place-items:center;overflow:hidden;box-shadow:var(--e1);border:1px solid var(--border)}
 .hm-poster::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(197,213,216,.14),transparent 40%)}
 .hm-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -773,7 +775,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .st2-hero .st2-num{font-size:clamp(2rem,9vw,2.8rem)}
 .hm-greet{font-size:clamp(1.25rem,6.5vw,1.5rem)}
 .tabpanel{gap:26px}
-.hm-sec{margin-bottom:6px}
+.hm-sec{margin-bottom:0}
 .shell{padding-top:76px}
 .tab{min-height:44px;display:flex;align-items:center}
 .hm-btn,.ob-btn,.btn,.sv-fchip,.acct-trigger,.nav-search{min-height:44px;min-width:44px}
@@ -902,7 +904,7 @@ body { overscroll-behavior-x: none; }
 }
 @keyframes msp-nav-pop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 /* ---- aurora mobile 11: request ETA chip ---- */
-.hm-eta{margin-left:auto;font-size:.68rem;font-weight:600;letter-spacing:.02em;color:var(--text-dim);background:var(--v-soft);border:1px solid var(--border-primary);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.hm-eta{margin-left:auto;font-size:.66rem;font-weight:600;letter-spacing:.02em;color:var(--text-dim);background:var(--v-soft);border:1px solid var(--border-primary);border-radius:99px;padding:2px 9px;white-space:nowrap;line-height:1.5}
 /* ---- aurora mobile 10: hm-un cards get real 16/9 geometry (all viewports) ---- */
 .hm-un{aspect-ratio:16/9;height:auto}
 @media (max-width:760px){
@@ -1195,7 +1197,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 <style id="graft-type-apply">
 /* GRAFT 1 APPLY — same layout, site faces. Later-in-head wins at equal specificity. */
 .hm-greet{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:0;font-size:1.95rem}
-.hm-h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:.005em;font-size:1.32rem}
+.hm-h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:.005em;font-size:1.24rem}
 .card h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:.005em}
 .st2-num{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:0}
 .eyebrow{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:600;font-size:.62rem;letter-spacing:.18em}
@@ -2141,8 +2143,8 @@ function guideDetailHtml(key) {
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' +
     '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
-    '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Up next for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse more &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
-    '<section class="hm-sec" id="hm-recent" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Recently added</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse all &rarr;</button></div><div class="hm-rail" id="hm-rec-rail"></div></section>' + obHtml +
+    '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
+    obHtml +
     '<div id="stats" hidden></div>' +
     '<section class="card" id="sec-status" hidden><p class="eyebrow">Service status</p><h3>Service status</h3><div class="skel"></div></section>' +
     '</div>' +
@@ -3141,17 +3143,12 @@ function guideDetailHtml(key) {
       if (cont.length) { kwRail.innerHTML = cont.slice(0, 10).map(hmWideCard).join(''); kwSec.hidden = false; }
       else kwSec.hidden = true;
     }
-    const UP_NEXT_N = 6;
-    const un = latest.slice(0, UP_NEXT_N), rec = latest.slice(UP_NEXT_N);
+    const un = latest;
     const unSec = document.getElementById('hm-upnext'), unRail = document.getElementById('hm-un-rail');
     if (unSec && unRail) {
-      if (un.length) { unRail.innerHTML = un.map(hmUnCard).join(''); unSec.hidden = false; }
+      // merged 'Up next / Recently added' rail: wide cards first, poster cards after
+      if (un.length) { unRail.innerHTML = un.slice(0, 6).map(hmUnCard).join('') + un.slice(6).map(hmPosterCard).join(''); unSec.hidden = false; }
       else unSec.hidden = true;
-    }
-    const recSec = document.getElementById('hm-recent'), recRail = document.getElementById('hm-rec-rail');
-    if (recSec && recRail) {
-      if (rec.length) { recRail.innerHTML = rec.map(hmPosterCard).join(''); recSec.hidden = false; }
-      else recSec.hidden = true;
     }
   }
   function hmInit() {
@@ -3997,8 +3994,8 @@ function relFuture(v) {
 <style id="graft-hb">
 /* GRAFT 3 — mono 24h uptime readout on home services rail cards (strip removed per user). */
 .hm-orb .hm-orb-hb-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px;width:100%;max-width:100%;min-width:0}
-.hm-orb .hm-orb-up{font-family:'JetBrains Mono',ui-monospace,monospace;flex:none;font-size:.56rem;
-  letter-spacing:.12em;color:var(--text-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hm-orb .hm-orb-up{font-family:'JetBrains Mono',ui-monospace,monospace;flex:none;font-size:.6rem;
+  letter-spacing:.12em;color:var(--text-dim);font-variant-numeric:tabular-nums;white-space:nowrap}
 /* GRAFT 4 — footer vine (site signature) + mono LIVE readout.
    Vine straddles the footer's top border exactly like the site's premium footer
    (margin -1px, hairline ::before/::after already provided by .vine-divider base). */
