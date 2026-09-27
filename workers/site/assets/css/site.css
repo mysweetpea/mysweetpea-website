@@ -8071,7 +8071,7 @@ body[data-page='pricing'] .steps-band{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,34px);
 }
 body[data-page='pricing'] .steps-band::before{
-  content:"";position:absolute;top:77px;height:1.5px;
+  content:"";position:absolute;top:76px;height:1.5px; /* chip center; ghost ink ends ~71, rail passes under it */
   left:clamp(18px,3vw,36px);right:clamp(18px,3vw,36px);
   background:linear-gradient(90deg,
     rgba(163,201,182,.45),
@@ -8084,7 +8084,10 @@ body[data-page='pricing'] .led-step{display:flex;flex-direction:column}
 body[data-page='pricing'] .led-step > p{flex:1 0 auto}
 body[data-page='pricing'] .led-numrow{position:relative;height:54px;margin-bottom:14px}
 body[data-page='pricing'] .led-ghost{
-  position:absolute;top:-10px;left:-6px;
+  /* NOTE: positioned against .led-numrow (the nearest positioned ancestor).
+     top:-40 puts the digit INK bottom ~10px above the rail (76) - Fraunces
+     leaves ~15px of descent space below the baseline in the 74px em-box. */
+  position:absolute;top:-40px;left:-6px;
   font-family:var(--t-font-display);font-weight:700;font-size:74px;line-height:1;letter-spacing:-.02em;
   color:transparent;
   -webkit-text-stroke:1px rgba(143,175,181,.22);
@@ -8153,8 +8156,11 @@ body[data-page='pricing'] .tier-feature .tier-chip{
 body[data-page='pricing'] .tier-headrow h3{font-family:var(--t-font-display);font-weight:400;font-size:24px;color:var(--text)}
 body[data-page='pricing'] .tier-feature .tier-headrow h3{color:var(--gold)}
 body[data-page='pricing'] .tier-blurb{font-size:13.5px;color:var(--text-dim);margin-bottom:14px}
-body[data-page='pricing'] .tier-pricerow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px}
-body[data-page='pricing'] .tier-price{font-family:var(--t-font-display);font-weight:400;font-size:36px;color:var(--text)}
+body[data-page='pricing'] .tier-pricerow{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+body[data-page='pricing'] .tier-price{font-family:var(--t-font-display);font-weight:400;font-size:36px;color:var(--text);white-space:nowrap}
+/* stacked meta column: subnote (status) ABOVE period (price terms) so the
+   reading order is fixed top-to-bottom; right-aligned like Seedling's period */
+body[data-page='pricing'] .tier-pricecol{display:flex;flex-direction:column;align-items:flex-end;gap:5px;text-align:right;min-width:0}
 body[data-page='pricing'] .tier-feature .tier-price{color:var(--gold)}
 body[data-page='pricing'] .tier-period2{
   font-family:var(--t-font-mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
@@ -8244,7 +8250,8 @@ body[data-page='pricing'] .cta-ghost{
 @media (max-width:560px){
   body[data-page='pricing'] .tier{padding:24px 20px}
   body[data-page='pricing'] .tier-price{font-size:30px}
-  body[data-page='pricing'] .tier-pricerow{flex-direction:column;gap:6px}
+  body[data-page='pricing'] .tier-pricerow{flex-direction:column;gap:8px}
+  body[data-page='pricing'] .tier-pricecol{align-items:flex-start;text-align:left}
   body[data-page='pricing'] .tier-period2{text-align:left;max-width:none}
 }
 /* == END PRICING PAGE v2 == */
@@ -8268,9 +8275,9 @@ body[data-page='form'] .form-selective{
 }
 [data-theme='light'] body[data-page='form'] .form-selective{border-left-color:#7A5A20;background:rgba(122,90,32,.06)}
 body[data-page='pricing'] .tier-subnote{
-  margin-top:8px;font-family:var(--t-font-mono);font-size:10px;
+  font-family:var(--t-font-mono);font-size:10px;
   letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);
-;white-space:nowrap}
+  white-space:nowrap}
 body[data-page='home'] .gw-note{
   margin:12px 0 0;text-align:center;
   font-size:.85rem;line-height:1.55;color:var(--text-faint);
