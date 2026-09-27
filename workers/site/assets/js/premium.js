@@ -239,7 +239,12 @@
                     return;
                 }
                 var up = list[list.length - 1].status === 1;
-                var wasDown = list.some(function (b) { return b.status !== 1; });
+                /* label/dot must mirror the BAR's signal exactly: the 24h uptime
+                   average, NOT the heartbeat list (Kuma's heartbeat window is only
+                   a few hours - outage beats age out while the 24h average still
+                   holds them, which made the bar amber while the label said LIVE). */
+                var up24 = (uptimeList && id) ? uptimeList[id + '_24'] : undefined;
+                var recovering = up && typeof up24 === 'number' && up24 * 100 < 99.5;
                 var meta = dot.parentElement; /* .sp-meta wraps dot + label */
                 var lab = meta ? meta.querySelector('.sp-txt') : null;
                 if (meta) meta.classList.remove('state-down', 'state-degraded');
@@ -248,15 +253,15 @@
                     dot.classList.add('status-down');
                     if (meta) meta.classList.add('state-down');
                     if (lab) lab.textContent = 'DOWN';
-                } else if (wasDown) {
+                } else if (recovering) {
                     dot.classList.add('status-degraded');
                     if (meta) meta.classList.add('state-degraded');
                     if (lab) lab.textContent = 'RECOVERING';
                 } else if (lab) {
                     lab.textContent = 'LIVE';
                 }
-                dot.title = up ? (wasDown ? 'Recovered in last 24h' : 'Operational') : 'Down';
-                dot.setAttribute('aria-label', up ? (wasDown ? 'Status: recovered after outage' : 'Status: operational') : 'Status: down');
+                dot.title = up ? (recovering ? 'Recovered in last 24h' : 'Operational') : 'Down';
+                dot.setAttribute('aria-label', up ? (recovering ? 'Status: recovering, service is back up' : 'Status: operational') : 'Status: down');
             });
         }
         var hbCards = document.querySelectorAll('.service-card[data-service]');
