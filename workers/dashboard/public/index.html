@@ -547,8 +547,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-btn.primary:hover{color:var(--bg)}
 .hm-banner-acct{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px 28px 18px;border-top:1px solid var(--border);position:relative}
 .hm-banner-acct::before{content:'YOUR ACCOUNT';position:absolute;top:-7px;left:28px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.56rem;font-weight:600;letter-spacing:.18em;color:var(--text-faint);background:linear-gradient(120deg,var(--v-soft) 0%,var(--c-soft) 45%,transparent 75%),var(--card);padding:0 8px}
-.hm-banner-acct .hm-tile-banner{width:100%;min-width:0;padding:13px 14px;box-shadow:none;background:rgba(19,21,36,.42);transition:transform var(--t-fast),border-color var(--t-fast),background var(--t-fast)}
-.hm-tile-banner:hover{transform:translateY(-2px);border-color:var(--border-primary);background:rgba(25,27,46,.55)}
+.hm-banner-acct .hm-tile-banner{width:100%;min-width:0;padding:13px 14px;box-shadow:none;background:var(--card);transition:transform var(--t-fast),border-color var(--t-fast),background var(--t-fast)}
+.hm-tile-banner:hover{background:var(--card);border-color:var(--border-primary)}
 .hm-tile-banner .hm-tile-th{margin-bottom:8px}
 .hm-tile-banner .hm-tile-lbl{font-size:.8rem}
 .hm-tile-banner .hm-tile-sub{font-size:.64rem}
@@ -609,7 +609,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 /* service orbs */
 .hm-orb{width:150px;display:flex;flex-direction:column;align-items:center;gap:9px;padding:18px 10px 14px;border-radius:18px;background:linear-gradient(180deg,rgba(151,146,255,.07),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1),inset 0 1px 0 rgba(197,213,216,.06);text-align:center;text-decoration:none;color:var(--text)}
 .hm-orb:hover{border-color:var(--border-primary);box-shadow:var(--e2)}
-.hm-orb:hover .hm-orb-plate{transform:translateY(-2px)}
 .hm-orb-plate{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;background:rgba(8,9,15,.55);border:1px solid var(--border);box-shadow:0 7px 18px rgba(0,0,0,.4),inset 0 1px 0 rgba(197,213,216,.08);transition:transform var(--t-fast)}
 .hm-orb:hover .hm-orb-plate{transform:translateY(-3px) scale(1.06)}
 .hm-orb-plate img{width:32px;height:32px;object-fit:contain}
@@ -1139,8 +1138,8 @@ a.upd-row:hover{background:rgba(143,175,181,.12)}
 .upd-row .uv{color:var(--sage);font-weight:600;white-space:nowrap}
 .upd-row .ud{margin-left:auto;font-size:.72rem;color:var(--text-faint);white-space:nowrap}
 .upd-empty{padding:14px 12px;font-size:.82rem;color:var(--text-dim)}
-.upd-card{display:flex;align-items:center;gap:10px;background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;text-decoration:none;color:var(--text);transition:transform var(--t-fast),border-color var(--t-fast),box-shadow var(--t-fast);flex:none;width:230px;box-shadow:var(--e1)} .upd-card{transition:transform var(--t-fast),border-color var(--t-fast)} .upd-card:hover{transform:translateY(-2px);border-color:var(--border-primary)}
-.upd-card:hover{transform:translateY(-3px);border-color:var(--border-primary);box-shadow:var(--e2)}
+.upd-card{display:flex;align-items:center;gap:10px;background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;text-decoration:none;color:var(--text);transition:transform var(--t-fast),border-color var(--t-fast),box-shadow var(--t-fast);flex:none;width:230px;box-shadow:var(--e1)}
+#hm-updates .upd-card{width:auto} .upd-card{transition:transform var(--t-fast),border-color var(--t-fast)} .upd-card:hover{transform:translateY(-3px);border-color:var(--border-primary);box-shadow:var(--e2)}
 .upd-card img{width:26px;height:26px;object-fit:contain;flex:none}
 .upd-card .uc-main{min-width:0;display:flex;flex-direction:column;gap:1px}
 .upd-card .uc-nm{font-weight:600;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1199,7 +1198,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 </style>
 <style id="graft-type-apply">
 /* GRAFT 1 APPLY — same layout, site faces. Later-in-head wins at equal specificity. */
-.hm-greet{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:0;font-size:1.95rem}
+.hm-greet{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:0;font-size:2.05rem}
 .hm-h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:.005em;font-size:1.24rem}
 .card h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:.005em}
 .st2-num{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:0}
@@ -1223,10 +1222,12 @@ a.hm-req{text-decoration:none;color:var(--text)}
 </style>
 <style>/* home bento pair (B-v3): services 5fr | updates 7fr, collapse <960px */
 .hm-pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:stretch}
+.hm-pair.hm-pair-solo{grid-template-columns:minmax(0,1fr)}
+#hm-un-rail{align-items:flex-start}
 .hm-pair>.hm-sec{min-width:0}
 .hm-pair .hm-rail{min-width:0}
-.hm-pair #hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}
-.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:1fr;gap:8px;overflow-x:visible;overflow-y:auto;max-height:266px;padding:2px 2px 6px;scrollbar-width:none}
+.hm-pair @media(min-width:761px){#hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}}
+.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:1fr;gap:8px;overflow-x:visible;overflow-y:auto;max-height:266px;padding:2px 2px 6px;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.25) transparent}
 .hm-pair #hm-updates .hm-rail::-webkit-scrollbar{display:none}
 .hm-pair #hm-updates .upd-card{padding:10px 13px;gap:10px}
 .hm-pair .hm-sec{margin-bottom:0}
@@ -3906,12 +3907,15 @@ function relFuture(v) {
     }
     function updApplyHome() {
       var sec = document.getElementById('hm-updates'), rail = document.getElementById('hm-upd-rail');
-      if (!sec || !rail || !updData) return;
+      if (!sec || !rail) return;
+      if (!updData) { var pr = document.querySelector('.hm-pair'); if (pr && !sec.hidden) { sec.hidden = true; pr.classList.add('hm-pair-solo'); } return; }
       var week = (updData.updates || []).filter(function (u) {
         var t = Date.parse(u.date + 'T00:00:00Z');
         return isFinite(t) && (Date.now() - t) <= 7 * 86400000;
       });
-      if (!week.length) { sec.hidden = true; return; }
+      var pair = document.querySelector('.hm-pair');
+      if (!week.length) { sec.hidden = true; if (pair) pair.classList.add('hm-pair-solo'); return; }
+      if (pair) pair.classList.remove('hm-pair-solo');
       rail.innerHTML = week.map(function (u) {
         var inner = '<img src="' + esc(UPD_ICONS[u.service] || '') + '" alt="" width="26" height="26" loading="lazy">' +
           '<span class="uc-main"><span class="uc-nm">' + esc(u.name) + '</span><span class="uc-ver">' + esc(updShort(u)) + '</span></span>' +
