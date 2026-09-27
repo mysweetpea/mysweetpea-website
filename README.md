@@ -226,4 +226,4 @@ Replace both values (in both files) when real addresses are available.
 
 Questions: support@mysweetpea.cc
 Infrastructure: https://github.com/mysweetpea/mysweetpea-homelab
-This site: https://github.com/mysweetpea/mysweetpea-portfolio
+This site: https://github.com/mysweetpea/mysweetpea-website

@@ -47,7 +47,7 @@ export default {
       if (commitsInflight) return commitsInflight;
       commitsInflight = (async () => {
       const token = env.GITHUB_TOKEN || '';
-      const repos = ['mysweetpea/mysweetpea-portfolio', 'mysweetpea/mysweetpea-homelab'];
+      const repos = ['mysweetpea/mysweetpea-website', 'mysweetpea/mysweetpea-homelab'];
       const headers = {
         'Accept': 'application/vnd.github+json',
         'User-Agent': 'mysweetpea-site'
