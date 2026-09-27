@@ -3020,15 +3020,25 @@ body[data-page='services'] .hb-uptime { font-family: var(--t-font-mono);
 /* 24h uptime bar: fill width = real 24h uptime (set by premium.js).
    Sits directly above the ledger row so every card shows it at the
    same height. Sage when healthy, error tint below 99.5%. */
-body[data-page='services'] .hbar { height: 4px; border-radius: 2px;
-    background: rgba(143, 175, 181, .12); overflow: hidden;
-    flex: 1; min-width: 0; }
+body[data-page='services'] .hbar { height: 6px; border-radius: 99px;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent);
+    overflow: hidden; flex: 1; min-width: 0; }
 body[data-page='services'] .hbar i { display: block; height: 100%; width: 0%;
-    border-radius: 2px; background: var(--sage);
-    transition: width .6s ease, background .3s ease; }
-body[data-page='services'] .hbar i.hbar-low { background: var(--error); }
-[data-theme='light'] body[data-page='services'] .hbar { background: rgba(51, 86, 95, .10); }
-[data-theme='light'] body[data-page='services'] .hbar i.hbar-low { background: #B3402F; }
+    border-radius: 99px; min-width: 6px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--sage) 72%, transparent), var(--sage));
+    box-shadow: 0 0 8px color-mix(in srgb, var(--sage) 35%, transparent);
+    transition: width .6s var(--ease-premium, ease), background .3s ease; }
+body[data-page='services'] .hbar i.hbar-low {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--error) 72%, transparent), var(--error));
+    box-shadow: 0 0 8px color-mix(in srgb, var(--error) 35%, transparent); }
+[data-theme='light'] body[data-page='services'] .hbar { background: rgba(51, 86, 95, .10); box-shadow: inset 0 0 0 1px rgba(51, 86, 95, .12); }
+[data-theme='light'] body[data-page='services'] .hbar i {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--sage) 80%, transparent), var(--sage));
+    box-shadow: none; }
+[data-theme='light'] body[data-page='services'] .hbar i.hbar-low {
+    background: linear-gradient(90deg, color-mix(in srgb, #B3402F 80%, transparent), #B3402F);
+    box-shadow: none; }
 /* footer pill belongs on the RIGHT of .card-foot — undo the old
    "pill on its own row" order override from the Sep 20 polish block */
 body[data-page='services'] .service-card .card-foot .tier-pill { order: 0; align-self: auto; }

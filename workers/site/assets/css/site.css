@@ -8080,6 +8080,8 @@ body[data-page='pricing'] .steps-band::before{
   z-index:0;
 }
 body[data-page='pricing'] .led-step{position:relative;padding-top:6px;z-index:1}
+body[data-page='pricing'] .led-step{display:flex;flex-direction:column}
+body[data-page='pricing'] .led-step > p{flex:1 0 auto}
 body[data-page='pricing'] .led-numrow{position:relative;height:54px;margin-bottom:14px}
 body[data-page='pricing'] .led-ghost{
   position:absolute;top:-10px;left:-6px;
@@ -8101,7 +8103,7 @@ body[data-page='pricing'] .led-step h3{
 body[data-page='pricing'] .led-step > p{font-size:13.5px;line-height:1.62;color:var(--text-dim);margin-bottom:16px;max-width:34ch}
 body[data-page='pricing'] .led-rows{border-top:1px solid var(--border)}
 body[data-page='pricing'] .led-row{
-  display:flex;align-items:baseline;gap:12px;padding:10px 2px;
+  display:flex;align-items:center;gap:12px;padding:10px 2px;
   font-family:var(--t-font-mono);font-size:11px;color:var(--text-dim);
 }
 body[data-page='pricing'] .led-row + .led-row{border-top:1px solid color-mix(in srgb,var(--border) 55%,transparent)}
@@ -8110,6 +8112,7 @@ body[data-page='pricing'] .led-k{
   color:var(--sage);
 }
 body[data-page='pricing'] .led-step:last-child .led-k{color:var(--gold)}
+body[data-page='pricing'] .led-v{flex:1;min-width:0;line-height:1.5}
 
 body[data-page='pricing'] .tiers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px;align-items:stretch}
 body[data-page='pricing'] .tier{
@@ -8202,6 +8205,7 @@ body[data-page='pricing'] .cta-ghost{
 [data-theme='light'] body[data-page='pricing'] .led-rows{border-top-color:rgba(46,92,70,.16)}
 [data-theme='light'] body[data-page='pricing'] .led-k{color:var(--sage)}
 [data-theme='light'] body[data-page='pricing'] .led-step:last-child .led-k{color:var(--gold)}
+body[data-page='pricing'] .led-v{flex:1;min-width:0;line-height:1.5}
 [data-theme='light'] body[data-page='pricing'] .tier{background:rgba(255,255,255,.66);border-color:rgba(46,92,70,.16)}
 [data-theme='light'] body[data-page='pricing'] .tier-chip{background:#fff;border-color:rgba(46,92,70,.20)}
 [data-theme='light'] body[data-page='pricing'] .tier-feature{border-top-color:var(--gold-dim)}
@@ -8223,10 +8227,20 @@ body[data-page='pricing'] .cta-ghost{
   body[data-page='pricing'] .tiers{grid-template-columns:minmax(0,1fr)}
   body[data-page='pricing'] .steps-band{grid-template-columns:minmax(0,1fr);gap:26px}
   body[data-page='pricing'] .steps-band::before{
-    /* 77px = 38 band pad-top + 6 step pad-top + 33 to chip center; left = band pad + chip(52px) + half chip(19px) */
-    top:77px;bottom:77px;left:calc(clamp(18px,3vw,36px) + 71px);right:auto;width:1.5px;height:auto;
+    /* 77px = 38 band pad-top + 6 step pad-top + 33 to chip center; left = band pad + chip left(52px) + half chip(19px) */
+    top:63px;bottom:55px;left:calc(clamp(18px,3vw,36px) + 71px);right:auto;width:1.5px;height:auto;
     background:linear-gradient(180deg, rgba(163,201,182,.45), rgba(217,168,108,.38));
   }
+  /* chip stays on the rail (numrow full-width); only text children shift right of it */
+  body[data-page='pricing'] .led-numrow{height:auto;margin-bottom:12px}
+  body[data-page='pricing'] .led-ghost{top:-12px;left:-8px}
+  body[data-page='pricing'] .led-chip{left:52px;bottom:auto;top:0}
+  body[data-page='pricing'] .led-step > h3,
+  body[data-page='pricing'] .led-step > p,
+  body[data-page='pricing'] .led-rows{margin-left:calc(52px + 38px + 16px)}
+  body[data-page='pricing'] .led-row{flex-wrap:wrap;row-gap:2px}
+  body[data-page='pricing'] .led-k{flex:0 0 100%}
+  body[data-page='pricing'] .led-v{flex:1 1 auto}
 }
 @media (max-width:560px){
   body[data-page='pricing'] .tier{padding:24px 20px}

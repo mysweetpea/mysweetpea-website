@@ -95,6 +95,7 @@
           if (beats && beats.length) { seen++; if (beats[beats.length - 1].status === 1) up++; }
         }
         if (txt) txt.textContent = seen ? (up + '/' + seen + ' services live') : 'live status unavailable';
+        /* gardenLive removed from the page: recUptime tile still needs the fetch result */
         /* real 24h average for the record tile (same math as status page) */
         if (recUptime && data.uptimeList) {
           var sum = 0, n = 0;
