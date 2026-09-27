@@ -2,7 +2,11 @@ name = "dashboard"
 main = "src/index.ts"
 compatibility_date = "2026-09-01"
 
-# Custom domain: dashboard.mysweetpea.cc (bound in CF dashboard)
+# Custom domain — DECLARED (restore-by-deploy; a worker delete also deletes the
+# custom domain's DNS, learned the hard way Sep 27 2026). Also bound in CF dashboard.
+routes = [
+  { pattern = "dashboard.mysweetpea.cc", custom_domain = true }
+]
 
 [[kv_namespaces]]
 binding = "SESSIONS"
