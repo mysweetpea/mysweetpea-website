@@ -4,7 +4,7 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-v164';
+const CACHE = 'mysweetpea-v165';
 const CORE = [
         '/assets/js/services-page.js',
         '/assets/js/redeem-page.js',

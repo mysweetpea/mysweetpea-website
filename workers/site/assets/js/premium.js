@@ -264,7 +264,14 @@
             var upEl = card.querySelector('.hb-uptime');
             if (upEl) {
                 var uptime = (uptimeList && id) ? uptimeList[id + '_24'] : undefined;
-                upEl.textContent = (typeof uptime === 'number') ? '24H · ' + Math.round(uptime * 100) + '%' : '24H · —';
+                /* Honest display: round to 2 decimals; only show '100%' when it
+                   really is >= 99.95% (Math.round turned a real 99.58% into 100%). */
+                if (typeof uptime === 'number') {
+                    var pct = uptime * 100;
+                    upEl.textContent = '24H · ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                } else {
+                    upEl.textContent = '24H · —';
+                }
             }
         });
         /* Footer pill */

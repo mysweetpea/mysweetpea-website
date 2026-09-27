@@ -3025,6 +3025,14 @@ body[data-page='services'] .hb-strip i.t-dim { opacity: .45; }
 /* blurb + footer ledger row */
 body[data-page='services'] .svc-blurb { margin: 14px 0 16px;
     font-size: .9rem; line-height: 1.62; color: var(--text-dim); }
+
+/* equal-height rows: cards in a grid row already stretch; make the innner
+   a column so the ledger row (uptime + tier pill) pins to the card bottom
+   and sits at the same height on every card in the row */
+body[data-page='services'] .service-card { display: flex; flex-direction: column; }
+body[data-page='services'] .service-card .card-inner { display: flex; flex-direction: column; flex: 1; }
+body[data-page='services'] .svc-blurb { flex: 1; }
+body[data-page='services'] .card-foot { margin-top: auto; padding-top: 12px; }
 body[data-page='services'] .card-foot { display: flex; align-items: center; justify-content: space-between;
     margin-top: 12px; }
 body[data-page='services'] .hb-uptime { font-family: var(--t-font-mono);
