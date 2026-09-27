@@ -5451,7 +5451,7 @@ body {
 }
 
 /* --- Premium link underline (subtle gradient) --- */
-.content-wrapper a:not(.nav-btn):not(.pc-btn):not(.hiw-inc-chip):not(.hiw-included-link):not(.nav-cta):not(.hero-btn):not(.cta-btn):not(.section-nav a):not(.wm-btn):not(.compare-cta):not(.teaser-btn):not(.status-action-btn):not(.service-chip):not(.github-link):not(.tier-cta):not([class*="btn-"]) {
+.content-wrapper a:not(.nav-btn):not(.pc-btn):not(.hiw-inc-chip):not(.hiw-included-link):not(.nav-cta):not(.hero-btn):not(.cta-btn):not(.section-nav a):not(.wm-btn):not(.compare-cta):not(.teaser-btn):not(.status-action-btn):not(.service-chip):not(.github-link):not(.tier-cta):not(.tb-more):not([class*="btn-"]) {
     text-decoration: none;
     background-image: linear-gradient(90deg, var(--sage), var(--primary));
     background-size: 100% 1px;
@@ -5459,7 +5459,7 @@ body {
     background-repeat: no-repeat;
     transition: background-size 0.3s var(--ease-premium);
 }
-.content-wrapper a:not(.nav-btn):not(.pc-btn):not(.hiw-inc-chip):not(.hiw-included-link):not(.nav-cta):not(.hero-btn):not(.cta-btn):not(.section-nav a):not(.wm-btn):not(.compare-cta):not(.teaser-btn):not(.status-action-btn):not(.service-chip):not(.github-link):not(.tier-cta):not([class*="btn-"]):hover {
+.content-wrapper a:not(.nav-btn):not(.pc-btn):not(.hiw-inc-chip):not(.hiw-included-link):not(.nav-cta):not(.hero-btn):not(.cta-btn):not(.section-nav a):not(.wm-btn):not(.compare-cta):not(.teaser-btn):not(.status-action-btn):not(.service-chip):not(.github-link):not(.tier-cta):not(.tb-more):not([class*="btn-"]):hover {
     background-size: 100% 2px;
 }
 
@@ -8317,20 +8317,19 @@ body[data-page='pricing'] .tier-feature .tb-feat::after{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(200px 90px at 85% -10%, rgba(217,168,108,.12), transparent 70%);
 }
-body[data-page='pricing'] .tb-tile.tb-more{
-  border-style:dashed;border-color:rgba(217,168,108,.35);
-  background:rgba(217,168,108,.03);
-  align-items:center;justify-content:center;text-align:center;gap:5px;
-  transition:border-color .25s ease,background .25s ease;
-}
-/* full-width horizontal strip on row 4 (6 services + more needs the room) */
+/* more-tile: full-width horizontal strip on row 4 (6 services + more needs the room);
+   ONE rule so cascade can't split transition/background across blocks */
 body[data-page='pricing'] .tb-tile.tb-more{
   grid-column:1 / -1;flex-direction:row;gap:14px;min-height:0;padding:13px 16px;
+  border-style:dashed;border-color:rgba(217,168,108,.35);
+  background:rgba(217,168,108,.03);
+  align-items:center;justify-content:center;text-align:center;
+  transition:border-color .25s ease,background .25s ease,transform .25s var(--ease-premium, ease);
 }
-body[data-page='pricing'] .tb-morelist{margin-left:6px}
 body[data-page='pricing'] .tb-tile.tb-more:hover{border-color:rgba(217,168,108,.6);background:rgba(217,168,108,.07)}
 body[data-page='pricing'] .tb-plus{font-family:var(--t-font-display);font-size:26px;line-height:1;color:var(--gold)}
 body[data-page='pricing'] .tb-morelist{
+  margin-left:6px;
   font-family:var(--t-font-mono);font-size:7.5px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--text-faint);white-space:nowrap;
 }
@@ -8338,8 +8337,7 @@ body[data-page='pricing'] .tb-arr{font-size:13px;color:var(--gold);margin-top:1p
 /* hover lift on tiles (desktop pointer only) */
 @media (hover:hover){
   body[data-page='pricing'] .tb-tile{transition:border-color .25s ease,transform .25s var(--ease-premium, ease)}
-  body[data-page='pricing'] .tb-tile:hover{border-color:var(--border-primary);transform:translateY(-2px)}
-  body[data-page='pricing'] .tb-tile.tb-more:hover{border-color:rgba(217,168,108,.6)}
+  body[data-page='pricing'] a.tb-tile:hover{border-color:var(--border-primary);transform:translateY(-2px)}
 }
 /* light theme */
 [data-theme='light'] body[data-page='pricing'] .tb-tile{background:rgba(46,92,70,.05)}
@@ -8351,6 +8349,11 @@ body[data-page='pricing'] .tb-arr{font-size:13px;color:var(--gold);margin-top:1p
 @media (max-width:560px){
   body[data-page='pricing'] .tier-bento{grid-template-columns:repeat(2,minmax(0,1fr))}
   body[data-page='pricing'] .tb-tile.tb-feat{grid-column:span 2;grid-row:auto;min-height:120px}
-  body[data-page='pricing'] .tb-tile.tb-more{grid-column:span 2}
+  /* more-tile fills the odd-tile row instead of leaving an orphan cell */
+  body[data-page='pricing'] .tb-tile.tb-more{grid-column:auto;flex-direction:column;gap:5px;padding:10px 12px}
+}
+@media (max-width:400px){
+  /* strip too tight for the service list at tiny widths - name + arrow carry it */
+  body[data-page='pricing'] .tb-morelist{display:none}
 }
 /* == END TIER BENTO == */
