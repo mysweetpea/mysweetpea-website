@@ -170,10 +170,6 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
 }
 
 
-/* garden footer: CTA + shared live line */
-
-/* garden live line: static dot under reduced motion */
-
 /* ===== POLISH PASS (compact era) ===== */
 /* garden-row reveal stagger + hover transition now live in the GARDEN block above
    (same !important counter-pattern vs premium.css `.js .reveal.visible`). */
@@ -182,9 +178,6 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
 .features-section .section-title{position:relative;z-index:1}
 .features-section{overflow-x:clip}
 .features-section::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:520px;height:220px;background:radial-gradient(ellipse at center,rgba(143,175,181,.07),transparent 70%);pointer-events:none;z-index:0}
-/* 4. garden-foot: hairline above, keeps CTA + live line as one composed unit */
-/* 5. live dot gentle breathing (not a ping — subtle) */
-@keyframes glBreath{0%,100%{opacity:1}50%{opacity:.55}}
 /* 6. record tiles: count-up numerals get tabular-nums so width doesn't jitter */
 .record .v{font-variant-numeric:tabular-nums}
 /* 7. eyebrow rule draw animation is handled by .reveal on .sec-eyebrow (already wired);

@@ -62,8 +62,9 @@
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMotion);
   else initMotion();
 
-/* garden live line + uptime tile: paints the shared status line under the
-   garden grid AND the "Measured uptime · last 24 hours" record tile.
+/* uptime tile: paints the "Measured uptime \u00b7 last 24 hours" record tile.
+   (The garden live line was removed 2026-09; the Kuma fetch stays because the
+   tile still needs it — do not restore a live line without re-adding painters.)
    Kuma contract: heartbeatList keyed by monitor id (1-9 = our services);
    status===1 means up; uptimeList["<id>_24"] = fraction 0..1.
    Runs inside the same DOM-ready contract as initMotion (defer scripts

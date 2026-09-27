@@ -3025,19 +3025,27 @@ body[data-page='services'] .hbar { height: 6px; border-radius: 99px;
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 12%, transparent);
     overflow: hidden; flex: 1; min-width: 0; }
 body[data-page='services'] .hbar i { display: block; height: 100%; width: 0%;
-    border-radius: 99px; min-width: 6px;
+    border-radius: 99px; /* no min-width: width:0% (no data) must render NOTHING */
     background: linear-gradient(90deg, color-mix(in srgb, var(--sage) 72%, transparent), var(--sage));
-    box-shadow: 0 0 8px color-mix(in srgb, var(--sage) 35%, transparent);
-    transition: width .6s var(--ease-premium, ease), background .3s ease; }
+    box-shadow: inset 0 0 4px color-mix(in srgb, var(--sage) 45%, transparent);
+    /* gradients don't interpolate, so only width + shadow transition (honest snap on color) */
+    transition: width .6s var(--ease-premium, ease), box-shadow .3s ease; }
 body[data-page='services'] .hbar i.hbar-low {
     background: linear-gradient(90deg, color-mix(in srgb, var(--error) 72%, transparent), var(--error));
-    box-shadow: 0 0 8px color-mix(in srgb, var(--error) 35%, transparent); }
+    box-shadow: inset 0 0 4px color-mix(in srgb, var(--error) 45%, transparent); }
+/* recovering: amber — was down inside the 24h window, up now */
+body[data-page='services'] .hbar i.hbar-degraded {
+    background: linear-gradient(90deg, color-mix(in srgb, #D9A86C 72%, transparent), #D9A86C);
+    box-shadow: inset 0 0 4px rgba(217, 168, 108, .5); }
 [data-theme='light'] body[data-page='services'] .hbar { background: rgba(51, 86, 95, .10); box-shadow: inset 0 0 0 1px rgba(51, 86, 95, .12); }
 [data-theme='light'] body[data-page='services'] .hbar i {
     background: linear-gradient(90deg, color-mix(in srgb, var(--sage) 80%, transparent), var(--sage));
-    box-shadow: none; }
+    box-shadow: none; } /* flat in light — no glow language */
 [data-theme='light'] body[data-page='services'] .hbar i.hbar-low {
     background: linear-gradient(90deg, color-mix(in srgb, #B3402F 80%, transparent), #B3402F);
+    box-shadow: none; }
+[data-theme='light'] body[data-page='services'] .hbar i.hbar-degraded {
+    background: linear-gradient(90deg, color-mix(in srgb, #8A6516 80%, transparent), #8A6516);
     box-shadow: none; }
 /* footer pill belongs on the RIGHT of .card-foot — undo the old
    "pill on its own row" order override from the Sep 20 polish block */

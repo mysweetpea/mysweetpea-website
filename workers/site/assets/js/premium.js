@@ -262,11 +262,26 @@
                 if (typeof uptime === 'number') {
                     var pct = uptime * 100;
                     fill.style.width = pct + '%';
-                    fill.classList.toggle('hbar-low', pct < 99.5);
-                    bar.title = '24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                    /* three states: red = down right now (latest heartbeat),
+                       amber = recovering (up now, but the 24h window holds an
+                       outage so uptime < 99.5%), sage = healthy. A service that
+                       comes back after a long down reads amber, not red, until
+                       the window heals. */
+                    var mlist = (hb && id) ? hb[id] : null;
+                    var wasDown = mlist && mlist.length && mlist[mlist.length - 1].status !== 1;
+                    fill.classList.remove('hbar-low', 'hbar-degraded');
+                    if (wasDown) {
+                        fill.classList.add('hbar-low');
+                        bar.title = 'Down right now \u2014 24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                    } else if (pct < 99.5) {
+                        fill.classList.add('hbar-degraded');
+                        bar.title = 'Recovering \u2014 back up, 24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                    } else {
+                        bar.title = '24h uptime: ' + (pct >= 99.95 ? Math.round(pct) : pct.toFixed(2)) + '%';
+                    }
                 } else {
                     fill.style.width = '0%';
-                    fill.classList.remove('hbar-low');
+                    fill.classList.remove('hbar-low', 'hbar-degraded');
                     bar.title = '';
                 }
             }
@@ -308,7 +323,7 @@
         document.querySelectorAll('.service-card[data-service] .hb-uptime').forEach(function (el) { el.textContent = '24H · —'; });
         document.querySelectorAll('.service-card[data-service] .hbar i').forEach(function (fill) {
             fill.style.width = '0%';
-            fill.classList.remove('hbar-low');
+            fill.classList.remove('hbar-low', 'hbar-degraded');
             if (fill.parentElement) fill.parentElement.title = '';
         });
         var footerStatus = document.getElementById('footerStatus');

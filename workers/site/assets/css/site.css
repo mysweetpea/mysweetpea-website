@@ -8205,7 +8205,6 @@ body[data-page='pricing'] .cta-ghost{
 [data-theme='light'] body[data-page='pricing'] .led-rows{border-top-color:rgba(46,92,70,.16)}
 [data-theme='light'] body[data-page='pricing'] .led-k{color:var(--sage)}
 [data-theme='light'] body[data-page='pricing'] .led-step:last-child .led-k{color:var(--gold)}
-body[data-page='pricing'] .led-v{flex:1;min-width:0;line-height:1.5}
 [data-theme='light'] body[data-page='pricing'] .tier{background:rgba(255,255,255,.66);border-color:rgba(46,92,70,.16)}
 [data-theme='light'] body[data-page='pricing'] .tier-chip{background:#fff;border-color:rgba(46,92,70,.20)}
 [data-theme='light'] body[data-page='pricing'] .tier-feature{border-top-color:var(--gold-dim)}
@@ -8249,3 +8248,13 @@ body[data-page='pricing'] .led-v{flex:1;min-width:0;line-height:1.5}
   body[data-page='pricing'] .tier-period2{text-align:left;max-width:none}
 }
 /* == END PRICING PAGE v2 == */
+
+/* == HIW selectivity note (pricing) == */
+body[data-page='pricing'] .hiw-selective{
+  max-width:980px;margin:18px auto 0;
+  padding:12px 18px;border:1px solid var(--border);border-left:2px solid var(--gold);
+  border-radius:var(--radius-sm);background:color-mix(in srgb,var(--gold) 5%,transparent);
+  font-size:.88rem;line-height:1.6;color:var(--text-dim);text-align:left;
+}
+[data-theme='light'] body[data-page='pricing'] .hiw-selective{border-left-color:#7A5A20;background:rgba(122,90,32,.06)}
+/* == END HIW selectivity note == */
