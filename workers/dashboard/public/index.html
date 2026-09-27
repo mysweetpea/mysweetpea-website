@@ -4131,13 +4131,21 @@ function relFuture(v) {
       upEl.title = v ? ('24h uptime: ' + v) : '';
     });
   }
-  var tries = 0;
+    /* Re-render-proof: the home rail re-renders after /api/media resolves, wiping
+     injected rows. Cache the monitor payload and keep a cheap watchdog alive that
+     re-inserts + re-fills rows after ANY re-render (no extra fetches). */
+  var LAST = null;
+  var ticks = 0;
   var iv = setInterval(function(){
+    var rows = document.querySelectorAll('.hm-orb .hm-orb-hb-row').length;
+    var orbs = document.querySelectorAll('.hm-orb').length;
+    if (!orbs || (rows >= orbs && LAST)) { if (++ticks > 300) clearInterval(iv); return; }
     ensureStrips();
-    if (document.querySelectorAll('.hm-orb .hm-orb-hb-row').length || ++tries > 40) clearInterval(iv);
-  }, 400);
+    if (LAST) fill(LAST);
+    if (++ticks > 300) clearInterval(iv);
+  }, 1200);
   fetch('/api/status/extended').then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(d){ ensureStrips(); fill(d && d.monitors); })
+    .then(function(d){ LAST = (d && d.monitors) || null; ensureStrips(); fill(LAST); })
     .catch(function(){});
 })();
 </script>
