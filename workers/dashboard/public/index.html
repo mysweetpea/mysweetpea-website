@@ -1222,9 +1222,13 @@ a.hm-req{text-decoration:none;color:var(--text)}
 }
 </style>
 <style>/* home bento pair (B-v3): services 5fr | updates 7fr, collapse <960px */
-.hm-pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+.hm-pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:stretch}
 .hm-pair>.hm-sec{min-width:0}
 .hm-pair .hm-rail{min-width:0}
+.hm-pair #hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}
+.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:1fr;gap:8px;overflow-x:visible;overflow-y:auto;max-height:266px;padding:2px 2px 6px;scrollbar-width:none}
+.hm-pair #hm-updates .hm-rail::-webkit-scrollbar{display:none}
+.hm-pair #hm-updates .upd-card{padding:10px 13px;gap:10px}
 .hm-pair .hm-sec{margin-bottom:0}
 @media(max-width:960px){.hm-pair{grid-template-columns:1fr}}
 </style>
