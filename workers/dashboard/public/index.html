@@ -8,7 +8,6 @@
 <style>
 @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('/fonts/inter-var.woff2') format('woff2')}
 @font-face{font-family:'Fraunces';font-style:normal;font-weight:100 900;font-display:swap;src:url('/fonts/fraunces-var.woff2') format('woff2')}
-
 :root{--bg:#08090F;--primary:#8B7EF6;--primary-dim:#6C5CE0;--primary-bright:#C9C2FF;--ice:#EEF0FB;--sage:#45D6C8;--slate:#9BA1C7;--gold:#D9A86C;
 --text:#EEF0FB;--text-dim:#9BA1C7;--text-faint:#5E648D;--border:rgba(151,146,255,.13);--border-primary:rgba(151,146,255,.26);--card-bg:rgba(19,21,36,.66);--card:rgba(19,21,36,.66);--radius:22px;--radius-sm:16px;
 --v:#8B7EF6;--v-soft:rgba(139,126,246,.16);--c:#45D6C8;--c-soft:rgba(69,214,200,.14);--up:#4ADE9C;--down:#F08A8A;--warn:#E5B567;
@@ -114,7 +113,6 @@ h3{font-family:'Fraunces','Inter',Georgia,serif;font-size:1.05rem;font-weight:60
 .toast .msg{flex:1;font-size:.9rem}
 .toast .undo{color:var(--gold);cursor:pointer;font-size:.85rem;text-decoration:underline}
 @media(max-width:760px){.grid{grid-template-columns:minmax(0,1fr)}}
-
 /* ---- phase 3: palette / stat cards / undo ---- */
 .pal-backdrop{position:fixed;inset:0;background:rgba(5,10,12,.66);backdrop-filter:blur(6px);z-index:90;display:none;align-items:flex-start;justify-content:center;padding-top:14vh}
 .pal-backdrop.open{display:flex}
@@ -152,7 +150,6 @@ img.svc-ico{object-fit:contain;padding:3px}
 .tier-copy{font-size:.82rem;color:var(--text-dim);line-height:1.5}
 .tier-echo{margin-left:10px}
 .tier-echo .tier-badge{font-size:.66rem;padding:2px 9px}
-
 /* === nav account dropdown + search (P15) === */
 .back-label{font-size:.95rem;color:var(--text-dim);font-family:'Inter',system-ui,sans-serif;font-weight:500;white-space:nowrap}
 .brand:hover .back-label{color:var(--text)}
@@ -178,12 +175,9 @@ img.svc-ico{object-fit:contain;padding:3px}
 .acct-pop a.danger{color:var(--error)}
 .acct-pop hr{border:0;border-top:1px solid var(--border);margin:6px 4px}
 @media(max-width:760px){.acct-name{display:none}.back-label{font-size:.85rem}}
-
 .acct-trigger.tier-sweetpea{border-color:rgba(217,168,108,.55);box-shadow:0 0 0 1px rgba(217,168,108,.25),0 2px 10px rgba(217,168,108,.12)}
 .acct-trigger.tier-sweetpea .acct-name{color:var(--gold)}
-
 /* === end P15 === */
-
 /* ---- phase 5: media rows ---- */
 .media-sec{grid-column:1/-1;display:flex;flex-direction:column;gap:18px}
 .media-sec:empty{display:none}
@@ -466,7 +460,6 @@ a.btn{min-height:40px;display:inline-flex;align-items:center;justify-content:cen
 @media(max-width:420px){
 #who-tier{display:none}
 }
-
 @media (prefers-color-scheme: light){
   :root{
     --bg:#E9EFF0;
@@ -499,20 +492,15 @@ a.btn{min-height:40px;display:inline-flex;align-items:center;justify-content:cen
         --card-edge:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,0) 36%)}
   .card{border-color:rgba(20,32,36,.08)}
 }
-
-
-
 /* ===== keyboard focus system ===== */
 :where(a,button,input,select,textarea,[tabindex]):focus-visible{
   outline:none;box-shadow:var(--ring);border-radius:10px;
 }
 .tab:focus-visible,.svc:focus-visible,.btn:focus-visible{border-radius:99px}
 input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:var(--radius-sm)}
-
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
 }
-
 /* ---- footer (site-parity) ---- */
 .dash-footer{grid-column:1/-1;margin-top:28px;text-align:left;padding:36px 24px 28px;font-size:.85rem;color:var(--text-dim);border-top:1px solid var(--border)}
 .dash-footer a{color:var(--primary);text-decoration:none;transition:color .16s ease}
@@ -528,13 +516,11 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .dash-footer .footer-bottom{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;max-width:1100px;margin:0 auto;padding-top:20px;border-top:1px solid var(--border);color:var(--text-faint)}
 .dash-footer .footer-bottom p{margin:0}
 @media(max-width:760px){.dash-footer .footer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-footer .footer-bottom{flex-direction:column;align-items:center;text-align:center}}
-
 /* guide variant picker (Moonfin / Jellyfin Web) */
 .guide-variants{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 14px}
 .guide-variant{padding:7px 16px;border-radius:999px;border:1px solid var(--border-primary);background:transparent;color:var(--text-dim);font:inherit;font-size:.85rem;cursor:pointer;transition:all .16s ease}
 .guide-variant:hover{color:var(--text);background:rgba(151,146,255,.08)}
 .guide-variant.active{background:linear-gradient(135deg,var(--primary),var(--primary-dim,var(--primary)));color:#0C1316;border-color:transparent;font-weight:600}
-
 /* ---- aurora home ---- */
 [hidden]{display:none!important}
 .hm-banner{position:relative;overflow:hidden;border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(120deg,var(--v-soft) 0%,var(--c-soft) 45%,transparent 75%),var(--card);backdrop-filter:blur(16px);box-shadow:var(--e1)}
@@ -559,13 +545,13 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-btn.primary{background:linear-gradient(135deg,var(--v),var(--primary-dim));border-color:transparent;color:var(--bg);box-shadow:0 3px 12px rgba(139,126,246,.3)}
 .hm-btn.primary:hover{color:var(--bg)}
 .hm-banner-acct{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px 28px 18px;border-top:1px solid var(--border);position:relative}
-.hm-banner-acct::before{content:'YOUR ACCOUNT';position:absolute;top:-7px;left:28px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.56rem;font-weight:600;letter-spacing:.18em;color:var(--text-faint);background:var(--bg);padding:0 8px}
+.hm-banner-acct::before{content:'YOUR ACCOUNT';position:absolute;top:-7px;left:28px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.56rem;font-weight:600;letter-spacing:.18em;color:var(--text-faint);background:linear-gradient(120deg,var(--v-soft) 0%,var(--c-soft) 45%,transparent 75%),var(--card);padding:0 8px}
 .hm-tile-banner{width:auto;padding:12px 13px;box-shadow:none;background:rgba(19,21,36,.45)}
 .hm-tile-banner .hm-tile-th{margin-bottom:8px}
 .hm-tile-banner .hm-tile-lbl{font-size:.8rem}
 .hm-tile-banner .hm-tile-sub{font-size:.64rem}
 @media(max-width:900px){.hm-banner-acct{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.hm-banner-acct{grid-template-columns:1fr 1fr;padding:12px 16px 14px}}
+@media(max-width:560px){.hm-banner-acct{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px 16px 14px}}
 .hm-sec{display:block}
 .hm-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:0 2px;margin-bottom:2px}
 .hm-h2{font-family:'Fraunces','Inter',Georgia,serif;font-weight:500;font-size:1.15rem;letter-spacing:-.01em;display:flex;align-items:center;gap:10px;margin:0}
@@ -689,7 +675,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-tile{width:230px}
 .hm-pcard{width:112px}
 }
-
 /* ---- aurora services (sv*) — spotlight + pinned + recent + dock ---- */
 .sv-spot{position:relative;overflow:hidden;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);backdrop-filter:blur(16px);padding:26px 30px;display:flex;gap:22px;align-items:center;box-shadow:var(--e1);min-height:150px}
 .sv-spot::before{content:'';position:absolute;inset:-40% -20% auto auto;width:420px;height:420px;background:radial-gradient(circle,var(--v-soft),transparent 65%);pointer-events:none}
@@ -803,7 +788,6 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .stat{padding:18px}
 .hm-tile,.hm-req,.hm-wide,.hm-un{width:auto}
 }
-
 /* ---- aurora mobile 4: iOS horizontal-pan hardening ---- */
 @supports (overflow-x: clip) { html, body { overflow-x: clip; } }
 body { overscroll-behavior-x: none; }
@@ -812,7 +796,6 @@ body { overscroll-behavior-x: none; }
 @media (max-width:760px){
   .ripple-strip { font-size: 8px; }
 }
-
 /* ---- aurora mobile 5: media rails fit phones (no :has dependency) ---- */
 @media (max-width:760px){
   .media-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
@@ -826,7 +809,6 @@ body { overscroll-behavior-x: none; }
   .acct-trigger{padding:4px}
   .nav-search{width:38px;height:38px}
 }
-
 /* ---- aurora mobile 6: home fit ---- */
 @media (max-width:760px){
 .hm-greet,.hm-id{overflow-wrap:anywhere;min-width:0}
@@ -849,14 +831,12 @@ body { overscroll-behavior-x: none; }
 .hm-rail>*{width:auto!important}
 .hm-pcard .mtitle{font-size:.86rem;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 }
-
 /* ---- aurora mobile 7: up-next width ---- */
 @media (max-width:760px){
 .hm-rail>.hm-wide,.hm-rail>.hm-un{width:100%!important;aspect-ratio:16/9;min-width:0}
 .hm-un .hm-wide-t{font-size:.86rem}
 .hm-wide .hm-wide-t{font-size:.86rem}
 }
-
 /* ---- aurora mobile 8: iOS focus auto-zoom guard ---- */
 @media (max-width:760px){
   input, select, textarea { font-size: 16px !important; }
@@ -866,18 +846,15 @@ body { overscroll-behavior-x: none; }
 @media (pointer: coarse){
   input, select, textarea { font-size: 16px !important; }
 }
-
 /* ---- aurora mobile 9: iOS grid-track shrink guard ---- */
 @media (max-width:760px){
   .hm-rail > *, .media-row > *, .sv-orbs > *, .hm-stats, .hm-actions, .hm-banner-row, .hm-hero-inner, .hm-hero-side { min-width: 0; }
   .hm-rail, .media-row, .sv-orbs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .media-row { grid-template-columns: repeat(auto-fill, minmax(0, 130px)); }
 }
-
 /* ---- aurora brand: wordmark label (brand now goes Home) ---- */
 .back-label{font-family:'Fraunces','Inter',Georgia,serif;font-size:.95rem;font-weight:600;letter-spacing:.01em}
 @media (max-width:760px){.back-label{font-size:.95rem}}
-
 /* ---- aurora sec2: protective circle (security tab redesign) ---- */
 .sec2-h{margin-bottom:2px}
 .sec2-sub{margin:-6px 0 16px;color:var(--text-dim);font-size:.92rem}
@@ -897,7 +874,6 @@ body { overscroll-behavior-x: none; }
 .sec2-main b{font-size:.92rem;font-weight:600}
 .sec2-why{font-size:.8rem;color:var(--text-dim);line-height:1.45}
 .sec2-row .ob-btn{flex:none;align-self:center}
-
 /* ---- aurora mobile 10: compact services ---- */
 @media (max-width:760px){
   #hm-svc-rail{display:grid;grid-template-columns:repeat(auto-fill,minmax(0,96px));gap:10px;overflow:visible;padding:2px 0 4px}
@@ -909,7 +885,6 @@ body { overscroll-behavior-x: none; }
   #hm-svc-rail .hm-orb-bl{display:none}
   #hm-svc-rail .hm-orb-open{display:none}
 }
-
 /* ---- aurora mobile 11: prettier hamburger + open menu ---- */
 .nav-toggle{width:42px;height:42px;border-radius:12px;background:rgba(151,146,255,.10);border:1px solid rgba(151,146,255,.32);gap:5px}
 .nav-toggle-bar{width:18px;height:2px}
@@ -937,7 +912,6 @@ body { overscroll-behavior-x: none; }
   .sv-orbs,.hm-rail:has(.hm-orb){grid-template-columns:repeat(auto-fill,minmax(0,96px));justify-content:center}
   .hm-orb{justify-items:center;text-align:center}
 }
-
 /* ---- aurora polish 3 (fix1): hm-un cards keep real height on iOS — static meta fallback ---- */
 .hm-un-meta-static{display:none}
 @media (max-width:760px){
@@ -1069,7 +1043,6 @@ body { overscroll-behavior-x: none; }
   .mini,.icon-btn{min-height:44px}
   .icon-btn{min-width:44px;width:44px}
 }
-
 /* ===== TIER 2/3 premium animations ===== */
 /* T2a cursor-tracked border glow on interactive glass cards (sv-card, hm-tile) */
 .sv-card, .hm-tile { position: relative; }
@@ -1146,7 +1119,6 @@ body { overscroll-behavior-x: none; }
   .hm-greet.greet-run { animation: none; background: none; -webkit-text-fill-color: currentColor; color: inherit; }
   .sec2-ring.draw .fg, .sec2-ring.pulse { animation: none; }
 }
-
 /* ===== SERVICE UPDATES FEED (upd*) — bell popover, Home row, Services hints ===== */
 .bell-menu{position:relative}
 .upd-bell{position:relative}
@@ -1175,8 +1147,6 @@ a.upd-row:hover{background:rgba(143,175,181,.12)}
   #hm-upd-rail{display:grid;grid-template-columns:1fr;gap:10px;overflow:visible}
   .upd-card{width:auto}
 }
-
-
 /* ---- Seerr requests (rq*) — home rail chips/ETA + Media tab full list ---- */
 .hm-chip.ok{background:var(--c-soft);color:var(--c);border:1px solid rgba(69,214,200,.4)}
 .hm-chip.info{background:var(--v-soft);color:var(--primary-bright);border:1px solid var(--border-primary)}
@@ -1222,7 +1192,6 @@ a.hm-req{text-decoration:none;color:var(--text)}
 @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:600;font-display:swap;src:url('/fonts/jbm-medium.l.woff2') format('woff2')}
 @font-face{font-family:'Archivo';font-style:normal;font-weight:100 900;font-stretch:62.5% 125%;font-display:swap;src:url('/fonts/archivo-var.woff2') format('woff2')}
 </style>
-
 <style id="graft-type-apply">
 /* GRAFT 1 APPLY — same layout, site faces. Later-in-head wins at equal specificity. */
 .hm-greet{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:0;font-size:1.95rem}
@@ -1234,7 +1203,6 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .hm-date{font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:400;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase}
 .hm-stat .n{font-family:'Archivo',Inter,sans-serif;font-stretch:80%;font-weight:700;letter-spacing:0}
 </style>
-
 <style id="graft-nav">
 /* GRAFT 2 — site nav grammar: tabs centered, mono lowercase labels, serif brand.
    Desktop/tablet only (mobile dropdown untouched). Sliding pill kept. */
@@ -1255,17 +1223,13 @@ a.hm-req{text-decoration:none;color:var(--text)}
 <div id="app"><div class="card" id="gate"><a href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><h1>MySweetPea</h1><p>Checking your session…</p></div></div>
 <div id="modal"><div class="mcard" id="mbody"></div></div>
 <div id="toasts" aria-live="polite"></div>
-
 <div class="pal-backdrop" id="pal">
   <div class="palette">
     <input id="pal-q" type="text" placeholder="Type a command…  (Esc to close)" autocomplete="off" spellcheck="false"/>
     <div class="pal-list" id="pal-list"></div>
   </div>
 </div>
-
-
 <script>
-
 'use strict';
 const $ = (s) => document.querySelector(s);
 const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1280,7 +1244,6 @@ function toast(msg, opts) {
 function modal(html) { $('#mbody').innerHTML = html; $('#modal').classList.add('open'); }
 function closeModal() { $('#modal').classList.remove('open'); }
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-
 // T2a: cursor-tracked border glow on service cards / home tiles (pointer only)
 (function cursorGlow() {
   if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -1312,7 +1275,6 @@ $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeM
     document.querySelectorAll('.hm-btn.primary, .ob-btn').forEach((b) => { b.style.transform = ''; });
   });
 })();
-
 // ===== PHASE 14: falling petals (site ground truth port — canvas, 22 petals) =====
 (function fallingPetals() {
   const canvas = document.getElementById('petalCanvas');
@@ -1412,7 +1374,6 @@ $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeM
   document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
   start();
 })();
-
 // Popup ceremony helper (authentik-hosted, branded, deep-links back)
 async function revokeAll() {
   const d = await (await fetch('/api/sessions')).json();
@@ -1429,7 +1390,6 @@ function ceremony(flowSlug, label) {
   }, 700);
   toast(label + ' opened — complete it in the popup');
 }
-
 // ===== PHASE 9: TABS + shared pure helpers (top-level: palette block reuses them) =====
 const TABS = ['home', 'media', 'services', 'stats', 'guides', 'contact'];
 // Tabs reachable from the account dropdown (not in the nav row). Hoisted to
@@ -1613,7 +1573,6 @@ function beatStrip(beats) {
   for (let i = 0; i < arr.length; i++) out += '<i class="b ' + (arr[i] ? 'up' : 'down') + '"></i>';
   return out;
 }
-
 // ===== PHASE 10: SETUP GUIDES — data from main site services.html + pure render helpers =====
 const GUIDE_ICONS = { jellyfin: '/icons/jellyfin.svg', seerr: '/icons/seerr.svg', nextcloud: '/icons/nextcloud.svg', immich: '/icons/immich.svg', vaultwarden: '/icons/vaultwarden.svg', matrix: '/icons/matrix.svg', koalasync: '/icons/koalasync.svg', openwebui: '/icons/openwebui.svg', affine: '/icons/affine.svg' };
 const GUIDE_ORDER = ['jellyfin', 'seerr', 'nextcloud', 'immich', 'vaultwarden', 'matrix', 'affine', 'openwebui', 'koalasync'];
@@ -2051,7 +2010,6 @@ function guideDetailHtml(key) {
   h += platformsHtml(key);
   return h;
 }
-
 (async () => {
   const app = $('#app'); const gate = $('#gate');
   let me = null;
@@ -2080,7 +2038,6 @@ function guideDetailHtml(key) {
     const nav = document.getElementById('nav-avatar');
     if (nav) nav.innerHTML = avatarInner();
   };
-
   const TIER_COPY = {
     sweetpea: 'Full garden access — every service, all features.',
     seedling: 'Seedling access — core services included. Sweet Pea unlocks media & more.'
@@ -2094,12 +2051,10 @@ function guideDetailHtml(key) {
     return '<span class="tier-badge tier-' + tier + (prominent ? ' lg' : '') + '" title="There is more in the garden…">' + ico + label + '</span>';
   };
   window.tierBadge = tierBadge;
-
   window.applyTierRing = () => {
     const trig = document.getElementById('acct-trigger');
     if (trig) trig.classList.toggle('tier-sweetpea', me.tier === 'sweetpea');
   };
-
   window.applyProfile = () => {
     const hn = $('#hero-name'); if (hn) hn.textContent = me.name || me.username;
     const ht = document.getElementById('hero-tier');
@@ -2112,7 +2067,6 @@ function guideDetailHtml(key) {
     const ae = $('#acct-email'); if (ae) ae.textContent = me.email;
     window.setAvatars(); if (window.applyAcctMenu) window.applyAcctMenu(); if (window.applyTierRing) window.applyTierRing();
   };
-
   // ===== account dropdown (nav) + tier-pill wrap (P15) =====
   window.applyAcctMenu = () => {
     const an = document.getElementById('pop-name'); if (an) an.textContent = me.name || me.username;
@@ -2122,7 +2076,6 @@ function guideDetailHtml(key) {
     const pt = document.getElementById('pop-tier'); if (pt) { pt.innerHTML = tierBadge(me.tier, false); pt.hidden = false; }
     window.setAvatars && window.setAvatars();
   };
-  
   // ===== PHASE 12: GET STARTED onboarding (dismissible, localStorage msp_onboarded) =====
   let obHtml = '';
   try {
@@ -2187,12 +2140,8 @@ function guideDetailHtml(key) {
     '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' +
     '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
-    
-    
-    
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Up next for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse more &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
-    
     '<section class="hm-sec" id="hm-recent" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Recently added</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse all &rarr;</button></div><div class="hm-rail" id="hm-rec-rail"></div></section>' + obHtml +
     '<div id="stats" hidden></div>' +
     '<section class="card" id="sec-status" hidden><p class="eyebrow">Service status</p><h3>Service status</h3><div class="skel"></div></section>' +
@@ -2293,12 +2242,10 @@ function guideDetailHtml(key) {
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
     '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>Private alternatives to the services you use every day. No ads, no tracking, no subscriptions &mdash; just community-funded, self-hosted software.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a href="https://mysweetpea.cc/services.html">Services</a><a href="https://mysweetpea.cc/pricing.html">How It Works</a><a href="https://status.mysweetpea.cc">Status</a><a href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a href="https://mysweetpea.cc/form.html">Get Access</a><a href="https://mysweetpea.cc/support.html">Donate</a><a href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a></p></div></footer></div>';
-
   // tier badges everywhere (hero, topbar, services/guides echoes) — initial render
   // NEVER let a profile-render hiccup abort the rest of boot (tab wiring below).
   try { window.applyProfile(); } catch (e) { }
   try { if (typeof window.updateFooterStatus === 'function') window.updateFooterStatus(); } catch (e) { }
-
   // ===== PHASE 13: vine dividers (site v37 SVG, verbatim) =====
   (function injectVines() {
     const vineSvg = '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -2317,7 +2264,6 @@ function guideDetailHtml(key) {
       '</svg>';
     document.querySelectorAll('.vine-divider').forEach((el) => { el.innerHTML = vineSvg; });
   })();
-
   // ===== PHASE 13: asciiRipple — garden ASCII wave strip (Bayer-dithered, rAF @100ms) =====
   (function initAsciiRipple() {
     const strips = Array.prototype.slice.call(document.querySelectorAll('.ripple-strip'));
@@ -2382,7 +2328,6 @@ function guideDetailHtml(key) {
     });
     start();
   })();
-
   // ===== PHASE 14: moon-girl as Account-tab resident (no easter-egg arming) =====
   (function initSpirit() {
     const v = document.getElementById('spirit-video');
@@ -2398,7 +2343,6 @@ function guideDetailHtml(key) {
         .observe(panel, { attributes: true, attributeFilter: ['hidden'] });
     }
   })();
-
   // ===== PHASE 14: site-style nav — condensed on scroll + mobile hamburger =====
   (function initNavShell() {
     const nav = document.getElementById('top-nav');
@@ -2424,7 +2368,6 @@ function guideDetailHtml(key) {
     links.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('.tab')) close(); });
     window.addEventListener('resize', () => { if (window.innerWidth > 760) close(); });
   })();
-
   // ===== PHASE 14: STATISTICS TAB (poll once per open + manual refresh) =====
   let statsLoaded = false, statsLoading = false;
   const KPI_ICONS = {
@@ -2628,7 +2571,6 @@ function guideDetailHtml(key) {
   window.loadStats = loadStats;
   const refreshBtn = document.getElementById('stats-refresh');
   if (refreshBtn) refreshBtn.addEventListener('click', () => loadStats(true));
-
   // ===== PHASE 9: TAB WIRING (click, arrows, deep-link, remember) =====
   TABS.forEach((t) => {
     const b = document.getElementById('tab-' + t);
@@ -2661,7 +2603,6 @@ function guideDetailHtml(key) {
   window.addEventListener('resize', () => moveTabPill(false));
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveTabPill(false)).catch(() => {});
   [50, 220, 600].forEach((ms) => setTimeout(() => moveTabPill(false), ms));
-
   // ===== PHASE 8: AVATAR MODAL (upload / remove / preview) =====
   window.openAvatarModal = async () => {
     let meta = { has: false, mime: '', bytes: 0, updated: 0 };
@@ -2720,7 +2661,6 @@ function guideDetailHtml(key) {
       } catch (e) { rm.disabled = false; err.textContent = 'Could not remove avatar.'; }
     };
   };
-
   // ===== PHASE 8: PROFILE EDIT MODAL (name + email, password step-up) =====
   window.openProfileModal = () => {
     modal('<h3>Edit profile</h3>' +
@@ -2758,7 +2698,6 @@ function guideDetailHtml(key) {
       } catch (e) { btn.disabled = false; err.textContent = 'Update failed.'; }
     };
   };
-
   // ===== PHASE 14: INLINE PASSWORD CHANGE (writes through to authentik) =====
   (function initPasswordForm() {
     const cur = document.getElementById('pw-current');
@@ -2795,7 +2734,6 @@ function guideDetailHtml(key) {
       } catch (e) { err.textContent = 'Password change failed.'; btn.disabled = false; }
     });
   })();
-
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
   (async () => {
     const JF_ITEM = 'https://media.mysweetpea.cc/web/index.html#!/item?id=';
@@ -2817,7 +2755,6 @@ function guideDetailHtml(key) {
     if ((latest.items || []).length) html += '<section class="card"><p class="eyebrow">Your library</p><h3>Recently Added</h3><div class="media-row">' + latest.items.map(it => posterCard(it, { badge: true })).join('') + '</div></section>';
     document.querySelectorAll('.media-sec').forEach((s) => { s.innerHTML = html; });
   })();
-
   // ===== SERVICES LAUNCHER =====
   const SERVICES = [
     { name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Movies & TV', icon: '/icons/jellyfin.svg' },
@@ -2956,7 +2893,6 @@ function guideDetailHtml(key) {
     ms.forEach((m) => { svState.monmap[m.name] = !!m.current; svState.upmap[m.name] = m.up24; });
     window.svRenderSpot(); window.svRenderOrbs(); window.svRenderGrid();
   }).catch(() => {});
-
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
   const hmJF = 'https://media.mysweetpea.cc';
   const hmJF_ITEM = hmJF + '/web/index.html#!/item?id=';
@@ -3229,7 +3165,6 @@ function guideDetailHtml(key) {
     try { hmLoadMedia(); } catch (e) {}
   }
   hmInit();
-
   // ===== PHASE 10: SETUP GUIDES (selector chips + live detail pane) =====
   const guideNav = document.getElementById('guide-nav');
   const guideBody = document.getElementById('guide-body');
@@ -3262,7 +3197,6 @@ function guideDetailHtml(key) {
       guideBody.innerHTML = guideDetailHtml(guideSel);
     });
   }
-
   // ===== PHASE 12 + 14: ONBOARDING wiring (dismiss + guide/contact jumps) + contact copy =====
   const obCard = document.getElementById('ob-card');
   if (obCard) {
@@ -3300,7 +3234,6 @@ function guideDetailHtml(key) {
       else toast('Could not copy — the address is ' + email, { err: true });
     }
   });
-
   // ===== PHASE 12: SUGGEST A SERVICE (same webhook + payload as site suggest.html) =====
   (function initSuggest() {
     const form = document.getElementById('sgf');
@@ -3365,7 +3298,6 @@ function guideDetailHtml(key) {
         });
     });
   })();
-
   // ===== PHASE 9: PER-SERVICE UPTIME BARS (/api/status/extended) =====
   const upHost = document.getElementById('sec-uptime');
   const renderUptime = (d) => {
@@ -3383,7 +3315,6 @@ function guideDetailHtml(key) {
     upHost.innerHTML = html;
   };
   fetch('/api/status/extended').then(r => r.json()).then(renderUptime).catch(() => { if (upHost) upHost.innerHTML = '<p class="eyebrow">Uptime</p><h3>Uptime — last 24h</h3><p class="dim">Unavailable.</p>'; });
-
   // ===== SECURITY CENTER (checklist + actions) =====
   let devices = { totp: [], webauthn: [], static: [] };
   try { const r = await fetch('/api/devices'); if (r.ok) devices = await r.json(); } catch (e) {}
@@ -3424,13 +3355,11 @@ function guideDetailHtml(key) {
     const secTab = document.getElementById('tab-security');
     if (secTab) secTab.classList.add('has-dot');
   }
-
   // T3c: draw the protective-circle ring in from 0 after mount (double-rAF = transition fires)
   requestAnimationFrame(() => requestAnimationFrame(() => {
     const fgEl = sec.querySelector('.sec2-ring .fg');
     if (fgEl && fgEl.dataset.target) fgEl.style.strokeDashoffset = fgEl.dataset.target;
   }));
-
   // device management modal
   window.manageDevices = async () => {
     const rows = []
@@ -3444,7 +3373,6 @@ function guideDetailHtml(key) {
     const r = await fetch('/api/devices/' + id, { method: 'DELETE' });
     if (r.ok) { toast('Device removed'); location.reload(); } else toast('Failed to remove');
   };
-
   // ===== STATUS =====
   fetch('/api/status').then(r => r.json()).then(d => {
     const el = $('#sec-status'); const mons = (d && d.monitors) || [];
@@ -3454,7 +3382,6 @@ function guideDetailHtml(key) {
       return '<div class="row"><div class="left"><span><span class="dot ' + (up ? 'ok' : 'down') + '"></span>' + esc(m.name) + '</span></div><span class="dim">' + Math.round(m.uptime24h || 0) + '%</span></div>';
     }).join('');
   }).catch(() => { $('#sec-status').innerHTML = '<p class="eyebrow">Service status</p><h3>Service status</h3><p class="dim">Unavailable.</p>'; });
-
   // ===== RECENT ACTIVITY (audit feed — icons + verbs + relative time) =====
   const ACT_SVG =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -3487,7 +3414,6 @@ function guideDetailHtml(key) {
       return '<div class="act-row"><span class="act-ico">' + ico + '</span><div class="left"><b>' + esc(label) + '</b><span class="dim">' + esc(when) + detail + '</span></div></div>';
     }).join('');
   }).catch(() => { const el = $('#sec-activity'); if (el) el.innerHTML = '<p class="eyebrow">Recent activity</p><h3>Recent activity</h3><p class="dim">Unavailable.</p>'; });
-
   // ===== SESSIONS (device icons + friendly labels + last seen) =====
   const DEV_SVG =
     '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
@@ -3598,7 +3524,6 @@ function relFuture(v) {
       };
     };
   }).catch(() => { $('#sec-sessions').innerHTML = '<p class="eyebrow">Sessions</p><h3>Your sessions</h3><p class="dim">Unavailable.</p>'; });
-
   // ===== CONNECTED APPS =====
   fetch('/api/consents').then(r => r.json()).then(d => {
     const el = $('#sec-apps'); const list = (d && d.results) || [];
@@ -3749,9 +3674,7 @@ function relFuture(v) {
     return cmds;
   }
   let sel = 0, filtered = [];
-
   const pal = $('#pal'), input = $('#pal-q'), list = $('#pal-list');
-
   function render() {
     if (!filtered.length) { list.innerHTML = '<div class="pal-empty">No matching commands</div>'; return; }
     list.innerHTML = filtered.map((c, i) =>
@@ -3772,9 +3695,7 @@ function relFuture(v) {
   }
   function open()  { mspCmdCache = null; filtered = mspFilter(mspAllCommands(), ''); sel = 0; pal.classList.add('open'); input.value = ''; render(); setTimeout(() => input.focus(), 0); }
   function close() { pal.classList.remove('open'); input.blur(); }
-
   window.mspPalette = { open, close };
-
   input.addEventListener('input', () => {
     filtered = mspFilter(mspAllCommands(), input.value);
     sel = 0; render();
@@ -3791,11 +3712,9 @@ function relFuture(v) {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && pal.classList.contains('open')) { e.preventDefault(); close(); }
   });
-
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); pal.classList.contains('open') ? close() : open(); }
   });
-
   /* ---- stat tiles (count-up) + library bar chart ---- */
   function waitFor(sel) {
     return new Promise(resolve => {
@@ -3836,13 +3755,11 @@ function relFuture(v) {
     const lib = document.getElementById('lib-body');
     if (lib) lib.innerHTML = libHtml(s);
   })();
-
   /* palette button (topbar is built dynamically -> delegated) */
   document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'pal-open') { e.preventDefault(); window.mspPalette.open(); }
   });
 })();
-
   // ===== account dropdown: delegated handlers (work regardless of render timing) =====
   (function () {
     'use strict';
@@ -3890,12 +3807,10 @@ function relFuture(v) {
     // tab switches should also close it
     window.addEventListener('hashchange', close);
   })();
-
   // aurora mobile 4: iOS Safari horizontal-pan guard — snap back to vertical if panned
   window.addEventListener('scroll', function () {
     if (window.scrollX !== 0) { try { window.scrollTo(0, window.scrollY); } catch (e) {} }
   }, { passive: true });
-
   // ===== BOOT WATCHDOG (Sep 14) — tab system must always initialize =====
   // Historical bug: any throw between the shell render and the tab wiring left
   // ZERO tabs active, ALL panels stacked, and the pill frozen offscreen (the
@@ -3922,7 +3837,6 @@ function relFuture(v) {
       moveTabPill(false);
     } catch (e) { /* last resort — never throw from the watchdog */ }
   }, 900);
-
   // ===== SERVICE UPDATES FEED (upd*) — bell popover + Home row + Services hints =====
   // Data comes from /api/updates (git commits reconciled against runtime versions).
   // The topbar is built dynamically -> ALL wiring is delegated (never getElementById
@@ -4080,13 +3994,11 @@ function relFuture(v) {
     })();
   })();
 </script>
-
 <style id="graft-hb">
 /* GRAFT 3 — mono 24h uptime readout on home services rail cards (strip removed per user). */
 .hm-orb .hm-orb-hb-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:10px;width:100%;max-width:100%;min-width:0}
 .hm-orb .hm-orb-up{font-family:'JetBrains Mono',ui-monospace,monospace;flex:none;font-size:.56rem;
   letter-spacing:.12em;color:var(--text-faint);font-variant-numeric:tabular-nums;white-space:nowrap}
-
 /* GRAFT 4 — footer vine (site signature) + mono LIVE readout.
    Vine straddles the footer's top border exactly like the site's premium footer
    (margin -1px, hairline ::before/::after already provided by .vine-divider base). */
@@ -4095,7 +4007,6 @@ function relFuture(v) {
   font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);gap:9px}
 .dash-footer .footer-status .status-dot{width:7px;height:7px}
 </style>
-
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
 (function(){
