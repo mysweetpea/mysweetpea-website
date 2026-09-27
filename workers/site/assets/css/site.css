@@ -4133,6 +4133,7 @@ body[data-page='form'] .form-card { animation: none !important; }
 .verify-banner a:hover { color: var(--primary-bright); border-color: var(--primary-bright); }
 
 /* === Set 3 #10: graphical How It Works === */
+/* [DEAD CSS — pricing steps redesign 2026-09 replaced by .steps-band; hiw-* unused in all markup. Left in place per append-only convention.] */
 .hiw-intro { text-align: center; color: var(--text-dim); font-size: 1.05rem; margin: 0 auto 30px; max-width: 46ch; }
 .hiw-steps {
     display: flex; align-items: stretch; justify-content: center; gap: 14px;
@@ -6192,6 +6193,7 @@ body[data-page='services'] .service-card .acct-pill {
    v52: Pricing page improvements
    ========================================================================== */
 
+/* [DEAD CSS — hiw-need/hiw-icon/hiw-arrow legacy; unused in all markup since pricing v2 redesign.] */
 /* --- How It Works: "you'll need" checklist --- */
 .hiw-need {
     max-width: 560px; margin: 0 auto 24px; padding: 14px 18px;
@@ -6244,6 +6246,7 @@ body[data-page='services'] .service-card .acct-pill {
 /* --- Pricing support footer --- */
 /* --- Mobile: stack hiw steps + arrows --- */
 @media (max-width: 640px) {
+    /* [DEAD CSS — legacy hiw mobile stack; unused since pricing v2 redesign.] */
     .hiw-steps { flex-direction: column; align-items: center; }
     .hiw-arrow { transform: rotate(90deg); margin: 4px 0; }
 }
@@ -7578,6 +7581,7 @@ body[data-page='pricing'] .pc-btn-ghost:hover { transform: translateY(-2px); bor
 }
 
 /* --- E2: connected timeline steps --- */
+/* [DEAD CSS — legacy pricing steps/tier-card region (hiw-*, .pricing-card, .tier-badge, .price, .features); replaced by PRICING PAGE v2 block below. Kept per append-only convention — do not extend.] */
 body[data-page='pricing'] .hiw-steps {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
     position: relative;
@@ -8057,6 +8061,7 @@ body[data-page='status'] .status-line.is-down .line-name { color: var(--error); 
    PRICING PAGE v2 — steps band + ledger tiers (hybrid design)
    Self-contained; appended 2026-09. Scoped to body[data-page='pricing'].
    ============================================================ */
+body[data-page='pricing']{--ink-on-gold:#14100A}
 body[data-page='pricing'] .steps-band{
   position:relative;
   background:color-mix(in srgb,var(--primary) 4%,transparent);
@@ -8127,7 +8132,7 @@ body[data-page='pricing'] .tier-flag{
   background:color-mix(in srgb,var(--bg) 88%,#000);border:1px solid var(--border-primary);color:var(--primary-bright);
 }
 body[data-page='pricing'] .tier-feature .tier-flag{
-  background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#14100A;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:var(--ink-on-gold, #14100A);
   border:1px solid rgba(255,255,255,.22);font-weight:600;
   box-shadow:0 6px 18px color-mix(in srgb,var(--gold) 30%,transparent);
 }
@@ -8175,7 +8180,7 @@ body[data-page='pricing'] .tier-cta{
   text-decoration:none;
 }
 body[data-page='pricing'] .cta-gold{
-  background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#14100A;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:var(--ink-on-gold, #14100A);
   border:1px solid rgba(255,255,255,.18);
   box-shadow:0 10px 26px color-mix(in srgb,var(--gold) 28%,transparent), inset 0 1px 0 rgba(255,255,255,.22);
   transition:filter .25s ease,transform .25s ease;
@@ -8192,37 +8197,38 @@ body[data-page='pricing'] .cta-ghost{
 [data-theme='light'] body[data-page='pricing'] .led-ghost{-webkit-text-stroke-color:rgba(46,86,95,.30)}
 [data-theme='light'] body[data-page='pricing'] .led-step:last-child .led-ghost{-webkit-text-stroke-color:rgba(148,108,48,.40)}
 [data-theme='light'] body[data-page='pricing'] .led-chip{background:#fff;border-color:rgba(46,92,70,.22)}
-[data-theme='light'] body[data-page='pricing'] .led-row{color:#4A635B}
+[data-theme='light'] body[data-page='pricing'] .led-row{color:var(--text-faint)}
 [data-theme='light'] body[data-page='pricing'] .led-row + .led-row{border-top-color:rgba(46,92,70,.14)}
 [data-theme='light'] body[data-page='pricing'] .led-rows{border-top-color:rgba(46,92,70,.16)}
-[data-theme='light'] body[data-page='pricing'] .led-k{color:#2F6B4E}
-[data-theme='light'] body[data-page='pricing'] .led-step:last-child .led-k{color:#7A5A20}
+[data-theme='light'] body[data-page='pricing'] .led-k{color:var(--sage)}
+[data-theme='light'] body[data-page='pricing'] .led-step:last-child .led-k{color:var(--gold)}
 [data-theme='light'] body[data-page='pricing'] .tier{background:rgba(255,255,255,.66);border-color:rgba(46,92,70,.16)}
 [data-theme='light'] body[data-page='pricing'] .tier-chip{background:#fff;border-color:rgba(46,92,70,.20)}
-[data-theme='light'] body[data-page='pricing'] .tier-feature{border-top-color:#B8874F}
+[data-theme='light'] body[data-page='pricing'] .tier-feature{border-top-color:var(--gold-dim)}
 [data-theme='light'] body[data-page='pricing'] .tier-feature .tier-chip{background:rgba(217,168,108,.10);border-color:rgba(148,108,48,.35)}
 [data-theme='light'] body[data-page='pricing'] .tier-flag{background:#fff;border-color:rgba(46,92,70,.22);color:#2E5651}
-[data-theme='light'] body[data-page='pricing'] .tier-feature .tier-flag{background:linear-gradient(135deg,#D9A86C,#B8874F);color:#14100A;border-color:rgba(148,108,48,.4)}
-[data-theme='light'] body[data-page='pricing'] .tier-price{color:#1F2A2E}
-[data-theme='light'] body[data-page='pricing'] .tier-feature .tier-price{color:#7A5A20}
+[data-theme='light'] body[data-page='pricing'] .tier-feature .tier-flag{background:linear-gradient(135deg,#D9A86C,var(--gold-dim));color:var(--ink-on-gold, #14100A);border-color:rgba(148,108,48,.4)}
+[data-theme='light'] body[data-page='pricing'] .tier-price{color:var(--text)}
+[data-theme='light'] body[data-page='pricing'] .tier-feature .tier-price{color:var(--gold)}
 [data-theme='light'] body[data-page='pricing'] .tier-div{background:rgba(46,92,70,.16)}
 [data-theme='light'] body[data-page='pricing'] .tier-feats li + li{border-top-color:rgba(46,92,70,.13)}
 [data-theme='light'] body[data-page='pricing'] .svc-chip{background:rgba(46,92,70,.07);border-color:rgba(46,92,70,.16)}
-[data-theme='light'] body[data-page='pricing'] .mono-k{color:#2F6B4E}
-[data-theme='light'] body[data-page='pricing'] .tier-feature .mono-k{color:#7A5A20}
-[data-theme='light'] body[data-page='pricing'] .cta-gold{color:#14100A}
-[data-theme='light'] body[data-page='pricing'] .cta-ghost{background:rgba(46,92,70,.05);border-color:rgba(47,107,78,.4);color:#2F6B4E}
+[data-theme='light'] body[data-page='pricing'] .mono-k{color:var(--sage)}
+[data-theme='light'] body[data-page='pricing'] .tier-feature .mono-k{color:var(--gold)}
+[data-theme='light'] body[data-page='pricing'] .cta-gold{color:var(--ink-on-gold, #14100A)}
+[data-theme='light'] body[data-page='pricing'] .cta-ghost{background:rgba(46,92,70,.05);border-color:rgba(47,107,78,.4);color:var(--sage)}
 
 /* pricing v2 — responsive */
-@media (max-width:880px){
+@media (max-width:768px){
   body[data-page='pricing'] .tiers{grid-template-columns:minmax(0,1fr)}
   body[data-page='pricing'] .steps-band{grid-template-columns:minmax(0,1fr);gap:26px}
   body[data-page='pricing'] .steps-band::before{
-    top:77px;bottom:77px;left:89px;right:auto;width:1.5px;height:auto;
+    /* 77px = 38 band pad-top + 6 step pad-top + 33 to chip center; left = band pad + chip(52px) + half chip(19px) */
+    top:77px;bottom:77px;left:calc(clamp(18px,3vw,36px) + 71px);right:auto;width:1.5px;height:auto;
     background:linear-gradient(180deg, rgba(163,201,182,.45), rgba(217,168,108,.38));
   }
 }
-@media (max-width:480px){
+@media (max-width:560px){
   body[data-page='pricing'] .tier{padding:24px 20px}
   body[data-page='pricing'] .tier-price{font-size:30px}
   body[data-page='pricing'] .tier-pricerow{flex-direction:column;gap:6px}
