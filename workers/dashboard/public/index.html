@@ -1139,7 +1139,9 @@ a.upd-row:hover{background:rgba(143,175,181,.12)}
 .upd-row .ud{margin-left:auto;font-size:.72rem;color:var(--text-faint);white-space:nowrap}
 .upd-empty{padding:14px 12px;font-size:.82rem;color:var(--text-dim)}
 .upd-card{display:flex;align-items:center;gap:10px;background:var(--card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;text-decoration:none;color:var(--text);transition:transform var(--t-fast),border-color var(--t-fast),box-shadow var(--t-fast);flex:none;width:230px;box-shadow:var(--e1)}
-#hm-updates .upd-card{width:auto} .upd-card{transition:transform var(--t-fast),border-color var(--t-fast)} .upd-card:hover{transform:translateY(-3px);border-color:var(--border-primary);box-shadow:var(--e2)}
+#hm-updates .upd-card{width:auto;padding:7px 9px;gap:9px;border-radius:12px}
+#hm-updates .upd-card img{width:21px;height:21px}
+#hm-updates .upd-card .uc-when{font-size:.6rem} .upd-card{transition:transform var(--t-fast),border-color var(--t-fast)} .upd-card:hover{transform:translateY(-3px);border-color:var(--border-primary);box-shadow:var(--e2)}
 .upd-card img{width:26px;height:26px;object-fit:contain;flex:none}
 .upd-card .uc-main{min-width:0;display:flex;flex-direction:column;gap:1px}
 .upd-card .uc-nm{font-weight:600;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1222,21 +1224,24 @@ a.hm-req{text-decoration:none;color:var(--text)}
 </style>
 <style>/* home bento pair (B-v3): services 5fr | updates 7fr, collapse <960px */
 .hm-pair{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:stretch}
-#hm-svc-rail{display:grid;grid-template-columns:1fr;gap:8px;overflow:visible;padding:2px 2px 4px}
-.hm-svcrow{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:linear-gradient(180deg,rgba(151,146,255,.05),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1);text-decoration:none;color:var(--text);transition:border-color var(--t-fast),transform var(--t-fast),box-shadow var(--t-fast)}
+#hm-svc-rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:visible;padding:2px 2px 4px;align-content:start}
+.hm-svcrow-more{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:12px;border:1px dashed var(--border-primary);background:transparent;color:var(--c);font:inherit;font-size:.7rem;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:border-color var(--t-fast),color var(--t-fast),transform var(--t-fast)}
+.hm-svcrow-more:hover{border-color:var(--c);color:var(--primary-bright);transform:translateY(-1px)}
+@media(max-width:760px){#hm-svc-rail{grid-template-columns:1fr}}
+.hm-svcrow{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:12px;background:linear-gradient(180deg,rgba(151,146,255,.05),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1);text-decoration:none;color:var(--text);transition:border-color var(--t-fast),transform var(--t-fast),box-shadow var(--t-fast)}
 .hm-svcrow:hover{border-color:var(--border-primary);transform:translateY(-1px);box-shadow:var(--e2)}
-.hm-svcrow .hm-orb-plate{width:42px;height:42px;border-radius:12px;flex:none;box-shadow:0 4px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(197,213,216,.08)}
-.hm-svcrow .hm-orb-plate img{width:26px;height:26px}
+.hm-svcrow .hm-orb-plate{width:34px;height:34px;border-radius:10px;flex:none;box-shadow:0 4px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(197,213,216,.08)}
+.hm-svcrow .hm-orb-plate img{width:21px;height:21px}
 .hm-svcrow-main{min-width:0;flex:1}
-.hm-svcrow .hm-orb-nm{font-size:.84rem}
-.hm-svcrow .hm-orb-bl{min-height:0;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm-svcrow .hm-orb-up{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.6rem;letter-spacing:.12em;color:var(--text-dim);font-variant-numeric:tabular-nums;background:rgba(8,9,15,.5);border:1px solid var(--border);border-radius:99px;padding:2px 9px}
+.hm-svcrow .hm-orb-nm{font-size:.76rem;gap:5px}
+.hm-svcrow .hm-orb-bl{min-height:0;font-size:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-svcrow .hm-orb-up{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;letter-spacing:.1em;color:var(--text-dim);font-variant-numeric:tabular-nums;background:rgba(8,9,15,.5);border:1px solid var(--border);border-radius:99px;padding:1px 7px}
 .hm-pair.hm-pair-solo{grid-template-columns:minmax(0,1fr)}
 #hm-un-rail{align-items:flex-start}
 .hm-pair>.hm-sec{min-width:0}
 .hm-pair .hm-rail{min-width:0}
 .hm-pair @media(min-width:761px){#hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}}
-.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:visible;padding:2px 2px 4px}
+.hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:1fr;gap:6px;overflow:visible;padding:2px 2px 4px;align-content:start}
 .hm-pair #hm-updates .hm-rail::-webkit-scrollbar{display:none}
 .hm-pair #hm-updates .upd-card{padding:10px 13px;gap:10px}
 .hm-pair .hm-sec{margin-bottom:0}
@@ -3154,7 +3159,11 @@ function guideDetailHtml(key) {
   };
   function hmLoadServices() {
     const rail = document.getElementById('hm-svc-rail');
-    if (rail) rail.innerHTML = SERVICES.map(hmSvcOrb).join('');
+    if (!rail) return;
+    const MAX = 6;
+    let html = SERVICES.slice(0, MAX).map(hmSvcOrb).join('');
+    if (SERVICES.length > MAX) html += '<button type="button" class="hm-svcrow hm-svcrow-more" onclick="setTab(\'services\')" aria-label="All services">+' + (SERVICES.length - MAX) + ' more</button>';
+    rail.innerHTML = html;
     try {
       fetch('/api/status').then((r) => (r.ok ? r.json() : { monitors: [] })).then((d) => hmApplyDots((d && d.monitors) || [])).catch(() => {});
     } catch (e) {}
