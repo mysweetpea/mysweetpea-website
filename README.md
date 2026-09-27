@@ -6,8 +6,8 @@ HTML/CSS/JS with no framework and no build step, served as static files through
 a Cloudflare Worker — plus a small email auto-reply worker.
 
 **Live:** https://mysweetpea.cc · **Status:** https://status.mysweetpea.cc
-**Infrastructure:** https://github.com/mysweetpea/homelab-k8s
-**Self-host the stack:** [homelab-k8s/installer](https://github.com/mysweetpea/homelab-k8s/tree/main/installer)
+**Infrastructure:** https://github.com/mysweetpea/mysweetpea-homelab
+**Self-host the stack:** [mysweetpea-homelab/installer](https://github.com/mysweetpea/mysweetpea-homelab/tree/main/installer)
 
 ---
 
@@ -21,8 +21,8 @@ subscriptions or ads.
 This repository holds the **website** — landing page, service catalog, pricing,
 signup + invite flow, status page, and support pages. The actual services run
 on a separate Kubernetes cluster managed in
-[homelab-k8s](https://github.com/mysweetpea/homelab-k8s) (which includes a
-[self-hosting installer](https://github.com/mysweetpea/homelab-k8s/tree/main/installer)
+[mysweetpea-homelab](https://github.com/mysweetpea/mysweetpea-homelab) (which includes a
+[self-hosting installer](https://github.com/mysweetpea/mysweetpea-homelab/tree/main/installer)
 if you want to run the stack yourself).
 
 ---
@@ -225,5 +225,5 @@ Replace both values (in both files) when real addresses are available.
 ## License / contact
 
 Questions: support@mysweetpea.cc
-Infrastructure: https://github.com/mysweetpea/homelab-k8s
-This site: https://github.com/mysweetpea/portfolio
+Infrastructure: https://github.com/mysweetpea/mysweetpea-homelab
+This site: https://github.com/mysweetpea/mysweetpea-portfolio

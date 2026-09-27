@@ -41,7 +41,7 @@ export default {
       }
 
       const token = env.GITHUB_TOKEN || '';
-      const repos = ['mysweetpea/portfolio', 'mysweetpea/homelab-k8s'];
+      const repos = ['mysweetpea/mysweetpea-portfolio', 'mysweetpea/mysweetpea-homelab'];
       const headers = {
         'Accept': 'application/vnd.github+json',
         'User-Agent': 'mysweetpea-site'

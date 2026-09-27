@@ -3610,7 +3610,10 @@ function relFuture(v) {
         if (kS > best) best = Math.max(best, Math.min(kS + 5, 85));
         if (best < 0 && d) {
           var dS = mspScore(d, words[w]);
-          if (dS > 0) best = Math.min(dS, 55);
+          /* desc hits qualify an item but rank below any name/keyword hit —
+             "Jellyfin library" in a tab description must not outrank the
+             actual Jellyfin service command. */
+          if (dS > 0) best = 10;
         }
         if (best < 0) { ok = false; break; }
         total += best;
@@ -3648,7 +3651,10 @@ function relFuture(v) {
   function mspServiceCmds() {
     var src = (typeof window.SERVICES !== 'undefined' && window.SERVICES) ? window.SERVICES : [];
     return src.map(function (s) {
-      return { t: 'Open ' + s.name, d: (s.blurb || '') + ' · ' + String(s.url || '').replace(/^https?:\/\//, '').split('/')[0], k: MSP_SVC_KW[s.name] || '', run: function () { window.open(s.url, '_blank', 'noopener'); } };
+      var name = String(s.name || '');
+      /* avoid "Open Open WebUI" when the name already starts with Open */
+      var title = /^open\b/i.test(name) ? name : 'Open ' + name;
+      return { t: title, d: (s.blurb || '') + ' · ' + String(s.url || '').replace(/^https?:\/\//, '').split('/')[0], k: MSP_SVC_KW[s.name] || '', run: function () { window.open(s.url, '_blank', 'noopener'); } };
     });
   }
   function mspGuideCmds() {
@@ -3658,13 +3664,29 @@ function relFuture(v) {
       return { t: 'Guide: ' + g.name, d: 'Setup how-to · Guides tab', k: MSP_GUIDE_KW[key] || '', run: function () { setTab('guides'); var chip = document.querySelector('.svc-guide-chip[data-guide="' + key + '"]'); if (chip) chip.click(); } };
     }).filter(Boolean);
   }
+  /* Per-tab descriptions (restores the info the old hardcoded list had) */
+  var MSP_TAB_DESC = {
+    home: 'Overview, updates & quick actions',
+    media: 'Jellyfin library & requests',
+    services: 'Service launcher & status',
+    stats: 'Watch time & library growth',
+    guides: 'Step-by-step setup guides',
+    contact: 'Reach the gardener',
+    security: 'Checklist, MFA & sessions',
+    account: 'Profile, password & data'
+  };
   function mspBuildCommands() {
     var cmds = [];
-    /* Tabs — from the live TABS array (+ dropdown-only tabs), not literals */
-    TABS.concat(EXTRA_TABS).forEach(function (t) {
+    /* Tabs — from the live TABS array (+ dropdown-only tabs), not literals.
+       Guarded like SERVICES/GUIDES so one missing structure can't break
+       Ctrl+K before the guarded branches run. */
+    var tabs = (typeof TABS !== 'undefined' && TABS) ? TABS.slice() : [];
+    if (typeof EXTRA_TABS !== 'undefined' && EXTRA_TABS) tabs = tabs.concat(EXTRA_TABS);
+    var labels = (typeof TAB_LABELS !== 'undefined' && TAB_LABELS) ? TAB_LABELS : {};
+    tabs.forEach(function (t) {
       var kw = t === 'stats' ? 'statistics numbers charts' : t;
       if (t === 'contact') kw = 'contact email message human talk gardener runs about person';
-      cmds.push({ t: 'Go to ' + TAB_LABELS[t], d: 'Dashboard tab', k: kw, run: function () { setTab(t); } });
+      cmds.push({ t: 'Go to ' + (labels[t] || t), d: MSP_TAB_DESC[t] || 'Dashboard tab', k: kw, run: function () { setTab(t); } });
     });
     /* Account/security actions — no data structure exists for these */
     cmds.push(
@@ -3696,13 +3718,20 @@ function relFuture(v) {
     });
     const s = list.querySelector('.sel'); if (s) s.scrollIntoView({ block: 'nearest' });
   }
-  function open()  { filtered = mspBuildCommands(); sel = 0; pal.classList.add('open'); input.value = ''; filtered = mspFilter(filtered, ''); render(); setTimeout(() => input.focus(), 0); }
+  /* Command list is static after page load (TABS/SERVICES/GUIDES don't
+     change) — build once, rebuild on next open. Typing only filters. */
+  var mspCmdCache = null;
+  function mspAllCommands() {
+    if (!mspCmdCache) mspCmdCache = mspBuildCommands();
+    return mspCmdCache;
+  }
+  function open()  { mspCmdCache = null; filtered = mspFilter(mspAllCommands(), ''); sel = 0; pal.classList.add('open'); input.value = ''; render(); setTimeout(() => input.focus(), 0); }
   function close() { pal.classList.remove('open'); input.blur(); }
 
   window.mspPalette = { open, close };
 
   input.addEventListener('input', () => {
-    filtered = mspFilter(mspBuildCommands(), input.value);
+    filtered = mspFilter(mspAllCommands(), input.value);
     sel = 0; render();
   });
   input.addEventListener('keydown', (e) => {

@@ -428,7 +428,7 @@ async function fetchPublicKuma(env: Env): Promise<{ monitors: KumaMonitor[] } | 
 // Reconcile rule: announce when to <= running (LTE, not == — equality would
 // collapse every historical step; LTE keeps the chain and still suppresses the
 // rolled-back nextcloud 35.0.0 chain). Non-version tags skip the comparison.
-const GH_REPO_API = 'https://api.github.com/repos/mysweetpea/homelab-k8s/commits';
+const GH_REPO_API = 'https://api.github.com/repos/mysweetpea/mysweetpea-homelab/commits';
 const GH_PAGES = 6; // 600 commits ~ 34 days of history, covers the 30d Services window
 // GitHub commit objects: only .sha, .commit.message and .commit.author.date are
 // consumed (see parseUpdateCommit in the shared pipeline). Raw `any` is deliberate:
