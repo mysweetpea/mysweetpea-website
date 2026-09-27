@@ -48,7 +48,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=116">
+    <link rel="stylesheet" href="/assets/css/site.css?v=117">
     <link rel="stylesheet" href="/assets/css/premium.css?v=127">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=108">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
@@ -189,11 +189,23 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                             </div>
                         </div>
                         <div class="tier-div" aria-hidden="true"></div>
-                        <ul class="tier-feats">
-                            <li><span class="svc-chip"><img src="/assets/icons/icon-ui-check.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Price</span> One-time donation, announced at launch</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/icon-ui-check.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Scope</span> Everyday essentials, lighter than Sweet Pea</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/icon-ui-check.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Lineup</span> Revealed when it opens</li>
-                        </ul>
+                        <div class="tier-bento">
+                            <div class="tb-tile tb-feat">
+                                <span class="tb-ic"><img src="/assets/icons/icon-ui-check.svg" alt="" width="25" height="25" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">One-time donation</span>
+                                <span class="tb-tag">guarantees your account</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/icon-ui-check.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Essentials</span>
+                                <span class="tb-tag">lighter than Sweet Pea</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/icon-ui-check.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Lineup</span>
+                                <span class="tb-tag">revealed at launch</span>
+                            </div>
+                        </div>
                         <button type="button" class="tier-cta cta-ghost" disabled>Coming Soon</button>
                     </div>
 
@@ -212,14 +224,44 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                             </div>
                         </div>
                         <div class="tier-div" aria-hidden="true"></div>
-                        <ul class="tier-feats">
-                            <li><span class="svc-chip"><img src="/assets/icons/jellyfin.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Media</span> Jellyfin &amp; Moonfin &mdash; your private Netflix</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/nextcloud.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Files</span> Nextcloud &mdash; sync, share, collaborate</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/immich.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Photos</span> Immich &mdash; Google Photos, without tracking</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/openwebui.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">AI</span> Open WebUI &mdash; private chat on our hardware</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/vaultwarden.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Identity</span> Vaultwarden passwords, Matrix chat, AFFiNE docs</li>
-                            <li><span class="svc-chip"><img src="/assets/icons/koalasync.svg" alt="" width="17" height="17" loading="lazy" decoding="async"></span><span class="mono-k">Together</span> KoalaSync watch parties, Seerr requests</li>
-                        </ul>
+                        <div class="tier-bento">
+                            <div class="tb-tile tb-feat">
+                                <span class="tb-ic"><img src="/assets/icons/jellyfin.svg" alt="" width="25" height="25" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Jellyfin</span>
+                                <span class="tb-tag">your private Netflix</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/nextcloud.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Nextcloud</span>
+                                <span class="tb-tag">files</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/immich.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Immich</span>
+                                <span class="tb-tag">photos</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/openwebui.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Open WebUI</span>
+                                <span class="tb-tag">AI chat</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/vaultwarden.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">Vaultwarden</span>
+                                <span class="tb-tag">passwords</span>
+                            </div>
+                            <div class="tb-tile">
+                                <span class="tb-ic"><img src="/assets/icons/koalasync.svg" alt="" width="20" height="20" loading="lazy" decoding="async"></span>
+                                <span class="tb-name">KoalaSync</span>
+                                <span class="tb-tag">watch parties</span>
+                            </div>
+                            <a href="/services.html" class="tb-tile tb-more">
+                                <span class="tb-plus">+3</span>
+                                <span class="tb-name">More services</span>
+                                <span class="tb-morelist">Matrix &middot; AFFiNE &middot; Seerr</span>
+                                <span class="tb-arr" aria-hidden="true">&rarr;</span>
+                            </a>
+                        </div>
                         <a href="/form.html?tier=sweetpea" class="tier-cta cta-gold">Request Sweet Pea Tier</a>
                     </div>
                 </div>
