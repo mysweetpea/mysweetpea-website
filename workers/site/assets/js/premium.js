@@ -216,6 +216,39 @@
         vaultwarden: 1, matrix: 2, affine: 3, koalasync: 4,
         jellyfin: 5, seerr: 6, nextcloud: 7, immich: 8, openwebui: 9
     };
+    /* ONE state function feeds EVERY status widget on a card (bar, dot, label)
+       so they can never disagree again.
+       down-now   : latest heartbeat is down.
+       recovering : up now, 24h avg < 99.5% (the window still holds an outage)
+                    AND the recovery is fresher than RECOVERY_HOLD_MS - i.e. the
+                    service has NOT yet accumulated 10 minutes of continuous up
+                    (10 minutes of healthy minutes = the average is climbing).
+       live       : everything else. The fill WIDTH + uptime text keep telling
+                    the 24h story; the label celebrates the recovery early. */
+    var RECOVERY_HOLD_MS = 10 * 60 * 1000;
+    function svcState(list, up24, nowMs) {
+        if (!list || !list.length) return 'unknown';
+        if (list[list.length - 1].status !== 1) return 'down';
+        if (!(typeof up24 === 'number') || up24 * 100 >= 99.5) return 'live';
+        var now = nowMs || Date.now();
+        /* recovery moment = first up beat AFTER the newest down beat.
+           No down beat visible -> the oldest up beat proves sustained up. */
+        var lastDown = -1, t, i;
+        for (i = list.length - 1; i >= 0; i--) {
+            t = Date.parse(list[i].time);
+            if (isNaN(t)) return 'recovering'; /* unparseable feed: conservative */
+            if (list[i].status !== 1) { lastDown = i; break; }
+        }
+        var recAt;
+        if (lastDown >= 0) {
+            if (lastDown + 1 >= list.length) return 'recovering'; /* up beat IS the recovery */
+            recAt = Date.parse(list[lastDown + 1].time);
+        } else {
+            recAt = Date.parse(list[0].time); /* oldest beat, all-up list */
+        }
+        if (isNaN(recAt)) return 'recovering';
+        return (now - recAt) >= RECOVERY_HOLD_MS ? 'live' : 'recovering';
+    }
     function applyHeartbeat(hb, uptimeList) {
         /* Card dots */
         var cards = document.querySelectorAll('.service-card[data-service]');
@@ -238,13 +271,10 @@
                     if (lab2) lab2.textContent = 'UNKNOWN';
                     return;
                 }
-                var up = list[list.length - 1].status === 1;
-                /* label/dot must mirror the BAR's signal exactly: the 24h uptime
-                   average, NOT the heartbeat list (Kuma's heartbeat window is only
-                   a few hours - outage beats age out while the 24h average still
-                   holds them, which made the bar amber while the label said LIVE). */
                 var up24 = (uptimeList && id) ? uptimeList[id + '_24'] : undefined;
-                var recovering = up && typeof up24 === 'number' && up24 * 100 < 99.5;
+                var state = svcState(list, up24);
+                var up = state !== 'down' && state !== 'unknown';
+                var recovering = state === 'recovering';
                 var meta = dot.parentElement; /* .sp-meta wraps dot + label */
                 var lab = meta ? meta.querySelector('.sp-txt') : null;
                 if (meta) meta.classList.remove('state-down', 'state-degraded');
@@ -260,7 +290,7 @@
                 } else if (lab) {
                     lab.textContent = 'LIVE';
                 }
-                dot.title = up ? (recovering ? 'Recovered in last 24h' : 'Operational') : 'Down';
+                dot.title = up ? (recovering ? 'Recently recovered \u2014 uptime climbing' : 'Operational') : 'Down';
                 dot.setAttribute('aria-label', up ? (recovering ? 'Status: recovering, service is back up' : 'Status: operational') : 'Status: down');
             });
         }
@@ -291,13 +321,12 @@
                        outage so uptime < 99.5%), sage = healthy. A service that
                        comes back after a long down reads amber, not red, until
                        the window heals. */
-                    var mlist = (hb && id) ? hb[id] : null;
-                    var wasDown = mlist && mlist.length && mlist[mlist.length - 1].status !== 1;
+                    var state2 = svcState((hb && id) ? hb[id] : null, uptime);
                     fill.classList.remove('hbar-low', 'hbar-degraded');
-                    if (wasDown) {
+                    if (state2 === 'down') {
                         fill.classList.add('hbar-low');
                         bar.title = 'Down right now \u2014 24h uptime: ' + fmt(pct) + '%';
-                    } else if (pct < 99.5) {
+                    } else if (state2 === 'recovering') {
                         fill.classList.add('hbar-degraded');
                         bar.title = 'Recovering \u2014 back up, 24h uptime: ' + fmt(pct) + '%';
                     } else {
