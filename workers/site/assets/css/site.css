@@ -8167,21 +8167,6 @@ body[data-page='pricing'] .tier-period2{
   color:var(--text-faint);text-align:right;max-width:24ch;
 }
 body[data-page='pricing'] .tier-div{height:1px;background:var(--border);margin-bottom:4px}
-body[data-page='pricing'] .tier-feats{list-style:none;padding:0;margin:0;flex:1 1 auto}
-body[data-page='pricing'] .tier-feats li{
-  display:flex;gap:12px;align-items:center;padding:9px 0;font-size:13.5px;color:var(--text-dim);
-}
-body[data-page='pricing'] .tier-feats li + li{border-top:1px solid color-mix(in srgb,var(--border) 55%,transparent)}
-body[data-page='pricing'] .svc-chip{
-  width:30px;height:30px;flex:0 0 auto;display:grid;place-items:center;
-  background:rgba(143,175,181,.07);border:1px solid var(--border);border-radius:8px;
-}
-body[data-page='pricing'] .svc-chip img{width:17px;height:17px;opacity:.9}
-body[data-page='pricing'] .mono-k{
-  flex:0 0 84px;font-family:var(--t-font-mono);font-size:9.5px;letter-spacing:.09em;
-  text-transform:uppercase;color:var(--sage);
-}
-body[data-page='pricing'] .tier-feature .mono-k{color:var(--gold)}
 body[data-page='pricing'] .tier-cta{
   display:flex;align-items:center;justify-content:center;
   margin-top:24px;min-height:52px;border-radius:10px;
@@ -8220,10 +8205,6 @@ body[data-page='pricing'] .cta-ghost{
 [data-theme='light'] body[data-page='pricing'] .tier-price{color:var(--text)}
 [data-theme='light'] body[data-page='pricing'] .tier-feature .tier-price{color:var(--gold)}
 [data-theme='light'] body[data-page='pricing'] .tier-div{background:rgba(46,92,70,.16)}
-[data-theme='light'] body[data-page='pricing'] .tier-feats li + li{border-top-color:rgba(46,92,70,.13)}
-[data-theme='light'] body[data-page='pricing'] .svc-chip{background:rgba(46,92,70,.07);border-color:rgba(46,92,70,.16)}
-[data-theme='light'] body[data-page='pricing'] .mono-k{color:var(--sage)}
-[data-theme='light'] body[data-page='pricing'] .tier-feature .mono-k{color:var(--gold)}
 [data-theme='light'] body[data-page='pricing'] .cta-gold{color:var(--ink-on-gold, #14100A)}
 [data-theme='light'] body[data-page='pricing'] .cta-ghost{background:rgba(46,92,70,.05);border-color:rgba(47,107,78,.4);color:var(--sage)}
 
