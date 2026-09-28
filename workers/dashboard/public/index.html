@@ -1227,6 +1227,15 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #hm-svc-rail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;overflow:visible;padding:2px 2px 4px;align-content:start}
 .hm-svcrow-more{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:12px;border:1px dashed var(--border-primary);background:transparent;color:var(--c);font:inherit;font-size:.7rem;font-weight:700;letter-spacing:.06em;cursor:pointer;transition:border-color var(--t-fast),color var(--t-fast),transform var(--t-fast)}
 .hm-svcrow-more:hover{border-color:var(--c);color:var(--primary-bright);transform:translateY(-1px)}
+.hm-seed-pill{display:inline-flex;align-items:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:linear-gradient(135deg,var(--primary-bright),var(--c));border-radius:99px;padding:3px 10px;white-space:nowrap}
+#hm-because .hm-more{margin-left:auto}
+.hm-rate-badge{color:#E8C878;background:rgba(8,9,15,.82);border:1px solid rgba(217,168,108,.4);font-family:'JetBrains Mono',ui-monospace,monospace}
+.mposter-wrap{position:relative;display:block}
+.mrate{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;font-weight:700;color:#E8C878;background:rgba(8,9,15,.8);border:1px solid rgba(217,168,108,.35);padding:2px 6px;border-radius:8px}
+.mplays{position:absolute;top:6px;left:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:var(--primary-bright);background:rgba(8,9,15,.78);border:1px solid rgba(151,146,255,.3);padding:2px 7px;border-radius:99px}
+.m-genre-row{display:flex;gap:8px;flex-wrap:wrap}
+.m-genre{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:7px 15px;border-radius:99px;border:1px solid var(--border);color:var(--text-dim);background:var(--card);cursor:pointer;transition:border-color var(--t-fast),color var(--t-fast),transform var(--t-fast)}
+.m-genre:hover{border-color:var(--c);color:var(--text);transform:translateY(-1px)}
 @media(max-width:760px){#hm-svc-rail{grid-template-columns:1fr}}
 .hm-svcrow{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:12px;background:linear-gradient(180deg,rgba(151,146,255,.05),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1);text-decoration:none;color:var(--text);transition:border-color var(--t-fast),transform var(--t-fast),box-shadow var(--t-fast)}
 .hm-svcrow:hover{border-color:var(--border-primary);transform:translateY(-1px);box-shadow:var(--e2)}
@@ -2173,6 +2182,7 @@ function guideDetailHtml(key) {
     '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
+    '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Because you watched<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
     obHtml +
     '<div id="stats" hidden></div>' +
     '<section class="card" id="sec-status" hidden><p class="eyebrow">Service status</p><h3>Service status</h3><div class="skel"></div></section>' +
@@ -2785,6 +2795,25 @@ function guideDetailHtml(key) {
     if ((cont.items || []).length) html += '<section class="card"><p class="eyebrow">Your library</p><h3>Continue Watching</h3><div class="media-row">' + cont.items.map(it => posterCard(it, { progress: true })).join('') + '</div></section>';
     if ((latest.items || []).length) html += '<section class="card"><p class="eyebrow">Your library</p><h3>Recently Added</h3><div class="media-row">' + latest.items.map(it => posterCard(it, { badge: true })).join('') + '</div></section>';
     document.querySelectorAll('.media-sec').forEach((s) => { s.innerHTML = html; });
+    // Media tab deep build (A2): most played / because / fresh / genres — Home keeps Continue/Recently only
+    (async () => {
+      const host = document.getElementById('sec-media-m');
+      if (!host) return;
+      const g2 = (u) => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
+      const [mp, be, fr, ge] = await Promise.all([g2('/api/media/mostplayed'), g2('/api/media/recommend'), g2('/api/media/unplayed'), g2('/api/media/genres')]);
+      const deepCard = (it, chipHtml) => '<a class="mitem" href="' + JF_ITEM + encodeURIComponent(String(it.id ?? '')) + '" target="_blank" rel="noopener">' +
+        '<span class="mposter-wrap"><img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
+        '<div class="mtitle">' + esc(it.name || '') + '</div>' +
+        '<div class="msub">' + esc([it.year, (it.rating != null ? '\u2605 ' + Number(it.rating).toFixed(1) : '')].filter(Boolean).join(' \u00b7 ')) + '</div></a>';
+      const rateChip = (it) => (it.rating != null ? '<span class="mrate">' + Number(it.rating).toFixed(1) + '</span>' : '');
+      const playsChip = (it) => (it.playCount ? '<span class="mplays">' + it.playCount + (it.playCount === 1 ? ' play' : ' plays') + '</span>' : '');
+      let out = '';
+      if (mp && mp.items && mp.items.length) out += '<section class="card"><p class="eyebrow">All time</p><h3>Most played</h3><div class="media-row">' + mp.items.map(it => deepCard(it, playsChip(it) + rateChip(it))).join('') + '</div></section>';
+      if (be && be.items && be.items.length) out += '<section class="card"><p class="eyebrow">Personal picks</p><h3>Because you watched' + (be.seed ? ' <span class="hm-seed-pill">' + esc(be.seed) + '</span>' : '') + '</h3><div class="media-row">' + be.items.map(it => deepCard(it, rateChip(it))).join('') + '</div></section>';
+      if (fr && fr.items && fr.items.length) out += '<section class="card"><p class="eyebrow">Unwatched \u00b7 top rated</p><h3>Fresh picks</h3><div class="media-row">' + fr.items.map(it => deepCard(it, rateChip(it))).join('') + '</div></section>';
+      if (ge && ge.genres && ge.genres.length) out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3><div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'https://media.mysweetpea.cc/web/index.html#!/movies?genre=\' + encodeURIComponent(\'' + esc(g.name) + '\'), \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div></section>';
+      host.innerHTML = out;
+    })();
   })();
   // ===== SERVICES LAUNCHER =====
   const SERVICES = [
@@ -3028,10 +3057,11 @@ function guideDetailHtml(key) {
   function hmPosterCard(it, i) {
     const initial = esc(String((it && it.name) || '?').trim().charAt(0).toUpperCase() || '?');
     const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
+    const rating = (it && it.rating != null) ? Number(it.rating).toFixed(1) : null;
     return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + encodeURIComponent(String((it && it.id) == null ? '' : it.id)) + '" target="_blank" rel="noopener noreferrer">' +
       '<span class="hm-poster hm-g' + (i % 3) + '"><span class="hm-poster-init">' + initial + '</span>' +
       ((it && it.img) ? '<img loading="lazy" alt="" src="' + esc(String(it.img)) + '" onerror="this.remove()">' : '') +
-      '<span class="hm-pbadge">NEW</span></span>' +
+      (rating ? '<span class="hm-pbadge hm-rate-badge">' + rating + '</span>' : '<span class="hm-pbadge">NEW</span>') + '</span>' +
       '<span class="mtitle">' + esc((it && it.name) || '') + '</span>' +
       (sub ? '<span class="msub">' + esc(sub) + '</span>' : '') + '</a>';
   }
@@ -3194,6 +3224,23 @@ function guideDetailHtml(key) {
     // (scope=all fetch deferred until the Media tab is first opened — wired in setTab)
     try { hmLoadServices(); } catch (e) {}
     try { hmLoadMedia(); } catch (e) {}
+    try { hmLoadBecause(); } catch (e) {}
+  }
+  async function hmLoadBecause() {
+    const sec = document.getElementById('hm-because');
+    const rail = document.getElementById('hm-because-rail');
+    const seedEl = document.getElementById('hm-because-seed');
+    if (!sec || !rail) return;
+    try {
+      const r = await fetch('/api/media/recommend');
+      if (!r.ok) return;
+      const d = await r.json();
+      const items = (d && d.items) || [];
+      if (!items.length) return;
+      if (seedEl && d.seed) { seedEl.textContent = d.seed; seedEl.hidden = false; }
+      rail.innerHTML = items.map(hmPosterCard).join('');
+      sec.hidden = false;
+    } catch (e) { /* row stays hidden */ }
   }
   hmInit();
   // ===== PHASE 10: SETUP GUIDES (selector chips + live detail pane) =====
