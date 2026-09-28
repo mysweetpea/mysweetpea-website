@@ -1107,6 +1107,82 @@ export default {
         });
         return json(JSON.parse(payload));
       }
+      if (path === '/api/media/mostplayed') {
+        // Most-played movies+series (PlayCount desc). Deep Media tab — not on Home.
+        const payload = await swrJson(ctx, env, 'cache:media-mostplayed', 600000, async () => {
+          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
+            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+          if (!r.ok) throw new Error('jellyfin ' + r.status);
+          const d = await r.json() as any;
+          const items = ((d.Items ?? []) as any[]).map((it) => ({
+            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
+            rating: it.CommunityRating ?? null, playCount: it.UserData?.PlayCount ?? 0,
+            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items });
+        });
+        return json(JSON.parse(payload));
+      }
+      if (path === '/api/media/unplayed') {
+        // Fresh picks: highest-rated unwatched movies. Deep Media tab — not on Home.
+        const payload = await swrJson(ctx, env, 'cache:media-unplayed', 600000, async () => {
+          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=CommunityRating&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie&Filters=IsUnplayed&Fields=ProductionYear,CommunityRating,Genres&EnableImages=true',
+            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+          if (!r.ok) throw new Error('jellyfin ' + r.status);
+          const d = await r.json() as any;
+          const items = ((d.Items ?? []) as any[]).map((it) => ({
+            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
+            rating: it.CommunityRating ?? null, genres: (it.Genres ?? []).slice(0, 2),
+            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items });
+        });
+        return json(JSON.parse(payload));
+      }
+      if (path === '/api/media/genres') {
+        // Top genres by item count (user-scoped). Deep Media tab — not on Home.
+        const payload = await swrJson(ctx, env, 'cache:media-genres', 900000, async () => {
+          const r = await fetch(env.JELLYFIN_URL + '/Genres?userId=' + env.JELLYFIN_USER_ID + '&Limit=10&SortBy=ItemCount&SortOrder=Descending',
+            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+          if (!r.ok) throw new Error('jellyfin ' + r.status);
+          const d = await r.json() as any;
+          const genres = ((d.Items ?? []) as any[]).map((g) => ({ name: g.Name }));
+          return JSON.stringify({ genres });
+        });
+        return json(JSON.parse(payload));
+      }
+      if (path === '/api/media/recommend') {
+        // Because-you-watched: Similar to the most-played movie (userId-scoped).
+        // 3-step: most-played id -> /Items/{id}/Similar?userId=... Falls back to
+        // resume-source if no play counts yet. 30-min cache (browsing shifts it).
+        const payload = await swrJson(ctx, env, 'cache:media-recommend-v3', 1800000, async () => {
+          const q = (extra: string) => env.JELLYFIN_URL + extra;
+          const H = { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } };
+          let seedId = '';
+          let seedName = '';
+          try {
+            const r = await fetch(q('/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=1&IncludeItemTypes=Movie'), H);
+            if (r.ok) { const d = await r.json() as any; const it = (d.Items ?? [])[0]; if (it) { seedId = it.Id; seedName = it.Name; } }
+          } catch {}
+          if (!seedId) {
+            try {
+              const r = await fetch(q('/Items?userId=' + env.JELLYFIN_USER_ID + '&Recursive=true&Filters=IsResumable&SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Movie,Episode&Limit=1'), H);
+              if (r.ok) { const d = await r.json() as any; const it = (d.Items ?? [])[0]; if (it) { seedId = it.Id; seedName = it.SeriesName || it.Name; } }
+            } catch {}
+          }
+          if (!seedId) return JSON.stringify({ items: [], seed: null });
+          const r2 = await fetch(q('/Items/' + seedId + '/Similar?userId=' + env.JELLYFIN_USER_ID + '&Limit=12&Fields=ProductionYear,CommunityRating'), H);
+          if (!r2.ok) return JSON.stringify({ items: [], seed: seedName });
+          const d2 = await r2.json() as any;
+          const items = ((d2.Items ?? []) as any[]).slice(0, 12).map((it) => ({
+            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
+            rating: it.CommunityRating ?? null,
+            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items, seed: seedName });
+        });
+        return json(JSON.parse(payload));
+      }
       if (path === '/api/requests') {
         // Home "Your requests" rail (default take 12) + Media tab full list
         // (?scope=all, take 24). Seerr user resolved by jellyfinUsername ==
