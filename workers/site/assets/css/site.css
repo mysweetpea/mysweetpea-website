@@ -8164,7 +8164,8 @@ body[data-page='pricing'] .tier-pricecol{display:flex;flex-direction:column;alig
 body[data-page='pricing'] .tier-feature .tier-price{color:var(--gold)}
 body[data-page='pricing'] .tier-period2{
   font-family:var(--t-font-mono);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--text-faint);text-align:right;max-width:24ch;
+  color:var(--text-faint);text-align:right;max-width:26ch;
+  text-wrap:balance;line-height:1.8;align-self:center;
 }
 body[data-page='pricing'] .tier-div{height:1px;background:var(--border);margin-bottom:4px}
 body[data-page='pricing'] .tier-cta{
