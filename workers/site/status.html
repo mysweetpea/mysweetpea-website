@@ -23,7 +23,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
   }catch(e){}
   document.documentElement.classList.add('js');
   setTimeout(function(){
-    if(!window.__mspRevealInit)document.documentElement.classList.remove('js');
+    if(!window.__mspRevealInit){
+      window.__mspWatchdogFired=true;
+      document.documentElement.classList.remove('js');
+    }
   },6000);
 })();
 </script>
@@ -116,7 +119,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <section class="status-section" aria-labelledby="status-summary">
                     <div class="status-summary status-degraded reveal" id="status-summary" role="status">
                         <span class="status-dot" aria-hidden="true"></span>
-                        <span class="status-summary-main"><strong>&mdash; of 9 monitored</strong><small>Uptime <span id="summary-pct">—</span> &middot; Current community services &middot; <time id="summary-updated" datetime="">Checking&hellip;</time></small></span>
+                        <span class="status-summary-main"><strong>&mdash; of 9 monitored</strong><small>Uptime <span id="summary-pct">—</span> &middot; Current community services &middot; <time id="summary-updated">Checking&hellip;</time></small></span>
                         <div class="status-summary-meta">UPTIME WINDOW <b>24 HOURS</b><br>MONITOR <b>KUMA</b> &middot; CHECKS <b>60 SEC</b></div>
                     </div>
 
@@ -295,9 +298,9 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=114" defer></script>
+    <script src="/assets/js/site.js?v=115" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
-    <script src="/assets/js/status-page.js?v=107" defer></script>
+    <script src="/assets/js/status-page.js?v=108" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {

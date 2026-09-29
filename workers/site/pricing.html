@@ -23,7 +23,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
   }catch(e){}
   document.documentElement.classList.add('js');
   setTimeout(function(){
-    if(!window.__mspRevealInit)document.documentElement.classList.remove('js');
+    if(!window.__mspRevealInit){
+      window.__mspWatchdogFired=true;
+      document.documentElement.classList.remove('js');
+    }
   },6000);
 })();
 </script>
@@ -357,7 +360,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=114" defer></script>
+    <script src="/assets/js/site.js?v=115" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script>
     if ('serviceWorker' in navigator) {

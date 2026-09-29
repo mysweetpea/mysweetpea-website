@@ -7,8 +7,15 @@
     'use strict';
 
     /* Mark html as JS-enabled so reveal animations only hide content
-       when JS is actually running (prevents blank/unfinished pages). */
-    document.documentElement.classList.add('js');
+       when JS is actually running (prevents blank/unfinished pages).
+       If the early-paint watchdog already fired (site.js arrived >6s
+       late on a slow connection), content is visible and must STAY
+       visible — re-adding html.js here would snap it back to opacity:0
+       and fade it in again (the exact "static screen" regression the
+       bootstrap was written to fix). */
+    if (!window.__mspWatchdogFired) {
+        document.documentElement.classList.add('js');
+    }
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');

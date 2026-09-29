@@ -93,7 +93,11 @@
                 if (unknown) dot.classList.add('status-unknown');
                 else dot.classList.toggle('status-down', !up);
             }
-            var win = (window.UPTIME_WIN && window.UPTIME_WIN[row.dataset.serviceKey]) || null;
+            /* UPTIME_WIN is keyed by monitor ID (built from "<id>_<days>"
+               uptimeList keys) — translate the row's service key through
+               ID_TO_KEY's inverse before lookup (was always null). */
+            var rowId = MONITOR_IDS[row.dataset.serviceKey];
+            var win = (window.UPTIME_WIN && rowId != null && window.UPTIME_WIN[String(rowId)]) || null;
             if (uptimeEl) uptimeEl.textContent = (pct != null) ? ((win ? win + 'd ' : '') + pct + '%') : 'uptime —';
             if (pctEl) pctEl.textContent = (pct != null) ? pct + '%' : '—';
             if (unknown) {
@@ -172,7 +176,9 @@
                        against any future Kuma ordering change. */
                     list.sort(function (a, b) { return a.time < b.time ? -1 : a.time > b.time ? 1 : 0; });
                     var h = list[list.length - 1];
-                    var up = h.status === 1;
+                    /* consistent outage semantics: only confirmed 0 is down
+                       (pending 2 / maintenance 3 are not outages) */
+                    var up = h.status !== 0;
                     if (up) upCount++;
                     total++;
                     var pct = uptimePct[id] != null ? uptimePct[id] : null;
@@ -184,13 +190,16 @@
                    the 9 monitored services reported up. */
                 if (summary) {
                     summary.classList.remove('status-all-online', 'status-degraded');
-                    summary.classList.add(downCount === 0 ? 'status-all-online' : 'status-degraded');
+                    /* zero evaluated rows = nothing verified: degraded, never green */
+                    summary.classList.add(downCount === 0 && total > 0 ? 'status-all-online' : 'status-degraded');
                 }
                 if (summaryText) {
                     /* textContent shows entities literally — use a real
                        middle dot. */
+                    /* both branches derived from the actual denominator — a
+                       missing row can never fabricate an all-green count */
                     summaryText.textContent = downCount === 0
-                        ? '9 of 9 operational'
+                        ? (total + ' of ' + total + ' operational')
                         : (upCount + ' of ' + total + ' operational \u00B7 ' + downCount + ' down');
                 }
                 if (summaryTime) {
@@ -207,7 +216,9 @@
                     if (headPct) headPct.textContent = (win ? win + 'd avg ' : '') + avg + '%';
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
+                clearKumaTimer();
+                console.warn('[msp] status feed failed:', err && err.message ? err.message : err);
                 // Status feed unreachable (network error, CORS, non-OK, or malformed
                 // payload). The static markup says "9 of 9 operational" — showing that
                 // during a monitoring outage would fabricate an all-green page exactly
@@ -242,10 +253,7 @@
     (function () {
         var panel = document.querySelector('.incidents-panel');
         if (!panel) return;
-        var title = panel.querySelector('.incidents-title');
         var empty = panel.querySelector('.incidents-empty');
-        var container = panel.querySelector('.incident-item');
-        if (container) container.remove();
 
         /* Fetch failure must say so: the static empty-state text was replaced
            with a neutral pending line, and a network error would otherwise
@@ -258,10 +266,19 @@
         panel.appendChild(failEl);
         var aborter = ('AbortController' in window) ? new AbortController() : null;
         var abortTimer = aborter ? setTimeout(function () { aborter.abort(); }, 10000) : 0;
+        function clearAbortTimer() { if (abortTimer) { clearTimeout(abortTimer); abortTimer = 0; } }
         fetch('https://subscribe.mysweetpea.cc/webhook/incidents', aborter ? { signal: aborter.signal } : {})
             .then(function (r) {
-                if (abortTimer) clearTimeout(abortTimer);
-                return r.text().then(function(t){ if(t){try{return JSON.parse(t);}catch(e){return [];}} return []; });
+                clearAbortTimer();
+                /* Non-2xx must hit the catch path: a 502 from the webhook is
+                   NOT "no incidents" — that false all-clear is the worst thing
+                   a status page can show. */
+                if (!r.ok) return Promise.reject(new Error('HTTP ' + r.status));
+                return r.text().then(function (t) {
+                    if (!t) return [];                       /* truly empty body = empty feed */
+                    var parsed = JSON.parse(t);              /* garbage body THROWS -> unavailable */
+                    return parsed;
+                });
             })
             .then(function (data) {
                 var list = Array.isArray(data) ? data : (data && data.incidents) || [];
@@ -292,7 +309,9 @@
                     panel.appendChild(item);
                 });
             })
-            .catch(function () {
+            .catch(function (err) {
+                clearAbortTimer();
+                console.warn('[msp] incident feed failed:', err && err.message ? err.message : err);
                 /* Feed unreachable (network/CORS/timeout/malformed): say so —
                    the old comment claimed a "static fallback" but the static
                    item is deleted at init, so this used to render NOTHING. */

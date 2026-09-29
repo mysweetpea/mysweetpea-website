@@ -25,7 +25,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
   // Deferred scripts execute BEFORE DOMContentLoaded, so decisive check runs after
   // site.js had its chance (prevents hide/reveal race on slow fetches); the
   // load + timeout checks stay as last-resort fallbacks.
-  var dropJs=function(){if(!window.__mspRevealInit)document.documentElement.classList.remove('js');};
+  var dropJs=function(){if(!window.__mspRevealInit){window.__mspWatchdogFired=true;document.documentElement.classList.remove('js');}};
   document.addEventListener('DOMContentLoaded',dropJs);
   window.addEventListener('load',dropJs);
   setTimeout(dropJs,6000);
@@ -213,7 +213,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=114" defer></script>
+    <script src="/assets/js/site.js?v=115" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script src="/assets/js/changelog-page.js?v=11" defer></script>
     <script>
