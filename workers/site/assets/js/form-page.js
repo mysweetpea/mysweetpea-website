@@ -8,6 +8,7 @@
     function valid(type, value) {
         value = value.trim();
         if (type === 'name') return value.length >= 2;
+        if (type === 'why') return value.length >= 20; /* 'why you' note: a real sentence, not a shrug */
         if (type === 'email') return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
         if (type === 'username') return /^[A-Za-z0-9_]{3,}$/.test(value);
         if (type === 'tx') {
@@ -19,7 +20,7 @@
         }
         return false;
     }
-    var fields = { 'ga-name':'name', 'ga-email':'email', 'ga-username':'username', 'ga-txhash':'tx', 'sp-name':'name', 'sp-email':'email' };
+    var fields = { 'ga-name':'name', 'ga-email':'email', 'ga-username':'username', 'ga-txhash':'tx', 'sp-name':'name', 'sp-email':'email', 'sp-message':'why' };
     function validateField(id) {
         var input = document.getElementById(id), ok = valid(fields[id], input.value);
         input.classList.toggle('valid', ok); input.classList.toggle('invalid', input.value.trim().length > 0 && !ok);
@@ -47,9 +48,11 @@
         var gaVerify = document.getElementById('ga-verify');
         var spVerify = document.getElementById('sp-verify');
         document.getElementById('ga-submit').disabled = !(allValid(['ga-name','ga-email','ga-username','ga-txhash']) && !!chosenCrypto && gaVerify && gaVerify.checked);
-        document.getElementById('sp-submit').disabled = !(allValid(['sp-name','sp-email']) && spVerify && spVerify.checked);
+        document.getElementById('sp-submit').disabled = !(allValid(['sp-name','sp-email','sp-message']) && spVerify && spVerify.checked);
     }
     ['ga-verify','sp-verify'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('change',updateButtons);});
+    var spMsg = document.getElementById('sp-message');
+    if (spMsg) spMsg.addEventListener('input', function(){ validateField('sp-message'); });
     document.querySelectorAll('.access-choice-card').forEach(function (card) {
         card.addEventListener('click', function () {
             var tier = card.getAttribute('data-tier');

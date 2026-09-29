@@ -2361,21 +2361,13 @@ body[data-page='form'] .tier-form-panel {
 /* 1. Glasshouse card — square top replaced by the arch outline (::after). */
 body[data-page='form'] .tier-form-panel .form-card {
     border: 1px solid var(--border);
-    /* top corners share the arch's 320px span: ONE continuous edge, no
-       hard/soft double line at the top-left/right junctions */
-    border-radius: 320px 320px var(--radius) var(--radius);
+    /* gate-arch top removed per user call - standard card shape */
+    border-radius: var(--radius);
     padding: 0 46px 36px 92px;
     overflow: hidden;
 }
 body[data-page='form'] .tier-form-panel .form-card::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 96px;
-    border-radius: 319px 319px 0 0; /* inset 1px inside the card border */
-    border: none;
-    pointer-events: none;
-    background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent 88%);
+    content: none; /* dome gradient retired with the gate arch */
 }
 /* 2. Arch window + night bloom — closed at rest (.open toggled by JS). */
 body[data-page='form'] .tier-form-panel .arch-window {
@@ -2386,14 +2378,7 @@ body[data-page='form'] .tier-form-panel .arch-window {
     z-index: 1;
 }
 body[data-page='form'] .tier-form-panel .arch-window svg.arch {
-    position: absolute;
-    top: 6px; left: 0; right: 0;
-    width: 100%;
-    height: 44px;
-    stroke: var(--sage);
-    fill: none;
-    stroke-width: 1.1;
-    opacity: .5;
+    display: none; /* arch outline retired with the gate top; bloom remains */
 }
 body[data-page='form'] .tier-form-panel .bloom {
     width: 58px; height: 58px;
