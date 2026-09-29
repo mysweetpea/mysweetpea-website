@@ -55,7 +55,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <link rel="stylesheet" href="/assets/css/premium.css?v=129">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=108">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
-    <link rel="stylesheet" href="/assets/css/home.css?v=13">
+    <link rel="stylesheet" href="/assets/css/home.css?v=14">
 <link rel="canonical" href="https://mysweetpea.cc/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MySweetPea","url":"https://mysweetpea.cc","logo":"https://mysweetpea.cc/icon-512.png","description":"Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions — community funded.","email":"support@mysweetpea.cc","sameAs":["https://github.com/mysweetpea"]}</script>
 </head>
@@ -86,7 +86,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <a href="/about.html" class="nav-btn" data-keywords="story gardener who about team mission why runs it behind mysweetpea person solo one"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="6" cy="6" r="5"/><path d="M6 5.3v3.1M6 3.5h.01"/></svg>About</a>
                         <a href="/redeem.html" class="nav-btn nav-code" data-keywords="redeem code invite access key"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="3.6" cy="6" r="2.3"/><path d="M5.9 6H11M9.3 6v1.9M10.7 6v1.5"/></svg>I Have a Code</a>
             <span class="nav-sep" aria-hidden="true"></span>
-            <div class="nav-actions"><button class="nav-search" aria-label="Search pages and services" title="Search (Ctrl+K)"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><button class="theme-toggle" aria-label="Toggle color theme"><span class="icon-moon" aria-hidden="true"><img src="/assets/icons/icon-ui-moon.svg" class="" alt="" width="18" height="18" loading="eager" decoding="async" aria-hidden="true"></span><span class="icon-sun" aria-hidden="true"><img src="/assets/icons/icon-ui-sun.svg" class="" alt="" width="18" height="18" loading="eager" decoding="async" aria-hidden="true"></span></button></div>
+            <div class="nav-actions"><button class="nav-search" aria-label="Search pages and services" title="Search (Ctrl+K)"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><button class="theme-toggle" aria-label="Toggle color theme"><span class="icon-moon" aria-hidden="true"><img src="/assets/icons/icon-ui-moon.svg" alt="" width="18" height="18" loading="eager" decoding="async" aria-hidden="true"></span><span class="icon-sun" aria-hidden="true"><img src="/assets/icons/icon-ui-sun.svg" alt="" width="18" height="18" loading="eager" decoding="async" aria-hidden="true"></span></button></div>
             <div class="nav-account" id="nav-account"><a class="nav-btn nav-signin nav-account-chip" id="nav-account-chip" href="https://dashboard.mysweetpea.cc/auth/login" aria-label="Sign in to your dashboard" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><img id="nav-account-avatar" alt="" hidden style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none" /><span id="nav-account-label">Sign in</span></a></div><style>.nav-account{display:inline-flex;align-items:center}.nav-account-chip{display:inline-flex;align-items:center;gap:7px}</style><script>(function(){"use strict";var chip=document.getElementById("nav-account-chip"),label=document.getElementById("nav-account-label");if(!chip||!label)return;var dash="https://dashboard.mysweetpea.cc";fetch("/api/auth/state?name=1",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(s){if(!s||!s.logged_in)return;var first=String(s.name||"").trim().split(/\s+/)[0];label.textContent=first||"Account";chip.href=dash;chip.setAttribute("aria-label","Open your dashboard");var av=document.getElementById("nav-account-avatar");var svg=chip.querySelector("svg");if(av){av.onload=function(){av.style.display="inline-block";av.hidden=false;if(svg)svg.style.display="none";};av.onerror=function(){av.style.display="none";};av.src="/api/avatar?v="+Date.now();}}).catch(function(){});})();</script>
             <a href="/form.html" class="nav-cta" data-keywords="request invite signup sign up access apply join">Get Access</a>
         </div>
@@ -111,7 +111,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <a href="/form.html" class="hero-btn hero-btn-primary" data-keywords="request invite signup sign up access apply join">Request an Invitation</a>
                 <a href="/services.html" class="hero-btn hero-btn-secondary" data-keywords="apps features what is offered services list">See Available Services</a>
             </div>
-            <div class="hero-proof" aria-label="MySweetPea at a glance">
+            <div class="hero-proof" role="region" aria-label="MySweetPea at a glance">
                 <div class="proof-stat"><span class="proof-value" data-count="1" data-suffix="">0</span><span class="proof-label">Gardener behind it all</span></div>
                 <div class="proof-divider" aria-hidden="true"></div>
                 <div class="proof-stat"><span class="proof-value" data-count="9" data-suffix="">0</span><span class="proof-label">Public services</span></div>
@@ -147,7 +147,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     </dl>
                 </aside>
             </div>
-            <div class="what-proof reveal reveal-delay-2" aria-label="MySweetPea in five facts">
+            <div class="what-proof reveal reveal-delay-2" role="region" aria-label="MySweetPea in five facts">
                 <span class="what-pill">9/9 services live</span>
                 <span class="what-sep" aria-hidden="true">·</span>
                 <span class="what-pill">0 ads &amp; trackers</span>
@@ -166,7 +166,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <p class="sec-eyebrow reveal"><span class="n">01</span> The Garden</p>
             <h2 class="section-title glass-text reveal">Each one replaces something that watches you.</h2>
             <p class="section-subtitle reveal reveal-delay-1">The same comfort and polish you're used to. Open any card to see what its corporate twin does with your data.</p>
-            <div class="garden-rows" id="gardenRows" style="margin-top:34px">
+            <div class="garden-rows" id="gardenRows">
                 <div class="garden-row reveal" style="--d:0ms">
                     <button type="button" class="g-row-head" aria-expanded="false" aria-controls="gx-jellyfin" id="gxt-jellyfin">
                         <span class="g-idx">01</span>
@@ -219,7 +219,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                                 <li><strong>Retention you don't control</strong> Delete is a promise on their terms, not a guarantee on yours.</li>
                             </ul>
                             <p class="g-contrast"><strong>What you get here:</strong> Nextcloud here means your files live in storage just for you, sync is verifiable, and there's no terms-of-service lawyer between you and your own documents.</p>
-                            <p class="g-src">Sources: <a href="https://support.google.com/drive/answer/2463328" target="_blank" rel="noopener noreferrer">Google: flagged-file review</a> · <a href="https://shieldfive.com/resources/is-google-drive-encrypted" target="_blank" rel="noopener noreferrer">Drive is not zero-knowledge</a></p>
+                            <p class="g-src">Sources: <a href="https://support.google.com/drive/answer/2463328" target="_blank" rel="noopener noreferrer">Google: copyright enforcement in Drive</a> · <a href="https://shieldfive.com/resources/is-google-drive-encrypted" target="_blank" rel="noopener noreferrer">Drive is not zero-knowledge</a></p>
                         </div>
                     </div>
                 </div>
@@ -331,7 +331,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                                 <li><strong>Acquisition risk is yours</strong> When your second brain belongs to a company that needs an exit, you find out last.</li>
                             </ul>
                             <p class="g-contrast"><strong>What you get here:</strong> AFFiNE here doesn't train AI on your data, keeps notes private, exports to open formats, and no acquisition can relocate them.</p>
-                            <p class="g-src">Sources: <a href="https://www.notion.com/help/notion-ai-security-practices" target="_blank" rel="noopener noreferrer">Notion AI processing</a> · <a href="https://techcrunch.com/2023/11/29/its-official-evernote-is-acquired-by-bending-spoons/" target="_blank" rel="noopener noreferrer">Evernote acquired</a></p>
+                            <p class="g-src">Sources: <a href="https://www.notion.com/help/notion-ai-security-practices" target="_blank" rel="noopener noreferrer">Notion AI processing</a> · <a href="https://techcrunch.com/2022/11/16/bending-spoons-acquires-evernote-marking-the-end-of-an-era/" target="_blank" rel="noopener noreferrer">Evernote acquired</a></p>
                         </div>
                     </div>
                 </div>
@@ -356,10 +356,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                                 <li><strong>Chats go public</strong> Shared conversations have surfaced in public search results.</li>
                                 <li><strong>Humans read your chats</strong> Contractors review real conversations for training.</li>
                                 <li><strong>Retention shifts silently</strong> Policies change under your feet; deletion windows move.</li>
-                                <li><strong>The Gemini twin too</strong> Google's Gemini same deal — activity is kept and reviewed by default.</li>
+                                <li><strong>The Gemini twin too</strong> Google's Gemini saves your activity by default — on their servers, under their retention rules.</li>
                             </ul>
                             <p class="g-contrast"><strong>What you get here:</strong> Here, your chat history isn't viewed by anyone else, model choice is explicit, and nothing you type becomes training data.</p>
-                            <p class="g-src">Sources: <a href="https://safeguard.sh/resources/blog/chatgpt-conversation-data-leakage-risk" target="_blank" rel="noopener noreferrer">shared chats indexed</a> · <a href="https://www.techrepublic.com/article/news-openai-chatgpt-conversations-leak-search-engines/" target="_blank" rel="noopener noreferrer">OpenAI chat leakage</a></p>
+                            <p class="g-src">Sources: <a href="https://safeguard.sh/resources/blog/chatgpt-conversation-data-leakage-risk" target="_blank" rel="noopener noreferrer">shared chats indexed</a> · <a href="https://www.techrepublic.com/article/news-openai-chatgpt-conversations-leak-search-engines/" target="_blank" rel="noopener noreferrer">OpenAI chat leakage</a> · <a href="https://support.google.com/gemini/answer/13575153" target="_blank" rel="noopener noreferrer">Gemini activity retention</a></p>
                         </div>
                     </div>
                 </div>
@@ -374,7 +374,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <div class="g-exposure" id="gx-koalasync" role="region" aria-labelledby="gxt-koalasync" hidden>
                         <div class="g-exposure-inner">
                             <div class="g-duel" aria-hidden="true">
-                                <span class="g-side g-side-corp"><span class="g-twin-logo g-twin-discord"></span><span class="g-side-name">Teleparty-style extensions</span></span>
+                                <span class="g-side g-side-corp"><span class="g-twin-logo g-twin-discord"></span><span class="g-side-name">Watch-party extensions + Discord</span></span>
                                 <span class="g-vs">vs</span>
                                 <span class="g-side g-side-ours"><img src="/assets/icons/koalasync.svg" alt="" width="28" height="28" loading="lazy" decoding="async"><span class="g-side-name">KoalaSync</span></span>
                             </div>
@@ -411,7 +411,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                                 <li><strong>Every browse is logged</strong> Streaming catalogs log each browse to predict — and steer — what you watch next.</li>
                                 <li><strong>Taste is the product</strong> Your watch history keeps you paying and shapes what you're shown.</li>
                                 <li><strong>Feeds engineered to retain</strong> Recommendations optimize for watch time, not for what you actually wanted.</li>
-                                <li><strong>Third-party trackers ride along</strong> Trakt-style services resell your viewing graph to 'partners'.</li>
+                                <li><strong>Third-party trackers ride along</strong> Trakt-style services share your viewing graph with 'partners' — their own policy says so.</li>
                                 <li><strong>Bundling your identity</strong> That graph merges with ad profiles across platforms.</li>
                             </ul>
                             <p class="g-contrast"><strong>What you get here:</strong> Seerr works with Jellyfin to request any media you want to watch anytime and anywhere. It doesn't create a profile of you and your requests do not go to a recommendation engine.</p>
@@ -457,7 +457,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <p class="sec-eyebrow reveal"><span class="n">03</span> Verify, don&rsquo;t trust</p>
             <h2 class="section-title glass-text reveal">Trust is nice. Proof is better.</h2>
             <p class="section-subtitle reveal reveal-delay-1">Every claim on this page has a receipt. Open-source apps, a public configuration, live monitoring &mdash; all of it checkable right now, without an account.</p>
-            <div class="vb-grid" style="margin-top:34px">
+            <div class="vb-grid">
                 <article class="vb-card reveal">
                     <span class="vb-ico"><img src="/assets/icons/feature-open-v2.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
                     <h3 class="vb-title">Open source, down to every app</h3>
@@ -486,7 +486,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <p class="sec-eyebrow reveal"><span class="n">04</span> Two doors</p>
             <h2 class="section-title glass-text reveal">One account here &mdash; or the whole garden at home.</h2>
             <p class="section-subtitle reveal reveal-delay-1">MySweetPea provides services you can run yourself. You can have the garden with one sign-up and every service just works, or everything here can be taken home, free, whenever you want.</p>
-            <div class="gw-grid" style="margin-top:34px">
+            <div class="gw-grid">
                 <article class="gw-card reveal">
                     <p class="gw-kicker">the easy door</p>
                     <span class="vb-ico"><img src="/assets/icons/icon-ui-key.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
@@ -512,7 +512,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <p class="sec-eyebrow reveal"><span class="n">05</span> On the Record</p>
             <h2 class="section-title glass-text reveal">Numbers, not promises.</h2>
             <p class="section-subtitle reveal reveal-delay-1">Measured live from the garden — every figure links to its source.</p>
-            <div class="record-band" style="margin-top:34px">
+            <div class="record-band">
                 <div class="record reveal"><div class="v"><span class="cnt" id="recUptime" data-count="99.9" data-dec="1">0.0</span><small>%</small></div><div class="l">Measured uptime · last 24 hours</div><a class="s" href="/status.html">live status page ↗</a></div>
                 <div class="record reveal reveal-delay-1"><div class="v"><span class="cnt" data-count="24" data-suffix="/7">0/7</span></div><div class="l">Watched by uptime monitors — and backed up every night</div><a class="s" href="/status.html">live monitors ↗</a></div>
                 <div class="record reveal reveal-delay-2"><div class="v">2026</div><div class="l">Started on one machine at home — grown for everyone sick of the same web</div><a class="s" href="/about.html">the story ↗</a></div>
@@ -562,7 +562,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
         </div>
 
         </main>
-<a href="#" class="back-to-top" aria-label="Back to top" data-action="back-to-top"><img src="/assets/icons/icon-ui-arrow-up.svg" class="" alt="" width="22" height="22" loading="lazy" decoding="async" aria-hidden="true"></a>
+<a href="#" class="back-to-top" aria-label="Back to top" data-action="back-to-top"><img src="/assets/icons/icon-ui-arrow-up.svg" alt="" width="22" height="22" loading="lazy" decoding="async" aria-hidden="true"></a>
 <footer class="page-footer">
     <div class="footer-inner">
         <div class="vine-divider reveal-grow" aria-hidden="true"></div>
@@ -611,7 +611,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
     <script src="/assets/js/site.js?v=113" defer></script>
     <script src="/assets/js/premium.js?v=119" defer></script>
-    <script src="/assets/js/home-page.js?v=12" defer></script>
+    <script src="/assets/js/home-page.js?v=13" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {

@@ -26,7 +26,7 @@ body[data-page='home'] .what-pill:hover{border-color:var(--border-primary);color
 body[data-page='home'] .what-sep{color:var(--text-faint)}
 
 /* ===== GARDEN — expandable exposure rows (button + hidden region, no <details>) ===== */
-body[data-page='home'] .garden-rows{max-width:1080px;margin:0 auto;padding:0 20px}
+body[data-page='home'] .garden-rows{max-width:1080px;margin:34px auto 0;padding:0 20px}
 /* .garden-row carries the reveal stagger itself (--d inline in markup); the full
    transition list + .visible delay-list mirror the old garden-card pattern —
    premium.css:1925 `.js .reveal.visible` would otherwise flatten both (documented trap). */
@@ -342,3 +342,8 @@ body[data-page='home'] .g-sins li:last-child{border-bottom:0}
 body[data-page='home'] .g-sins li::before{content:'';position:absolute;left:2px;top:14px;width:9px;height:9px;border-radius:50%;background:rgba(217,140,140,.55);box-shadow:0 0 8px rgba(217,140,140,.35)}
 body[data-page='home'] .g-sins li strong{color:var(--text);font-weight:600;margin-right:2px}
 body[data-page='home'] .g-contrast strong{color:var(--sage)}
+
+/* spacing moved from inline styles (OCR round) */
+.vb-grid { margin-top: 34px; }
+.gw-grid { margin-top: 34px; }
+.record-band { margin-top: 34px; }

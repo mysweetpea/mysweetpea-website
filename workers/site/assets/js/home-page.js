@@ -7,12 +7,18 @@
   'use strict';
   function initMotion(){
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasIO = 'IntersectionObserver' in window;
 
-  /* grow-lines: observe vines + eyebrows */
-  var io = new IntersectionObserver(function(entries){
+  /* grow-lines: observe vines + eyebrows (skipped when IO unsupported —
+     the accordion below must never depend on animation features) */
+  if (hasIO) { var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible'); io.unobserve(e.target); } });
   }, {threshold:.2, rootMargin:'0px 0px -8% 0px'});
   document.querySelectorAll('.vine-divider.reveal-grow, .sec-eyebrow.reveal, .step').forEach(function(el){ io.observe(el); });
+  } else {
+    /* no IO: reveal decorations immediately so nothing stays invisible */
+    document.querySelectorAll('.vine-divider.reveal-grow, .sec-eyebrow.reveal, .step, .reveal').forEach(function(el){ el.classList.add('visible'); });
+  }
 
   /* count-up numerals in record tiles */
   function animateCount(el){
@@ -31,10 +37,15 @@
     }
     requestAnimationFrame(step);
   }
-  var cio = new IntersectionObserver(function(entries){
-    entries.forEach(function(e){ if(e.isIntersecting){ animateCount(e.target); cio.unobserve(e.target); } });
-  }, {threshold:.4});
-  document.querySelectorAll('.record .cnt').forEach(function(el){ cio.observe(el); });
+  if (hasIO) {
+    var cio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ animateCount(e.target); cio.unobserve(e.target); } });
+    }, {threshold:.4});
+    document.querySelectorAll('.record .cnt').forEach(function(el){ cio.observe(el); });
+  } else {
+    /* paint final values directly when IO is unavailable */
+    document.querySelectorAll('.record .cnt').forEach(function(el){ animateCount(el); });
+  }
 
   /* garden exposure rows: one delegated listener, rows toggle independently.
      The head is a real <button> so keyboard (Enter/Space) works natively; the
@@ -71,15 +82,21 @@
   function initLive(){
     var recUptime = document.getElementById('recUptime');
     if (!recUptime) return;
+    /* 10s budget covers the WHOLE exchange (headers + body). AbortController
+       when present; otherwise a losing Promise.race rejects us out of a hung
+       fetch — the tile must never silently sit on its static default. */
     var aborter = ('AbortController' in window) ? new AbortController() : null;
-    var abortTimer = aborter ? setTimeout(function(){ aborter.abort(); }, 10000) : 0;
-    function clearAbort(){ if (abortTimer) { clearTimeout(abortTimer); abortTimer = 0; } }
+    var abortTimer = setTimeout(function(){ if (aborter) aborter.abort(); }, 10000);
+    function clearAbort(){ clearTimeout(abortTimer); }
     function paintUnavailable(){
       /* honesty rule: the tile must not keep pretending — mark it so the
-         count-up never re-aims at the stale 99.9 default. */
+         count-up never re-aims at the stale 99.9 default. data-count AND
+         textContent both: an animation already in flight re-reads data-count
+         on its final frame, and a not-yet-started one reads it at start. */
       recUptime.removeAttribute('data-count');
+      recUptime.textContent = '—';
     }
-    fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public', aborter ? { signal: aborter.signal } : {})
+    var p = fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public', aborter ? { signal: aborter.signal } : {})
       .then(function(r){ clearAbort(); return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
       .then(function(data){
         if (!data || !data.uptimeList) throw new Error('no uptimeList');
@@ -97,6 +114,13 @@
         }
       })
       .catch(function(err){ clearAbort(); console.warn('[msp] uptime tile fetch failed:', err && err.message ? err.message : err); paintUnavailable(); });
+    /* belt-and-braces: if AbortController is unsupported the fetch itself can
+       hang forever — race the chain against a hard 10s timeout. (With
+       AbortController the abort already rejects p; this race is harmless.) */
+    var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, 10000); });
+    Promise.race([p, timeout]).catch(function(err){
+      if (err && err.message === 'timeout') paintUnavailable();
+    });
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLive);
   else initLive();

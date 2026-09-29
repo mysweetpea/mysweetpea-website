@@ -473,6 +473,7 @@
     var CMDK_ITEMS = [];
     var CMDK_SERVICES_LOADED = false;
     var CMDK_SERVICES_FETCHING = null;   /* in-flight fetch promise (null = idle) */
+    var CMDK_SERVICES_FAILURES = 0;      /* cap: give up after 3 failed loads per page */
     var CMDK_SERVICE_ITEMS = [];         // parsed once, reused on every open
     var CMDK_LAST_SCORED = [];           /* [{item,s}] from the latest filter */
     var SERVICES_URL = '/services.html';
@@ -481,20 +482,27 @@
         /* Exactly ONE in-flight fetch of services.html per page load (the
            per-keystroke rebuild used to refire it until the first resolved). */
         if (CMDK_SERVICES_LOADED || CMDK_SERVICES_FETCHING) return;
+        if (CMDK_SERVICES_FAILURES >= 3) return;   /* nav-only index is fine; stop hammering */
         CMDK_SERVICES_FETCHING = fetch(SERVICES_URL)
-            .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
+            .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)); })
             .then(function (html) {
                 CMDK_SERVICES_LOADED = true;
                 var parsed = cmdkParseCards(new DOMParser().parseFromString(html, 'text/html'));
                 CMDK_SERVICE_ITEMS = parsed;
                 CMDK_ITEMS = (cmdkBuildIndex._pages || []).concat(parsed);
-                if (backdrop.classList.contains('open')) {
-                    cmdkFiltered = cmdkApplyFilter(cmdkInput.value);
+                /* Re-render only if the palette is open AND the query is empty —
+                   a user mid-keystroke or mid-arrow-selection keeps their
+                   state; an empty query has no state to clobber. */
+                if (backdrop.classList.contains('open') && !cmdkInput.value) {
+                    cmdkFiltered = cmdkApplyFilter('');
                     cmdkActive = 0;
                     cmdkRender();
                 }
             })
-            .catch(function () { /* nav-only index is fine; allow a retry on next load */ })
+            .catch(function (err) {
+                CMDK_SERVICES_FAILURES++;
+                console.warn('[msp] cmdk services fetch failed (' + CMDK_SERVICES_FAILURES + '/3):', err && err.message ? err.message : err);
+            })
             .then(function () { CMDK_SERVICES_FETCHING = null; });
     }
 
@@ -873,12 +881,23 @@
             var delay = Math.min(i * 0.08, 0.5);
             card.style.transitionDelay = delay + 's';
             /* Clear after the entrance so hover/press transitions are not
-               delayed by up to 0.5s for the life of the page. */
-            card.addEventListener('transitionend', function clear(e) {
-                if (e.target !== card) return;
+               delayed by up to 0.5s for the life of the page. transitionend
+               is NOT guaranteed (offscreen cards, backgrounded tabs, reduced
+               motion) — the timeout is the safety net. */
+            var cleared = false;
+            function clearDelay() {
+                if (cleared) return;
+                cleared = true;
                 card.style.transitionDelay = '';
-                card.removeEventListener('transitionend', clear);
-            });
+                card.removeEventListener('transitionend', onEnd);
+                clearTimeout(timer);
+            }
+            function onEnd(e) {
+                if (e.target !== card) return;
+                clearDelay();
+            }
+            var timer = setTimeout(clearDelay, (delay + 1.2) * 1000);
+            card.addEventListener('transitionend', onEnd);
         });
     });
 
@@ -914,26 +933,8 @@
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (reduceMotion.matches) return;
 
-    /* === Floating garden pollen particles === */
-    var pollen = document.createElement('div');
-    pollen.className = 'garden-pollen';
-    pollen.setAttribute('aria-hidden', 'true');
-    document.body.appendChild(pollen);
 
-    var COUNT = 14;
-    for (var i = 0; i < COUNT; i++) {
-        var span = document.createElement('span');
-        var size = 3 + Math.random() * 5;
-        span.style.width = size + 'px';
-        span.style.height = size + 'px';
-        span.style.left = (Math.random() * 100) + '%';
-        span.style.animationDuration = (12 + Math.random() * 14) + 's';
-        span.style.animationDelay = (Math.random() * 12) + 's';
-        pollen.appendChild(span);
-    }
-
-    /* === Vine divider SVG (injected into .vine-divider elements) === */
-    var vineSvg = '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    document.querySelectorAll('.vine-divider').forEach(function (el) { el.innerHTML = '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         /* main stems */
         '<path d="M32 6C22 10 16 20 18 32c2 12 12 20 14 26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
         '<path d="M32 6c10 4 16 14 14 26-2 12-12 20-14 26" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".5"/>' +
@@ -951,10 +952,38 @@
         /* center bloom */
         '<circle cx="32" cy="32" r="3" fill="currentColor" opacity=".8"/>' +
         '<circle cx="32" cy="32" r="5.5" fill="none" stroke="currentColor" stroke-width="1" opacity=".4"/>' +
-        '</svg>';
-    document.querySelectorAll('.vine-divider').forEach(function (el) {
-        el.innerHTML = vineSvg;
-    });
+        '</svg>'; });
+
+    /* === Floating garden pollen particles (motion-gated, mid-session aware) === */
+    var pollen = document.createElement('div');
+    pollen.className = 'garden-pollen';
+    pollen.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(pollen);
+
+    var COUNT = 14;
+    function pollenSet(on) {
+        /* display:none kills the CSS animation without rebuilding spans —
+           and a mid-session OS reduced-motion flip is honored live. */
+        pollen.style.display = on ? '' : 'none';
+    }
+    for (var i = 0; i < COUNT; i++) {
+        var span = document.createElement('span');
+        var size = 3 + Math.random() * 5;
+        span.style.width = size + 'px';
+        span.style.height = size + 'px';
+        span.style.left = (Math.random() * 100) + '%';
+        span.style.animationDuration = (12 + Math.random() * 14) + 's';
+        span.style.animationDelay = (Math.random() * 12) + 's';
+        pollen.appendChild(span);
+    }
+    pollenSet(!reduceMotion.matches);
+    if (typeof reduceMotion.addEventListener === 'function') {
+        reduceMotion.addEventListener('change', function (e) { pollenSet(!e.matches); });
+    } else if (typeof reduceMotion.addListener === 'function') {
+        reduceMotion.addListener(function (e) { pollenSet(!e.matches); });
+    }
+
+    /* (vine injection moved above the motion gate — static decoration) */
 })();
 
 /* ==========================================================================
@@ -1045,11 +1074,24 @@
        clicks: deterministic, covers OS-preference flips and any other script
        that changes the theme, no 50ms race. */
 (function () {
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (!meta) return;
+    /* Pages ship TWO media-scoped metas (dark + light); the browser picks the
+       right one per OS scheme, so each only ever needs its OWN color. Legacy
+       single-meta pages (no media attr) get both values written as before. */
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    if (!metas.length) return;
     function update() {
         var light = document.documentElement.getAttribute('data-theme') === 'light';
-        meta.setAttribute('content', light ? '#D8E1DD' : '#0C1316');
+        var darkColor = light ? null : '#0C1316', lightColor = light ? '#D8E1DD' : null;
+        var sawMedia = false;
+        metas.forEach(function (m) {
+            var media = m.getAttribute('media') || '';
+            if (media.indexOf('light') !== -1) { sawMedia = true; if (lightColor) m.setAttribute('content', lightColor); }
+            else if (media.indexOf('dark') !== -1) { sawMedia = true; if (darkColor) m.setAttribute('content', darkColor); }
+        });
+        if (!sawMedia) {
+            /* single unscoped meta: write the active color */
+            metas[0].setAttribute('content', light ? '#D8E1DD' : '#0C1316');
+        }
         if (typeof window.__mspPetalThemeRefresh === 'function') window.__mspPetalThemeRefresh();
     }
     update();
@@ -1074,7 +1116,13 @@
         });
         switcher.querySelectorAll('.view-tab').forEach(function (tab) {
             var view = tab.getAttribute('data-view');
-            var panel = switcher.querySelector('.view-panel[data-view="' + view + '"]');
+            /* attribute comparison instead of a selector built from the raw
+               value — a data-view containing quotes/brackets would throw a
+               SyntaxError and abort wiring for every later switcher. */
+            var panel = null;
+            switcher.querySelectorAll('.view-panel').forEach(function (p) {
+                if (p.getAttribute('data-view') === view) panel = p;
+            });
             if (panel) {
                 tab.setAttribute('aria-controls', panel.id);
                 panel.setAttribute('aria-labelledby', tab.id);
@@ -1235,7 +1283,7 @@
             portal.classList.add('open');
             portal.setAttribute('aria-hidden', 'false');
             if (hint) hint.classList.remove('visible');
-            if (video && video.paused) { video.play().catch(function () {}); }
+            if (video && video.paused) { video.play().catch(function (err) { console.warn('[msp] portal video blocked:', err && err.name ? err.name : err); }); }
         } else if (o <= 0.98 && open) {
             open = false;
             portal.classList.remove('open');
@@ -1291,16 +1339,35 @@
         if (spacer) spacer.classList.add('armed');
         if (hint) hint.classList.add('visible');
         // Start the video on arm so she's already animating when the cover lifts.
-        if (video && video.paused) { video.play().catch(function () {}); }
+        if (video && video.paused) { video.play().catch(function (err) { console.warn('[msp] portal video blocked:', err && err.name ? err.name : err); }); }
         if (reduceMotionQuery.matches) {
             // Reduced motion: reveal immediately instead of scroll-ramping.
             setOpacity(1);
-            return;
+        } else {
+            document.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+            onScroll();
         }
-        document.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', onScroll);
-        onScroll();
     });
+    /* Mid-session OS reduced-motion flips must re-evaluate an armed portal:
+       ramps start (listeners attach) or collapse to the instant reveal. */
+    function onReduceChange(e) {
+        if (!armed) return;
+        if (e.matches) {
+            document.removeEventListener('scroll', onScroll, { passive: true });
+            window.removeEventListener('resize', onScroll);
+            setOpacity(1);
+        } else {
+            document.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
+            onScroll();
+        }
+    }
+    if (typeof reduceMotionQuery.addEventListener === 'function') {
+        reduceMotionQuery.addEventListener('change', onReduceChange);
+    } else if (typeof reduceMotionQuery.addListener === 'function') {
+        reduceMotionQuery.addListener(onReduceChange);
+    }
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && (open || armed)) close();
@@ -1334,7 +1401,8 @@
 
     tabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
-            show(tab.getAttribute('data-value'));
+            var v = tab.getAttribute('data-value');
+            if (v) show(v);
         });
     });
 
@@ -1393,7 +1461,9 @@
         '/assets/icons/feature-experimental.svg'
     ];
     function lightPath(p) {
+        var slash = p.lastIndexOf('/');
         var dot = p.lastIndexOf('.');
+        if (dot <= slash + 1) return null;   /* no extension (or dot at dir start) — not swappable */
         return p.slice(0, dot) + '-light' + p.slice(dot);
     }
     function applyThemeAssets() {
@@ -1406,6 +1476,7 @@
             for (var i = 0; i < SWAPS.length; i++) {
                 var dark = SWAPS[i];
                 var lit = lightPath(dark);
+                if (!lit) continue;   /* extensionless entry can never swap */
                 if (path === lit && !light) { img.setAttribute('src', dark); return; }
                 if (path === dark && light) { img.setAttribute('src', lit); return; }
             }

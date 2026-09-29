@@ -57,7 +57,12 @@
     if (asciiPre) {
         var asciiLogo = document.createElement('img');
         asciiLogo.className = 'ascii-logo';
-        asciiLogo.src = document.documentElement.getAttribute('data-theme') === 'light' ? '/logo-light.svg' : '/logo.svg';
+        function asciiLogoSrc() {
+            asciiLogo.src = document.documentElement.getAttribute('data-theme') === 'light' ? '/logo-light.svg' : '/logo.svg';
+        }
+        asciiLogoSrc();
+        /* keep the logo on-theme across mid-session toggles */
+        new MutationObserver(asciiLogoSrc).observe(document.documentElement, { attributeFilter: ['data-theme'] });
         asciiLogo.alt = '';
         asciiLogo.width = 150;
         asciiLogo.height = 150;
