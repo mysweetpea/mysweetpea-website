@@ -445,3 +445,34 @@ body[data-page='support'] .faq-answer a { color: var(--primary); }
     body[data-page='support'] .dn-btn:hover { transform: none; }
     body[data-page='support'] .hero img.logo { animation: none; }
 }
+
+/* --- "don't have crypto?" box (card option interest) ----------------------- */
+/* Same grammar as .dn-wallet-soon above: dashed sage border, blossom-style
+   flex row, token-only colors so light mode inherits correctly. */
+body[data-page='support'] .dn-alt-give {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 15px 16px;
+    border: 1px dashed var(--sage);
+    border-radius: 14px;
+    background: var(--card-bg); /* fallback for no color-mix() support */
+    background: color-mix(in srgb, var(--card-bg) 60%, transparent);
+}
+body[data-page='support'] .dn-alt-give img { flex: none; opacity: 0.9; }
+body[data-page='support'] .dn-alt-give strong {
+    display: block;
+    font-size: var(--t-fs-sm, 0.92rem);
+    color: var(--text);
+    margin-bottom: 3px;
+}
+body[data-page='support'] .dn-alt-give p {
+    margin: 0 0 10px;
+    font-size: var(--t-fs-xs, 0.8rem);
+    line-height: 1.55;
+    color: var(--text-faint);
+}
+body[data-page='support'] .dn-alt-btn { min-height: 38px; padding: 8px 16px; }
+@media (max-width: 760px) {
+    body[data-page='support'] .dn-alt-give { padding: 14px; }
+}

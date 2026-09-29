@@ -21,6 +21,20 @@
                 var panel = document.getElementById(t.getAttribute('aria-controls'));
                 if (panel) panel.hidden = !on;
             });
+            /* "Why crypto?" belongs to the Cryptocurrency tab only — the GitHub
+               panel is about stars, not crypto giving, so the box hides there. */
+            var why = document.getElementById('dn-why');
+            if (why) {
+                why.hidden = tab.id !== 'dn-tab-crypto';
+                if (!why.hidden) {
+                    /* Reveal safety: the IntersectionObserver never fires for a
+                       display:none element, so a box revealed mid-viewport by a
+                       tab switch can stay opacity:0 forever — complete the
+                       reveal manually when it is already on screen. */
+                    var r = why.getBoundingClientRect();
+                    if (r.top < (window.innerHeight || 0) && r.bottom > 0) why.classList.add('visible');
+                }
+            }
         }
         tabs.forEach(function (t, i) {
             t.addEventListener('click', function () { selectTab(t); });

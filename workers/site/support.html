@@ -56,7 +56,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <link rel="stylesheet" href="/assets/css/premium.css?v=129">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=108">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
-<link rel="stylesheet" href="/assets/css/donate.css?v=8">
+<link rel="stylesheet" href="/assets/css/donate.css?v=9">
 <link rel="canonical" href="https://mysweetpea.cc/support">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MySweetPea","url":"https://mysweetpea.cc","logo":"https://mysweetpea.cc/icon-512.png","description":"Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions — community funded.","email":"support@mysweetpea.cc","sameAs":["https://github.com/mysweetpea"]}</script>
 </head>
@@ -137,13 +137,21 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <img src="/assets/icons/icon-ui-blossom.svg" alt="" width="22" height="22" loading="lazy" decoding="async" aria-hidden="true">
                     <div>
                         <strong>Wallet addresses are being set up.</strong>
-                        <p>Monero and Bitcoin giving goes live here the moment the wallets are ready — this box becomes the address, click-to-copy.</p>
+                        <p>This box becomes the address for Monero and Bitcoin once they go live.</p>
                     </div>
                 </div>
                 <div class="wallet-display" id="wallet-display" hidden>
                     <div class="wl">Send your donation to:</div>
                     <div class="wa" id="wallet-addr" data-action="copy-wallet" data-wallet="" title="Wallet addresses are being set up">Coming soon</div>
                     <div class="copy-hint">Click address to copy to clipboard</div>
+                </div>
+                <div class="dn-alt-give" id="dn-alt-give">
+                    <img src="/assets/icons/icon-ui-leaf.svg" alt="" width="22" height="22" loading="lazy" decoding="async" aria-hidden="true">
+                    <div>
+                        <strong>Don't have crypto?</strong>
+                        <p>You can let us know if you would rather donate by credit card. If enough people want another way, we'll add it.</p>
+                        <a class="dn-btn dn-btn-ghost dn-alt-btn" href="mailto:support@mysweetpea.cc?subject=I%20would%20like%20to%20donate%20by%20card">Let us know</a>
+                    </div>
                 </div>
             </article>
 
@@ -156,14 +164,12 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <p class="dn-card-sub">Free, takes 5 seconds, helps others find the garden</p>
                     </div>
                 </div>
-                <p class="dn-card-body">Both the website and the homelab infrastructure are public — every config, every
-                    script. Stars push the projects up search and discovery, which brings in new members. It's
-                    the only growth channel this garden has, and it costs you nothing.</p>
+                <p class="dn-card-body">Both the website and the homelab infrastructure are public, you can see how everything was built. Stars (GitHub's way of liking) push the projects up search and discovery, which brings in new members. It's the only growth channel this garden has, and it costs you nothing.</p>
                 <div class="dn-card-actions">
-                    <a class="dn-btn dn-btn-ghost" href="https://github.com/mysweetpea/mysweetpea-website" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>Star portfolio</a>
+                    <a class="dn-btn dn-btn-ghost" href="https://github.com/mysweetpea/mysweetpea-website" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>Star website</a>
                     <a class="dn-btn dn-btn-ghost" href="https://github.com/mysweetpea/mysweetpea-homelab" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>Star homelab</a>
                 </div>
-                <p class="dn-card-foot">Takes 5 seconds · no account needed beyond GitHub</p>
+                <p class="dn-card-foot">Takes 5 seconds · need GitHub account</p>
             </article>
         </div>
 
@@ -172,9 +178,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <div class="dn-why-icon"><img src="/assets/icons/icon-ui-blossom.svg" alt="" width="34" height="34" loading="lazy" decoding="async"></div>
                 <h3>Why crypto?</h3>
             </div>
-            <p>Privacy is the whole point. Crypto donations (especially Monero) are anonymous and irreversible —
-                no name, no email, no account, no KYC, no chargebacks, no paper trail. You give the way the
-                garden runs: directly, and between strangers who trust each other.</p>
+            <p>Privacy is the whole point. Crypto donations (especially Monero) are anonymous. There is no name, no email, no account, no KYC, no chargebacks, no paper trail, nothing personal.</p>
             <div class="dn-why-points">
                 <div class="dn-why-point"><span class="pt-label">No name</span><span class="pt-desc">Nothing to sign up for, nothing to fill in</span></div>
                 <div class="dn-why-point"><span class="pt-label">No middleman</span><span class="pt-desc">The gift lands directly on the hardware</span></div>
@@ -260,7 +264,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
     <script src="/assets/js/site.js?v=113" defer></script>
     <script src="/assets/js/premium.js?v=119" defer></script>
-    <script src="/assets/js/support-page.js?v=7" defer></script>
+    <script src="/assets/js/support-page.js?v=8" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
