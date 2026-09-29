@@ -2531,3 +2531,16 @@ h2.glass-text:not(.section-title), body[data-page] h2.glass-text:not(.section-ti
     font-size: clamp(2rem, 4.2vw, 2.9rem);
     line-height: var(--t-lh-tight);
 }
+
+/* --- contact page polish (2026-09 round): mobile email sizing ---------------- */
+/* The mono email is the page payload; at 390px the fixed --t-fs-h3 pushes it
+   edge-to-edge. Scale it down on small screens (shadow layer must own this —
+   font-size literals in site.css are dead here). */
+@media (max-width: 480px) {
+    body[data-page='contact'] .contact-email {
+        font-size: 0.98rem;
+    }
+    body[data-page='contact'] .copy-email-btn {
+        font-size: 0.82rem;
+    }
+}

@@ -8419,3 +8419,99 @@ body[data-page='suggest'] .form-submit:focus-visible { outline: none; box-shadow
 /* Guidelines labels: keep each criterion name on one line (they were wrapping
    mid-word at 560px, e.g. "Privacy-" / "focused") — descriptions flow after. */
 body[data-page='suggest'] .guidelines-list li strong { white-space: nowrap; }
+
+/* --- contact page polish (2026-09 round) -------------------------------------- */
+/* Email address = the payload: mono voice (technical value convention, matches
+   the redeem code treatment), larger, near-white so it outweighs the button. */
+body[data-page='contact'] .contact-email {
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: 1.12rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 20px;
+}
+body[data-page='contact'] .contact-email a {
+    color: var(--text);
+    border-bottom: 2px solid rgba(163,201,182,0.35);
+}
+body[data-page='contact'] .contact-email a:hover {
+    color: var(--primary-bright);
+    border-color: var(--primary-bright);
+}
+/* Copy button: icon + label inline, gap per site button grammar. */
+body[data-page='contact'] .copy-email-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+body[data-page='contact'] .copy-email-btn svg { flex: none; }
+body[data-page='contact'] .copy-email-btn.copied {
+    background: var(--sage);
+    border-color: var(--sage);
+}
+/* Response pill: the dot pulses with the status page's liveness grammar. */
+body[data-page='contact'] .resp-dot {
+    animation: statusPulse 2.6s ease-in-out infinite;
+}
+/* Copy hint: let the sentence break naturally at card width (forcing a
+   max-width produced a worse rag than the natural 2-line break). */
+body[data-page='contact'] .contact-copy-hint {
+    max-width: none;
+}
+/* Checklist rows: label on its own line, description under it — kills the
+   mid-row em-dash wrap misalignment on the "What you need help with" row. */
+body[data-page='contact'] .contact-checklist li {
+    align-items: center;
+}
+body[data-page='contact'] .contact-checklist .cl-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+body[data-page='contact'] .contact-checklist .cl-body strong {
+    white-space: nowrap;
+    font-size: 0.95rem;
+}
+body[data-page='contact'] .contact-checklist .cl-desc {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+}
+/* Tip: info-box grammar (sage rail + icon-free, left-aligned) so it reads as
+   guidance rather than a stray paragraph; replaces the centered ghost box. */
+body[data-page='contact'] .contact-note {
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 3px solid var(--sage);
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, rgba(163,201,182,0.10), rgba(143,175,181,0.05));
+    border-top: 1px solid rgba(163,201,182,0.18);
+    border-right: 1px solid rgba(163,201,182,0.18);
+    border-bottom: 1px solid rgba(163,201,182,0.18);
+    font-size: 0.85rem;
+    color: var(--text-dim);
+}
+body[data-page='contact'] .contact-note::before {
+    content: '';
+    flex: 0 0 auto;
+    width: 15px;
+    height: 15px;
+    background-color: var(--sage);
+    -webkit-mask: url('/assets/icons/icon-ui-checkmark.svg') center/contain no-repeat;
+    mask: url('/assets/icons/icon-ui-checkmark.svg') center/contain no-repeat;
+}
+
+/* Mobile: the mono email must not run edge-to-edge at 390px — scale it down
+   with the viewport instead of a fixed 1.12rem, and allow a graceful break. */
+@media (max-width: 480px) {
+    body[data-page='contact'] .contact-email {
+        font-size: 0.98rem;
+    }
+    body[data-page='contact'] .contact-email a {
+        word-break: break-all;
+    }
+    body[data-page='contact'] .copy-email-btn {
+        white-space: nowrap;
+    }
+}
