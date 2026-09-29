@@ -99,7 +99,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
 <main id="main-content" class="content-wrapper">
         <div class="hero contact-hero">
-            <img src="/logo.svg" alt="" class="hero-watermark" aria-hidden="true" loading="lazy" decoding="async">
+            <img src="/logo.svg" alt="" class="hero-watermark" aria-hidden="true" loading="eager" decoding="async">
             <img src="/logo.svg" alt="MySweetPea logo" class="logo" width="160" height="160">
             <h1 class="glass-text">Contact Us</h1>
             <p class="hero-sub pop-text">Questions, help getting started, or anything else — we read every message.</p>
@@ -111,7 +111,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <button type="button" class="view-tab" role="tab" aria-selected="false" data-view="before">Before you write</button>
             </div>
 
-            <div class="view-panel active" data-view="contact" role="tabpanel">
+            <div class="view-panel active" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact" data-view="contact">
                 <div class="container contact-container reveal">
                     <div class="coH-strip">
                         <div class="coH-stat"><span class="coH-k">Reply time</span><span class="coH-v"><span class="d" aria-hidden="true"></span>24–48h</span></div>
@@ -139,7 +139,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 </div>
             </div>
 
-            <div class="view-panel" data-view="before" role="tabpanel">
+            <div class="view-panel" id="panel-before" role="tabpanel" aria-labelledby="tab-before" data-view="before" hidden>
                 <div class="container contact-container reveal">
                     <div class="card glow-card contact-card">
                         <p class="coH-line">read first</p>
@@ -220,9 +220,11 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
        button carry ?about=card — surface why they're here above the email. */
     (function () {
         try {
-            var m = /(?:\?|&)about=([a-z]+)/.exec(location.search);
-            if (m && document.getElementById('contactContext')) {
-                document.getElementById('contactContext').hidden = false;
+            /* whitelist the one documented emitter value (?about=card from the
+               Support page) instead of any lowercase run */
+            if (/(?:\?|&)about=card(?:&|$)/.test(location.search)) {
+                var ctx = document.getElementById('contactContext');
+                if (ctx) ctx.hidden = false;
             }
         } catch (e) { /* never break the page over a hint */ }
     })();
