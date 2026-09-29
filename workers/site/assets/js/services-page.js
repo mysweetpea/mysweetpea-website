@@ -32,7 +32,7 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
         };
 
         /* Icon markup is stored as a PATH (not an HTML string) and rendered
-           with createElement - removes the innerHTML sink (OCR security). */
+           with createElement - removes the innerHTML sink (XSS security). */
         function renderIcon(container, iconPath, altText) {
             if (!container) return;
             container.textContent = '';
@@ -65,11 +65,30 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
             var icoEl = document.getElementById('lightboxIco');
             renderIcon(icoEl, s.icon, (s.name || '') + ' icon');
             var ghEl = document.getElementById('lightboxGithub');
-            if (ghEl) { ghEl.href = s.github || '#'; ghEl.style.display = s.github ? '' : 'none'; }
+            if (ghEl) {
+                /* scheme guard: only https GitHub URLs from the static data pass */
+                var gh = typeof s.github === 'string' && s.github.indexOf('https://') === 0 ? s.github : '';
+                ghEl.href = gh || '#';
+                ghEl.style.display = gh ? '' : 'none';
+            }
             /* Open button now deep-links to the dashboard Services tab
                (static, in the markup) - per-service s.url no longer wired. */
             var tierEl = document.getElementById('lightboxTier');
             if (tierEl) tierEl.textContent = String(s.tierLabel || 'Sweet Pea').toUpperCase();
+            /* Mirror the card's LIVE Kuma state into the lightbox meta row
+               (was hardcoded LIVE/Operational markup — lied when a service
+               was down or unknown). The card's .sp-txt is premium.js-driven. */
+            var card = document.querySelector('.service-card[data-service="' + serviceId + '"]');
+            var liveEl = document.querySelector('#serviceLightbox .lm-live');
+            var dotEl = document.querySelector('#serviceLightbox .status-dot');
+            var spTxt = card ? card.querySelector('.sp-txt') : null;
+            var cardDot = card ? card.querySelector('.status-dot') : null;
+            if (liveEl && spTxt) liveEl.textContent = spTxt.textContent;
+            if (dotEl && cardDot) {
+                dotEl.className = cardDot.className;
+                dotEl.title = cardDot.title;
+                dotEl.setAttribute('aria-label', cardDot.getAttribute('aria-label') || '');
+            }
             lb.setAttribute('aria-label', s.name + ' screenshot');
             lb.classList.add('active'); lb.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
@@ -95,11 +114,23 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
     
         document.querySelectorAll('.service-card[data-service]').forEach(function(card) {
             card.addEventListener('click', function() { openLightbox(card.dataset.service, card); });
+            /* Card keydown: Enter/Space on the CARD is legacy mouse-user
+               convenience — the accessible trigger is the h3 .svc-open button
+               (a real <button>, native keyboard semantics, no role juggling).
+               Card-level keydown stays for back-compat with bookmarks/habits
+               but a focused button handles its own Enter natively, and the
+               card check ignores events originating inside the button. */
             card.addEventListener('keydown', function(e) {
+                if (e.target.closest('.svc-open') || e.target.closest('a')) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     openLightbox(card.dataset.service, card);
                 }
+            });
+            var openBtn = card.querySelector('.svc-open');
+            if (openBtn) openBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openLightbox(card.dataset.service, openBtn);
             });
         });
 
@@ -149,19 +180,24 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
                     if (shuffleTimer) { clearTimeout(shuffleTimer); shuffleTimer = 0; }
                     groups.forEach(function (g) { g.classList.add('filtering'); });
                     shuffleTimer = setTimeout(function () {
-                        applyFilter(filter);
-                        groups.forEach(function (g) {
-                            g.classList.remove('filtering');
-                            Array.prototype.forEach.call(g.querySelectorAll('.service-card, .coming-soon-card'), function (card) {
-                                /* Drop the animationend hook's inline animation:none —
-                                   inline styles outrank the .card-anim class, so without
-                                   this the filter re-entrance animation can never replay. */
-                                card.style.animation = '';
-                                card.classList.remove('card-anim');
-                                void card.offsetWidth;
-                                card.classList.add('card-anim');
+                        try {
+                            applyFilter(filter);
+                        } finally {
+                            /* containment: applyFilter throwing must never leave
+                               the page stuck in the fade-out 'filtering' state */
+                            groups.forEach(function (g) {
+                                g.classList.remove('filtering');
+                                Array.prototype.forEach.call(g.querySelectorAll('.service-card, .coming-soon-card'), function (card) {
+                                    /* Drop the animationend hook's inline animation:none —
+                                       inline styles outrank the .card-anim class, so without
+                                       this the filter re-entrance animation can never replay. */
+                                    card.style.animation = '';
+                                    card.classList.remove('card-anim');
+                                    void card.offsetWidth;
+                                    card.classList.add('card-anim');
+                                });
                             });
-                        });
+                        }
                     }, 150);
                 });
             });

@@ -8635,3 +8635,18 @@ body[data-page='error'] .error-icon img { width: 40px; height: 40px; }
 [data-theme="light"] body[data-page='p404'] .code {
     filter: drop-shadow(0 0 26px rgba(47,107,78,0.18));
 }
+
+/* OCR services round: h3 title is now a real button (accessible lightbox
+   trigger) — style it to look identical to the old plain text title. */
+body[data-page='services'] .service-card .svc-open {
+    all: unset;
+    cursor: pointer;
+    font: inherit;
+    color: inherit;
+    display: inline;
+    border-radius: 6px;
+}
+body[data-page='services'] .service-card .svc-open:focus-visible {
+    outline: 2px solid var(--primary-bright);
+    outline-offset: 2px;
+}

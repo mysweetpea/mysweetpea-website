@@ -285,7 +285,7 @@
                     /* binary: red only while down right now; sage otherwise.
                        The 24h average still shows in the width + footer text. */
                     var mlist = (hb && id) ? hb[id] : null;
-                    var wasDown = mlist && mlist.length && mlist[mlist.length - 1].status !== 1;
+                    var wasDown = mlist && mlist.length && mlist[mlist.length - 1].status === 0;
                     fill.classList.remove('hbar-low', 'hbar-degraded');
                     if (wasDown) {
                         fill.classList.add('hbar-low');
@@ -311,7 +311,9 @@
                 var list = hb ? hb[SERVICE_MONITORS[key]] : null;
                 if (!list || !list.length) return;
                 total++;
-                if (list[list.length - 1].status !== 1) down++;
+                /* only a confirmed 0 counts as down (2=pending/3=maintenance
+                   are not outages — binary display per user call) */
+                if (list[list.length - 1].status === 0) down++;
             });
             if (total === 0) {
                 /* Payload without data for ANY known monitor ID (malformed

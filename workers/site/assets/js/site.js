@@ -410,7 +410,7 @@
 (function () {
     'use strict';
 
-    var reduceMotion2 = window.matchMedia('(prefers-reduced-motion: reduce)');
+    var reduceMotionPm = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     /* === Theme: load saved or system preference === */
     var root = document.documentElement;
@@ -442,7 +442,7 @@
     }
 
     /* === Magnetic CTAs (fine pointers only) === */
-    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion2.matches) {
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotionPm.matches) {
         document.querySelectorAll('.hero-btn-primary, .cta-btn, .form-submit, .nav-cta, .compare-cta').forEach(function (btn) {
             var raf = null;
             btn.addEventListener('pointermove', function (e) {
@@ -460,11 +460,6 @@
             });
         });
     }
-
-    /* === Animated counters (uses data-target/data-suffix, falls back to text) ===
-       NOTE: the live homepage counters use .proof-value[data-count] and are
-       animated by premium.js; this block is a no-op fallback for any page that
-       carries the older .number[data-target] markup. */
 
     /* === Command palette (Ctrl+K / Cmd+K) — dynamic index ===
        Pages are discovered from the nav links (present on every page) and
@@ -1009,8 +1004,9 @@
            other failure — race the request against a 10s timeout. */
         var aborter = ('AbortController' in window) ? new AbortController() : null;
         var abortTimer = aborter ? setTimeout(function () { aborter.abort(); }, 10000) : 0;
+        function clearAbortTimer() { if (abortTimer) { clearTimeout(abortTimer); abortTimer = 0; } }
         fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public', aborter ? { signal: aborter.signal } : {})
-            .then(function (r) { if (abortTimer) clearTimeout(abortTimer); return r.ok ? r.json() : Promise.reject(); })
+            .then(function (r) { clearAbortTimer(); return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
             .then(function (data) {
                 var hb = data && data.heartbeatList;
                 if (!hb) throw new Error('no data');
@@ -1022,7 +1018,9 @@
                     if (!list || !list.length) return; /* counted below as not reporting */
                     seen++;
                     var last = list[list.length - 1];
-                    if (last.status !== 1) {
+                    /* Kuma: 0=down, 1=up, 2=pending, 3=maintenance — only a
+                       confirmed 0 counts as down (binary display per user call). */
+                    if (last.status === 0) {
                         down.push(STATUS_NAMES[id] || ('Service ' + id));
                     }
                 });
@@ -1051,8 +1049,10 @@
                     homeStatus.classList.add('offline');
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
+                clearAbortTimer();
                 // API unreachable — say so honestly instead of faking "operational".
+                console.warn('[msp] home status fetch failed:', err && err.message ? err.message : err);
                 homeStatusText.textContent = 'Status unavailable — check the status page';
                 homeStatus.classList.remove('online');
                 homeStatus.classList.add('degraded');
@@ -1081,16 +1081,17 @@
     if (!metas.length) return;
     function update() {
         var light = document.documentElement.getAttribute('data-theme') === 'light';
-        var darkColor = light ? null : '#0C1316', lightColor = light ? '#D8E1DD' : null;
+        var COLORS = { dark: '#0C1316', light: '#D8E1DD' };
+        var active = light ? COLORS.light : COLORS.dark;
         var sawMedia = false;
         metas.forEach(function (m) {
             var media = m.getAttribute('media') || '';
-            if (media.indexOf('light') !== -1) { sawMedia = true; if (lightColor) m.setAttribute('content', lightColor); }
-            else if (media.indexOf('dark') !== -1) { sawMedia = true; if (darkColor) m.setAttribute('content', darkColor); }
+            if (media.indexOf('light') !== -1) { sawMedia = true; if (light) m.setAttribute('content', COLORS.light); }
+            else if (media.indexOf('dark') !== -1) { sawMedia = true; if (!light) m.setAttribute('content', COLORS.dark); }
         });
         if (!sawMedia) {
             /* single unscoped meta: write the active color */
-            metas[0].setAttribute('content', light ? '#D8E1DD' : '#0C1316');
+            metas[0].setAttribute('content', active);
         }
         if (typeof window.__mspPetalThemeRefresh === 'function') window.__mspPetalThemeRefresh();
     }
