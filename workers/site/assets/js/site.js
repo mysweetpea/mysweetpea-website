@@ -423,6 +423,7 @@
     var root = document.documentElement;
     var saved = null;
     try { saved = localStorage.getItem('msp-theme'); } catch (e) {}
+    if (saved !== 'light' && saved !== 'dark') saved = null;   /* whitelist */
     if (saved) root.setAttribute('data-theme', saved);
     else if (window.matchMedia('(prefers-color-scheme: light)').matches) root.setAttribute('data-theme', 'light');
 
@@ -488,10 +489,14 @@
         CMDK_SERVICES_FETCHING = fetch(SERVICES_URL)
             .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)); })
             .then(function (html) {
-                CMDK_SERVICES_LOADED = true;
+                /* Parse + index FIRST, latch LOADED only on success — a parse
+                   throw must fall through to .catch so the retry budget still
+                   applies (latching early would permanently disable the
+                   services index on one transient DOMParser error). */
                 var parsed = cmdkParseCards(new DOMParser().parseFromString(html, 'text/html'));
                 CMDK_SERVICE_ITEMS = parsed;
                 CMDK_ITEMS = (cmdkBuildIndex._pages || []).concat(parsed);
+                CMDK_SERVICES_LOADED = true;
                 /* Re-render only if the palette is open AND the query is empty —
                    a user mid-keystroke or mid-arrow-selection keeps their
                    state; an empty query has no state to clobber. */
@@ -907,6 +912,7 @@
     var root = document.documentElement;
     var savedTheme = null;
     try { savedTheme = localStorage.getItem('msp-theme'); } catch (e) {}
+    if (savedTheme !== 'light' && savedTheme !== 'dark') savedTheme = null;   /* whitelist */
     if (!savedTheme && window.matchMedia('(prefers-color-scheme: light)').matches) {
         root.setAttribute('data-theme', 'light');
     }
@@ -1090,15 +1096,20 @@
         var light = document.documentElement.getAttribute('data-theme') === 'light';
         var COLORS = { dark: '#0C1316', light: '#D8E1DD' };
         var active = light ? COLORS.light : COLORS.dark;
-        var sawMedia = false;
+        var sawMedia = false, sawUnscoped = false;
         metas.forEach(function (m) {
             var media = m.getAttribute('media') || '';
             if (media.indexOf('light') !== -1) { sawMedia = true; if (light) m.setAttribute('content', COLORS.light); }
             else if (media.indexOf('dark') !== -1) { sawMedia = true; if (!light) m.setAttribute('content', COLORS.dark); }
+            else sawUnscoped = true;
         });
-        if (!sawMedia) {
-            /* single unscoped meta: write the active color */
-            metas[0].setAttribute('content', active);
+        if (sawUnscoped) {
+            /* mixed page (scoped + unscoped metas): keep the unscoped one on
+               the active color so non-media-aware readers stay correct */
+            metas.forEach(function (m) {
+                var media = m.getAttribute('media') || '';
+                if (!media) m.setAttribute('content', active);
+            });
         }
         if (typeof window.__mspPetalThemeRefresh === 'function') window.__mspPetalThemeRefresh();
     }
@@ -1414,9 +1425,10 @@
         });
     });
 
-    // Show the first value's cards by default
+    // Show the first value's cards by default (guarded like the click path —
+    // a malformed first tab without data-value must not call show(null))
     var initial = tabs[0].getAttribute('data-value');
-    show(initial);
+    if (initial) show(initial);
 })();
 
 /* === Nav: reflect the signed-in state (nav v3) ===
@@ -1440,8 +1452,12 @@
     if (!nav || !label) return;
 
     function sync() {
-        var name = (label.textContent || '').trim();
-        nav.classList.toggle('nav-signed-in', name !== '' && name !== 'Sign in');
+        /* Signed-in signal = the chip's aria-label, flipped by the inline nav
+           script to "Open your dashboard" on auth (comparing the rendered
+           name against 'Sign in' was a cross-file magic-string trap). */
+        var signedIn = (label.closest('a') || label.parentElement).
+            getAttribute('aria-label') === 'Open your dashboard';
+        nav.classList.toggle('nav-signed-in', signedIn);
     }
 
     new MutationObserver(sync).observe(label, { childList: true, characterData: true, subtree: true });

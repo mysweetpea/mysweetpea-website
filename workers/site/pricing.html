@@ -18,6 +18,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 (function(){
   try{
     var t=localStorage.getItem('msp-theme');
+    /* whitelist: a corrupted/legacy value must not poison data-theme */
+    if(t!=='light'&&t!=='dark')t=null;
     if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)t='light';
     if(t)document.documentElement.setAttribute('data-theme',t);
   }catch(e){}
@@ -51,7 +53,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=121">
+    <link rel="stylesheet" href="/assets/css/site.css?v=122">
     <link rel="stylesheet" href="/assets/css/premium.css?v=129">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=110">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
@@ -108,12 +110,12 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
         <div class="view-switcher" id="pricing-switcher">
             <div class="view-tabs" role="tablist" aria-label="Pricing sections">
-                <button type="button" class="view-tab active" role="tab" aria-selected="true" data-view="how">How It Works</button>
-                <button type="button" class="view-tab" role="tab" aria-selected="false" data-view="tiers">Tiers</button>
-                <button type="button" class="view-tab" role="tab" aria-selected="false" data-view="compare">Compare</button>
+                <button type="button" class="view-tab active" role="tab" aria-selected="true" id="tab-how" aria-controls="panel-how" data-view="how">How It Works</button>
+                <button type="button" class="view-tab" role="tab" aria-selected="false" id="tab-tiers" aria-controls="panel-tiers" data-view="tiers">Tiers</button>
+                <button type="button" class="view-tab" role="tab" aria-selected="false" id="tab-compare" aria-controls="panel-compare" data-view="compare">Compare</button>
             </div>
 
-            <div class="view-panel active" data-view="how" role="tabpanel">
+            <div class="view-panel active" id="panel-how" role="tabpanel" aria-labelledby="tab-how" data-view="how">
                 <span class="eyebrow">Community access</span>
                 <h2 class="section-title glass-text reveal">How It Works</h2>
                 <div class="steps-band reveal">
@@ -160,21 +162,21 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <div class="hiw-included reveal">
                     <span class="hiw-included-label">Everything included</span>
                     <div class="hiw-included-wall">
-                        <a class="hiw-inc-chip" href="/services.html" title="Jellyfin / Moonfin"><img src="/assets/icons/jellyfin.svg" alt="Jellyfin" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="Seerr"><img src="/assets/icons/seerr.svg" alt="Seerr" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="Nextcloud"><img src="/assets/icons/nextcloud.svg" alt="Nextcloud" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="Immich"><img src="/assets/icons/immich.svg" alt="Immich" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="Open WebUI"><img src="/assets/icons/openwebui.svg" alt="Open WebUI" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="Vaultwarden"><img src="/assets/icons/vaultwarden.svg" alt="Vaultwarden" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="Matrix / Element"><img src="/assets/icons/matrix.svg" alt="Matrix" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="AFFiNE"><img src="/assets/icons/affine2.svg" alt="AFFiNE" loading="lazy" decoding="async"></a>
-                        <a class="hiw-inc-chip" href="/services.html" title="KoalaSync"><img src="/assets/icons/koalasync.svg" alt="KoalaSync" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Jellyfin / Moonfin"><img src="/assets/icons/jellyfin.svg" alt="Jellyfin" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Seerr"><img src="/assets/icons/seerr.svg" alt="Seerr" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Nextcloud"><img src="/assets/icons/nextcloud.svg" alt="Nextcloud" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Immich"><img src="/assets/icons/immich.svg" alt="Immich" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Open WebUI"><img src="/assets/icons/openwebui.svg" alt="Open WebUI" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Vaultwarden"><img src="/assets/icons/vaultwarden.svg" alt="Vaultwarden" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="Matrix / Element"><img src="/assets/icons/matrix.svg" alt="Matrix" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="AFFiNE"><img src="/assets/icons/affine2.svg" alt="AFFiNE" width="24" height="24" loading="lazy" decoding="async"></a>
+                        <a class="hiw-inc-chip" href="/services.html" title="KoalaSync"><img src="/assets/icons/koalasync.svg" alt="KoalaSync" width="24" height="24" loading="lazy" decoding="async"></a>
                     </div>
                     <a class="hiw-included-link" href="/services.html">Explore the services →</a>
                 </div>
             </div>
 
-            <div class="view-panel" data-view="tiers" role="tabpanel">
+            <div class="view-panel" id="panel-tiers" role="tabpanel" aria-labelledby="tab-tiers" data-view="tiers">
                 <span class="eyebrow">Choose a tier</span>
                 <h2 class="section-title glass-text reveal">Tiers</h2>
                 <div class="tiers reveal">
@@ -270,28 +272,28 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 </div>
             </div>
 
-            <div class="view-panel" data-view="compare" role="tabpanel">
+            <div class="view-panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" data-view="compare">
                 <span class="eyebrow">Compare</span>
                 <h2 class="section-title glass-text reveal">How the tiers compare</h2>
                 <div class="compare-table-wrap">
                     <table class="compare-table">
-                        <thead>
+                        <th scope="col"ead>
                             <tr>
-                                <th>Service</th>
-                                <th class="col-seedling"><span class="compare-tier-icon"><img src="/assets/icons/icon-ui-seedling.svg" alt="" width="22" height="22"></span>Seedling <span class="compare-soon-tag">Coming soon</span></th>
-                                <th class="col-sweetpea"><span class="compare-tier-icon"><img src="/assets/icons/icon-ui-blossom.svg" alt="" width="22" height="22"></span>Sweet Pea</th>
+                                <th scope="col">Service</th>
+                                <th scope="col" class="col-seedling"><span class="compare-tier-icon"><img src="/assets/icons/icon-ui-seedling.svg" alt="" width="22" height="22"></span>Seedling <span class="compare-soon-tag">Coming soon</span></th>
+                                <th scope="col" class="col-sweetpea"><span class="compare-tier-icon"><img src="/assets/icons/icon-ui-blossom.svg" alt="" width="22" height="22"></span>Sweet Pea</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td><img src="/assets/icons/vaultwarden.svg" alt="" width="22" height="22"> Vaultwarden</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/matrix.svg" alt="" width="22" height="22"> Matrix / Element</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/affine2.svg" alt="" width="22" height="22"> AFFiNE</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/koalasync.svg" alt="" width="22" height="22"> KoalaSync</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/jellyfin.svg" alt="" width="22" height="22"> Jellyfin / Moonfin</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/seerr.svg" alt="" width="22" height="22"> Seerr</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/nextcloud.svg" alt="" width="22" height="22"> Nextcloud</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/immich.svg" alt="" width="22" height="22"> Immich</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
-                            <tr><td><img src="/assets/icons/openwebui.svg" alt="" width="22" height="22"> Open WebUI</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/vaultwarden.svg" alt="" width="22" height="22"> Vaultwarden</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/matrix.svg" alt="" width="22" height="22"> Matrix / Element</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/affine2.svg" alt="" width="22" height="22"> AFFiNE</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/koalasync.svg" alt="" width="22" height="22"> KoalaSync</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/jellyfin.svg" alt="" width="22" height="22"> Jellyfin / Moonfin</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/seerr.svg" alt="" width="22" height="22"> Seerr</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/nextcloud.svg" alt="" width="22" height="22"> Nextcloud</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/immich.svg" alt="" width="22" height="22"> Immich</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
+                            <tr><td><img src="/assets/icons/openwebui.svg" alt="" width="22" height="22"> Open WebUI</td><td class="col-seedling"><span class="mystery-cell" role="img" aria-label="Not yet announced">?</span></td><td class="col-sweetpea"><span class="check" role="img" aria-label="Included"></span></td></tr>
                             <tr class="compare-cta-row"><td></td><td class="col-seedling"><span class="compare-cta compare-cta-soon" aria-disabled="true">Coming Soon</span></td><td class="col-sweetpea"><a class="compare-cta" href="/form.html?tier=sweetpea">Request Sweet Pea</a></td></tr>
                         </tbody>
                     </table>
@@ -360,7 +362,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=115" defer></script>
+    <script src="/assets/js/site.js?v=116" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script>
     if ('serviceWorker' in navigator) {

@@ -18,6 +18,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 (function(){
   try{
     var t=localStorage.getItem('msp-theme');
+    /* whitelist: a corrupted/legacy value must not poison data-theme */
+    if(t!=='light'&&t!=='dark')t=null;
     if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches)t='light';
     if(t)document.documentElement.setAttribute('data-theme',t);
   }catch(e){}
@@ -50,7 +52,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=121">
+    <link rel="stylesheet" href="/assets/css/site.css?v=122">
     <link rel="stylesheet" href="/assets/css/premium.css?v=129">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=110">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
@@ -325,7 +327,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=115" defer></script>
+    <script src="/assets/js/site.js?v=116" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script src="/assets/js/about-page.js?v=110" defer></script>
     <script>
