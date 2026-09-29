@@ -93,6 +93,54 @@ body[data-page='changelog'] .cl2-hl {
     transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     animation: cl2-fade-up 0.55s ease both;
 }
+/* ghost index numeral (pricing steps-band ledger idiom) */
+body[data-page='changelog'] .cl2-hl::after {
+    content: attr(data-idx);
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    font-family: var(--t-font-display);
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(143, 175, 181, 0.18);
+    pointer-events: none;
+}
+body[data-page='changelog'] .cl2-hl:first-child::after {
+    -webkit-text-stroke-color: rgba(163, 201, 182, 0.32);
+}
+/* freshness badge - shows the section is alive (auto-promoted, newest wins) */
+body[data-page='changelog'] .cl2-hl-fresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--t-font-mono);
+    font-size: 8.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sage);
+}
+body[data-page='changelog'] .cl2-fresh-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--sage);
+    box-shadow: 0 0 6px rgba(163, 201, 182, 0.7);
+    animation: cl2-pulse-dot 2.4s ease-in-out infinite;
+}
+@keyframes cl2-pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+body[data-page='changelog'] .cl2-hl:first-child {
+    border-color: rgba(163, 201, 182, 0.3);
+    background: linear-gradient(180deg, rgba(163, 201, 182, 0.05), rgba(19, 30, 34, 0.42) 55%);
+}
+/* tag pinned to the top row instead of floating alone at the bottom */
+body[data-page='changelog'] .cl2-hl .cl2-tags { margin-top: 10px; }
+
 body[data-page='changelog'] .cl2-hl:nth-child(2) { animation-delay: 0.08s; }
 body[data-page='changelog'] .cl2-hl:nth-child(3) { animation-delay: 0.16s; }
 body[data-page='changelog'] .cl2-hl::before {
@@ -114,6 +162,8 @@ body[data-page='changelog'] .cl2-hl-top {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    /* clear the ghost numeral so the repo pill never overlaps it */
+    padding-right: 56px;
 }
 body[data-page='changelog'] .cl2-hl-date {
     font-family: var(--t-font-mono);
@@ -704,6 +754,7 @@ body[data-page='changelog'] .cl2-empty {
 
 /* === Mobile <= 760px: zero horizontal overflow at 390px === */
 @media (max-width: 760px) {
+    body[data-page='changelog'] .cl2-hl::after { font-size: 34px; top: 8px; right: 12px; }
     body[data-page='changelog'] .cl2-row {
         grid-template-columns: 1fr;
         gap: 6px;
@@ -758,6 +809,8 @@ body[data-page='changelog'] .cl2-empty {
 
 /* === Reduced motion: kill shimmer + hover transforms + pulse + entrances === */
 @media (prefers-reduced-motion: reduce) {
+    body[data-page='changelog'] .cl2-fresh-dot { animation: none; }
+
     body[data-page='changelog'] .cl2-hl,
     body[data-page='changelog'] .cl2-row,
     body[data-page='changelog'] .cl2-chip { transition: none; }

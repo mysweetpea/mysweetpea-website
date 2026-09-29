@@ -68,16 +68,25 @@
         var vine = document.querySelector('.vine-divider.reveal-grow');
         if (vine) vine.hidden = hs.length === 0;
         if (!hs.length) return;
-        hs.forEach(function (h) {
-            var card = el('div', 'cl2-hl');
+        hs.forEach(function (h, i) {
+            var card = el('article', 'cl2-hl');
+            // ghost index numeral - the ledger idiom (pricing steps band)
+            card.setAttribute('data-idx', '0' + (i + 1));
             var top = el('div', 'cl2-hl-top');
+            var dAge = (Date.now() - new Date(h.date).getTime()) / 86400000;
             top.appendChild(el('span', 'cl2-hl-date', dateShort(h.date)));
+            if (dAge < 8) {
+                var fresh = el('span', 'cl2-hl-fresh');
+                fresh.appendChild(el('span', 'cl2-fresh-dot'));
+                fresh.appendChild(txt('new'));
+                top.appendChild(fresh);
+            }
             top.appendChild(el('span', 'cl2-tag n', h.repo));
             card.appendChild(top);
             card.appendChild(el('h2', null, cleanTitle(h.message)));
             var meta = el('p', 'cl2-hl-meta');
             meta.appendChild(el('span', null, h.sha));
-            meta.appendChild(txt(' \u00B7 ' + dateShort(h.date)));
+            // date lives in the top row only - no duplicate
             meta.appendChild(txt(' \u00B7 ' + (h.repo === 'portfolio' ? 'website' : 'infrastructure')));
             card.appendChild(meta);
             var tags = el('div', 'cl2-tags');
