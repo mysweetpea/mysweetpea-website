@@ -2544,3 +2544,13 @@ h2.glass-text:not(.section-title), body[data-page] h2.glass-text:not(.section-ti
         font-size: 0.82rem;
     }
 }
+
+/* --- 404 numeral voice (2026-09 round) ----------------------------------------
+   The page's biggest element was heavy sans; the brand voice is Instrument
+   Serif for display type. Shadow layer owns font-family — site.css literals
+   are dead here. */
+body[data-page='p404'] .code {
+    font-family: var(--t-font-display, Georgia, serif);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}

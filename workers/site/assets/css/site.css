@@ -8515,3 +8515,111 @@ body[data-page='contact'] .contact-note::before {
         white-space: nowrap;
     }
 }
+
+/* --- 404 / success / error polish (2026-09 round) ---------------------------- */
+/* 404 numeral: the biggest element on the page was flat sans gray — wrong voice
+   for a serif-brand site. Now Instrument Serif with the site's aurora gradient
+   fill (same grammar as .glass-text headings) + soft sage glow behind it.
+   (font-family lives in type-tokens.css — shadow layer owns type.) */
+body[data-page='p404'] .code {
+    position: relative;
+    background: linear-gradient(135deg, var(--primary-bright), var(--sage) 55%, var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 34px rgba(163,201,182,0.22));
+    opacity: 0.95;
+}
+body[data-page='p404'] .code::after { content: none; }
+/* Secondary button: was a near-invisible dark slab — frosted glass per brand. */
+body[data-page='p404'] .hero-btn-secondary {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(197,213,216,0.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+body[data-page='p404'] .hero-btn-secondary:hover {
+    background: rgba(255,255,255,0.13);
+    border-color: rgba(197,213,216,0.45);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
+}
+/* Search: looked disabled — icon inside, glass fill, brighter placeholder,
+   unified 10px radius (matches the form-page approved input grammar). */
+body[data-page='p404'] .p404-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+body[data-page='p404'] .p404-search-icon {
+    position: absolute;
+    left: 15px;
+    color: var(--text-faint);
+    pointer-events: none;
+    transition: color 0.25s ease;
+}
+body[data-page='p404'] .p404-search-box:focus-within .p404-search-icon { color: var(--sage); }
+body[data-page='p404'] .p404-search .form-input {
+    padding-left: 42px;
+    border-radius: 10px;
+    border-color: rgba(197,213,216,0.22);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+body[data-page='p404'] .p404-search .form-input::placeholder { color: var(--text-dim); }
+
+/* Success: check badge gets a drawn ring + glow so it reads as completed. */
+body[data-page='success'] .success-icon {
+    border-color: rgba(163,201,182,0.55);
+    box-shadow: 0 0 0 6px rgba(163,201,182,0.08), 0 0 44px rgba(163,201,182,0.18);
+    animation: checkPop 0.6s ease-out, ringDraw 1.1s ease-out 0.2s both;
+}
+@keyframes ringDraw {
+    from { box-shadow: 0 0 0 0 rgba(163,201,182,0.4), 0 0 0 0 rgba(163,201,182,0); }
+    to   { box-shadow: 0 0 0 6px rgba(163,201,182,0.08), 0 0 44px rgba(163,201,182,0.18); }
+}
+/* "What happens next" card: mono eyebrow + mono step numbers (site numeral voice). */
+body[data-page='success'] .next-steps h3 {
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    color: var(--sage);
+}
+body[data-page='success'] .next-steps ol { list-style: none; padding-left: 0; counter-reset: step; }
+body[data-page='success'] .next-steps li {
+    counter-increment: step;
+    position: relative;
+    padding-left: 34px;
+    margin-bottom: 12px;
+}
+body[data-page='success'] .next-steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: 0.72rem;
+    color: var(--sage);
+    background: rgba(163,201,182,0.1);
+    border: 1px solid rgba(163,201,182,0.25);
+    border-radius: 8px;
+    padding: 2px 6px;
+    line-height: 1.4;
+}
+
+/* Error: warning badge larger glyph + warm ring breathe (not shake — this isn't
+   the user's fault, and shake reads as scolding). */
+body[data-page='error'] .error-icon {
+    border-color: rgba(217,140,140,0.5);
+    box-shadow: 0 0 0 6px rgba(217,140,140,0.07), 0 0 44px rgba(217,140,140,0.14);
+    animation: warmBreathe 3.2s ease-in-out infinite;
+}
+@keyframes warmBreathe {
+    0%, 100% { box-shadow: 0 0 0 5px rgba(217,140,140,0.06), 0 0 34px rgba(217,140,140,0.12); }
+    50%      { box-shadow: 0 0 0 7px rgba(217,140,140,0.09), 0 0 52px rgba(217,140,140,0.2); }
+}
+body[data-page='error'] .error-icon img { width: 40px; height: 40px; }
+/* Light mode: gradient text + glow must stay visible on light bg. */
+[data-theme="light"] body[data-page='p404'] .code {
+    filter: drop-shadow(0 0 26px rgba(47,107,78,0.18));
+}
