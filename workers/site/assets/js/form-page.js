@@ -143,18 +143,19 @@
     var bloomPanels = [
         { panelId: 'panel-sweetpea', bloomId: 'sp-bloom', btnId: 'sp-submit', n0check: 'sp-name',
           isReady: function () { return allValid(['sp-name', 'sp-email', 'sp-message']) && !!(document.getElementById('sp-verify') || {}).checked; },
+          /* index = node index: 0=name (via n0check), 1=email row, 2=why row, 3=complete */
           nodeOk: [null,
-            function () { return valid('name', document.getElementById('sp-name').value); },
             function () { return valid('email', document.getElementById('sp-email').value); },
-            function () { return valid('why', document.getElementById('sp-message').value) && allValid(['sp-name', 'sp-email']) && !!(document.getElementById('sp-verify') || {}).checked; }] },
+            function () { return valid('why', document.getElementById('sp-message').value); },
+            function () { return allValid(['sp-name', 'sp-email', 'sp-message']) && !!(document.getElementById('sp-verify') || {}).checked; }] },
         { panelId: 'panel-seedling', bloomId: 'ga-bloom', btnId: 'ga-submit', n0check: 'ga-name',
           isReady: function () { return allValid(['ga-name', 'ga-email', 'ga-username', 'ga-txhash']) && !!chosenCrypto && !!(document.getElementById('ga-verify') || {}).checked; },
           nodeOk: [null,
-            function () { return valid('name', document.getElementById('ga-name').value); },
             function () { return valid('email', document.getElementById('ga-email').value); },
             function () { return valid('username', document.getElementById('ga-username').value); },
             function () { return !!chosenCrypto; },
-            function () { return valid('tx', document.getElementById('ga-txhash').value) && !!(document.getElementById('ga-verify') || {}).checked; }] }
+            function () { return valid('tx', document.getElementById('ga-txhash').value); },
+            function () { return valid('tx', document.getElementById('ga-txhash').value) && !!chosenCrypto && !!(document.getElementById('ga-verify') || {}).checked; }] }
     ];
     function syncBloomAndRail() {
         bloomPanels.forEach(function (p) {
