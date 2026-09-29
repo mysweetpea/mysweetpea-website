@@ -52,7 +52,7 @@
     }
     ['ga-verify','sp-verify'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('change',updateButtons);});
     var spMsg = document.getElementById('sp-message');
-    if (spMsg) spMsg.addEventListener('input', function(){ validateField('sp-message'); });
+    if (spMsg) spMsg.addEventListener('input', function(){ validateField('sp-message'); syncBloomAndRail(); });
     document.querySelectorAll('.access-choice-card').forEach(function (card) {
         card.addEventListener('click', function () {
             var tier = card.getAttribute('data-tier');
@@ -141,13 +141,13 @@
        validation rules and does not touch submit gating (the disabled attr
        stays owned by updateButtons()). ==== */
     var bloomPanels = [
-        { panelId: 'panel-sweetpea', bloomId: 'sp-bloom', btnId: 'sp-submit',
-          isReady: function () { return allValid(['sp-name', 'sp-email']) && !!(document.getElementById('sp-verify') || {}).checked; },
+        { panelId: 'panel-sweetpea', bloomId: 'sp-bloom', btnId: 'sp-submit', n0check: 'sp-name',
+          isReady: function () { return allValid(['sp-name', 'sp-email', 'sp-message']) && !!(document.getElementById('sp-verify') || {}).checked; },
           nodeOk: [null,
             function () { return valid('name', document.getElementById('sp-name').value); },
             function () { return valid('email', document.getElementById('sp-email').value); },
-            function () { return allValid(['sp-name', 'sp-email']) && !!(document.getElementById('sp-verify') || {}).checked; }] },
-        { panelId: 'panel-seedling', bloomId: 'ga-bloom', btnId: 'ga-submit',
+            function () { return valid('why', document.getElementById('sp-message').value) && allValid(['sp-name', 'sp-email']) && !!(document.getElementById('sp-verify') || {}).checked; }] },
+        { panelId: 'panel-seedling', bloomId: 'ga-bloom', btnId: 'ga-submit', n0check: 'ga-name',
           isReady: function () { return allValid(['ga-name', 'ga-email', 'ga-username', 'ga-txhash']) && !!chosenCrypto && !!(document.getElementById('ga-verify') || {}).checked; },
           nodeOk: [null,
             function () { return valid('name', document.getElementById('ga-name').value); },
@@ -168,7 +168,8 @@
             var nodes = rail.querySelectorAll('.node');
             var done = 0;
             for (var i = 0; i < nodes.length; i++) {
-                var ok = i === 0 || !!(p.nodeOk[i] && p.nodeOk[i]());
+                /* n1 (name) reflects real field state too - no free pass */
+                var ok = !!(i === 0 ? valid('name', document.getElementById(p.n0check).value) : p.nodeOk[i] && p.nodeOk[i]());
                 nodes[i].classList.toggle('done', ok);
                 if (ok) done++;
             }
