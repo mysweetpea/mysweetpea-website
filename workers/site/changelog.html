@@ -98,7 +98,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
 
 
-<main id="main-content" class="content-wrapper">
+<main id="main-content" class="content-wrapper" tabindex="-1">
         <div class="hero">
             <img src="/logo.svg" alt="MySweetPea logo" class="hero-watermark" aria-hidden="true" loading="lazy" decoding="async">
             <img src="/logo.svg" alt="MySweetPea logo" class="logo" width="160" height="160">
@@ -120,7 +120,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <span>Activity graph</span>
                     <span class="cl2-graph-total" id="cl2-graph-total"></span>
                 </div>
-                <div class="cl2-graph" id="cl2-graph" role="img" aria-label="Stacked bar chart of changes per day over the last 30 days"></div>
+                <div class="cl2-graph" id="cl2-graph" role="group" aria-label="Changes per day over the last 30 days — each day is a button with its own label"></div>
                 <div class="cl2-axis" id="cl2-axis" aria-hidden="true"></div>
                 <div class="cl2-graph-foot">
                     <div class="cl2-filters">
@@ -146,17 +146,17 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <div class="cl2-fgroup" role="group" aria-label="Filter by repository">
                         <span class="cl2-fgroup-label">Repository</span>
                         <div class="cl2-fgroup-btns">
-                            <button class="cl2-chip" data-f="repo:portfolio" aria-pressed="false">portfolio</button>
-                            <button class="cl2-chip" data-f="repo:homelab-k8s" aria-pressed="false">homelab-k8s</button>
+                            <button type="button" class="cl2-chip" data-f="repo:portfolio" aria-pressed="false">portfolio</button>
+                            <button type="button" class="cl2-chip" data-f="repo:homelab-k8s" aria-pressed="false">homelab-k8s</button>
                         </div>
                     </div>
                     <span class="cl2-fgroup-sep" aria-hidden="true"></span>
                     <div class="cl2-fgroup" role="group" aria-label="Filter by change type">
                         <span class="cl2-fgroup-label">Change type</span>
                         <div class="cl2-fgroup-btns">
-                            <button class="cl2-chip" data-f="cat:f" aria-pressed="false">Features</button>
-                            <button class="cl2-chip" data-f="cat:i" aria-pressed="false">Improvements</button>
-                            <button class="cl2-chip" data-f="cat:d" aria-pressed="false">Fixes</button>
+                            <button type="button" class="cl2-chip" data-f="cat:f" aria-pressed="false">Features</button>
+                            <button type="button" class="cl2-chip" data-f="cat:i" aria-pressed="false">Improvements</button>
+                            <button type="button" class="cl2-chip" data-f="cat:d" aria-pressed="false">Fixes</button>
                         </div>
                     </div>
                 </div>
@@ -217,7 +217,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
     <script src="/assets/js/site.js?v=116" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
-    <script src="/assets/js/changelog-page.js?v=11" defer></script>
+    <script src="/assets/js/changelog-page.js?v=12" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {

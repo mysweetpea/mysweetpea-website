@@ -41,8 +41,11 @@
     function cleanTitle(msg) {
         var s = String(msg);
         // strip conventional prefixes: type(scope): and bare scope: — "form: fix x" -> "Fix x"
-        s = s.replace(/^(feat|fix)(\([^)]*\))?:\s*/i, '');
-        s = s.replace(/^[a-z][a-z0-9-]{1,15}:\s+/i, '');
+        /* Strip only KNOWN conventional-commit prefixes (fix/feat/chore/docs/
+           refactor/perf/test/build/ci/style/revert + scope forms) — the old
+           generic 'any word:' rule mangled legit titles like
+           'Add search: results improve'. */
+        s = s.replace(/^(fix|feat|chore|docs|refactor|perf|test|build|ci|style|revert)(\([a-z0-9._\/-]+\))?!?:\s+/i, '');
         // sentence-case the first word
         return s.charAt(0).toUpperCase() + s.slice(1);
     }
@@ -61,7 +64,7 @@
     function renderHighlights() {
         if (!hlList) return;
         hlList.textContent = '';
-        var hs = (data.highlights || []);
+        var hs = (data && data.highlights) || [];   /* total function: safe even pre-fetch */
         // No highlights this window: hide the section + vine, keep the page honest.
         var hlSection = document.querySelector('.cl2-highlights');
         if (hlSection) hlSection.hidden = hs.length === 0;
@@ -138,7 +141,7 @@
                 row.appendChild(el('span', 'cl2-t', dateShort(it.date)));
                 var m = el('span', 'cl2-m');
                 m.setAttribute('data-when', dateShort(it.date));
-                m.appendChild(el('span', 'cl2-mtxt', it.message));
+                m.appendChild(el('span', 'cl2-mtxt', cleanTitle(it.message)));
                 m.appendChild(el('span', null, ' \u00B7 ' + it.repo));
                 row.appendChild(m);
                 row.appendChild(el('span', 'cl2-cat ' + (it.cat || 'i'), CAT_LABEL[it.cat] || 'Improvement'));
@@ -194,7 +197,7 @@
         g.textContent = '';
         // NOTE: legend is STATIC in HTML now — do not clear it here.
         var all = [];
-        (data.weeks || []).forEach(function (wk) { all = all.concat(wk.items); });
+        (data.weeks || []).forEach(function (wk) { all = all.concat(wk.items || []); });
         if (!all.length) { g.hidden = true; if (cap) cap.hidden = true; return; }
         g.hidden = false; if (cap) cap.hidden = false;
 
@@ -211,10 +214,13 @@
         all.forEach(function (it) {
             var dt = new Date(it.date);
             if (isNaN(dt.getTime())) return;
+            /* legend counts honor the SAME 30-day window as the bars/total —
+               counting all-time made the chips disagree with the graph */
+            var dy = byKey[dayKey(dt)];
+            if (!dy) return;
             var c = it.cat || 'i';
             if (c in legendCounts) legendCounts[c]++;
-            var dy = byKey[dayKey(dt)];
-            if (!dy || !passes(it)) return;
+            if (!passes(it)) return;
             if (c in dy) { dy[c]++; dy.total++; }
         });
 
@@ -251,6 +257,7 @@
         if (cap) {
             cap.textContent = 'Hover a day for detail \u00B7 click it to jump to that week';
             if (!active.all) cap.textContent = 'Filtered view \u2014 graph shows matching changes only. ' + cap.textContent;
+            defaultCaption = cap.textContent;   /* restored when a tooltip hides */
         }
         if (totalEl) totalEl.textContent = grand + ' in the last 30 days';
         // Time axis: 5 evenly spaced date ticks under the bars (oldest left, today right)
@@ -332,7 +339,14 @@
             tipEl.style.left = left + 'px';
         }
     }
-    function hideTip() { if (tipEl) tipEl.hidden = true; }
+    var defaultCaption = '';
+    function hideTip() {
+        if (tipEl) tipEl.hidden = true;
+        /* restore the default caption — the last-hovered day's text must not
+           stick after mouseleave/blur */
+        var cap = document.getElementById('cl2-graph-cap');
+        if (cap && defaultCaption) cap.textContent = defaultCaption;
+    }
 
     function jumpToDay(date) {
         var key = dayKey(date);
