@@ -286,6 +286,16 @@ body[data-page='home'] .gw-kicker{font-family:var(--t-font-mono,ui-monospace,mon
 body[data-page='home'] .gw-card .vb-ico{margin-bottom:14px}
 body[data-page='home'] .gw-btn{margin-top:22px;align-self:flex-start;width:auto}
 body[data-page='home'] .gw-card{display:flex;flex-direction:column}
+/* Buttons pinned to a shared baseline: cards are equal-height flex columns,
+   so the button (and its note, if any) must anchor to the bottom — before,
+   the two CTAs sat 54px apart because the left card's copy ran longer. */
+body[data-page='home'] .gw-btn{margin-top:auto}
+body[data-page='home'] .gw-card > .gw-kicker ~ .vb-ico ~ .vb-title ~ .vb-body{margin-bottom:22px}
+body[data-page='home'] .gw-card .gw-btn + .gw-note{margin-top:12px}
+/* Ghost variant: was near-invisible on the dark card (read as disabled) —
+   raise border + text contrast to sit as a true secondary CTA. */
+body[data-page='home'] .cta-btn-ghost.gw-btn{border:1px solid rgba(197,213,216,.4);color:var(--text)}
+body[data-page='home'] .cta-btn-ghost.gw-btn:hover{border-color:var(--primary-bright);color:var(--primary-bright)}
 body[data-page='home'] .gw-card-alt .vb-title{color:var(--text)}
 body[data-page='home'] .gw-card-alt .vb-body{color:var(--text-dim)}
 
@@ -347,3 +357,18 @@ body[data-page='home'] .g-contrast strong{color:var(--sage)}
 .vb-grid { margin-top: 34px; }
 .gw-grid { margin-top: 34px; }
 .record-band { margin-top: 34px; }
+
+/* --- record band systematize (2026-09 round) --------------------------------- */
+/* Cards were ragged: unequal heights, links floating at 4 different baselines.
+   Equal-height stretch + link pinned to a shared bottom seam. */
+.record{display:flex;flex-direction:column}
+/* a.s selector matches the base rule's specificity (0,2,1) so margin-top:auto
+   actually wins over the base rule's margin-top:8px — this pins every link
+   to the same bottom seam. */
+.record a.s{
+    margin-top:auto;
+    padding-top:12px;
+    border-top:1px solid rgba(197,213,216,0.08); /* glass-pane footer seam */
+}
+/* lining figures so future live values don't shift width */
+.record .v .cnt{font-variant-numeric:tabular-nums}

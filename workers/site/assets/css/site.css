@@ -7357,12 +7357,24 @@ body[data-page='form'] .vc-text {
         display: inline-flex !important;
         align-items: center !important;
     }
-    /* inline text links inside prose: keep look, expand hit area */
+    /* inline text links inside prose: keep look, expand hit area.
+       FIX (Sep 29): the old inline-block + padding:8px/margin:-8px trick made
+       every link's box 16px taller than its text, so any two links that
+       wrapped onto adjacent lines had OVERLAPPING tap boxes (garden sources
+       on iOS). Pseudo-element hit areas grow the touch target without
+       inflating the layout box — links wrap cleanly again. */
     .card a, .content-section a, .status-desc a, p a, li a,
     .account-help-box a, .pricing-support a, .help-box a {
-        display: inline-block;
-        padding: 8px 2px;
-        margin: -8px -2px;
+        position: relative;
+    }
+    .card a::after, .content-section a::after, .status-desc a::after,
+    p a::after, li a::after, .account-help-box a::after,
+    .pricing-support a::after, .help-box a::after {
+        content: '';
+        position: absolute;
+        /* vertical must stay under half the tightest line-height (~17px in
+           .g-src) or a neighbor's zone covers this link's text center */
+        inset: -8px -6px;
     }
 }
 
