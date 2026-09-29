@@ -3084,3 +3084,15 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
 /* Manifest rows lost their emoji glyphs — the item column reads slightly flat.
    Mono small-caps echo of the values voice keeps the instrument feel. */
 .about-x-mf-item { letter-spacing: .01em; }
+
+/* --- stats band baseline uniformity (2026-09 fix) -----------------------------
+   The LIVE pill sat IN FLOW above the left column's numeral, pushing that
+   stack ~27px below columns 2/3 (neither numerals nor captions aligned).
+   Pin the pill into the column's top padding band; the numeral then rises to
+   the same baseline as its siblings. Mobile keeps the pill in flow (stacked
+   layout has room). */
+.about-x-bn.about-x-lead { display: flex; flex-direction: column; justify-content: center; }
+.about-x-lead .about-x-live { position: absolute; top: 14px; left: 0; right: 0; margin: 0; }
+@media (max-width: 720px) {
+    .about-x-lead .about-x-live { position: static; margin: 0 0 12px; }
+}
