@@ -3073,3 +3073,14 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
 
 @media (prefers-reduced-motion: reduce) {
 }
+
+/* --- about polish (2026-09 round) -------------------------------------------- */
+/* COST "Your part" links — the inline color was replaced by a real rule; mono
+   voice to match the manifest labels, sage like the values column. */
+.about-x-mf-link { color: var(--sage); text-decoration: none; border-bottom: 1px solid rgba(163,201,182,.35); padding-bottom: 1px; transition: color .18s ease, border-color .18s ease; }
+.about-x-mf-link:hover { color: var(--primary-bright); border-color: var(--primary-bright); }
+[data-theme="light"] .about-x-mf-link { color: #2F6B4E; border-bottom-color: rgba(47,107,78,.4); }
+[data-theme="light"] .about-x-mf-link:hover { color: #1F4A35; border-bottom-color: #1F4A35; }
+/* Manifest rows lost their emoji glyphs — the item column reads slightly flat.
+   Mono small-caps echo of the values voice keeps the instrument feel. */
+.about-x-mf-item { letter-spacing: .01em; }
