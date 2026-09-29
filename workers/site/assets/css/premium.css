@@ -2541,10 +2541,14 @@ body[data-page='form'] .tier-form-panel .slabel i {
     letter-spacing: .04em;
     font-size: 8px;
     margin-top: 4px;
-    white-space: nowrap;
+    line-height: 1.6;            /* wrap instead of overflowing the column */
     color: color-mix(in srgb, var(--text-faint) 70%, transparent);
 }
 body[data-page='form'] .tier-form-panel .srow { grid-template-columns: 140px 1fr 30px; }
+
+/* textarea row: label leads the field, not bottom-stacked against it */
+body[data-page='form'] .tier-form-panel .srow.note-row { align-items: start; }
+body[data-page='form'] .tier-form-panel .srow.note-row .slabel { padding-top: 14px; padding-bottom: 0; }
 body[data-page='form'] .tier-form-panel .sfield { position: relative; min-width: 0; }
 body[data-page='form'] .tier-form-panel .sfield input[type="text"],
 body[data-page='form'] .tier-form-panel .sfield input[type="email"] {
@@ -2659,8 +2663,8 @@ body[data-page='form'] .tier-form-panel .srow:has(textarea) {
 }
 body[data-page='form'] .tier-form-panel .covenant {
     display: block;
-    margin: 16px 0 24px;
-    padding: 17px 17px 15px;
+    margin: 14px 0 18px;
+    padding: 13px 16px 12px;
     border: 1px solid var(--border);
     border-radius: 12px;
     position: relative;
@@ -2714,7 +2718,7 @@ body[data-page='form'] .tier-form-panel .cov-title b {
     display: block;
     font-family: var(--t-font-display, 'Instrument Serif', Georgia, serif);
     font-style: italic;
-    font-size: 16.5px;
+    font-size: 15.5px;
     letter-spacing: 0;
     text-transform: none;
     color: var(--text);
@@ -2723,11 +2727,10 @@ body[data-page='form'] .tier-form-panel .cov-title b {
     transition: color .3s;
 }
 body[data-page='form'] .tier-form-panel .cov-note {
-    font-size: 12.5px;
+    font-size: 12px;
     color: var(--text-faint);
-    margin-top: 10px;
-    padding-left: 42px;
-    line-height: 1.5;
+    margin-top: 7px;
+    line-height: 1.55;
 }
 /* 8. Submit — serif, teal fill when .ready, gold when .success (sent). */
 body[data-page='form'] .tier-form-panel .form-submit {
