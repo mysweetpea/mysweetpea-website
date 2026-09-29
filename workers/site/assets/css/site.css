@@ -8339,3 +8339,83 @@ body[data-page='pricing'] .tb-arr{font-size:13px;color:var(--gold);margin-top:1p
   body[data-page='pricing'] .tb-morelist{display:none}
 }
 /* == END TIER BENTO == */
+
+/* --- contact page: context note (?about=card arrivals) ---------------------- */
+/* Mirrors the suggest page's .info-box grammar: sage left rail, tinted fill,
+   token-only colors so light mode inherits. Hidden in markup; JS unhides. */
+.contact-context {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 16px;
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-dim);
+    background: linear-gradient(135deg, rgba(163,201,182,0.10), rgba(143,175,181,0.05));
+    border: 1px solid rgba(163,201,182,0.18);
+    border-left: 3px solid var(--sage);
+    border-radius: var(--radius-sm);
+}
+.contact-context[hidden] { display: none; }
+.contact-context .cc-icon { flex: 0 0 auto; display: inline-flex; margin-top: 2px; opacity: 0.9; }
+.contact-context a { color: var(--sage); }
+
+/* --- suggest page polish (2026-09 round) ------------------------------------- */
+/* Custom select: the native arrow was the most default-looking element on the
+   page. appearance:none + the site's own chevron icon, padded clear of text.
+   Icons are immutable-cached — if the chevron ever changes, version it. */
+body[data-page='suggest'] .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-right: 44px;
+    background-image: url('/assets/icons/icon-ui-chevron-down.svg'),
+        linear-gradient(160deg, rgba(255,255,255,0.03), transparent 40%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: right 16px center, 0 0;
+    background-size: 16px 16px, auto;
+}
+/* The base :focus rule uses the background shorthand, which would wipe the
+   chevron image — re-declare it at matching specificity for the focused state. */
+body[data-page='suggest'] .form-select:focus {
+    background-image: url('/assets/icons/icon-ui-chevron-down.svg'),
+        linear-gradient(160deg, rgba(255,255,255,0.03), transparent 40%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: right 16px center, 0 0;
+    background-size: 16px 16px, auto;
+}
+/* Char counter: mono voice (site convention for numerals). */
+body[data-page='suggest'] .char-counter {
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+}
+/* Light mode: the light-theme block (above in this file) uses the background
+   shorthand on the select, which would wipe the chevron — re-assert it with
+   matching specificity plus the light input fill. */
+[data-theme="light"] body[data-page='suggest'] .form-select {
+    background-image: url('/assets/icons/icon-ui-chevron-down-light.svg'),
+        linear-gradient(160deg, rgba(255,255,255,0.6), transparent 40%);
+    background-repeat: no-repeat, no-repeat;
+    background-position: right 16px center, 0 0;
+    background-size: 16px 16px, auto;
+}
+/* Input treatment aligned with the form page's approved inset grammar:
+   10px radius + top inset highlight instead of flat 12px. */
+body[data-page='suggest'] .form-input,
+body[data-page='suggest'] .form-select,
+body[data-page='suggest'] .form-textarea {
+    border-radius: 10px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+/* Submit: match the form page's tactile states (lift on hover, press on active,
+   visible keyboard ring) — the base gradient already comes from the section above. */
+body[data-page='suggest'] .form-submit { min-height: 48px; transition: transform .25s ease, box-shadow .25s ease, opacity .2s ease; }
+body[data-page='suggest'] .form-submit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(143,175,181,.25); }
+body[data-page='suggest'] .form-submit:active:not(:disabled) { transform: translateY(1px); }
+body[data-page='suggest'] .form-submit:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(143,175,181,.35); }
+
+/* Guidelines labels: keep each criterion name on one line (they were wrapping
+   mid-word at 560px, e.g. "Privacy-" / "focused") — descriptions flow after. */
+body[data-page='suggest'] .guidelines-list li strong { white-space: nowrap; }

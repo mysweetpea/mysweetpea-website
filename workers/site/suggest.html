@@ -48,7 +48,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=118">
+    <link rel="stylesheet" href="/assets/css/site.css?v=119">
     <link rel="stylesheet" href="/assets/css/premium.css?v=129">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=108">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
@@ -116,20 +116,20 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <p class="form-desc">Suggest a self-hosted service you would like to see on MySweetPea.</p>
                         <div class="form-group">
                             <label class="form-label" for="s-name">Service Name <span class="req-tag">required</span></label>
-                            <input type="text" class="form-input" id="s-name" aria-describedby="s-name-hint" aria-invalid="false" placeholder="e.g., Mastodon, Gitea" maxlength="60">
+                            <input type="text" class="form-input" id="s-name" aria-describedby="s-name-hint" aria-invalid="false" placeholder="e.g. Mastodon, Gitea" maxlength="60" autocomplete="off">
                             <span class="validation-icon" id="s-name-icon"></span>
-                            <div class="form-hint" id="s-name-hint" aria-live="polite">Please enter a service name (min 2 characters).</div>
+                            <div class="form-hint" id="s-name-hint" aria-live="polite">The name of the service, as it's known.</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="s-url">Project URL <span class="req-tag">required</span></label>
-                            <input type="url" class="form-input" id="s-url" placeholder="https://github.com/..." required aria-describedby="s-url-hint">
+                            <input type="url" class="form-input" id="s-url" placeholder="https://…" required aria-describedby="s-url-hint">
                             <span class="validation-icon" id="s-url-icon"></span>
-                            <div class="form-hint" id="s-url-hint" aria-live="polite">Link to the project's website or GitHub repo so we can evaluate it. Don't know the URL? Just paste the GitHub link or website address.</div>
+                            <div class="form-hint" id="s-url-hint" aria-live="polite">The project's website or GitHub repo — wherever we can read about it.</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="s-category">Category <span class="req-tag">required</span></label>
                             <select class="form-select" id="s-category" aria-describedby="s-category-hint" aria-invalid="false">
-                                <option value="">Select a category...</option>
+                                <option value="">Choose the closest fit</option>
                                 <option value="media">Media &amp; Entertainment</option>
                                 <option value="productivity">Productivity</option>
                                 <option value="communication">Communication</option>
@@ -139,21 +139,23 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                                 <option value="storage">File Storage &amp; Sync</option>
                                 <option value="other">Other</option>
                             </select>
-                            <div class="form-hint" id="s-category-hint" aria-live="polite">Please select a category.</div>
+                            <div class="form-hint" id="s-category-hint" aria-live="polite">Pick the group it belongs to — "Other" is fine too.</div>
                         </div>
                         <div class="form-group">
                             <div class="label-row"><label class="form-label" for="s-reason">Why should we host this? <span class="req-tag">required</span></label><span class="char-counter" id="s-reason-count" aria-hidden="true">0 / 500</span></div>
-                            <textarea class="form-textarea" id="s-reason" aria-describedby="s-reason-hint" aria-invalid="false" placeholder="Explain why this service would be valuable..." maxlength="500"></textarea>
+                            <textarea class="form-textarea" id="s-reason" aria-describedby="s-reason-hint" aria-invalid="false" placeholder="What would it do for members?" maxlength="500"></textarea>
                             <span class="validation-icon" id="s-reason-icon" style="top: auto; bottom: 14px;"></span>
-                            <div class="form-hint" id="s-reason-hint" aria-live="polite">Please provide an explanation (min 10 characters).</div>
+                            <div class="form-hint" id="s-reason-hint" aria-live="polite">A sentence or two is plenty — why it's worth hosting.</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="s-yourname">Your Name <span class="opt-tag">optional</span></label>
-                            <input type="text" class="form-input" id="s-yourname" placeholder="Leave blank to submit anonymously." maxlength="60">
+                            <input type="text" class="form-input" id="s-yourname" placeholder="Anonymous is fine" maxlength="60">
+                            <div class="form-hint">Leave it blank and the suggestion goes in without a name.</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="s-youremail">Your Email <span class="opt-tag">optional</span></label>
-                            <input type="email" class="form-input" id="s-youremail" placeholder="Only if you want us to follow up with you." maxlength="120">
+                            <input type="email" class="form-input" id="s-youremail" placeholder="you@example.com" maxlength="120">
+                            <div class="form-hint">Only if you'd like a reply — we don't add it to any list.</div>
                         </div>
                         <button class="form-submit" id="s-submit" disabled>Submit Suggestion</button>
                     </div>
@@ -165,7 +167,6 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <div class="card glow-card guidelines-card">
                         <h2>Before you suggest</h2>
                         <p class="form-desc">A few things we look for in every suggestion.</p>
-                        <div class="info-box">Check if the service is open source and can be self-hosted. We prioritize privacy-focused, community-driven projects.</div>
                         <ul class="guidelines-list">
                             <li><span class="gl-icon" aria-hidden="true"></span> <strong>Open source</strong> — the code should be publicly available and self-hostable.</li>
                             <li><span class="gl-icon" aria-hidden="true"></span> <strong>Privacy-focused</strong> — we favor services that respect user data and avoid tracking.</li>
@@ -232,9 +233,9 @@ function validateField(id, type) {
             else if (type === 'url') valid = /^https?:\/\/[^\s/]+\.[^\s/]+(\/\S*)?$/.test(val);
             input.classList.remove('valid', 'invalid'); if (icon) icon.classList.remove('show', 'valid', 'invalid');
             if (val.length > 0 || type === 'category') {
-                if (valid) { input.classList.add('valid'); if (icon) { icon.classList.add('show', 'valid'); icon.innerHTML = '<img src="/assets/icons/icon-ui-check.svg" alt="" width="18" height="18">'; } if (hint) { hint.classList.remove('error'); hint.classList.add('success'); if (type === 'category') hint.textContent = 'Category selected.'; } }
-                else { input.classList.add('invalid'); if (icon) { icon.classList.add('show', 'invalid'); icon.innerHTML = '<img src="/assets/icons/icon-ui-cross.svg" alt="" width="18" height="18">'; } if (hint) { hint.classList.remove('success'); hint.classList.add('error'); if (type === 'category') hint.textContent = 'Please select a category.'; } }
-            } else { if (hint) hint.classList.remove('error', 'success'); if (type === 'category' && hint) hint.textContent = 'Please select a category.'; }
+                if (valid) { input.classList.add('valid'); if (icon) { icon.classList.add('show', 'valid'); icon.innerHTML = '<img src="/assets/icons/icon-ui-check.svg" alt="" width="18" height="18">'; } if (hint) { hint.classList.remove('error'); hint.classList.add('success'); if (type === 'category') hint.textContent = 'Got it.'; } }
+                else { input.classList.add('invalid'); if (icon) { icon.classList.add('show', 'invalid'); icon.innerHTML = '<img src="/assets/icons/icon-ui-cross.svg" alt="" width="18" height="18">'; } if (hint) { hint.classList.remove('success'); hint.classList.add('error'); if (type === 'category') hint.textContent = 'Pick the group it belongs to — "Other" is fine too.'; } }
+            } else { if (hint) hint.classList.remove('error', 'success'); if (type === 'category' && hint) hint.textContent = 'Pick the group it belongs to — "Other" is fine too.'; }
             if (type === 'reason') {
                 var count = document.getElementById('s-reason-count');
                 if (count) { count.textContent = val.length + ' / 500'; count.classList.toggle('met', valid); }

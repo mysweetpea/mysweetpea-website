@@ -47,7 +47,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
     <link rel="manifest" href="/manifest.json">
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=118">
+    <link rel="stylesheet" href="/assets/css/site.css?v=119">
     <link rel="stylesheet" href="/assets/css/premium.css?v=129">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=108">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
@@ -115,6 +115,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <button type="button" class="copy-email-btn" data-copy="support@mysweetpea.cc">Copy email address</button>
                         <p class="contact-copy-hint">Copy the address and paste it into whatever email app you use — Gmail, Outlook, Apple Mail, anything.</p>
                         <div class="contact-response"><span class="resp-dot" aria-hidden="true"></span> We usually reply within 24–48 hours.</div>
+                        <div class="contact-context" id="contactContext" hidden>
+                            <span class="cc-icon" aria-hidden="true"><img src="/assets/icons/icon-ui-leaf.svg" alt="" width="16" height="16" loading="lazy" decoding="async"></span>
+                            <span>Sent from the <a href="/support.html">Support</a> page — this is about donating by card. Mention "card donation" in your email so we can tally interest.</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -192,5 +196,17 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
         });
     }
     </script>
+<script>
+    /* Context note: visitors arriving from the Support page's "Let us know"
+       button carry ?about=card — surface why they're here above the email. */
+    (function () {
+        try {
+            var m = /(?:\?|&)about=([a-z]+)/.exec(location.search);
+            if (m && document.getElementById('contactContext')) {
+                document.getElementById('contactContext').hidden = false;
+            }
+        } catch (e) { /* never break the page over a hint */ }
+    })();
+</script>
 </body>
 </html>
