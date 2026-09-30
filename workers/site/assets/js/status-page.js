@@ -5,16 +5,10 @@
         var summaryTime = summary ? summary.querySelector('time') : null;
         var rows = document.querySelectorAll('.status-line[data-service-key]');
 
-        // Map our service keys to Uptime Kuma monitor IDs
-        var MONITOR_IDS = {
-            vaultwarden: 1, matrix: 2, affine: 3, koalasync: 4,
-            jellyfin: 5, seerr: 6, nextcloud: 7, immich: 8, openwebui: 9
-        };
-        // Reverse map: monitor ID -> service key
-        var ID_TO_KEY = {};
-        Object.keys(MONITOR_IDS).forEach(function (k) { ID_TO_KEY[MONITOR_IDS[k]] = k; });
-        // Status page slug in Uptime Kuma (public URL /status/public)
-        var STATUS_SLUG = 'public';
+        // Monitor key -> id resolution and the heartbeat payload both come
+        // from MSP (site-data.js): ids are resolved at RUNTIME from the Kuma
+        // public status API (name match), cached 7d, baked hints as last
+        // resort. No hardcoded ID map lives in this file anymore.
 
         // 40-tick recent-checks strip, oldest -> newest left -> right.
         // Slots without a beat are padded with t-none on the LEFT.
@@ -128,19 +122,88 @@
             renderStrip(row, list || []);
         }
 
-        // Fetch the status page heartbeat (single call, object keyed by monitor ID).
-        // Race a hung connection against a 10s timeout so the page degrades to
-        // the honest catch path instead of spinning on the static defaults.
-        var kumaAborter = ('AbortController' in window) ? new AbortController() : null;
-        var kumaAbortTimer = kumaAborter ? setTimeout(function () { kumaAborter.abort(); }, 10000) : 0;
-        fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/' + STATUS_SLUG,
-              kumaAborter ? { signal: kumaAborter.signal } : {})
-            .then(function (r) {
-                if (kumaAbortTimer) clearTimeout(kumaAbortTimer);
-                return r.ok ? r.json() : Promise.reject();
-            })
-            .then(function (data) {
-                if (!data || !data.heartbeatList) return Promise.reject();
+        /* === Row reconciliation: the console follows site-data.json ===
+           Static rows stay the SEO/first-paint skeleton (server-rendered HTML,
+           no innerHTML anywhere). At runtime we APPEND rows for services the
+           markup doesn't know yet, and HIDE rows whose service was retired —
+           the page never lies about what exists. Rendering is createElement +
+           textContent only (XSS-safe with validated data). */
+        (function reconcileRows() {
+            if (!window.MSP) return;
+            var console_ = document.querySelector('.status-console');
+            if (!console_) return;
+            window.MSP.data().then(function (d) {
+                if (!d || !d.services) return;
+                var have = {};
+                document.querySelectorAll('.status-line[data-service-key]').forEach(function (r) {
+                    have[r.getAttribute('data-service-key')] = r;
+                });
+                // 1. append missing services after the last existing row
+                var last = null;
+                d.services.forEach(function (s) {
+                    if (have[s.key]) { last = have[s.key]; return; }
+                    var row = document.createElement('div');
+                    row.className = 'status-line';
+                    row.setAttribute('data-service-key', s.key);
+                    var idx = document.createElement('span');
+                    idx.className = 'line-idx'; idx.setAttribute('aria-hidden', 'true');
+                    idx.textContent = String(d.services.indexOf(s) + 1).padStart(2, '0');
+                    var icoWrap = document.createElement('span');
+                    icoWrap.className = 'line-icon';
+                    var ico = document.createElement('img');
+                    ico.src = s.icon; ico.alt = ''; ico.width = 26; ico.height = 26;
+                    ico.loading = 'lazy'; ico.decoding = 'async';
+                    icoWrap.appendChild(ico);
+                    var nm = document.createElement('span');
+                    nm.className = 'line-name'; nm.textContent = s.shortName;
+                    var ct = document.createElement('span');
+                    ct.className = 'line-cat'; ct.textContent = s.category;
+                    var strip = document.createElement('div');
+                    strip.className = 'sc-strip'; strip.setAttribute('aria-hidden', 'true');
+                    var pct = document.createElement('span'); pct.className = 'line-pct';
+                    var lat = document.createElement('span'); lat.className = 'line-lat';
+                    lat.title = 'HTTP check round-trip, refreshed every 60s';
+                    lat.textContent = '— ms';
+                    var badge = document.createElement('span');
+                    badge.className = 'status-badge status-unknown';
+                    var dot = document.createElement('span');
+                    dot.className = 'status-dot status-unknown'; dot.setAttribute('aria-hidden', 'true');
+                    var blab = document.createElement('span'); blab.className = 'badge-label';
+                    blab.textContent = 'Checking…';
+                    badge.appendChild(dot); badge.appendChild(blab);
+                    var checksWrap = document.createElement('span'); checksWrap.className = 'line-checks';
+                    var up24 = document.createElement('span'); up24.className = 'sc-uptime';
+                    up24.textContent = '—';
+                    var chks = document.createElement('span'); chks.className = 'sc-checks';
+                    chks.textContent = '—';
+                    checksWrap.appendChild(up24); checksWrap.appendChild(chks);
+                    row.appendChild(idx); row.appendChild(icoWrap); row.appendChild(nm);
+                    row.appendChild(ct); row.appendChild(strip); row.appendChild(pct);
+                    row.appendChild(lat); row.appendChild(badge); row.appendChild(checksWrap);
+                    if (last && last.nextSibling) console_.insertBefore(row, last.nextSibling);
+                    else console_.appendChild(row);
+                    last = row;
+                });
+                // 2. hide rows whose service no longer exists in the data
+                Object.keys(have).forEach(function (k) {
+                    var known = d.services.some(function (s) { return s.key === k; });
+                    if (!known) {
+                        have[k].setAttribute('hidden', '');
+                        have[k].classList.add('retired');
+                    }
+                });
+            }).catch(function () { /* static skeleton stays as-is */ });
+        })();
+
+        // Feed = ONE shared heartbeat fetch (MSP, 10s abort budget) + the
+        // resolved monitor map. Degrades to the honest catch path on failure.
+        var feedReady = (window.MSP
+            ? Promise.all([window.MSP.heartbeat(), window.MSP.monitors()])
+            : Promise.reject(new Error('MSP missing'))
+        )
+            .then(function (res) {
+                var data = res[0], mons = res[1] || {};
+                var MONITORS = mons.byKey || {};
                 var hb = data.heartbeatList; // { "<monitorId>": [heartbeats...], ... }
                 // uptimeList keys are "<monitorId>_<durationDays>" (e.g. "1_24"),
                 // values are fractions 0..1 — normalize to a monitorId -> pct map
@@ -161,8 +224,8 @@
                 /* Iterate OUR 9 monitor ids (not payload keys): a monitor
                    missing/empty from the payload must count as NOT REPORTING,
                    never silently vanish from the denominator. */
-                Object.keys(MONITOR_IDS).forEach(function (k) {
-                    var key = k, id = String(MONITOR_IDS[k]);
+                Object.keys(MONITORS).forEach(function (k) {
+                    var key = k, id = String(MONITORS[k]);
                     var row = document.querySelector('.status-line[data-service-key="' + key + '"]');
                     if (!row) return;
                     var list = (hb[id] || []).filter(function (b) { return b && typeof b.time === 'string'; });
@@ -202,6 +265,12 @@
                         ? (total + ' of ' + total + ' operational')
                         : (upCount + ' of ' + total + ' operational \u00B7 ' + downCount + ' down');
                 }
+                /* denominator chip in the summary strong follows the
+                   resolved monitor count (markup ships a static 9) */
+                var sumDenom = summary ? summary.querySelector('strong') : null;
+                if (sumDenom && sumDenom.textContent.indexOf('monitored') !== -1) {
+                    sumDenom.textContent = '— of ' + Object.keys(MONITORS).length + ' monitored';
+                }
                 if (summaryTime) {
                     var now = new Date();
                     summaryTime.setAttribute('datetime', now.toISOString());
@@ -217,7 +286,6 @@
                 }
             })
             .catch(function (err) {
-                clearKumaTimer();
                 console.warn('[msp] status feed failed:', err && err.message ? err.message : err);
                 // Status feed unreachable (network error, CORS, non-OK, or malformed
                 // payload). The static markup says "9 of 9 operational" — showing that

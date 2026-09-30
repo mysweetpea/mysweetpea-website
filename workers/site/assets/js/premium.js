@@ -214,21 +214,19 @@
     };
 
     /* === 4+5. Live status dots on service cards + footer status widget ===
-       Both widgets consume the SAME heartbeat payload — fetch it once and
-       share the result (two independent fetches issued duplicate requests on
-       the services page, the only page with both widgets). */
-    var SERVICE_MONITORS = {
-        vaultwarden: 1, matrix: 2, affine: 3, koalasync: 4,
-        jellyfin: 5, seerr: 6, nextcloud: 7, immich: 8, openwebui: 9
-    };
-    function applyHeartbeat(hb, uptimeList) {
+       Both widgets consume the SAME heartbeat payload — via MSP (site-data.js)
+       the payload is fetched ONCE per page and monitor IDs are resolved at
+       runtime from the Kuma public status API (no hardcoded ID map left). */
+    var SERVICE_MONITORS = null; /* filled from MSP: { key: monitorId } */
+
+    function applyHeartbeat(hb, uptimeList, monitors) {
         /* Card dots */
         var cards = document.querySelectorAll('.service-card[data-service]');
         if (cards.length) {
             cards.forEach(function (card) {
                 var dot = card.querySelector('.status-dot');
                 if (!dot) return;
-                var id = SERVICE_MONITORS[card.getAttribute('data-service')];
+                var id = monitors ? monitors[card.getAttribute('data-service')] : null;
                 var list = (hb && id) ? hb[id] : null;
                 if (!list || !list.length) {
                     /* No heartbeat for this monitor (unknown/renumbered ID):
@@ -262,7 +260,7 @@
         }
         var hbCards = document.querySelectorAll('.service-card[data-service]');
         hbCards.forEach(function (card) {
-            var id = SERVICE_MONITORS[card.getAttribute('data-service')];
+            var id = monitors ? monitors[card.getAttribute('data-service')] : null;
             var upEl = card.querySelector('.hb-uptime');
             if (upEl) {
                 var uptime = (uptimeList && id) ? uptimeList[id + '_24'] : undefined;
@@ -305,10 +303,11 @@
         var footerStatusText = document.getElementById('footerStatusText');
         if (footerStatus && footerStatusText) {
             var down = 0, total = 0;
-            // Count only our 9 known service monitors — the public page
-            // also includes the mysweetpea.cc website itself.
-            Object.keys(SERVICE_MONITORS).forEach(function (key) {
-                var list = hb ? hb[SERVICE_MONITORS[key]] : null;
+            // Count only our public service monitors (resolved via MSP) —
+            // the public Kuma page also includes the mysweetpea.cc site itself.
+            var monKeys = monitors ? Object.keys(monitors) : [];
+            monKeys.forEach(function (key) {
+                var list = hb ? hb[monitors[key]] : null;
                 if (!list || !list.length) return;
                 total++;
                 /* only a confirmed 0 counts as down (2=pending/3=maintenance
@@ -353,13 +352,101 @@
             footerStatus.classList.add('degraded');
         }
     }
-    var heartbeatPromise = fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public')
-        .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
-        .then(function (data) {
-            var hb = data && data.heartbeatList;
-            if (!hb) throw new Error('no heartbeatList');
-            applyHeartbeat(hb, data && data.uptimeList);
-        })
-        .catch(function () { markAllUnknown(); });
+    /* === Pricing featured bento (dynamic, from site-data.json) ==============
+       The Sweet Pea tier's bento tiles ship static markup (SEO/no-JS). At
+       runtime order + names + tags follow the validated featured list; the
+       "+N More services" tile is derived from the real service count.
+       createElement/textContent only. Static tiles are adopted by matching
+       their .tb-name text to the featured tile name — never duplicated. */
+    (function syncPricingBento() {
+        if (!window.MSP) return;
+        var bento = document.querySelector('#card-sweetpea .tier-bento');
+        if (!bento) return;
+        window.MSP.data().then(function (d) {
+            if (!d || !d.pricing || !d.pricing.featured) return;
+            var byKey = {};
+            var i, k;
+            for (i = 0; i < d.services.length; i++) byKey[d.services[i].key] = d.services[i];
+            var more = bento.querySelector('.tb-more');
+            var tiles = Array.prototype.slice.call(bento.querySelectorAll('.tb-tile:not(.tb-more)'));
+            /* 1. adopt static tiles by name -> data-key */
+            tiles.forEach(function (tile) {
+                var nm = tile.querySelector('.tb-name');
+                var txt = nm ? String(nm.textContent).trim().toLowerCase() : '';
+                var match = null;
+                for (var j = 0; j < d.pricing.featured.length; j++) {
+                    if (d.pricing.featured[j].tile.toLowerCase() === txt) { match = d.pricing.featured[j]; break; }
+                }
+                if (match) tile.setAttribute('data-key', match.key);
+                else tile.remove(); /* stale tile (service no longer featured) */
+            });
+            /* 2. enforce featured order + sync names/tags; create missing */
+            var ref = more;
+            for (i = d.pricing.featured.length - 1; i >= 0; i--) {
+                (function (f) {
+                    var svc = byKey[f.key];
+                    if (!svc) return;
+                    var tile = bento.querySelector('.tb-tile[data-key="' + f.key + '"]');
+                    if (!tile) {
+                        tile = document.createElement('div');
+                        tile.className = 'tb-tile';
+                        tile.setAttribute('role', 'listitem');
+                        tile.setAttribute('data-key', f.key);
+                        var ic = document.createElement('span'); ic.className = 'tb-ic';
+                        var img = document.createElement('img');
+                        img.src = svc.icon; img.alt = ''; img.width = 20; img.height = 20;
+                        img.loading = 'lazy'; img.decoding = 'async';
+                        ic.appendChild(img);
+                        var nm = document.createElement('span'); nm.className = 'tb-name';
+                        nm.textContent = f.tile;
+                        var tg = document.createElement('span'); tg.className = 'tb-tag';
+                        tg.textContent = f.tag;
+                        tile.appendChild(ic); tile.appendChild(nm); tile.appendChild(tg);
+                    } else {
+                        var nm2 = tile.querySelector('.tb-name');
+                        var tg2 = tile.querySelector('.tb-tag');
+                        if (nm2) nm2.textContent = f.tile;
+                        if (tg2) tg2.textContent = f.tag;
+                    }
+                    /* (re)insert in order: reverse iteration keeps positions
+                       stable without touching the first-tile tb-feat class */
+                    bento.insertBefore(tile, ref);
+                    ref = tile;
+                })(d.pricing.featured[i]);
+            }
+            /* 3. +N count + morelist from the non-featured services */
+            if (more) {
+                var rest = d.services.filter(function (s) {
+                    return !d.pricing.featured.some(function (f) { return f.key === s.key; });
+                });
+                var plus = more.querySelector('.tb-plus');
+                var list = more.querySelector('.tb-morelist');
+                if (plus) plus.textContent = '+' + rest.length;
+                if (list) list.textContent = rest.map(function (s) { return s.shortName; }).join(' · ');
+            }
+        }).catch(function () { /* static bento stands */ });
+    })();
+
+    var heartbeatPromise = (function () {
+        if (!window.MSP) {
+            /* site-data.js missing (defensive — every page loads it before
+               premium.js): fall back to the legacy direct fetch so widgets
+               still work, with NO monitor map (dots go unknown, honestly). */
+            return fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public')
+                .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
+                .then(function (data) {
+                    var hb = data && data.heartbeatList;
+                    if (!hb) throw new Error('no heartbeatList');
+                    applyHeartbeat(hb, data && data.uptimeList, null);
+                })
+                .catch(function () { markAllUnknown(); });
+        }
+        return Promise.all([window.MSP.heartbeat(), window.MSP.monitors()])
+            .then(function (r) {
+                SERVICE_MONITORS = r[1].byKey || {};
+                applyHeartbeat(r[0].heartbeatList, r[0].uptimeList, r[1].byKey || {});
+            })
+            .catch(function () { markAllUnknown(); });
+    })();
 
 })();

@@ -96,21 +96,17 @@
       recUptime.removeAttribute('data-count');
       recUptime.textContent = '—';
     }
-    var p = fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public', aborter ? { signal: aborter.signal } : {})
-      .then(function(r){ clearAbort(); return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
-      .then(function(data){
-        if (!data || !data.uptimeList) throw new Error('no uptimeList');
-        var sum = 0, n = 0;
-        for (var u = 1; u <= 9; u++) {
-          var v = data.uptimeList[u + '_24'];
-          if (typeof v === 'number' && v >= 0 && v <= 1) { sum += v; n++; }
-        }
-        if (n === 9) {
-          var avg = (Math.round((sum / n) * 1000) / 10).toFixed(1);
-          recUptime.setAttribute('data-count', avg);
-          recUptime.textContent = avg;   /* paint live value (count-up may re-read data-count on final frame) */
+    /* Live avg via MSP (single shared fetch + runtime monitor resolution).
+       MSP.uptimeAvg() keeps the old honesty rule: partial monitor set =>
+       null => static value stays, never a plausible-but-wrong average. */
+    var p = (window.MSP ? window.MSP.uptimeAvg() : Promise.reject(new Error('MSP missing')))
+      .then(function(avg){
+        if (avg != null) {
+          var s = avg.toFixed(1);
+          recUptime.setAttribute('data-count', s);
+          recUptime.textContent = s;   /* paint live value (count-up may re-read data-count on final frame) */
         } else {
-          console.warn('[msp] uptime tile: partial monitor set (' + n + '/9) — keeping static value');
+          console.warn('[msp] uptime tile: partial monitor set — keeping static value');
         }
       })
       .catch(function(err){ clearAbort(); console.warn('[msp] uptime tile fetch failed:', err && err.message ? err.message : err); paintUnavailable(); });
@@ -122,6 +118,32 @@
       if (err && err.message === 'timeout') paintUnavailable();
     });
   }
+  /* === Dynamic service count (home proof-stat + what-pill) ================
+     Markup ships data-count="9" / "9/9 services live" as the SEO static. At
+     runtime we re-aim them at the validated service list so adding a service
+     never requires editing index.html numbers again. */
+  function syncCounts(){
+    if (!window.MSP) return;
+    window.MSP.data().then(function(d){
+      if (!d || !d.services) return;
+      var n = d.services.length;
+      var nine = document.querySelector('.proof-stat .proof-value[data-count]');
+      var lbl = nine ? nine.closest('.proof-stat') : null;
+      var isCount = lbl && lbl.querySelector('.proof-label') && /public services/i.test(lbl.querySelector('.proof-label').textContent);
+      if (nine && isCount) {
+        nine.setAttribute('data-count', String(n));
+        /* if the count-up already fired (text is a finished number, not the
+           initial 0), repaint directly — data-count alone won't re-run it */
+        var t = parseFloat(nine.textContent);
+        if (isFinite(t) && t > 0) nine.textContent = String(n);
+      }
+      var pill = document.querySelector('.what-pill');
+      if (pill && pill.textContent.indexOf('services live') !== -1) {
+        pill.textContent = n + '/' + n + ' services live';
+      }
+    }).catch(function(){});
+  }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLive);
   else initLive();
+  syncCounts();
 })();

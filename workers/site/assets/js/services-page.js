@@ -1,3 +1,73 @@
+/* === Coming-soon grid (dynamic, from site-data.json) ======================
+   Static cards stay the SEO/no-JS skeleton. At runtime the grid follows the
+   validated comingSoon list: cards are adopted by name (never duplicated),
+   missing ones appended, retired ones hidden. createElement/textContent only. */
+(function reconcileComingSoon() {
+    if (!window.MSP) return;
+    var grid = document.querySelector('.coming-soon-grid');
+    if (!grid) return;
+    window.MSP.data().then(function (d) {
+        if (!d || !d.comingSoon) return;
+        var cards = Array.prototype.slice.call(grid.querySelectorAll('.coming-soon-card'));
+        var i, j;
+        /* adopt by name match */
+        cards.forEach(function (card) {
+            var h = card.querySelector('h3');
+            var txt = h ? String(h.textContent).trim().toLowerCase() : '';
+            var match = null;
+            for (j = 0; j < d.comingSoon.length; j++) {
+                if (d.comingSoon[j].name.toLowerCase() === txt) { match = d.comingSoon[j]; break; }
+            }
+            if (match) card.setAttribute('data-cs-key', match.key);
+            else card.setAttribute('hidden', ''); /* retired */
+        });
+        /* append missing */
+        var last = null;
+        d.comingSoon.forEach(function (cs) {
+            var existing = grid.querySelector('.coming-soon-card[data-cs-key="' + cs.key + '"]');
+            if (existing) { last = existing; return; }
+            var card = document.createElement('div');
+            card.className = 'coming-soon-card reveal reveal-delay-1';
+            card.setAttribute('data-tier', 'coming-soon');
+            card.setAttribute('data-cs-key', cs.key);
+            card.setAttribute('data-keywords', cs.keywords);
+            var inner = document.createElement('div'); inner.className = 'card-inner';
+            var row1 = document.createElement('div'); row1.className = 'row1';
+            var si = document.createElement('div'); si.className = 'service-icon';
+            var img = document.createElement('img');
+            img.src = cs.icon; img.alt = cs.iconAlt || cs.name; img.width = 40; img.height = 40;
+            img.loading = 'lazy'; img.decoding = 'async';
+            si.appendChild(img);
+            var h3 = document.createElement('h3'); h3.textContent = cs.name;
+            row1.appendChild(si); row1.appendChild(h3);
+            var row2 = document.createElement('div'); row2.className = 'row2';
+            var meta = document.createElement('span'); meta.className = 'sp-meta sp-meta-planned';
+            meta.textContent = 'PLANNED';
+            row2.appendChild(meta);
+            var blurb = document.createElement('p'); blurb.className = 'svc-blurb';
+            blurb.textContent = cs.blurb;
+            var foot = document.createElement('div'); foot.className = 'card-foot';
+            var hb = document.createElement('span'); hb.className = 'hb-uptime';
+            hb.textContent = 'QUEUED';
+            var pill = document.createElement('span'); pill.className = 'tier-pill tier-pill-soon';
+            pill.textContent = 'Coming Soon';
+            foot.appendChild(hb); foot.appendChild(pill);
+            inner.appendChild(row1); inner.appendChild(row2); inner.appendChild(blurb); inner.appendChild(foot);
+            card.appendChild(inner);
+            if (last && last.nextSibling) grid.insertBefore(card, last.nextSibling);
+            else grid.appendChild(card);
+            last = card;
+        });
+        /* re-fill the queued chip now that the grid may have grown */
+        var chip = document.getElementById('csQueued');
+        if (chip) {
+            var n = grid.querySelectorAll('.coming-soon-card:not([hidden])').length;
+            if (n > 0) chip.textContent = '+' + n + ' queued';
+            else chip.style.display = 'none';
+        }
+    }).catch(function () { /* static grid stands */ });
+})();
+
 /* === Tier dividers: fill '+N queued' chip from the coming-soon grid */
 (function () {
     var chip = document.getElementById('csQueued');
@@ -19,17 +89,25 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
 });
 
 // Screenshot lightbox
-        var SERVICES = {
-            vaultwarden: { name:'Vaultwarden', icon:'/assets/icons/vaultwarden.svg', iconAlt:'Vaultwarden', shot:'/assets/screenshots/vaultwarden.webp', github:'https://github.com/dani-garcia/vaultwarden', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'A safe place to store all your passwords — like a locked drawer for your digital life.', replaces:'Think of it like LastPass or 1Password.', desc:'Vaultwarden is a password manager that remembers all your passwords so you do not have to. It creates strong, unique passwords for every website and fills them in automatically. Your vault is encrypted end-to-end — even we cannot see your passwords.', url:'https://vault.mysweetpea.cc' },
-            matrix: { name:'Matrix / Element', icon:'/assets/icons/matrix.svg', iconAlt:'Matrix', shot:'/assets/screenshots/element.webp', github:'https://github.com/element-hq/element-web', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'A private chat app for messaging friends — nobody else can read your messages.', replaces:'Think of it like Discord or Slack, but private.', desc:'Matrix is a private, encrypted chat system. Element is the app you use to access it. Create rooms, send messages, share files, all encrypted.', url:'https://chat.mysweetpea.cc' },
-            affine: { name:'AFFiNE', icon:'/assets/icons/affine2.svg', iconAlt:'AFFiNE', shot:'/assets/screenshots/affine.webp', github:'https://github.com/toeverything/AFFiNE', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'A place to write notes, build wikis, and sketch ideas — all kept private.', replaces:'Think of it like Notion and Miro in one.', desc:'AFFiNE is a free alternative to Notion. Create documents, wikis, whiteboards, and knowledge bases. All your notes are stored privately on our server.', url:'https://notes.mysweetpea.cc' },
-            koalasync: { name:'KoalaSync', icon:'/assets/icons/koalasync.svg', iconAlt:'KoalaSync logo', shot:'/assets/screenshots/koalasync.webp', github:'https://github.com/Shik3i/KoalaSync', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'Watch movies and shows together with friends in real-time — everyone sees the same scene.', replaces:'Think of it like a shared remote for your watch party.', desc:'KoalaSync lets you watch movies and shows together with friends in real-time. Works with Jellyfin, YouTube, and other video sites.', url:'https://sync.mysweetpea.cc' },
-            jellyfin: { name:'Jellyfin / Moonfin', icon:'/assets/icons/jellyfin.svg', iconAlt:'Jellyfin', shot:'/assets/screenshots/jellyfin.webp', github:'https://github.com/jellyfin/jellyfin', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'Watch any shows, movies, or animes anytime', replaces:'Think of it like Netflix, but it is your own collection.', desc:'Jellyfin is your own private Netflix — a free, open-source media server that streams your movie and TV collection to any device. Moonfin is a premium web interface that runs on top of Jellyfin.', url:'https://media.mysweetpea.cc/Moonfin/Web/' },
-            seerr: { name:'Seerr', icon:'/assets/icons/seerr.svg', iconAlt:'Seerr logo', shot:'/assets/screenshots/seerr.webp', github:'https://github.com/seerr-team/seerr', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'A wish list for movies and shows — request anything you want to watch.', replaces:'Think of it like a request box for your media library.', desc:'Seerr is like a wish list for movies and shows. Browse what is trending, see what is already available, and request anything you want to watch. Your request is processed automatically and the content appears in Jellyfin.', url:'https://request.mysweetpea.cc' },
-            nextcloud: { name:'Nextcloud', icon:'/assets/icons/nextcloud.svg', iconAlt:'Nextcloud', shot:'/assets/screenshots/nextcloud.webp', github:'https://github.com/nextcloud/server', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'Your private place for files, calendar, and contacts — like a personal Google Workspace.', replaces:'Think of it like Google Drive, but private.', desc:'Nextcloud is your private Google Workspace replacement. Sync files across devices, share documents, manage your calendar and contacts — all stored on our own hardware.', url:'https://cloud.mysweetpea.cc' },
-            immich: { name:'Immich', icon:'/assets/icons/immich.svg', iconAlt:'Immich', shot:'/assets/screenshots/immich.webp', github:'https://github.com/immich-app/immich', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'Back up your photos and videos privately — search them and keep them safe.', replaces:'Think of it like Google Photos, but private.', desc:'Immich is a self-hosted photo and video backup, like Google Photos without the tracking. Back up your memories, search them with AI, and keep them private on our own server.', url:'https://photos.mysweetpea.cc' },
-            openwebui: { name:'Open WebUI', icon:'/assets/icons/openwebui.svg', iconAlt:'Open WebUI', shot:'/assets/screenshots/openwebui.webp', github:'https://github.com/open-webui/open-webui', tier:'sweetpea', tierLabel:'Sweet Pea', plain:'A private AI chat assistant — your conversations aren\'t logged or trained on.', replaces:'Think of it like ChatGPT, but private.', desc:'Open WebUI is a private AI chat interface running entirely on our own hardware. Chat with open-source models without your conversations ever leaving our servers.', url:'https://ai.mysweetpea.cc' },
-        };
+        /* Service catalog comes from MSP (assets/site-data.json, validated +
+           frozen; baked fallback embedded in site-data.js at build time).
+           Synchronous view: MSP.baked() — available immediately, used for the
+           lightbox so clicks never wait on the network. */
+        var SERVICES = {};
+        if (window.MSP) {
+            SERVICES = window.MSP.baked() || {};
+            /* keep the live copy warm: if the fetched JSON differs from the
+               baked one (a deploy updated the data), swap it in — the data is
+               frozen, so any open lightbox keeps its old reference safely. */
+            window.MSP.data().then(function (d) {
+                if (d && d.services) {
+                    var byKey = {};
+                    for (var i = 0; i < d.services.length; i++) byKey[d.services[i].key] = d.services[i];
+                    SERVICES = byKey;
+                }
+            }).catch(function () { });
+        }
+
 
         /* Icon markup is stored as a PATH (not an HTML string) and rendered
            with createElement - removes the innerHTML sink (XSS security). */

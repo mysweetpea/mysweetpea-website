@@ -1516,6 +1516,41 @@
     setTimeout(applyThemeAssets, 300);
 })();
 
+/* === Suggest categories (dynamic, from site-data.json) ========================
+   The <select> in suggest.html ships its static option list (SEO + no-JS
+   fallback). At runtime we reconcile it with the validated category list
+   from MSP so adding a category never requires editing markup again.
+   createElement/textContent only — the option labels are data, never HTML. */
+(function () {
+    'use strict';
+    var sel = document.getElementById('s-category');
+    if (!sel || !window.MSP) return;
+    window.MSP.data().then(function (d) {
+        if (!d || !d.suggestCategories) return;
+        var have = {};
+        var i, o;
+        for (i = 0; i < sel.options.length; i++) have[sel.options[i].value] = true;
+        // append categories the markup doesn't know (before 'other' if present)
+        var other = sel.querySelector('option[value="other"]');
+        for (i = 0; i < d.suggestCategories.length; i++) {
+            var c = d.suggestCategories[i];
+            if (have[c.value]) continue;
+            o = document.createElement('option');
+            o.value = c.value;
+            o.textContent = c.label;
+            if (other) sel.insertBefore(o, other);
+            else sel.appendChild(o);
+        }
+        // remove options whose category was retired (keep placeholder + other)
+        for (i = sel.options.length - 1; i >= 0; i--) {
+            var v = sel.options[i].value;
+            if (v === '' || v === 'other') continue;
+            var known = d.suggestCategories.some(function (c) { return c.value === v; });
+            if (!known) sel.remove(i);
+        }
+    }).catch(function () { /* static list stands */ });
+})();
+
 /* === Auto-year (footer copyright) ============================================
    One listener-free pass on load; spans carry data-year. */
 (function () {

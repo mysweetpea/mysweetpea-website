@@ -56,19 +56,9 @@
         for (var i = 0; i < nodes.length; i++) cio.observe(nodes[i]);
     }
 
-    /* ---------- live uptime (monitors 1-9, 24h windows) ---------- */
+    /* ---------- live uptime (monitor ids resolved at runtime via MSP) ---------- */
 
-    var MONITOR_IDS = {
-        vaultwarden: 1,
-        matrix: 2,
-        affine: 3,
-        koalasync: 4,
-        jellyfin: 5,
-        seerr: 6,
-        nextcloud: 7,
-        immich: 8,
-        openwebui: 9
-    };
+    var MONITOR_IDS = null; /* filled from MSP.monitors() below */
 
     var stateEl = document.getElementById('aboutUptimeState');
     var tickerEl = document.getElementById('aboutTickerState');
@@ -108,28 +98,36 @@
         }
     }
 
-    var aborter = ('AbortController' in window) ? new AbortController() : null;
-    /* timer cleared on EVERY settle path (success AND failure) */
-    var abortTimer = aborter ? setTimeout(function () { aborter.abort(); }, 10000) : 0;
-    function clearAbort() { if (abortTimer) { clearTimeout(abortTimer); abortTimer = 0; } }
-    fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public', aborter ? { signal: aborter.signal } : {})
-        .then(function (r) { clearAbort(); return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
-        .then(function (data) {
-            if (!data || !data.uptimeList || !pctEl) return Promise.reject(new Error('no uptimeList'));
+    /* PageAvg: mean 24h uptime across the resolved monitors. Honesty rule
+       (kept from the hand-rolled version): a PARTIAL set means IDs drifted —
+       avg is null so the caller fails closed instead of showing a
+       plausible-but-wrong number. */
+    function PageAvg(ids, uptimeList) {
+        var sum = 0, n = 0, keys = Object.keys(ids);
+        keys.forEach(function (name) {
+            var v = uptimeList[ids[name] + '_24'];
+            if (typeof v === 'number' && v >= 0 && v <= 1) { sum += v; n++; }
+        });
+        if (n !== keys.length) {
+            console.warn('[msp] about uptime: partial monitor set (' + n + '/' + keys.length + ')');
+            return { n: n, avg: null };
+        }
+        return { n: n, avg: Math.round((sum / n) * 1000) / 10 };
+    }
+
+    /* Shared pipeline: ONE heartbeat fetch + runtime-resolved monitor map. */
+    var feedP = (window.MSP
+        ? Promise.all([window.MSP.heartbeat(), window.MSP.monitors()])
+        : Promise.reject(new Error('MSP missing')));
+    feedP
+        .then(function (res) {
+            var data = res[0], mons = res[1] || {};
+            MONITOR_IDS = mons.byKey || {};
+            if (!data || !data.uptimeList || !pctEl || !Object.keys(MONITOR_IDS).length) return Promise.reject(new Error('no usable feed'));
             // uptimeList keys are "<monitorId>_24", values are fractions 0..1
-            var sum = 0, n = 0;
-            Object.keys(MONITOR_IDS).forEach(function (name) {
-                var v = data.uptimeList[MONITOR_IDS[name] + '_24'];
-                if (typeof v === 'number' && v >= 0 && v <= 1) { sum += v; n++; }
-            });
-            /* honesty rule: a PARTIAL set means server-side IDs drifted —
-               averaging the subset would show a plausible-but-wrong number.
-               Fail closed to the unreachable state instead. */
-            if (n !== Object.keys(MONITOR_IDS).length) {
-                console.warn('[msp] about uptime: partial monitor set (' + n + '/' + Object.keys(MONITOR_IDS).length + ')');
-                return Promise.reject(new Error('partial monitor set'));
-            }
-            var avg = Math.round((sum / n) * 1000) / 10;
+            var pa = PageAvg(MONITOR_IDS, data.uptimeList);
+            if (pa.avg == null) return Promise.reject(new Error('partial monitor set'));
+            var avg = pa.avg; /* already one-decimal from PageAvg */
             var s = avg.toFixed(1);   /* one decimal, matching "99.9" markup default */
             if (pctFired || reducedMotion || !('IntersectionObserver' in window)) {
                 // animation already ran (or will never run): show the live value.
