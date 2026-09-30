@@ -92,10 +92,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
 
 
-<main id="main-content" class="content-wrapper">
+<main id="main-content" class="content-wrapper" tabindex="-1">
         <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/index.html" data-keywords="home start landing main mysweetpea">Home</a><span aria-current="page">Page Not Found</span></nav>
         <div class="hero">
-            <img src="/logo.svg" alt="" class="hero-watermark" aria-hidden="true" loading="lazy" decoding="async">
+            <img src="/logo.svg" alt="" class="hero-watermark" aria-hidden="true" loading="eager" decoding="async">
             <img src="/logo.svg" alt="MySweetPea logo" class="logo" width="160" height="160">
             <div class="code">404</div>
             <h1 class="glass-text">Page Not Found</h1>
@@ -172,28 +172,49 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
         function wire() {
             var input = document.getElementById('p404-search');
             if (!input) return;
-            if (window.MSPSearch) {
-                window.MSPSearch.warm();
+            /* API-shape guard, not just truthiness: site.js and this HTML are
+               cached independently (SW asset versions can drift), so an old
+               cached site.js may lack ready()/goto(). A shape-less truthiness
+               check would throw on every Enter. */
+            var search = window.MSPSearch;
+            var usable = search && typeof search.goto === 'function' && typeof search.ready === 'function';
+            if (usable) {
+                search.warm();
                 /* Await the service index so a fast Enter-press doesn't hit
                    "No match" for a valid service (the old hardcoded map was
                    always complete; this keeps parity). */
-                window.MSPSearch.ready().catch(function () {});
+                search.ready().catch(function () {});
+            }
+            function showNoMatch() {
+                input.classList.add('invalid');
+                input.value = '';
+                input.placeholder = 'No match — try "services" or "pricing"';
             }
             input.addEventListener('keydown', function (e) {
-                if (e.key !== 'Enter') return;
+                if (e.key !== 'Enter' || e.isComposing) return;
                 var q = input.value.trim();
                 if (!q) return;
+                /* unstick the error state the moment the user types again */
+                input.addEventListener('input', function onType() {
+                    input.classList.remove('invalid');
+                    input.removeEventListener('input', onType);
+                });
                 var go = function () {
-                    if (window.MSPSearch && window.MSPSearch.goto(q)) return;
-                    input.classList.add('invalid');
-                    input.value = '';
-                    input.placeholder = 'No match — try "services" or "pricing"';
+                    var s = window.MSPSearch;
+                    if (s && typeof s.goto === 'function' && s.goto(q)) return;
+                    showNoMatch();
                 };
-                if (window.MSPSearch) { window.MSPSearch.ready().then(go, go); } else { go(); }
+                var s2 = window.MSPSearch;
+                if (s2 && typeof s2.ready === 'function') { s2.ready().then(go, go); }
+                else { go(); }
             });
         }
         if (window.MSPSearch) { wire(); return; }
-        document.addEventListener('DOMContentLoaded', wire);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', wire);
+        } else {
+            wire();   /* fragment included post-DOMContentLoaded still wires */
+        }
     })();
     </script>
     <script>
