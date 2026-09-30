@@ -61,7 +61,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="canonical" href="https://mysweetpea.cc/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MySweetPea","url":"https://mysweetpea.cc","logo":"https://mysweetpea.cc/icon-512.png","description":"Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions — community funded.","email":"support@mysweetpea.cc","sameAs":["https://github.com/mysweetpea"]}</script>
 </head>
-<body data-page="home">
+<body data-nav="home" data-page="home">
     <a href="#main-content" class="skip-link">Skip to content</a>
     <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
     <div class="bg-gradient" aria-hidden="true"></div>
@@ -471,12 +471,12 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <span class="vb-ico"><img src="/assets/icons/github.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
                     <h3 class="vb-title">The configuration is public too</h3>
                     <p class="vb-body">Not just the apps &mdash; the whole infrastructure. Deployment manifests, backup scripts, monitoring rules: the way this garden is actually run lives in a public repository. You can read exactly how your data is stored, backed up and protected.</p>
-                    <a class="vb-link" href="https://github.com/mysweetpea/mysweetpea-homelab" rel="noopener" data-keywords="infrastructure repository config homelab kubernetes verify">read the infrastructure repo</a>
+                    <a class="vb-link" href="https://github.com/mysweetpea/mysweetpea-homelab" data-gh-repo="homelab" rel="noopener" data-keywords="infrastructure repository config homelab kubernetes verify">read the infrastructure repo</a>
                 </article>
                 <article class="vb-card reveal reveal-delay-2">
                     <span class="vb-ico"><img src="/assets/icons/icon-ui-globe.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
                     <h3 class="vb-title">Watched in the open</h3>
-                    <p class="vb-body">The same uptime monitors that alert the gardener publish their heartbeats publicly &mdash; nine services, checked around the clock, failures included. There is no status-page editor: what you see is what the machines report.</p>
+                    <p class="vb-body">The same uptime monitors that alert the gardener publish their heartbeats publicly &mdash; <span data-fact="services-word">nine</span> services, checked around the clock, failures included. There is no status-page editor: what you see is what the machines report.</p>
                     <a class="vb-link" href="/status.html" data-keywords="status uptime monitoring verify live monitors heartbeat">watch the monitors live</a>
                 </article>
             </div>
@@ -503,7 +503,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <span class="vb-ico"><img src="/assets/icons/icon-ui-leaf.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
                     <h3 class="vb-title">Run the whole garden yourself</h3>
                     <p class="vb-body">The exact setup this garden runs on ships as a free, open-source installer created by MySweetPea: a guided wizard, 54+ apps. Any hardware you have can become your own home server. No GitHub account needed, your data never leaves your house, and the heavy lifting is a single command.</p>
-                    <a class="cta-btn cta-btn-ghost gw-btn" href="https://github.com/mysweetpea/mysweetpea-homelab" rel="noopener" data-keywords="installer self host selfhost download github homelab diy own hardware">Get the installer</a>
+                    <a class="cta-btn cta-btn-ghost gw-btn" href="https://github.com/mysweetpea/mysweetpea-homelab" data-gh-repo="homelab" rel="noopener" data-keywords="installer self host selfhost download github homelab diy own hardware">Get the installer</a>
                     <p class="gw-note">free and open source — the same setup this garden runs on, nothing hidden.</p>
                 </article>
             </div>
@@ -533,7 +533,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <div class="med reveal" aria-hidden="true">✦</div>
                 <div class="reveal reveal-delay-1">
                     <p><strong>MySweetPea is run by one person.</strong> It started in May 2026 as a passion project but evolved into a privacy escape. After hearing so many cases of personal data misusage, I began running a handful of services on my own machines at home. After months of development, it grew into a proper server so the garden could reach beyond just me. Everything here runs on hardware I own, backed up nightly and watched around the clock, and I genuinely love running and maintaining MySweetPea.</p>
-                    <div class="g-links"><a href="/about.html" data-keywords="story gardener who about team mission why runs it behind mysweetpea person solo one">The full story ↗</a><a href="/status.html" data-keywords="uptime health monitors operational down status page">Incident history ↗</a><a href="https://github.com/mysweetpea" rel="noopener">The public repos ↗</a></div>
+                    <div class="g-links"><a href="/about.html" data-keywords="story gardener who about team mission why runs it behind mysweetpea person solo one">The full story ↗</a><a href="/status.html" data-keywords="uptime health monitors operational down status page">Incident history ↗</a><a href="https://github.com/mysweetpea" data-gh-org="1" rel="noopener">The public repos ↗</a></div>
                 </div>
             </div>
         </section>
@@ -594,7 +594,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <h4>Support</h4>
             <a href="/contact.html" data-keywords="email reach message touch help questions">Contact Us</a>
             <a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a>
-            <a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://github.com/mysweetpea" data-gh-org="1" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
         </div>
         <div class="footer-bottom">
@@ -613,10 +613,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=h1375bb5f" defer></script>
     <script src="/assets/js/lenis-init.js?v=h3379bccf" defer></script>
-    <script src="/assets/js/site.js?v=hf7689c9a" defer></script>
-    <script src="/assets/js/site-data.js?v=h885de6f4" defer></script>
+    <script src="/assets/js/site.js?v=h7e84206a" defer></script>
+    <script src="/assets/js/site-data.js?v=h9f249afe" defer></script>
     <script src="/assets/js/premium.js?v=h7c2f2f59" defer></script>
-    <script src="/assets/js/home-page.js?v=hc8a3cd78" defer></script>
+    <script src="/assets/js/home-page.js?v=h59bbae3e" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {

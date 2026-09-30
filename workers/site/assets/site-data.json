@@ -296,6 +296,25 @@
     "statusApiBase": "https://status.mysweetpea.cc",
     "statusSlug": "public",
     "monitorStrategy": "kuma-name",
-    "monitorGroup": "Visitor Services"
+    "monitorGroup": "Visitor Services",
+    "orgUrl": "https://github.com/mysweetpea"
+  },
+  "repos": [
+    {
+      "key": "homelab",
+      "name": "mysweetpea-homelab",
+      "url": "https://github.com/mysweetpea/mysweetpea-homelab",
+      "desc": "Every service definition, firewall rule and backup script. The whole garden, as code, exactly as it runs."
+    },
+    {
+      "key": "website",
+      "name": "mysweetpea-website",
+      "url": "https://github.com/mysweetpea/mysweetpea-website",
+      "desc": "The site, the dashboard, the workers behind them — written in the open."
+    }
+  ],
+  "siteFacts": {
+    "publicServices": 9,
+    "publicRepos": 2
   }
 }

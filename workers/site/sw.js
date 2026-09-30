@@ -4,14 +4,14 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-h706cf4dd';
+const CACHE = 'mysweetpea-h127e8dc1';
 const CORE = [
-        '/assets/js/services-page.js?v=hf30612e8',
-        '/assets/js/site-data.js?v=h885de6f4',
+        '/assets/js/services-page.js?v=hf3307130',
+        '/assets/js/site-data.js?v=h9f249afe',
         '/assets/site-data.json',
         '/assets/js/redeem-page.js?v=h97be1293',
         '/assets/js/status-page.js?v=hdd39da1c',
-        '/assets/js/about-page.js?v=h84624478',
+        '/assets/js/about-page.js?v=h4657466c',
         '/assets/js/form-page.js?v=hc5de4739',
         '/assets/js/changelog-page.js?v=hb3ac4f95',
         '/assets/js/support-page.js?v=h79796c97',
@@ -25,9 +25,9 @@ const CORE = [
   '/assets/css/home.css?v=hc06a8cdd',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',
-  '/assets/js/site.js?v=hf7689c9a',
+  '/assets/js/site.js?v=h7e84206a',
   '/assets/js/premium.js?v=h7c2f2f59',
-  '/assets/js/home-page.js?v=hc8a3cd78',
+  '/assets/js/home-page.js?v=h59bbae3e',
   '/assets/js/lenis.min.js?v=h1375bb5f',
   '/assets/js/lenis-init.js?v=h3379bccf',
   '/assets/fonts/figtree-var.woff2',

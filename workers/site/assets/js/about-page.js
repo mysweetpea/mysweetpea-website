@@ -56,6 +56,36 @@
         for (var i = 0; i < nodes.length; i++) cio.observe(nodes[i]);
     }
 
+    /* ---------- dynamic factsheet counts (from site-data.json) ----------
+       Markup ships 9 / 2 as SEO statics. At runtime re-aim the count-ups at
+       the validated data; repaint when the animation already finished. */
+    (function syncFacts() {
+        if (!window.MSP) return;
+        window.MSP.data().then(function (d) {
+            if (!d) return;
+            var nS = d.services.length, nR = (d.repos || []).length;
+            var stats = document.querySelectorAll('.about-x-bignum .about-x-bn');
+            stats.forEach(function (bn) {
+                var lbl = bn.querySelector('.about-x-bl');
+                var val = bn.querySelector('.about-x-bv span[data-count]');
+                if (!lbl || !val) return;
+                var txt = lbl.textContent.toLowerCase();
+                var target = null;
+                /* exact-tile matching: the uptime tile also says "services" —
+                   only the "Services, all open source" / "Public repositories"
+                   tiles are count tiles. Uptime lives in the lead tile with
+                   the live % (id'd separately). */
+                if (txt.indexOf('uptime') !== -1) return;
+                if (txt.indexOf('services') !== -1) target = nS;
+                else if (txt.indexOf('repositor') !== -1) target = nR;
+                if (target == null) return;
+                val.setAttribute('data-count', String(target));
+                var cur = parseFloat(val.textContent);
+                if (isFinite(cur) && cur > 0 && cur !== target) val.textContent = String(target);
+            });
+        }).catch(function () { });
+    })();
+
     /* ---------- live uptime (monitor ids resolved at runtime via MSP) ---------- */
 
     var MONITOR_IDS = null; /* filled from MSP.monitors() below */
@@ -140,7 +170,6 @@
             }
         })
         .catch(function (err) {
-            clearAbort();
             console.warn('[msp] about uptime fetch failed:', err && err.message ? err.message : err);
             markUnreachable();
         })

@@ -65,6 +65,16 @@
             if (n > 0) chip.textContent = '+' + n + ' queued';
             else chip.style.display = 'none';
         }
+        /* re-derive filter badge counts from the live DOM (the 'All 15'
+           static can drift once the grid is dynamic) */
+        var counts = document.querySelectorAll('.filter-btn .f-count');
+        var nAll = document.querySelectorAll('.service-card').length +
+                   document.querySelectorAll('.coming-soon-card:not([hidden])').length;
+        counts.forEach(function (el) {
+            var btn = el.closest('.filter-btn');
+            if (!btn) return;
+            if (btn.getAttribute('data-filter') === 'all') el.textContent = String(nAll);
+        });
     }).catch(function () { /* static grid stands */ });
 })();
 

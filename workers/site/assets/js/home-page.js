@@ -101,6 +101,7 @@
        null => static value stays, never a plausible-but-wrong average. */
     var p = (window.MSP ? window.MSP.uptimeAvg() : Promise.reject(new Error('MSP missing')))
       .then(function(avg){
+        clearAbort();
         if (avg != null) {
           var s = avg.toFixed(1);
           recUptime.setAttribute('data-count', s);
@@ -127,19 +128,34 @@
     window.MSP.data().then(function(d){
       if (!d || !d.services) return;
       var n = d.services.length;
-      var nine = document.querySelector('.proof-stat .proof-value[data-count]');
-      var lbl = nine ? nine.closest('.proof-stat') : null;
-      var isCount = lbl && lbl.querySelector('.proof-label') && /public services/i.test(lbl.querySelector('.proof-label').textContent);
-      if (nine && isCount) {
+      var tiles = Array.prototype.slice.call(document.querySelectorAll('.proof-stat'));
+      tiles.forEach(function (tile) {
+        var nine = tile.querySelector('.proof-value[data-count]');
+        var lab = tile.querySelector('.proof-label');
+        if (!nine || !lab) return;
+        if (!/public services/i.test(lab.textContent)) return;
         nine.setAttribute('data-count', String(n));
         /* if the count-up already fired (text is a finished number, not the
            initial 0), repaint directly — data-count alone won't re-run it */
         var t = parseFloat(nine.textContent);
         if (isFinite(t) && t > 0) nine.textContent = String(n);
-      }
+      });
       var pill = document.querySelector('.what-pill');
       if (pill && pill.textContent.indexOf('services live') !== -1) {
         pill.textContent = n + '/' + n + ' services live';
+      }
+      var nr = (d.repos || []).length || (d.siteFacts && d.siteFacts.publicRepos) || 0;
+      if (nr) {
+        var rp = Array.prototype.slice.call(document.querySelectorAll('.what-pill')).find(function (p2) {
+          return p2.textContent.indexOf('public repos') !== -1;
+        });
+        if (rp) rp.textContent = nr + ' public repos you can see for yourself';
+        /* record band '2' tile (Public repos) */
+        var rec = Array.prototype.slice.call(document.querySelectorAll('.record .v')).find(function (v2) {
+          var l2 = v2.parentElement && v2.parentElement.querySelector('.l');
+          return l2 && /public repos/i.test(l2.textContent);
+        });
+        if (rec) rec.textContent = String(nr);
       }
     }).catch(function(){});
   }

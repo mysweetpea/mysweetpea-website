@@ -1516,6 +1516,35 @@
     setTimeout(applyThemeAssets, 300);
 })();
 
+/* === Data-fact reconciler (from site-data.json) ===============================
+   Prose numerals tagged with data-fact follow the validated data so dictated
+   copy stays byte-identical while counts stay true. */
+(function () {
+    'use strict';
+    if (!window.MSP) return;
+    window.MSP.data().then(function (d) {
+        if (!d) return;
+        var n = d.services.length;
+        var words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+                     'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+        var w = n >= 0 && n < words.length ? words[n] : String(n);
+        document.querySelectorAll('[data-fact="services-word"]').forEach(function (el) {
+            el.textContent = w;
+        });
+        document.querySelectorAll('[data-fact="services-num"]').forEach(function (el) {
+            el.textContent = String(n);
+        });
+    }).catch(function () { });
+})();
+
+/* === Chrome reconcile: repo links + aria-current (from site-data.json) ======= */
+(function () {
+    'use strict';
+    if (window.MSP && typeof window.MSP.syncChrome === 'function') {
+        window.MSP.syncChrome();
+    }
+})();
+
 /* === Suggest categories (dynamic, from site-data.json) ========================
    The <select> in suggest.html ships its static option list (SEO + no-JS
    fallback). At runtime we reconcile it with the validated category list
