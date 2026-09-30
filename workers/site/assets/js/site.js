@@ -1008,48 +1008,39 @@
     /* The dot's color is driven by .home-status.online/.degraded/.offline via
        CSS (site.css) — no per-dot JS state needed. */
     if (homeStatus && homeStatusText) {
-        var STATUS_NAMES = {
-            1: 'Vaultwarden', 2: 'Matrix', 3: 'AFFiNE', 4: 'KoalaSync',
-            5: 'Jellyfin', 6: 'Seerr', 7: 'Nextcloud', 8: 'Immich', 9: 'Open WebUI'
-        };
-        var STATUS_TOTAL = Object.keys(STATUS_NAMES).length; /* single source of truth */
-        /* A hung connection must degrade to the honest catch path like any
-           other failure — race the request against a 10s timeout. */
-        var aborter = ('AbortController' in window) ? new AbortController() : null;
-        var abortTimer = aborter ? setTimeout(function () { aborter.abort(); }, 10000) : 0;
-        function clearAbortTimer() { if (abortTimer) { clearTimeout(abortTimer); abortTimer = 0; } }
-        fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public', aborter ? { signal: aborter.signal } : {})
-            .then(function (r) { clearAbortTimer(); return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
-            .then(function (data) {
-                var hb = data && data.heartbeatList;
-                if (!hb) throw new Error('no data');
-                var down = [], seen = 0;
-                // Count only our known service monitors — the public page
-                // also includes the mysweetpea.cc website itself.
-                Object.keys(STATUS_NAMES).forEach(function (id) {
-                    var list = hb[id];
-                    if (!list || !list.length) return; /* counted below as not reporting */
+        /* Names + ids come from MSP (runtime-resolved monitors + validated
+           catalog); the heartbeat is the SHARED per-page fetch (was a 4th
+           duplicate fetch with a hardcoded id->name map). */
+        var homeFeed = (window.MSP
+            ? Promise.all([window.MSP.monitors(), window.MSP.data()])
+            : Promise.reject(new Error('MSP missing')));
+        homeFeed.then(function (res) {
+            var mon = res[0] || {};
+            var d = res[1];
+            var byKey = mon.byKey || {};
+            var keyToName = {};
+            if (d && d.services) {
+                d.services.forEach(function (s) { keyToName[s.key] = s.shortName; });
+            }
+            return window.MSP.heartbeat().then(function (data) {
+                var hb = data.heartbeatList;
+                var down = [], seen = 0, total = 0;
+                Object.keys(byKey).forEach(function (key) {
+                    total++;
+                    var list = hb[byKey[key]];
+                    if (!list || !list.length) return; /* counted as not reporting */
                     seen++;
                     var last = list[list.length - 1];
-                    /* Kuma: 0=down, 1=up, 2=pending, 3=maintenance — only a
-                       confirmed 0 counts as down (binary display per user call). */
-                    if (last.status === 0) {
-                        down.push(STATUS_NAMES[id] || ('Service ' + id));
-                    }
+                    /* only a confirmed 0 counts as down (2=pending, 3=maintenance) */
+                    if (last.status === 0) down.push(keyToName[key] || key);
                 });
-                var notReporting = STATUS_TOTAL - seen;
+                var notReporting = total - seen;
                 if (seen === 0) {
-                    /* Payload with data for NONE of our monitors (malformed
-                       response or Kuma renumbering): claiming "all
-                       operational" here would be a lie. */
                     homeStatusText.textContent = 'Status unavailable — check the status page';
                     homeStatus.classList.remove('online', 'offline');
                     homeStatus.classList.add('degraded');
                 } else if (notReporting > 0) {
-                    /* Monitors missing/empty from the payload are UNKNOWN,
-                       not healthy — a service that stopped reporting must not
-                       silently count as operational. */
-                    homeStatusText.textContent = down.length + ' of ' + STATUS_TOTAL + ' down · ' + notReporting + ' not reporting';
+                    homeStatusText.textContent = down.length + ' of ' + total + ' down · ' + notReporting + ' not reporting';
                     homeStatus.classList.remove('online');
                     homeStatus.classList.add(down.length > 0 ? 'offline' : 'degraded');
                 } else if (down.length === 0) {
@@ -1057,19 +1048,17 @@
                     homeStatus.classList.remove('degraded', 'offline');
                     homeStatus.classList.add('online');
                 } else {
-                    homeStatusText.textContent = down.length + ' of ' + STATUS_TOTAL + ' services down: ' + down.join(', ');
+                    homeStatusText.textContent = down.length + ' of ' + total + ' services down: ' + down.join(', ');
                     homeStatus.classList.remove('online');
                     homeStatus.classList.add('offline');
                 }
-            })
-            .catch(function (err) {
-                clearAbortTimer();
-                // API unreachable — say so honestly instead of faking "operational".
-                console.warn('[msp] home status fetch failed:', err && err.message ? err.message : err);
-                homeStatusText.textContent = 'Status unavailable — check the status page';
-                homeStatus.classList.remove('online');
-                homeStatus.classList.add('degraded');
             });
+        }).catch(function (err) {
+            console.warn('[msp] home status fetch failed:', err && err.message ? err.message : err);
+            homeStatusText.textContent = 'Status unavailable — check the status page';
+            homeStatus.classList.remove('online');
+            homeStatus.classList.add('degraded');
+        });
     }
 
     /* === Notify-me buttons (coming-soon services) — removed per request === */

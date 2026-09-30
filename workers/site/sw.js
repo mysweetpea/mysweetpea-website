@@ -4,16 +4,16 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-h127e8dc1';
+const CACHE = 'mysweetpea-ha58ff895';
 const CORE = [
-        '/assets/js/services-page.js?v=hf3307130',
-        '/assets/js/site-data.js?v=h9f249afe',
+        '/assets/js/services-page.js?v=h81a54dae',
+        '/assets/js/site-data.js?v=h0d86b862',
         '/assets/site-data.json',
-        '/assets/js/redeem-page.js?v=h97be1293',
-        '/assets/js/status-page.js?v=hdd39da1c',
+        '/assets/js/redeem-page.js?v=hfd548850',
+        '/assets/js/status-page.js?v=h69bd436a',
         '/assets/js/about-page.js?v=h4657466c',
-        '/assets/js/form-page.js?v=hc5de4739',
-        '/assets/js/changelog-page.js?v=hb3ac4f95',
+        '/assets/js/form-page.js?v=h3cd2d0ec',
+        '/assets/js/changelog-page.js?v=h7781ce4b',
         '/assets/js/support-page.js?v=h79796c97',
         '/assets/css/type-tokens.css?v=hd06288e9',
         '/assets/css/hermes-type.css?v=hdf458fd2',
@@ -25,8 +25,8 @@ const CORE = [
   '/assets/css/home.css?v=hc06a8cdd',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',
-  '/assets/js/site.js?v=h7e84206a',
-  '/assets/js/premium.js?v=h7c2f2f59',
+  '/assets/js/site.js?v=h4cc2be2d',
+  '/assets/js/premium.js?v=h591227ca',
   '/assets/js/home-page.js?v=h59bbae3e',
   '/assets/js/lenis.min.js?v=h1375bb5f',
   '/assets/js/lenis-init.js?v=h3379bccf',

@@ -1,5 +1,5 @@
 (function () {
- var endpoint='https://subscribe.mysweetpea.cc/webhook/redeem-code',btn=document.getElementById('rc-submit');
+ var RB=((window.MSP&&window.MSP.bakedConfig&&window.MSP.bakedConfig().formBase)||'https://subscribe.mysweetpea.cc')+'/webhook',endpoint=RB+'/redeem-code',btn=document.getElementById('rc-submit');
  var fields={'rc-code':'code','rc-name':'name','rc-email':'email','rc-username':'username'};
  function valid(type,v){v=v.trim();if(type==='code')return /^(PEA|FAM)-[A-Z0-9]{8}$/.test(v.toUpperCase());if(type==='name')return v.length>=2;if(type==='email')return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);return /^[A-Za-z0-9_]{3,}$/.test(v);}
  function normCode(v){var c=v.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,11);return c.length>=3?c.slice(0,3)+'-'+c.slice(3):c;}
@@ -39,7 +39,7 @@
    dbValue=norm;dbState='checking';
    var seq=++checkSeq;
    checkTimer=setTimeout(function(){
-    fetch('https://subscribe.mysweetpea.cc/webhook/check-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invite_code:norm})})
+    fetch(RB+'/check-code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invite_code:norm})})
     .then(function(r){return r.text().then(function(t){if(t){try{return JSON.parse(t);}catch(e){return {ok:r.ok};}}return {ok:r.ok};});})
     .then(function(data){if(seq!==checkSeq)return;dbState=data.ok?'valid':'invalid';
      lhint.textContent=data.ok?'CODE VALID':'CODE REJECTED';lhint.classList.toggle('err',!data.ok);})

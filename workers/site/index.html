@@ -90,7 +90,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <a href="/redeem.html" class="nav-btn nav-code" data-keywords="redeem code invite access key"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="3.6" cy="6" r="2.3"/><path d="M5.9 6H11M9.3 6v1.9M10.7 6v1.5"/></svg>I Have a Code</a>
             <span class="nav-sep" aria-hidden="true"></span>
             <div class="nav-actions"><button class="nav-search" aria-label="Search pages and services" title="Search (Ctrl+K)"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button><button class="theme-toggle" aria-label="Toggle color theme"><span class="icon-moon" aria-hidden="true"><img src="/assets/icons/icon-ui-moon.svg" alt="" width="18" height="18" loading="eager" decoding="async" aria-hidden="true"></span><span class="icon-sun" aria-hidden="true"><img src="/assets/icons/icon-ui-sun.svg" alt="" width="18" height="18" loading="eager" decoding="async" aria-hidden="true"></span></button></div>
-            <div class="nav-account" id="nav-account"><a class="nav-btn nav-signin nav-account-chip" id="nav-account-chip" href="https://dashboard.mysweetpea.cc/auth/login" aria-label="Sign in to your dashboard" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><img id="nav-account-avatar" alt="" hidden style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none" /><span id="nav-account-label">Sign in</span></a></div><style>.nav-account{display:inline-flex;align-items:center}.nav-account-chip{display:inline-flex;align-items:center;gap:7px}</style><script>(function(){"use strict";var chip=document.getElementById("nav-account-chip"),label=document.getElementById("nav-account-label");if(!chip||!label)return;var dash="https://dashboard.mysweetpea.cc";fetch("/api/auth/state?name=1",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(s){if(!s||!s.logged_in)return;var first=String(s.name||"").trim().split(/\s+/)[0];label.textContent=first||"Account";chip.href=dash;chip.setAttribute("aria-label","Open your dashboard");var av=document.getElementById("nav-account-avatar");var svg=chip.querySelector("svg");if(av){av.onload=function(){av.style.display="inline-block";av.hidden=false;if(svg)svg.style.display="none";};av.onerror=function(){av.style.display="none";};av.src="/api/avatar?v="+Date.now();}}).catch(function(){});})();</script>
+            <div class="nav-account" id="nav-account"><a class="nav-btn nav-signin nav-account-chip" id="nav-account-chip" href="https://dashboard.mysweetpea.cc/auth/login" data-msp-dash="1" aria-label="Sign in to your dashboard" rel="noopener"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><img id="nav-account-avatar" alt="" hidden style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:none" /><span id="nav-account-label">Sign in</span></a></div><style>.nav-account{display:inline-flex;align-items:center}.nav-account-chip{display:inline-flex;align-items:center;gap:7px}</style><script>(function(){"use strict";var chip=document.getElementById("nav-account-chip"),label=document.getElementById("nav-account-label");if(!chip||!label)return;var dash="https://dashboard.mysweetpea.cc";fetch("/api/auth/state?name=1",{credentials:"same-origin"}).then(function(r){return r.ok?r.json():null}).then(function(s){if(!s||!s.logged_in)return;var first=String(s.name||"").trim().split(/\s+/)[0];label.textContent=first||"Account";chip.href=dash;chip.setAttribute("aria-label","Open your dashboard");var av=document.getElementById("nav-account-avatar");var svg=chip.querySelector("svg");if(av){av.onload=function(){av.style.display="inline-block";av.hidden=false;if(svg)svg.style.display="none";};av.onerror=function(){av.style.display="none";};av.src="/api/avatar?v="+Date.now();}}).catch(function(){});})();</script>
             <a href="/form.html" class="nav-cta" data-keywords="request invite signup sign up access apply join">Get Access</a>
         </div>
     </div>
@@ -593,7 +593,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <div class="footer-col">
             <h4>Support</h4>
             <a href="/contact.html" data-keywords="email reach message touch help questions">Contact Us</a>
-            <a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a>
+            <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a>
             <a href="https://github.com/mysweetpea" data-gh-org="1" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
         </div>
@@ -613,9 +613,9 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=h1375bb5f" defer></script>
     <script src="/assets/js/lenis-init.js?v=h3379bccf" defer></script>
-    <script src="/assets/js/site.js?v=h7e84206a" defer></script>
-    <script src="/assets/js/site-data.js?v=h9f249afe" defer></script>
-    <script src="/assets/js/premium.js?v=h7c2f2f59" defer></script>
+    <script src="/assets/js/site.js?v=h4cc2be2d" defer></script>
+    <script src="/assets/js/site-data.js?v=h0d86b862" defer></script>
+    <script src="/assets/js/premium.js?v=h591227ca" defer></script>
     <script src="/assets/js/home-page.js?v=h59bbae3e" defer></script>
     <script>
     if ('serviceWorker' in navigator) {

@@ -338,7 +338,8 @@
         var aborter = ('AbortController' in window) ? new AbortController() : null;
         var abortTimer = aborter ? setTimeout(function () { aborter.abort(); }, 10000) : 0;
         function clearAbortTimer() { if (abortTimer) { clearTimeout(abortTimer); abortTimer = 0; } }
-        fetch('https://subscribe.mysweetpea.cc/webhook/incidents', aborter ? { signal: aborter.signal } : {})
+        var fb = (window.MSP && window.MSP.bakedConfig && window.MSP.bakedConfig().formBase) || 'https://subscribe.mysweetpea.cc';
+        fetch(fb + '/webhook/incidents', aborter ? { signal: aborter.signal } : {})
             .then(function (r) {
                 clearAbortTimer();
                 /* Non-2xx must hit the catch path: a 502 from the webhook is

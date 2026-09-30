@@ -17,11 +17,34 @@
     var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     var WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     var CAT_LABEL = { f: 'Feature', i: 'Improvement', d: 'Fix' };
-    var REPO_KEYS = ['repo:portfolio', 'repo:homelab-k8s'];
+    /* Repo chips derive from MSP repos[] (full owner/name slugs — the same
+       values /api/commits items carry in .repo). Kept in sync with the
+       fetched data below so a repo list change is a data change. */
+    var REPO_SLUGS = (window.MSP && window.MSP.bakedRepos()) || [];
+    var REPO_KEYS = REPO_SLUGS.map(function (r) { return 'repo:' + r.key; });
     var CAT_KEYS = ['cat:f', 'cat:i', 'cat:d'];
 
+    function repoKeyOf(slug) {
+        /* slug 'mysweetpea/mysweetpea-website' -> key 'website' via repos[];
+           match by repo name (owner-agnostic). Falls back to the raw slug. */
+        var leaf = String(slug || '').split('/').pop();
+        for (var i = 0; i < REPO_SLUGS.length; i++) {
+            if (REPO_SLUGS[i].name === leaf) return REPO_SLUGS[i].key;
+        }
+        return leaf || slug;
+    }
+    function repoNameOf(keyOrSlug) {
+        var leaf = String(keyOrSlug || '').split('/').pop();
+        for (var i = 0; i < REPO_SLUGS.length; i++) {
+            if (REPO_SLUGS[i].key === leaf || REPO_SLUGS[i].name === leaf) return REPO_SLUGS[i].name;
+        }
+        return leaf;
+    }
+
     var data = null;
-    var active = { all: true, 'repo:portfolio': false, 'repo:homelab-k8s': false, 'cat:f': false, 'cat:i': false, 'cat:d': false };
+    var active = { all: true };
+    REPO_KEYS.forEach(function (k) { active[k] = false; });
+    CAT_KEYS.forEach(function (k) { active[k] = false; });
 
     function el(tag, cls, text) {
         var node = document.createElement(tag);
@@ -56,7 +79,7 @@
     }
 
     function passes(item) {
-        if (anyOn(REPO_KEYS) && !active['repo:' + item.repo]) return false;
+        if (anyOn(REPO_KEYS) && !active['repo:' + repoKeyOf(item.repo)]) return false;
         if (anyOn(CAT_KEYS) && !active['cat:' + item.cat]) return false;
         return true;
     }
@@ -84,13 +107,13 @@
                 fresh.appendChild(txt('new'));
                 top.appendChild(fresh);
             }
-            top.appendChild(el('span', 'cl2-tag n', h.repo));
+            top.appendChild(el('span', 'cl2-tag n', repoNameOf(h.repo)));
             card.appendChild(top);
             card.appendChild(el('h2', null, cleanTitle(h.message)));
             var meta = el('p', 'cl2-hl-meta');
             meta.appendChild(el('span', null, h.sha));
             // date lives in the top row only - no duplicate
-            meta.appendChild(txt(' \u00B7 ' + (h.repo === 'portfolio' ? 'website' : 'infrastructure')));
+            meta.appendChild(txt(' \u00B7 ' + (repoKeyOf(h.repo) === 'website' ? 'website' : 'infrastructure')));
             card.appendChild(meta);
             var tags = el('div', 'cl2-tags');
             tags.appendChild(el('span', 'cl2-tag ' + (h.cat || 'i'), CAT_LABEL[h.cat] || 'Improvement'));
@@ -393,11 +416,15 @@
     /* chip counts — computed from loaded data once */
     function fillCounts() {
         if (!data || !data.weeks) return;
-        var counts = { 'repo:portfolio': 0, 'repo:homelab-k8s': 0, 'cat:f': 0, 'cat:i': 0, 'cat:d': 0 };
+        var counts = {};
+        REPO_KEYS.forEach(function (k) { counts[k] = 0; });
+        CAT_KEYS.forEach(function (k) { counts[k] = 0; });
         data.weeks.forEach(function (w) {
             (w.items || []).forEach(function (item) {
-                if (item && counts['repo:' + item.repo] !== undefined) counts['repo:' + item.repo]++;
-                if (item && item.cat && counts['cat:' + item.cat] !== undefined) counts['cat:' + item.cat]++;
+                if (!item) return;
+                var rk = 'repo:' + repoKeyOf(item.repo);
+                if (counts[rk] !== undefined) counts[rk]++;
+                if (item.cat && counts['cat:' + item.cat] !== undefined) counts['cat:' + item.cat]++;
             });
         });
         Array.prototype.forEach.call(document.querySelectorAll('.cl2-count'), function (c) {
@@ -429,8 +456,9 @@
         // Deep-link state: shareable #repo=...&type=... (f=features, i=improvements, d=fixes)
         try {
             var params = [];
-            if (active['repo:portfolio']) params.push('repo=portfolio');
-            if (active['repo:homelab-k8s']) params.push('repo=homelab');
+            REPO_KEYS.forEach(function (k) {
+                if (active[k]) params.push('repo=' + k.slice(5));
+            });
             if (active['cat:f']) params.push('type=f');
             if (active['cat:i']) params.push('type=i');
             if (active['cat:d']) params.push('type=d');
@@ -524,8 +552,10 @@
         h.split('&').forEach(function (pair) {
             var kv = pair.split('=');
             if (kv.length !== 2) return;
-            if (kv[0] === 'repo' && kv[1] === 'portfolio') applyFilter('repo:portfolio');
-            if (kv[0] === 'repo' && kv[1] === 'homelab') applyFilter('repo:homelab-k8s');
+            if (kv[0] === 'repo') {
+                var want = 'repo:' + kv[1];
+                if (REPO_KEYS.indexOf(want) !== -1) applyFilter(want);
+            }
             if (kv[0] === 'type' && kv[1] === 'f') applyFilter('cat:f');
             if (kv[0] === 'type' && kv[1] === 'i') applyFilter('cat:i');
             if (kv[0] === 'type' && kv[1] === 'd') applyFilter('cat:d');

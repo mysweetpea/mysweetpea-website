@@ -17,7 +17,8 @@
 
 const JSON_HEADERS = { 'Content-Type': 'application/json' };
 
-const DASH = 'https://dashboard.mysweetpea.cc';
+/* dashboard origin: env-overridable (DASHBOARD_URL), literal = fallback */
+const dashUrl = (env) => (env && env.DASHBOARD_URL) || 'https://dashboard.mysweetpea.cc';
 
 // In-memory cache for /api/commits (survives across requests within an isolate)
 let commitsCache = { data: null, ts: 0 };
@@ -47,7 +48,10 @@ export default {
       if (commitsInflight) return commitsInflight;
       commitsInflight = (async () => {
       const token = env.GITHUB_TOKEN || '';
-      const repos = ['mysweetpea/mysweetpea-website', 'mysweetpea/mysweetpea-homelab'];
+      /* repos come from the environment (vars) so a future repo rename is a
+         config change, not a code change; the literal below is the fallback. */
+      const repos = (env.COMMITS_REPOS || 'mysweetpea/mysweetpea-website,mysweetpea/mysweetpea-homelab')
+        .split(',').map(s => s.trim()).filter(Boolean);
       const headers = {
         'Accept': 'application/vnd.github+json',
         'User-Agent': 'mysweetpea-site'
@@ -73,7 +77,7 @@ export default {
           }
           if (!Array.isArray(data)) return [];
           return data.filter((c) => c && c.sha && c.commit && c.commit.author && c.commit.author.date).map((c) => ({
-            repo: repo.split('/')[1],
+            repo: repo, /* full owner/name — display labels are the page's job */
             full: c.sha,
             sha: c.sha.slice(0, 7),
             message: (c.commit.message || '').split('\n')[0],
@@ -230,7 +234,7 @@ export default {
         const ua = request.headers.get('User-Agent');
         if (cookie) fwd['Cookie'] = cookie;
         if (ua) fwd['User-Agent'] = ua;
-        try { return await (await fetch(DASH + '/api/auth/state', { headers: fwd })).json(); }
+        try { return await (await fetch(dashUrl(env) + '/api/auth/state', { headers: fwd })).json(); }
         catch { return { logged_in: false }; }
       })();
       if (!state.logged_in) return new Response(JSON.stringify({ error: 'sign_in_required' }), { status: 401, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
@@ -285,8 +289,8 @@ export default {
         '<language>en</language>' +
         items.map((h) => {
           const d = h.date ? new Date(h.date) : new Date();
-          const repoName = h.repo === 'portfolio' ? 'mysweetpea-website' : 'mysweetpea-homelab';
-          const link = 'https://github.com/mysweetpea/' + repoName + '/commit/' + (h.full || h.sha || '');
+          const repoSlug = h.repo || '';
+          const link = 'https://github.com/' + repoSlug + '/commit/' + (h.full || h.sha || '');
           return '<item><title>' + esc(h.name || h.message || 'change') + '</title><link>' + esc(link) + '</link><guid isPermaLink="true">' + esc(link) + '</guid><pubDate>' + d.toUTCString() + '</pubDate></item>';
         }).join('') +
         '</channel></rss>';
@@ -311,7 +315,7 @@ export default {
       let upstream;
       try {
         // client query-params deliberately dropped — no parameter injection upstream
-        upstream = await fetch(DASH + '/api/auth/state', { headers: fwd });
+        upstream = await fetch(dashUrl(env) + '/api/auth/state', { headers: fwd });
       } catch (e) {
         return new Response(JSON.stringify({ logged_in: false, error: 'upstream_unreachable' }), {
           status: 502,
@@ -333,7 +337,7 @@ export default {
       fwd['User-Agent'] = request.headers.get('User-Agent') || '';
       let upstream;
       try {
-        upstream = await fetch(DASH + '/api/avatar', { headers: fwd, redirect: 'manual' });
+        upstream = await fetch(dashUrl(env) + '/api/avatar', { headers: fwd, redirect: 'manual' });
       } catch (e) {
         return new Response('upstream_unreachable', { status: 502 });
       }

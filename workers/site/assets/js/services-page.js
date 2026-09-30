@@ -159,8 +159,13 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
                 ghEl.href = gh || '#';
                 ghEl.style.display = gh ? '' : 'none';
             }
-            /* Open button now deep-links to the dashboard Services tab
-               (static, in the markup) - per-service s.url no longer wired. */
+            /* Open button deep-links to the dashboard Services tab; the
+               origin follows the validated config (data- not hardcoded). */
+            var openEl = document.getElementById('lightboxOpen');
+            if (openEl && window.MSP) {
+                var cfg0 = window.MSP.bakedConfig();
+                if (cfg0.dashboardUrl) openEl.href = cfg0.dashboardUrl + '/#services';
+            }
             var tierEl = document.getElementById('lightboxTier');
             if (tierEl) tierEl.textContent = String(s.tierLabel || 'Sweet Pea').toUpperCase();
             /* Mirror the card's LIVE Kuma state into the lightbox meta row

@@ -1,7 +1,9 @@
 /* form.html — Get Access form logic (moved verbatim from inline script; CSP-hash friendly).
    Additions (v108): panel .revealed toggle for CSS reveal animation, submit success state. */
 (function () {
-    var WEBHOOK_BASE = 'https://subscribe.mysweetpea.cc/webhook';
+    /* webhook base from the validated data layer (baked copy = sync, no
+       fetch wait; falls back to the current host if MSP is missing) */
+    var WEBHOOK_BASE = ((window.MSP && window.MSP.bakedConfig && window.MSP.bakedConfig().formBase) || 'https://subscribe.mysweetpea.cc') + '/webhook';
     var ENDPOINTS = { donationRequest: WEBHOOK_BASE + '/donation-request', sweetPeaRequest: WEBHOOK_BASE + '/sweetpea-request' };
     var WALLETS = { monero: 'Coming Soon', bitcoin: 'Coming Soon' };
     var chosenCrypto = '';

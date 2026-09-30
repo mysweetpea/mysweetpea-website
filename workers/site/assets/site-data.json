@@ -19,7 +19,11 @@
       "plain": "A safe place to store all your passwords — like a locked drawer for your digital life.",
       "replaces": "Think of it like LastPass or 1Password.",
       "desc": "Vaultwarden is a password manager that remembers all your passwords so you do not have to. It creates strong, unique passwords for every website and fills them in automatically. Your vault is encrypted end-to-end — even we cannot see your passwords.",
-      "monitorHint": 1
+      "monitorHint": 1,
+      "garden": {
+        "line": "Your passwords and passkeys, synced to every device.",
+        "replaces": "1Password / LastPass"
+      }
     },
     {
       "key": "matrix",
@@ -38,7 +42,11 @@
       "plain": "A private chat app for messaging friends — nobody else can read your messages.",
       "replaces": "Think of it like Discord or Slack, but private.",
       "desc": "Matrix is a private, encrypted chat system. Element is the app you use to access it. Create rooms, send messages, share files, all encrypted.",
-      "monitorHint": 2
+      "monitorHint": 2,
+      "garden": {
+        "line": "Encrypted chat and rooms — nobody in the middle.",
+        "replaces": "Discord / Slack"
+      }
     },
     {
       "key": "affine",
@@ -57,7 +65,11 @@
       "plain": "A place to write notes, build wikis, and sketch ideas — all kept private.",
       "replaces": "Think of it like Notion and Miro in one.",
       "desc": "AFFiNE is a free alternative to Notion. Create documents, wikis, whiteboards, and knowledge bases. All your notes are stored privately on our server.",
-      "monitorHint": 3
+      "monitorHint": 3,
+      "garden": {
+        "line": "Notes, docs and whiteboards that stay yours.",
+        "replaces": "Notion / Miro"
+      }
     },
     {
       "key": "koalasync",
@@ -76,7 +88,11 @@
       "plain": "Watch movies and shows together with friends in real-time — everyone sees the same scene.",
       "replaces": "Think of it like a shared remote for your watch party.",
       "desc": "KoalaSync lets you watch movies and shows together with friends in real-time. Works with Jellyfin, YouTube, and other video sites.",
-      "monitorHint": 4
+      "monitorHint": 4,
+      "garden": {
+        "line": "Watch parties with the people you actually like.",
+        "replaces": "Teleparty"
+      }
     },
     {
       "key": "jellyfin",
@@ -95,7 +111,11 @@
       "plain": "Watch any shows, movies, or animes anytime",
       "replaces": "Think of it like Netflix, but it is your own collection.",
       "desc": "Jellyfin is your own private Netflix — a free, open-source media server that streams your movie and TV collection to any device. Moonfin is a premium web interface that runs on top of Jellyfin.",
-      "monitorHint": 5
+      "monitorHint": 5,
+      "garden": {
+        "line": "Your movies and shows, on your terms.",
+        "replaces": "Netflix"
+      }
     },
     {
       "key": "seerr",
@@ -114,7 +134,11 @@
       "plain": "A wish list for movies and shows — request anything you want to watch.",
       "replaces": "Think of it like a request box for your media library.",
       "desc": "Seerr is like a wish list for movies and shows. Browse what is trending, see what is already available, and request anything you want to watch. Your request is processed automatically and the content appears in Jellyfin.",
-      "monitorHint": 6
+      "monitorHint": 6,
+      "garden": {
+        "line": "Request anything; the garden grows it.",
+        "replaces": "Request forms"
+      }
     },
     {
       "key": "nextcloud",
@@ -133,7 +157,11 @@
       "plain": "Your private place for files, calendar, and contacts — like a personal Google Workspace.",
       "replaces": "Think of it like Google Drive, but private.",
       "desc": "Nextcloud is your private Google Workspace replacement. Sync files across devices, share documents, manage your calendar and contacts — all stored on our own hardware.",
-      "monitorHint": 7
+      "monitorHint": 7,
+      "garden": {
+        "line": "Files, photos and calendar that sync everywhere.",
+        "replaces": "Google Drive"
+      }
     },
     {
       "key": "immich",
@@ -152,7 +180,11 @@
       "plain": "Back up your photos and videos privately — search them and keep them safe.",
       "replaces": "Think of it like Google Photos, but private.",
       "desc": "Immich is a self-hosted photo and video backup, like Google Photos without the tracking. Back up your memories, search them with AI, and keep them private on our own server.",
-      "monitorHint": 8
+      "monitorHint": 8,
+      "garden": {
+        "line": "Every photo, backed up at full quality.",
+        "replaces": "Google Photos"
+      }
     },
     {
       "key": "openwebui",
@@ -171,7 +203,11 @@
       "plain": "A private AI chat assistant — your conversations aren't logged or trained on.",
       "replaces": "Think of it like ChatGPT, but private.",
       "desc": "Open WebUI is a private AI chat interface running entirely on our own hardware. Chat with open-source models without your conversations ever leaving our servers.",
-      "monitorHint": 9
+      "monitorHint": 9,
+      "garden": {
+        "line": "AI chat that answers to you, not an ad network.",
+        "replaces": "ChatGPT"
+      }
     }
   ],
   "comingSoon": [
@@ -297,7 +333,10 @@
     "statusSlug": "public",
     "monitorStrategy": "kuma-name",
     "monitorGroup": "Visitor Services",
-    "orgUrl": "https://github.com/mysweetpea"
+    "orgUrl": "https://github.com/mysweetpea",
+    "supportEmail": "support@mysweetpea.cc",
+    "dashboardUrl": "https://dashboard.mysweetpea.cc",
+    "formBase": "https://subscribe.mysweetpea.cc"
   },
   "repos": [
     {

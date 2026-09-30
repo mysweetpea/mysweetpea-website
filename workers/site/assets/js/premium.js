@@ -427,12 +427,60 @@
         }).catch(function () { /* static bento stands */ });
     })();
 
+    /* === Editorial tiles adopt service names from data (about + index) ======
+       The "replaces" analysis tiles (about) and garden card names (index)
+       carry user-dictated prose that stays in markup; the SERVICE NAMES are
+       facts and follow site-data.json (adopt-by-existing-text, never
+       rewritten prose). */
+    (function syncEditorialNames() {
+        if (!window.MSP) return;
+        window.MSP.data().then(function (d) {
+            if (!d || !d.services) return;
+            /* about: .about-x-ana-to tiles adopt the shortName of the service
+               whose tile text already matches a known name (renames only) */
+            var byLeaf = {};
+            d.services.forEach(function (s) { byLeaf[s.name.split('/').pop().trim().toLowerCase()] = s.shortName; });
+            document.querySelectorAll('.about-x-ana-to').forEach(function (el) {
+                var cur = el.textContent.trim().toLowerCase();
+                if (byLeaf[cur]) el.textContent = byLeaf[cur];
+            });
+            /* index garden: .g-name + .g-side-name + .g-altname "replaces"
+               adopt when the garden copy exists in the data */
+            var gByName = {};
+            d.services.forEach(function (s) {
+                if (!s.garden) return;
+                /* match by full display name OR ANY '/' segment ("Jellyfin /
+                   Moonfin" cards may say just "Jellyfin"). The card NAME is
+                   editorial — only tagline + replaces follow the data. */
+                gByName[s.name.toLowerCase()] = s;
+                s.name.split('/').forEach(function (seg) {
+                    gByName[seg.trim().toLowerCase()] = s;
+                });
+            });
+            document.querySelectorAll('.g-name').forEach(function (el) {
+                var cur = el.textContent.trim().toLowerCase();
+                var s = gByName[cur];
+                if (!s) return;
+                var row = el.closest('.garden-row');
+                if (s.garden.line && row) {
+                    var line = row.querySelector('.g-line');
+                    if (line) line.textContent = s.garden.line;
+                }
+                if (s.garden.replaces && row) {
+                    var alt = row.querySelector('.g-altname');
+                    if (alt) alt.textContent = s.garden.replaces;
+                }
+            });
+        }).catch(function () { });
+    })();
+
     var heartbeatPromise = (function () {
         if (!window.MSP) {
             /* site-data.js missing (defensive — every page loads it before
                premium.js): fall back to the legacy direct fetch so widgets
                still work, with NO monitor map (dots go unknown, honestly). */
-            return fetch('https://status.mysweetpea.cc/api/status-page/heartbeat/public')
+            var base = (window.MSP && window.MSP.bakedConfig && window.MSP.bakedConfig().statusApiBase) || 'https://status.mysweetpea.cc';
+            return fetch(base + '/api/status-page/heartbeat/public')
                 .then(function (r) { return r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)); })
                 .then(function (data) {
                     var hb = data && data.heartbeatList;
