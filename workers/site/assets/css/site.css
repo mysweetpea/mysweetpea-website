@@ -9010,3 +9010,19 @@ body[data-page='status'] .status-head-group .status-dot { margin: 0; flex: none;
 
 /* OCR round: hidden attr gates the success banner even if .show lands */
 body[data-page='suggest'] .success-msg[hidden] { display: none !important; }
+
+/* == USER POLISH BATCH (Oct 2026): breathing room on form/redeem/pricing ======
+   1. form: the selectivity note card sat 10px under the covenant and the
+      submit button right under it — give the note real separation and push
+      the button down from the note (the two boxes read as glued together).
+   2. redeem: the 'Need access first?' callout sat 8px under the account
+      card — one card-margin of air between the two panels.
+   3. pricing: 'THE DIFFERENCE' eyebrow nearly touched the note card below. */
+body[data-page='form'] .form-selective{
+  margin:18px 0 14px;
+}
+body[data-page='form'] .form-submit{ margin-top:4px; }
+body[data-page='redeem'] .redeem-callout{ margin-top:28px; }
+body[data-page='pricing'] .hiw-selective-eyebrow{ margin-bottom:16px; }
+body[data-page='pricing'] .hiw-selective{ margin-top:6px; }
+/* == END USER POLISH BATCH == */
