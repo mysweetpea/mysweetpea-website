@@ -217,7 +217,6 @@
        Both widgets consume the SAME heartbeat payload — via MSP (site-data.js)
        the payload is fetched ONCE per page and monitor IDs are resolved at
        runtime from the Kuma public status API (no hardcoded ID map left). */
-    var SERVICE_MONITORS = null; /* filled from MSP: { key: monitorId } */
 
     function applyHeartbeat(hb, uptimeList, monitors) {
         /* Card dots */
@@ -386,6 +385,8 @@
                 (function (f) {
                     var svc = byKey[f.key];
                     if (!svc) return;
+                    /* f.key is validated by MSP (KEY_RE) before it reaches this
+                       selector — quote/bracket injection cannot survive validation */
                     var tile = bento.querySelector('.tb-tile[data-key="' + f.key + '"]');
                     if (!tile) {
                         tile = document.createElement('div');
@@ -491,7 +492,6 @@
         }
         return Promise.all([window.MSP.heartbeat(), window.MSP.monitors()])
             .then(function (r) {
-                SERVICE_MONITORS = r[1].byKey || {};
                 applyHeartbeat(r[0].heartbeatList, r[0].uptimeList, r[1].byKey || {});
             })
             .catch(function () { markAllUnknown(); });

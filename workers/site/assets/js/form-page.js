@@ -87,7 +87,7 @@
             }
             document.querySelectorAll('.access-choice-card').forEach(function(c){var picked=c===card;c.classList.toggle('selected',picked);c.setAttribute('aria-pressed',String(picked));});
             // Reveal the panel first so the form exists, then smooth-scroll to it.
-            ['seedling','sweetpea'].forEach(function(name){var panel=document.getElementById('panel-'+name),active=name===tier;panel.hidden=!active;panel.classList.toggle('active',active);panel.classList.toggle('revealed',active);});
+            ['seedling','sweetpea'].forEach(function(name){var panel=document.getElementById('panel-'+name);if(!panel)return;var active=name===tier;panel.hidden=!active;panel.classList.toggle('active',active);panel.classList.toggle('revealed',active);});
             var formSection = document.querySelector('.tier-form-section');
             if (formSection) {
                 var target = formSection.getBoundingClientRect().top + window.pageYOffset - 90;
@@ -142,7 +142,7 @@
         }
         wrap.hidden = false;
     }
-    document.getElementById('wallet-addr').addEventListener('click',function(){var b=this;navigator.clipboard.writeText(b.textContent).then(function(){var x=b.textContent;b.textContent='Copied!';setTimeout(function(){b.textContent=x;},1600);});});
+    document.getElementById('wallet-addr').addEventListener('click',function(){var b=this;navigator.clipboard.writeText(b.textContent).then(function(){var x=b.textContent;b.textContent='Copied!';setTimeout(function(){b.textContent=x;},1600);}).catch(function(){/* insecure context or denied: leave address as-is */});});
     function post(endpoint,data,btn,defaultLabel,successUrl,overlayId){btn.disabled=true;btn.classList.add('loading');btn.textContent='Submitting…';var overlay=document.getElementById(overlayId);if(overlay)overlay.classList.add('active');fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.text().then(function(t){if(t){try{return JSON.parse(t);}catch(e){return {ok:r.ok};}}return {ok:r.ok};});}).then(function(result){if(!result.ok)throw new Error(result.msg||'Submission failed');if(overlay)overlay.classList.remove('active');btn.classList.add('success');btn.textContent='Request sent';if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches){window.location.href=successUrl;return;}setTimeout(function(){window.location.href=successUrl;},900);}).catch(function(e){btn.disabled=false;btn.classList.remove('loading');btn.textContent=e.message||'Try again';if(overlay)overlay.classList.remove('active');if(typeof showToast==='function')showToast(e.message||'Submission failed — please try again','error');setTimeout(function(){btn.textContent=defaultLabel;updateButtons();},3000);});}
     ['ga-submit','sp-submit'].forEach(function(id){
         var f=document.getElementById(id).closest('form');
