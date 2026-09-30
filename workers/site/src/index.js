@@ -277,8 +277,7 @@ export default {
       }
       const items = (payload && Array.isArray(payload.highlights) ? payload.highlights : []).slice(0, 15);
       const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-      const xml = '<?xml version="1.0" encoding="UTF-8"?>
-' +
+      const xml = '<?xml version="1.0" encoding="UTF-8"?>' +
         '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>' +
         '<title>MySweetPea changelog</title>' +
         '<link>https://mysweetpea.cc/changelog</link>' +
