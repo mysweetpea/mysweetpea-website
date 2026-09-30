@@ -44,8 +44,8 @@
       "desc": "Matrix is a private, encrypted chat system. Element is the app you use to access it. Create rooms, send messages, share files, all encrypted.",
       "monitorHint": 2,
       "garden": {
-        "line": "Encrypted chat and rooms — nobody in the middle.",
-        "replaces": "Discord / Slack"
+        "line": "Your encrypted chat and calls with no ads reading along.",
+        "replaces": "WhatsApp"
       }
     },
     {
@@ -67,8 +67,8 @@
       "desc": "AFFiNE is a free alternative to Notion. Create documents, wikis, whiteboards, and knowledge bases. All your notes are stored privately on our server.",
       "monitorHint": 3,
       "garden": {
-        "line": "Notes, docs and whiteboards that stay yours.",
-        "replaces": "Notion / Miro"
+        "line": "Your notes, docs and whiteboards that no one can see.",
+        "replaces": "Notion / Evernote"
       }
     },
     {
@@ -90,8 +90,8 @@
       "desc": "KoalaSync lets you watch movies and shows together with friends in real-time. Works with Jellyfin, YouTube, and other video sites.",
       "monitorHint": 4,
       "garden": {
-        "line": "Watch parties with the people you actually like.",
-        "replaces": "Teleparty"
+        "line": "Watch parties with perfectly synced playback.",
+        "replaces": "Teleparty-style extensions"
       }
     },
     {
@@ -113,7 +113,7 @@
       "desc": "Jellyfin is your own private Netflix — a free, open-source media server that streams your movie and TV collection to any device. Moonfin is a premium web interface that runs on top of Jellyfin.",
       "monitorHint": 5,
       "garden": {
-        "line": "Your movies and shows, on your terms.",
+        "line": "Your movies, shows and animes. This is your stream, your rules.",
         "replaces": "Netflix"
       }
     },
@@ -136,8 +136,8 @@
       "desc": "Seerr is like a wish list for movies and shows. Browse what is trending, see what is already available, and request anything you want to watch. Your request is processed automatically and the content appears in Jellyfin.",
       "monitorHint": 6,
       "garden": {
-        "line": "Request anything; the garden grows it.",
-        "replaces": "Request forms"
+        "line": "Request anything — it appears in your library.",
+        "replaces": "recommendation feeds"
       }
     },
     {
@@ -159,7 +159,7 @@
       "desc": "Nextcloud is your private Google Workspace replacement. Sync files across devices, share documents, manage your calendar and contacts — all stored on our own hardware.",
       "monitorHint": 7,
       "garden": {
-        "line": "Files, photos and calendar that sync everywhere.",
+        "line": "Your files, calendar and contacts that sync everywhere.",
         "replaces": "Google Drive"
       }
     },
@@ -182,7 +182,7 @@
       "desc": "Immich is a self-hosted photo and video backup, like Google Photos without the tracking. Back up your memories, search them with AI, and keep them private on our own server.",
       "monitorHint": 8,
       "garden": {
-        "line": "Every photo, backed up at full quality.",
+        "line": "Your photos that are backed up and organized automatically.",
         "replaces": "Google Photos"
       }
     },
@@ -205,8 +205,8 @@
       "desc": "Open WebUI is a private AI chat interface running entirely on our own hardware. Chat with open-source models without your conversations ever leaving our servers.",
       "monitorHint": 9,
       "garden": {
-        "line": "AI chat that answers to you, not an ad network.",
-        "replaces": "ChatGPT"
+        "line": "Private AI chat on models you choose.",
+        "replaces": "ChatGPT / Gemini"
       }
     }
   ],
