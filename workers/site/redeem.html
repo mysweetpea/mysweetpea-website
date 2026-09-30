@@ -55,8 +55,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
     <link rel="preload" href="/assets/fonts/jbm-bold.l.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/jbm-medium.l.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="/assets/css/site.css?v=124">
-    <link rel="stylesheet" href="/assets/css/premium.css?v=131">
+    <link rel="stylesheet" href="/assets/css/site.css?v=125">
+    <link rel="stylesheet" href="/assets/css/premium.css?v=132">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=110">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
 <link rel="canonical" href="https://mysweetpea.cc/redeem">
@@ -110,6 +110,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <span class="eyebrow redeem-eyebrow">Invitation code</span>
             <h1 class="glass-text">Redeem Your Invite Code</h1>
             <p class="hero-sub pop-text redeem-subtitle">Enter the invitation code we emailed you to create your MySweetPea account.</p>
+            <p class="rc-steps"><span class="rc-step done">1 · request approved</span><span class="rc-step-now">2 · create your account</span><span class="rc-step">3 · change your password</span></p>
         </div>
         <section class="tier-form-section redeem-section">
             <div class="form-card glow-card">
@@ -131,9 +132,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <span class="right" id="lhint">FROM YOUR INVITE EMAIL</span>
                     </div>
                 </div>
+                    <p class="rc-code-help">Where's my code? It arrives by email after your request is approved — <a href="/contact.html">contact us</a> if it's lost.</p>
                 <div class="form-group"><label class="form-label glass-text" for="rc-name">Name</label><input type="text" class="form-input" id="rc-name" placeholder="Your name" autocomplete="name" maxlength="60"><span class="validation-icon" id="rc-name-icon" aria-hidden="true"></span></div>
                 <div class="form-group"><label class="form-label glass-text" for="rc-email">Email</label><input type="email" class="form-input" id="rc-email" placeholder="you@example.com" autocomplete="email" maxlength="120"><span class="validation-icon" id="rc-email-icon" aria-hidden="true"></span></div>
-                <div class="form-group"><label class="form-label glass-text" for="rc-username">Username</label><input type="text" class="form-input" id="rc-username" placeholder="Choose a username" autocomplete="username" maxlength="30"><span class="validation-icon" id="rc-username-icon" aria-hidden="true"></span><div class="username-checks" id="rc-username-checks"><span class="uc-item" data-uc="len"><span class="uc-icon">×</span> At least 3 characters</span><span class="uc-item" data-uc="alnum"><span class="uc-icon">×</span> Letters/Numbers</span><span class="uc-item" data-uc="underscore"><span class="uc-icon">×</span> Underscore only</span></div></div>
+                <div class="form-group"><label class="form-label glass-text" for="rc-username">Username</label><input type="text" class="form-input" id="rc-username" placeholder="Choose a username" autocomplete="username" maxlength="30"><span class="validation-icon" id="rc-username-icon" aria-hidden="true"></span><div class="username-checks" id="rc-username-checks"><span class="uc-item" data-uc="len"><span class="uc-icon">×</span> At least 3 characters</span><span class="uc-item" data-uc="underscore"><span class="uc-icon">×</span> Letters, numbers &amp; underscores only</span></div></div>
                 <button type="button" class="form-submit" id="rc-submit" disabled>Create MySweetPea Account</button>
             </div>
         </section>
@@ -187,7 +189,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=116" defer></script>
+    <script src="/assets/js/site.js?v=117" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script src="/assets/js/redeem-page.js?v=107" defer></script>    <script>
     if ('serviceWorker' in navigator) {

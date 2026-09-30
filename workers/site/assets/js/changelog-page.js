@@ -390,6 +390,22 @@
     })();
 
     /* Shared filter application: header chips AND graph legend chips */
+    /* chip counts — computed from loaded data once */
+    function fillCounts() {
+        if (!data || !data.weeks) return;
+        var counts = { 'repo:portfolio': 0, 'repo:homelab-k8s': 0, 'cat:f': 0, 'cat:i': 0, 'cat:d': 0 };
+        data.weeks.forEach(function (w) {
+            (w.items || []).forEach(function (item) {
+                if (item && counts['repo:' + item.repo] !== undefined) counts['repo:' + item.repo]++;
+                if (item && item.cat && counts['cat:' + item.cat] !== undefined) counts['cat:' + item.cat]++;
+            });
+        });
+        Array.prototype.forEach.call(document.querySelectorAll('.cl2-count'), function (c) {
+            var k = c.getAttribute('data-count');
+            if (k && counts[k] !== undefined) c.textContent = '(' + counts[k] + ')';
+        });
+    }
+
     function applyFilter(key) {
         if (!(key in active)) return;
         if (key === 'all') {
@@ -488,6 +504,7 @@
                     if (!ok) throw new Error('unexpected /api/commits shape');
                     if (timer) { clearTimeout(timer); timer = null; }
                     data = payload;
+                    fillCounts();
                     if (pulse) pulse.hidden = false;
                     renderHighlights();
                     renderFeed();

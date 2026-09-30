@@ -264,6 +264,41 @@ export default {
       });
     }
 
+    // --- RSS feed for the changelog (reuses the commits cache) ---
+    if (url.pathname === '/feed.xml') {
+      const now = Date.now();
+      let payload = commitsCache.data;
+      if (!payload || (now - commitsCache.ts) >= (commitsCache.ttl || COMMITS_TTL)) {
+        // trigger a fresh fetch through the API route logic by calling it
+        try {
+          const r = await fetch(new URL('/api/commits', url.origin), { headers: { 'User-Agent': 'mysweetpea-site-rss' } });
+          payload = r.ok ? await r.json() : commitsCache.data;
+        } catch (e) { /* fall back to stale cache */ }
+      }
+      const items = (payload && Array.isArray(payload.highlights) ? payload.highlights : []).slice(0, 15);
+      const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      const xml = '<?xml version="1.0" encoding="UTF-8"?>
+' +
+        '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>' +
+        '<title>MySweetPea changelog</title>' +
+        '<link>https://mysweetpea.cc/changelog</link>' +
+        '<description>Recent changes to the MySweetPea website and homelab.</description>' +
+        '<language>en</language>' +
+        items.map((h) => {
+          const d = h.date ? new Date(h.date) : new Date();
+          const repoName = h.repo === 'portfolio' ? 'mysweetpea-website' : 'mysweetpea-homelab';
+          const link = 'https://github.com/mysweetpea/' + repoName + '/commit/' + (h.full || h.sha || '');
+          return '<item><title>' + esc(h.name || h.message || 'change') + '</title><link>' + esc(link) + '</link><guid isPermaLink="true">' + esc(link) + '</guid><pubDate>' + d.toUTCString() + '</pubDate></item>';
+        }).join('') +
+        '</channel></rss>';
+      return new Response(xml, {
+        headers: {
+          'Content-Type': 'application/rss+xml; charset=utf-8',
+          'Cache-Control': 'public, max-age=300'
+        }
+      });
+    }
+
     if (url.pathname === '/api/auth/state') {
       const fwd = {};
       const cookie = request.headers.get('Cookie');

@@ -54,8 +54,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=124">
-    <link rel="stylesheet" href="/assets/css/premium.css?v=131">
+    <link rel="stylesheet" href="/assets/css/site.css?v=125">
+    <link rel="stylesheet" href="/assets/css/premium.css?v=132">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=110">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
 <link rel="stylesheet" href="/assets/css/donate.css?v=9">
@@ -173,6 +173,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     <a class="dn-btn dn-btn-ghost" href="https://github.com/mysweetpea/mysweetpea-homelab" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>Star homelab</a>
                 </div>
                 <p class="dn-card-foot">Takes 5 seconds · need GitHub account</p>
+                    <div class="support-share"><span>or spread the word:</span><button type="button" id="shareBtn" data-share="Check out MySweetPea — private, self-hosted alternatives to the services you use every day: https://mysweetpea.cc">Copy share text</button></div>
             </article>
         </div>
 
@@ -201,7 +202,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             </div>
             <div class="faq-item">
                 <button class="faq-question" type="button" id="sup-faq-q-2" aria-expanded="false" aria-controls="sup-faq-a-2" data-action="toggle-faq">Why don't you accept credit cards? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-2" role="region" aria-labelledby="sup-faq-q-2"><p>We prioritize privacy. Card payments route your identity through payment processors and create a paper trail linking you to this garden. Crypto (Monero especially) keeps giving anonymous — no KYC, no chargebacks, no third party collecting either of us.</p></div>
+                <div class="faq-answer" id="sup-faq-a-2" role="region" aria-labelledby="sup-faq-q-2"><p>We prioritize privacy. Card payments route your identity through payment processors and create a paper trail linking you to this garden. Crypto (Monero especially) keeps your giving anonymous — no KYC, no chargebacks, no third party in between.</p></div>
             </div>
             <div class="faq-item">
                 <button class="faq-question" type="button" id="sup-faq-q-3" aria-expanded="false" aria-controls="sup-faq-a-3" data-action="toggle-faq">Is my donation anonymous? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
@@ -209,7 +210,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             </div>
             <div class="faq-item">
                 <button class="faq-question" type="button" id="sup-faq-q-4" aria-expanded="false" aria-controls="sup-faq-a-4" data-action="toggle-faq">Can I get a refund? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-4" role="region" aria-labelledby="sup-faq-q-4"><p>Crypto donations are irreversible by design — the same property that protects your privacy. If something genuinely went wrong, write to <a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a> and a human will read it.</p></div>
+                <div class="faq-answer" id="sup-faq-a-4" role="region" aria-labelledby="sup-faq-q-4"><p>Crypto donations are irreversible by design — that is what protects your privacy. If something genuinely went wrong, write to <a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a> and a human will read it.</p></div>
             </div>
             <div class="faq-item">
                 <button class="faq-question" type="button" id="sup-faq-q-5" aria-expanded="false" aria-controls="sup-faq-a-5" data-action="toggle-faq">When do crypto wallets go live? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
@@ -265,7 +266,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=116" defer></script>
+    <script src="/assets/js/site.js?v=117" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script src="/assets/js/support-page.js?v=8" defer></script>
     <script>
@@ -275,5 +276,22 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
         });
     }
     </script>
+<script id="shareBtnScript">
+    (function () {
+        var b = document.getElementById('shareBtn');
+        if (!b) return;
+        b.addEventListener('click', function () {
+            var text = b.getAttribute('data-share') || '';
+            if (!text) return;
+            var done = function () {
+                b.textContent = 'Copied!';
+                setTimeout(function () { b.textContent = 'Copy share text'; }, 1800);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(done, done);
+            } else { done(); }
+        });
+    })();
+</script>
 </body>
 </html>

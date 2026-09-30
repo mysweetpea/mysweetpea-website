@@ -3096,3 +3096,70 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
 @media (max-width: 720px) {
     .about-x-lead .about-x-live { position: static; margin: 0 0 12px; }
 }
+
+/* --- form + redeem polish (2026-09-30) ----------------------------------------- */
+/* Trust microcopy under email fields. */
+.f-trust-note {
+    margin: 6px 2px 0;
+    font-size: .76rem;
+    color: var(--text-faint);
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    letter-spacing: .02em;
+}
+/* Cross-link to redeem under the submit buttons. */
+.f-cross-link {
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: .84rem;
+    color: var(--text-dim);
+}
+.f-cross-link a { color: var(--sage); font-weight: 600; }
+/* Choice-card legend (solid = now, dashed = soon). */
+.access-choice-legend {
+    margin: 16px auto 0;
+    text-align: center;
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .64rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+}
+.access-choice-legend .lg-solid, .access-choice-legend .lg-dashed {
+    display: inline-block; width: 16px; height: 0;
+    border-top: 2px solid var(--border-primary);
+    vertical-align: middle; margin-right: 5px;
+}
+.access-choice-legend .lg-dashed { border-top-style: dashed; }
+/* Redeem: step indicator (instrument grammar). */
+.rc-steps {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin: 16px 0 0;
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+.rc-step { color: var(--text-faint); }
+.rc-step.done { color: var(--sage); }
+.rc-step-now {
+    color: var(--text);
+    padding: 3px 10px;
+    border: 1px solid rgba(197,213,216,.3);
+    border-radius: 999px;
+    background: rgba(163,201,182,.08);
+}
+/* Redeem: where's-my-code helper. */
+.rc-code-help {
+    margin: 10px 2px 0;
+    font-size: .76rem;
+    color: var(--text-faint);
+}
+.rc-code-help a { color: var(--sage); }
+/* Redeem CTA: enabled-state contrast lift (matched the suggest-page fix). */
+body[data-page='redeem'] .form-submit:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dim));
+    color: var(--bg);
+    box-shadow: 0 4px 18px rgba(143,175,181,.25);
+}
+[data-theme="light"] .f-trust-note, [data-theme="light"] .rc-code-help { color: #4A635B; }
+[data-theme="light"] .rc-step-now { background: rgba(47,107,78,.08); border-color: rgba(46,92,70,.25); }

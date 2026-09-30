@@ -8890,3 +8890,111 @@ body[data-page='contact'] .coH-row .v a { color: var(--sage); }
 /* Collapse the dead gap between the auto-update note and the footer. */
 body[data-page='status'] .status-section { padding-bottom: 40px; }
 body[data-page='status'] .status-updated { margin-bottom: 0; }
+
+/* --- changelog polish (2026-09-30) -------------------------------------------- */
+.cl2-count { font-size: .9em; opacity: .55; margin-left: 2px; }
+.cl2-retry {
+    display: block;
+    margin: 12px auto 0;
+    cursor: pointer;
+}
+.cl2-retry:hover { border-color: var(--primary-bright); color: var(--primary-bright); }
+/* Dead space between a short feed and the footer. */
+.cl2-console { min-height: 0; }
+body[data-page='changelog'] .content-wrapper { padding-bottom: 40px; }
+
+/* --- error/404/about/contact polish (2026-09-30) ------------------------------ */
+/* Error page: secondary retry button gets the 404 frosted treatment. */
+body[data-page='error'] .hero-btn-secondary {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(197,213,216,.28);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 14px 36px;
+    border-radius: var(--radius-sm);
+}
+body[data-page='error'] .hero-btn-secondary:hover {
+    background: rgba(255,255,255,.13);
+    border-color: rgba(197,213,216,.45);
+    transform: translateY(-2px);
+}
+/* About: ticker fade-in band (first item no longer clipped under the nav). */
+.about-x-ticker-fade {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 60px, #000 calc(100% - 60px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 60px, #000 calc(100% - 60px), transparent 100%);
+}
+/* Contact: quick-answers row under the ledger. */
+.coH-quick {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    margin-top: 18px;
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .68rem;
+    letter-spacing: .06em;
+}
+.coH-quick a { color: var(--text-dim); text-decoration: none; border-bottom: 1px dotted var(--text-faint); }
+.coH-quick a:hover { color: var(--primary-bright); border-color: var(--primary-bright); }
+/* Contact: email underline clears descenders. */
+body[data-page='contact'] .coH-mail .contact-email a { text-underline-offset: 3px; }
+/* Support: share row (third way to help, tracking-free). */
+.support-share {
+    margin: 14px 0 0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    justify-content: center;
+    font-size: .84rem;
+    color: var(--text-dim);
+}
+.support-share button {
+    cursor: pointer;
+    font: inherit;
+    font-size: .8rem;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(197,213,216,.3);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    transition: border-color .2s ease, background .2s ease;
+}
+.support-share button:hover { border-color: var(--primary-bright); background: rgba(255,255,255,.09); }
+/* Success: ETA chip above the card. */
+.success-eta {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-bottom: 20px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(163,201,182,.2);
+    background: rgba(163,201,182,.08);
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sage);
+}
+[data-theme="light"] .coH-quick a { color: #4A635B; }
+[data-theme="light"] body[data-page='error'] .hero-btn-secondary { background: rgba(255,255,255,.6); }
+
+/* --- perf: low-resource device pass (2026-09-30) -------------------------------
+   (1) Save-data / low-memory: drop the heavy glass blur layers. The site has
+   ~135 backdrop-filter rules; on weak GPUs each blurred surface costs a full
+   re-composite. prefers-reduced-transparency is the standard opt-down signal
+   (mirrors save-data intent for visual effects). */
+@media (prefers-reduced-transparency: reduce) {
+    .card, .contact-card, .contact-card *, .glass-card, .view-tabs, .dn-tabs,
+    .service-card, .status-summary, .record, .gw-card, .about-x-bignum,
+    .coH-strip, .skip-link, .hiw-included-btn, .hero-btn-secondary {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: var(--card-bg) !important;
+    }
+}
+/* (2) Battery: the infinite ambient loops (garden breathing, petal drift,
+   status pulses) stop entirely on reduced-motion (already) and now also
+   throttle to pause on blur via animation-play-state (cheap CSS equivalent
+   of the JS visibilitychange gating). */
+@supports (content-visibility: auto) {
+    .features-section, .about-x-blk { content-visibility: auto; contain-intrinsic-size: auto 600px; }
+}

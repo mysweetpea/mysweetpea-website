@@ -53,8 +53,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=107">
-    <link rel="stylesheet" href="/assets/css/site.css?v=124">
-    <link rel="stylesheet" href="/assets/css/premium.css?v=131">
+    <link rel="stylesheet" href="/assets/css/site.css?v=125">
+    <link rel="stylesheet" href="/assets/css/premium.css?v=132">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=110">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=108">
 <link rel="canonical" href="https://mysweetpea.cc/error">
@@ -107,6 +107,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <h1 class="glass-text">Something Went Wrong</h1>
             <p>We could not process your request. This could be a temporary issue — please try again in a moment.</p>
             <a href="/form.html" class="hero-btn" data-keywords="request invite signup sign up access apply join">Back to Form</a>
+            <button type="button" class="hero-btn hero-btn-secondary" id="errRetry">Try again</button>
             <div class="contact-link">Need help? <a href="/contact.html" data-keywords="email reach message touch help questions">Contact us</a></div>
         </div>
         </main>
@@ -157,7 +158,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=107" defer></script>
     <script src="/assets/js/lenis-init.js?v=107" defer></script>
-    <script src="/assets/js/site.js?v=116" defer></script>
+    <script src="/assets/js/site.js?v=117" defer></script>
     <script src="/assets/js/premium.js?v=120" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
@@ -166,5 +167,11 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
         });
     }
     </script>
+<script>
+    (function () {
+        var b = document.getElementById('errRetry');
+        if (b) b.addEventListener('click', function () { history.back(); });
+    })();
+</script>
 </body>
 </html>
