@@ -1266,7 +1266,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
 <canvas id="petalCanvas" aria-hidden="true"></canvas>
-<div id="app"><div class="card" id="gate"><a href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><h1>MySweetPea</h1><p>Checking your session…</p></div></div>
+<div id="app"><div class="card" id="gate"><a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" data-msp-site-img="/logo.svg" alt="MySweetPea logo"/></a><h1>MySweetPea</h1><p>Checking your session…</p></div></div>
 <div id="modal"><div class="mcard" id="mbody"></div></div>
 <div id="toasts" aria-live="polite"></div>
 <div class="pal-backdrop" id="pal">
@@ -1277,6 +1277,52 @@ a.hm-req{text-decoration:none;color:var(--text)}
 </div>
 <script>
 'use strict';
+/* ===== Deployment config adoption (/api/config) ============================
+   The worker exposes public-safe config (site origin, support email, media
+   and request origins) from env vars. Everything has a literal fallback, so
+   the SPA works with or without the endpoint. Origins are validated
+   strict-scheme+host before adoption - a bad payload changes nothing.
+   ========================================================================== */
+const MSP_CFG = {
+  mainSite: 'https://mysweetpea.cc',
+  supportEmail: 'support@mysweetpea.cc',
+  media: 'https://media.mysweetpea.cc',
+  request: 'https://request.mysweetpea.cc',
+  loaded: false,
+};
+const mspOrigin = (u) => {
+  const m = String(u || '').match(/^https:\/\/[A-Za-z0-9.-]+(?::\d{1,5})?(?=\/|$)/i);
+  return m ? m[0] : '';
+};
+(function mspLoadConfig() {
+  fetch('/api/config').then((r) => (r.ok ? r.json() : null)).then((c) => {
+    if (!c) return;
+    const o1 = mspOrigin(c.mainSite), o2 = mspOrigin(c.media), o3 = mspOrigin(c.request);
+    if (o1) MSP_CFG.mainSite = o1;
+    if (o2) MSP_CFG.media = o2;
+    if (o3) MSP_CFG.request = o3;
+    if (typeof c.supportEmail === 'string' && /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(c.supportEmail)) MSP_CFG.supportEmail = c.supportEmail;
+    MSP_CFG.loaded = true;
+    mspApplyConfig();
+  }).catch(() => { /* fallbacks stand */ });
+})();
+function mspApplyConfig() {
+  try {
+    document.querySelectorAll('a[data-msp-site]').forEach((a) => {
+      a.href = MSP_CFG.mainSite + (a.getAttribute('data-msp-site') || '/');
+    });
+    document.querySelectorAll('[data-msp-site-img]').forEach((img) => {
+      img.src = MSP_CFG.mainSite + (img.getAttribute('data-msp-site-img') || '/logo.svg');
+    });
+    document.querySelectorAll('a[data-msp-email]').forEach((a) => {
+      a.href = 'mailto:' + MSP_CFG.supportEmail;
+      if (/^[^\s]+@[^\s]+$/.test((a.textContent || '').trim())) a.textContent = MSP_CFG.supportEmail;
+    });
+    /* hmJF consumers read window.MSP_CFG.media at render time (defined below) */
+    window.MSP_CFG = MSP_CFG;
+  } catch (e) { /* non-fatal */ }
+}
+mspApplyConfig(); /* adopt fallbacks immediately so early renders are consistent */
 const $ = (s) => document.querySelector(s);
 const esc = (x) => String(x == null ? '' : x).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(msg, opts) {
@@ -1998,16 +2044,28 @@ function platChipHtml(entry) {
   const ico = PLAT_ICONS[p.icon]
     ? '<span class="plat-ico" aria-hidden="true">' + PLAT_ICONS[p.icon] + '</span>'
     : '<span class="plat-mono" aria-hidden="true">' + esc(String(p.icon).slice(0, 1)) + '</span>';
-  return '<a class="plat-chip" href="' + esc(entry.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(p.name) + ' download">' + ico + esc(p.name) + '</a>';
+  return '<a class="plat-chip" href="' + esc(mspCfgUrl(entry.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(p.name) + ' download">' + ico + esc(p.name) + '</a>';
 }
 function platformsHtml(key) {
   const list = DL_PLATFORMS[key];
   if (!list || !list.length) return '';
   return '<p class="plat-cap">Get the app on</p><div class="plat-grid">' + list.map(platChipHtml).join('') + '</div>';
 }
+/* guide URLs: adopt deployed origins from MSP_CFG at render time. Only
+   our own hosts are rewritten (vendor/doc links are external facts). */
+function mspCfgUrl(u) {
+  if (!u) return u;
+  const cfg = (typeof window.MSP_CFG === 'object' && window.MSP_CFG) || null;
+  if (!cfg || !cfg.loaded) return u;
+  const ORIGINS = [['https://media.mysweetpea.cc', cfg.media], ['https://request.mysweetpea.cc', cfg.request]];
+  for (let i = 0; i < ORIGINS.length; i++) {
+    if (u.indexOf(ORIGINS[i][0]) === 0) return ORIGINS[i][1] + u.slice(ORIGINS[i][0].length);
+  }
+  return u;
+}
 function guideStepHtml(s, i) {
   return '<div class="svc-guide-step"><span class="svc-guide-num">' + (i + 1) + '</span><div class="svc-guide-body"><h4>' + esc(s.title) + '</h4><p>' + esc(s.text) + '</p>' +
-    (s.url && s.btn ? '<a class="svc-guide-btn" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer">' + esc(s.btn) + '</a>' : '') +
+    (s.url && s.btn ? '<a class="svc-guide-btn" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(s.btn) + '</a>' : '') +
     '</div></div>';
 }
 function guideVariantsHtml(g) {
@@ -2070,7 +2128,7 @@ function guideDetailHtml(key) {
     if (typeof me.tier !== 'string') me.tier = 'seedling';
   }
   if (!me) {
-    gate.innerHTML = '<a href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><h1>MySweetPea</h1><p>Sign in with your MySweetPea account to manage everything in one place.</p><a class="btn" href="/auth/login">Sign in with MySweetPea</a>';
+    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><h1>MySweetPea</h1><p>Sign in with your MySweetPea account to manage everything in one place.</p><a class="btn" href="/auth/login">Sign in with MySweetPea</a>';
     return;
   }
   const initialsOf = (n, u) => (n || u || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
@@ -2145,7 +2203,7 @@ function guideDetailHtml(key) {
     '<div class="tab-pill" id="tab-pill" aria-hidden="true"></div>' + TABS.map((t) => '<button type="button" class="tab" id="tab-' + t + '" data-tab="' + t + '" role="tab" aria-controls="panel-' + t + '" aria-selected="false">' + TAB_LABELS[t] + (t === 'security' ? '<span class="tab-dot" aria-hidden="true"></span>' : '') + '</button>').join('') +
     '</div>' +
     '<div class="nav-id">' +
-    '<a class="site-back" href="https://mysweetpea.cc" title="Return to mysweetpea.cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 13v6H5V6h6"/></svg><span class="sb-txt">Return to Website</span></a>' +
+    '<a class="site-back" data-msp-site="/" href="https://mysweetpea.cc" title="Return to mysweetpea.cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 13v6H5V6h6"/></svg><span class="sb-txt">Return to Website</span></a>' +
     '<button class="nav-search" id="pal-open" title="Search (Ctrl+K)" aria-label="Search (Ctrl+K)"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>' +
     '<button type="button" class="nav-search upd-bell" id="upd-bell" title="Service updates" aria-label="Service updates" aria-haspopup="true" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="bell-dot" id="bell-dot" hidden></span></button>' +
     '<div class="bell-menu" id="bell-menu"><div class="acct-pop" id="upd-pop" role="menu" aria-label="Service updates" hidden><div class="upd-pop-head"><b>Service updates</b><span id="upd-pop-sub"></span></div><div id="upd-pop-list"></div></div></div>' +
@@ -2159,7 +2217,7 @@ function guideDetailHtml(key) {
         '<a role="menuitem" href="#security" data-goto="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/></svg>Security settings</a>' +
         '<a role="menuitem" href="#account" data-goto="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Account profile</a>' +
         '<a role="menuitem" href="#contact" data-goto="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>Contact us</a>' +
-        '<a role="menuitem" href="https://mysweetpea.cc" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Back to site</a>' +
+        '<a role="menuitem" data-msp-site="/" href="https://mysweetpea.cc" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Back to site</a>' +
         '<hr/>' +
         '<a role="menuitem" href="/auth/logout" class="danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>' +
       '</div>' +
@@ -2243,13 +2301,13 @@ function guideDetailHtml(key) {
     '<section class="card"><p class="eyebrow">Contact</p><h3>Talk to a <em class="ct2-human">human</em>.</h3>' +
     '<p class="dim">The fastest way to reach us is by email. Whether you are stuck creating an account, curious about a service, or just want to say hello &mdash; we are happy to help.</p>' +
     '<p class="dim ct2-sub">No tickets, no bots pretending &mdash; a real person reads every email.</p>' +
-    '<div class="contact-mail"><a class="contact-pill ct2-mail" href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a></div>' +
+    '<div class="contact-mail"><a class="contact-pill ct2-mail" href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></div>' +
     '<div class="contact-actions"><button type="button" class="ob-btn" id="ct-copy">Copy email address</button></div>' +
     '<p class="dim contact-note"><span class="dot ok" style="margin-right:8px"></span>We usually reply within 24&ndash;48 hours.</p></section>' +
     '<section class="card"><p class="eyebrow">Before you write</p><h3>Before you write</h3>' +
     '<p class="dim">A few things that help us reply faster.</p>' +
     '<ul class="ct-list">' +
-    '<li><span>Many questions are answered on the <a href="https://mysweetpea.cc/pricing.html" target="_blank" rel="noopener noreferrer">How It Works</a> page &mdash; how to get access, what the $5 donation covers, and how your sign-in works.</span></li>' +
+    '<li><span>Many questions are answered on the <a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html" target="_blank" rel="noopener noreferrer">How It Works</a> page &mdash; how to get access, what the $5 donation covers, and how your sign-in works.</span></li>' +
     '<li><span><b>Your name</b> &mdash; so we know who you are.</span></li>' +
     '<li><span><b>What you need help with</b> &mdash; account, service, or donation.</span></li>' +
     '<li><span><b>Your username</b> &mdash; if you already have one.</span></li>' +
@@ -2288,7 +2346,10 @@ function guideDetailHtml(key) {
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
-    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>Private alternatives to the services you use every day. No ads, no tracking, no subscriptions &mdash; just community-funded, self-hosted software.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a href="https://mysweetpea.cc/services.html">Services</a><a href="https://mysweetpea.cc/pricing.html">How It Works</a><a href="https://status.mysweetpea.cc">Status</a><a href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a href="https://mysweetpea.cc/form.html">Get Access</a><a href="https://mysweetpea.cc/support.html">Donate</a><a href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc">support@mysweetpea.cc</a></p></div></footer></div>';
+    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>Private alternatives to the services you use every day. No ads, no tracking, no subscriptions &mdash; just community-funded, self-hosted software.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a href="https://status.mysweetpea.cc" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer></div>';
+  /* config adoption re-run: the shell (footer site links, emails, gate logo)
+     was just injected — mspApplyConfig ran before it existed */
+  if (typeof mspApplyConfig === 'function') mspApplyConfig();
   // tier badges everywhere (hero, topbar, services/guides echoes) — initial render
   // NEVER let a profile-render hiccup abort the rest of boot (tab wiring below).
   try { window.applyProfile(); } catch (e) { }
@@ -2822,17 +2883,26 @@ function guideDetailHtml(key) {
     })();
   })();
   // ===== SERVICES LAUNCHER =====
+  /* ===== SERVICE CATALOG — the single source of truth for every service
+     list in the SPA. key = stable id (GUIDES/GUIDE_ORDER keys), mon =
+     Kuma monitor-name fragments for status matching (lowercase; any
+     fragment found in a monitor's name matches), cat = services-grid
+     filter category. SV_CATS / HM_DOT_MATCH / graft MATCH used to
+     duplicate subsets of this by display name; they are DERIVED below. ===== */
   const SERVICES = [
-    { name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Movies & TV', icon: '/icons/jellyfin.svg' },
-    { name: 'Seerr',       url: 'https://request.mysweetpea.cc', blurb: 'Request media', icon: '/icons/seerr.svg' },
-    { name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg' },
-    { name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg' },
-    { name: 'Vaultwarden', url: 'https://vault.mysweetpea.cc',   blurb: 'Passwords', icon: '/icons/vaultwarden.svg' },
-    { name: 'Element',     url: 'https://chat.mysweetpea.cc',    blurb: 'Matrix chat', icon: '/icons/matrix.svg' },
-    { name: 'AFFiNE',      url: 'https://notes.mysweetpea.cc',   blurb: 'Docs, wikis & whiteboards', icon: '/icons/affine.svg' },
-    { name: 'Open WebUI',  url: 'https://ai.mysweetpea.cc',      blurb: 'AI assistants', icon: '/icons/openwebui.svg' },
-    { name: 'KoalaSync',   url: 'https://sync.mysweetpea.cc',    blurb: 'Watch parties, in sync', icon: '/icons/koalasync.svg' },
+    { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Movies & TV', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin', 'moonfin', 'media'] },
+    { key: 'seerr',       name: 'Seerr',       url: 'https://request.mysweetpea.cc', blurb: 'Request media', icon: '/icons/seerr.svg', cat: 'media', mon: ['seerr', 'request', 'jellyseerr'] },
+    { key: 'nextcloud',   name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg', cat: 'cloud', mon: ['nextcloud', 'cloud'] },
+    { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'] },
+    { key: 'vaultwarden', name: 'Vaultwarden', url: 'https://vault.mysweetpea.cc',   blurb: 'Passwords', icon: '/icons/vaultwarden.svg', cat: 'cloud', mon: ['vaultwarden', 'vault'] },
+    { key: 'matrix',      name: 'Element',     url: 'https://chat.mysweetpea.cc',    blurb: 'Matrix chat', icon: '/icons/matrix.svg',    cat: 'tools', mon: ['element', 'matrix', 'chat'] },
+    { key: 'affine',      name: 'AFFiNE',      url: 'https://notes.mysweetpea.cc',   blurb: 'Docs, wikis & whiteboards', icon: '/icons/affine.svg', cat: 'tools', mon: ['affine', 'notes'] },
+    { key: 'openwebui',   name: 'Open WebUI',  url: 'https://ai.mysweetpea.cc',      blurb: 'AI assistants', icon: '/icons/openwebui.svg', cat: 'ai', mon: ['webui', 'open web', 'ai'] },
+    { key: 'koalasync',   name: 'KoalaSync',   url: 'https://sync.mysweetpea.cc',    blurb: 'Watch parties, in sync', icon: '/icons/koalasync.svg', cat: 'media', mon: ['koala', 'sync'] },
   ];
+  /* name -> entry view (matchers + future consumers) */
+  const SVC_BY_NAME = {};
+  SERVICES.forEach((s) => { SVC_BY_NAME[s.name] = s; });
   /* Single source of truth — the command palette (later script block) reads
      this to build its service commands, so new services here are searchable
      automatically. (const inside this IIFE is invisible cross-block.) */
@@ -2844,7 +2914,8 @@ function guideDetailHtml(key) {
   ];
   const svcGrid = $('#svc-grid');
   // ===== aurora services engine (sv*) =====
-  const SV_CATS = { 'Jellyfin': 'media', 'Seerr': 'media', 'KoalaSync': 'media', 'Nextcloud': 'cloud', 'Immich': 'cloud', 'Vaultwarden': 'cloud', 'Element': 'tools', 'AFFiNE': 'tools', 'Open WebUI': 'ai' };
+  const SV_CATS = {}; /* derived: display name -> cat (single source: SERVICES[].cat) */
+  SERVICES.forEach((s) => { SV_CATS[s.name] = s.cat; });
   const SV_CAT_LABELS = [['all','All'],['media','Media'],['cloud','Cloud & Files'],['tools','Tools'],['ai','AI']];
   window.svState = { filter: 'all', sort: 'default', featured: 0, upmap: {}, monmap: {} };
   const svState = window.svState;
@@ -2890,7 +2961,7 @@ function guideDetailHtml(key) {
     if (svState.sort === 'az') list = list.slice().sort((a, b) => a.name.localeCompare(b.name));
     host.innerHTML = list.map((s) => {
       const pinned = svPinned.indexOf(s.name) >= 0;
-      return '<a class="sv-card" href="' + s.url + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' +
+      return '<a class="sv-card" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' +
         svStar(s.name, pinned) +
         '<div class="top">' + svIcon(s, 'svc-ico') + '<div><div class="nm">' + esc(s.name) + '</div><div class="bl">' + esc(s.blurb) + '</div></div></div>' +
         '<div class="meta"><span class="sdot' + (svIsUp(s.name) ? '' : ' down') + '"></span><span>' + (svIsUp(s.name) ? 'Operational' : 'Degraded') + (svUp24(s.name) ? ' · ' + svUp24(s.name) + ' uptime' : '') + '</span><span style="margin-left:auto" class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div></a>';
@@ -2956,11 +3027,23 @@ function guideDetailHtml(key) {
   // OPT: one fetch instead of two — extended carries current + up24 + beats
   fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((d) => {
     const ms = (d && d.monitors) || [];
-    ms.forEach((m) => { svState.monmap[m.name] = !!m.current; svState.upmap[m.name] = m.up24; });
+    ms.forEach((m) => {
+      /* dual-key: by RAW monitor name (Kuma lowercase keys like 'jellyfin')
+         AND by resolved display name (via each service's mon fragments).
+         Fixes the case-mismatch that left every grid card stuck on
+         'Operational' with no 24h uptime. */
+      svState.monmap[m.name] = !!m.current;
+      svState.upmap[m.name] = m.up24;
+      const hit = SERVICES.find((s) => (s.mon || []).some((k) => String(m.name || '').toLowerCase().indexOf(k) >= 0));
+      if (hit) {
+        svState.monmap[hit.name] = !!m.current;
+        svState.upmap[hit.name] = m.up24;
+      }
+    });
     window.svRenderSpot(); window.svRenderOrbs(); window.svRenderGrid();
   }).catch(() => {});
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
-  const hmJF = 'https://media.mysweetpea.cc';
+  const hmJF = (window.MSP_CFG && window.MSP_CFG.media) || 'https://media.mysweetpea.cc';
   const hmJF_ITEM = hmJF + '/web/index.html#!/item?id=';
   const hmBackdrop = (id, w) => hmJF + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
   const hmGreetingWord = () => { const h = new Date().getHours(); return (h < 5 ? 'Good night,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'); };
@@ -3011,23 +3094,16 @@ function guideDetailHtml(key) {
       '</a>';
   }
   function hmSvcOrb(s) {
-    return '<a class="hm-card hm-svcrow" href="' + esc(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' +
+    return '<a class="hm-card hm-svcrow" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' +
       '<span class="hm-orb-plate"><img src="' + esc(s.icon) + '" alt="" width="30" height="30" loading="lazy"></span>' +
       '<span class="hm-svcrow-main"><span class="hm-orb-nm">' + esc(s.name) + '<span class="hm-orb-dot unknown" data-hm-dot="' + esc(s.name) + '"></span></span>' +
       '<span class="hm-orb-bl">' + esc(s.blurb) + '</span></span>' +
       '<span class="hm-orb-up" data-hm-hb="' + esc(s.name) + '"></span></a>';
   }
-  const HM_DOT_MATCH = {
-    'Jellyfin': ['jellyfin', 'moonfin', 'media'],
-    'Seerr': ['seerr', 'request', 'jellyseerr'],
-    'Nextcloud': ['nextcloud', 'cloud'],
-    'Immich': ['immich', 'photos'],
-    'Vaultwarden': ['vaultwarden', 'vault'],
-    'Element': ['element', 'matrix', 'chat'],
-    'AFFiNE': ['affine', 'notes'],
-    'Open WebUI': ['webui', 'open web', 'ai'],
-    'KoalaSync': ['koala', 'sync']
-  };
+  /* derived monitor-match map: display name -> Kuma name fragments
+     (single source: SERVICES[].mon) */
+  const HM_DOT_MATCH = {};
+  SERVICES.forEach((s) => { HM_DOT_MATCH[s.name] = s.mon; });
   function hmApplyDots(monitors) {
     Object.keys(HM_DOT_MATCH).forEach((svc) => {
       const el = document.querySelector('.hm-orb-dot[data-hm-dot="' + svc.replace(/"/g, '&quot;') + '"]');
@@ -4097,17 +4173,10 @@ function relFuture(v) {
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
 (function(){
-  var MATCH = {
-    'Jellyfin': ['jellyfin', 'moonfin', 'media'],
-    'Seerr': ['seerr', 'request', 'jellyseerr'],
-    'Nextcloud': ['nextcloud', 'cloud'],
-    'Immich': ['immich', 'photos'],
-    'Vaultwarden': ['vaultwarden', 'vault'],
-    'Element': ['element', 'matrix', 'chat'],
-    'AFFiNE': ['affine', 'notes'],
-    'Open WebUI': ['webui', 'open web', 'ai'],
-    'KoalaSync': ['koala', 'sync']
-  };
+  /* derived from the MAIN block's catalog (window.SERVICES); hardcoded
+     fragment lists removed — one source of truth */
+  var MATCH = {};
+  (window.SERVICES || []).forEach(function (s) { MATCH[s.name] = s.mon || []; });
   function ensureStrips(){
     document.querySelectorAll('.hm-orb').forEach(function(card){
       if (card.querySelector('.hm-orb-hb-row')) return;

@@ -20,6 +20,11 @@ APP_URL = "https://dashboard.mysweetpea.cc"
 JELLYFIN_USER_ID = "3d75456ef9c5438480195d731242133d"
 # Seerr origin (non-secret; the API key is a Worker secret: SEERR_API_KEY)
 SEERR_URL = "https://request.mysweetpea.cc"
+# SPA deployment config (/api/config): site + contact, env-overridable
+MAIN_SITE_URL = "https://mysweetpea.cc"
+SUPPORT_EMAIL = "support@mysweetpea.cc"
+# commits source repo for the changelog/updates feed ('owner/name')
+GH_COMMITS_REPO = "mysweetpea/mysweetpea-homelab"
 
 # Secrets (set via `npx wrangler secret put ...`):
 #   AUTHENTIK_CLIENT_ID

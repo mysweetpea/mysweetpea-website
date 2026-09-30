@@ -40,6 +40,9 @@ export interface Env {
   JELLYFIN_USER_ID: string;
   AUTHENTIK_ADMIN_TOKEN: string;
   GITHUB_TOKEN?: string; // optional — homelab-k8s is public; token only lifts the 60/hr anon limit
+  GH_COMMITS_REPO?: string; // optional — commits source repo 'owner/name' (default: mysweetpea/mysweetpea-homelab)
+  MAIN_SITE_URL?: string;   // optional — marketing site origin (default: https://mysweetpea.cc)
+  SUPPORT_EMAIL?: string;   // optional — contact email (default: support@mysweetpea.cc)
 }
 
 interface SessionData {
@@ -230,6 +233,14 @@ async function resolveUpk(env: Env, sess: SessionData): Promise<number> {
 // slug — derive just the origin here and request the `public` slug so the
 // secret's value can never leak admin monitors to members.
 const KUMA_PUBLIC_SLUG = 'public';
+
+/* strict origin from a configured URL: scheme+host only, no path/query.
+   Returns '' for anything that is not a well-formed http(s) URL. */
+function cleanOrigin(raw: string | undefined): string {
+  const s = (raw || '').trim();
+  const m = s.match(/^https?:\/\/[A-Za-z0-9.-]+(?::\d{1,5})?(?=\/|$)/i);
+  return m ? m[0] : '';
+}
 
 function kumaOrigin(env: Env): string {
   const raw = (env.KUMA_STATUS_URL || '').trim();
@@ -428,7 +439,12 @@ async function fetchPublicKuma(env: Env): Promise<{ monitors: KumaMonitor[] } | 
 // Reconcile rule: announce when to <= running (LTE, not == — equality would
 // collapse every historical step; LTE keeps the chain and still suppresses the
 // rolled-back nextcloud 35.0.0 chain). Non-version tags skip the comparison.
-const GH_REPO_API = 'https://api.github.com/repos/mysweetpea/mysweetpea-homelab/commits';
+/* commits source repo: env-overridable (GH_COMMITS_REPO, 'owner/name'),
+   literal = the homelab repo fallback */
+const ghCommitsRepo = (env: Env) => {
+  const raw = (env.GH_COMMITS_REPO || '').trim();
+  return /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(raw) ? raw : 'mysweetpea/mysweetpea-homelab';
+};
 const GH_PAGES = 6; // 600 commits ~ 34 days of history, covers the 30d Services window
 // GitHub commit objects: only .sha, .commit.message and .commit.author.date are
 // consumed (see parseUpdateCommit in the shared pipeline). Raw `any` is deliberate:
@@ -442,7 +458,7 @@ async function fetchGithubCommitPages(env: Env): Promise<any[]> {
   let okCount = 0;
   const pages = await Promise.all(Array.from({ length: GH_PAGES }, async (_, i) => {
     try {
-      const r = await fetch(`${GH_REPO_API}?per_page=100&page=${i + 1}`, { headers });
+      const r = await fetch(`https://api.github.com/repos/${ghCommitsRepo(env)}/commits?per_page=100&page=${i + 1}`, { headers });
       if (!r.ok) return [];
       okCount++;
       return (await r.json() as any[]) || [];
@@ -1226,6 +1242,22 @@ export default {
           return JSON.stringify({ requests: cards, linked: true, seerrBase: env.SEERR_URL });
         });
         return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+      }
+      if (path === '/api/config') {
+        // Public-safe deployment config for the SPA (no secrets by
+        // construction: only non-secret vars + literal fallbacks). Values the
+        // caller can already learn from the served pages. Cached 1h in the
+        // Cache API (free) — config changes propagate within the hour.
+        const cfg = {
+          mainSite: cleanOrigin(env.MAIN_SITE_URL) || 'https://mysweetpea.cc',
+          supportEmail: /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(env.SUPPORT_EMAIL || '') ? env.SUPPORT_EMAIL : 'support@mysweetpea.cc',
+          media: cleanOrigin(env.JELLYFIN_URL) || 'https://media.mysweetpea.cc',
+          request: cleanOrigin(env.SEERR_URL) || 'https://request.mysweetpea.cc',
+        };
+        const body = JSON.stringify(cfg);
+        const cached = new Response(body, { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+        await cachePutJson('cache:spa-config', body, 3600).catch(() => {});
+        return cached;
       }
       if (path === '/api/status') {
         // Home "Service status" card — public slug only, shaped for the SPA.
