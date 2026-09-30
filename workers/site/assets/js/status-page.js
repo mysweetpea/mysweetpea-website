@@ -13,6 +13,8 @@
         // 40-tick recent-checks strip, oldest -> newest left -> right.
         // Slots without a beat are padded with t-none on the LEFT.
         var STRIP_TICKS = 40;
+        /* resolved { serviceKey: monitorId } — set by the feed chain below */
+        var FEED_MONITORS = {};
 
         function fmtHM(d) {
             if (!d || isNaN(d.getTime())) return '?';
@@ -90,7 +92,7 @@
             /* UPTIME_WIN is keyed by monitor ID (built from "<id>_<days>"
                uptimeList keys) — translate the row's service key through
                ID_TO_KEY's inverse before lookup (was always null). */
-            var rowId = MONITOR_IDS[row.dataset.serviceKey];
+            var rowId = FEED_MONITORS[row.dataset.serviceKey];
             var win = (window.UPTIME_WIN && rowId != null && window.UPTIME_WIN[String(rowId)]) || null;
             if (uptimeEl) uptimeEl.textContent = (pct != null) ? ((win ? win + 'd ' : '') + pct + '%') : 'uptime —';
             if (pctEl) pctEl.textContent = (pct != null) ? pct + '%' : '—';
@@ -204,6 +206,7 @@
             .then(function (res) {
                 var data = res[0], mons = res[1] || {};
                 var MONITORS = mons.byKey || {};
+                FEED_MONITORS = MONITORS;
                 var hb = data.heartbeatList; // { "<monitorId>": [heartbeats...], ... }
                 // uptimeList keys are "<monitorId>_<durationDays>" (e.g. "1_24"),
                 // values are fractions 0..1 — normalize to a monitorId -> pct map
