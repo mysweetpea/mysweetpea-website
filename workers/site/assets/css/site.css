@@ -8769,44 +8769,7 @@ body[data-page='contact'] .coH-row .v a { color: var(--sage); }
     contain-intrinsic-size: auto 600px;
 }
 
-/* --- services: search row + card polish (2026-09-30) ------------------------- */
-.svc-search { position: relative; display: inline-flex; align-items: center; margin-right: 10px; }
-.svc-search-ico { position: absolute; left: 12px; color: var(--text-faint); pointer-events: none; transition: color .25s ease; }
-.svc-search:focus-within .svc-search-ico { color: var(--sage); }
-.svc-search-input {
-    width: 200px; padding: 9px 12px 9px 34px;
-    border-radius: 10px;
-    border: 1px solid rgba(197,213,216,.22);
-    background: linear-gradient(160deg, rgba(255,255,255,.03), transparent 40%), rgba(14,22,26,.6);
-    color: var(--text); font: inherit; font-size: .88rem;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
-    transition: border-color .25s var(--ease-premium, ease), box-shadow .25s var(--ease-premium, ease);
-}
-.svc-search-input:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px rgba(163,201,182,.14); }
-.svc-search-input::placeholder { color: var(--text-dim); }
-.service-card.svc-search-hidden, .coming-soon-card.svc-search-hidden { display: none; }
-[data-tier-group].svc-search-empty, [data-tier-divider].svc-search-empty { display: none; }
-/* Status row pinned to card bottom: ragged 1-line vs 4-line blurbs no longer
-   move the status/foot rows around. */
-.card-inner { display: flex; flex-direction: column; height: 100%; }
-.svc-blurb { flex: 1 1 auto; }
-@media (max-width: 640px) {
-    .svc-search { width: 100%; margin: 0 0 8px; }
-    .svc-search-input { width: 100%; }
-}
-[data-theme="light"] .svc-search-input {
-    background: linear-gradient(160deg, rgba(255,255,255,.6), transparent 40%), rgba(250,253,250,.88);
-    border-color: rgba(46,92,70,.16);
-}
 
-/* --- icon contrast fix (2026-09-30) -------------------------------------------
-   KoalaSync's brand SVG is near-black on dark (lum 17-45 on a 27-lum chip).
-   invert+rotate keeps the hue relationships while lifting it readable. */
-.service-card[data-service="koalasync"] .icon-chip img {
-    filter: invert(1) hue-rotate(180deg) brightness(.92);
-    border-radius: 6px;
-}
-[data-theme="light"] .service-card[data-service="koalasync"] .icon-chip img { filter: none; }
 
 /* --- pricing polish (2026-09-30) ---------------------------------------------- */
 /* Icon chips: hover name caption (title/alt exist; this makes it visible). */
@@ -8850,12 +8813,22 @@ body[data-page='contact'] .coH-row .v a { color: var(--sage); }
 .hiw-included-btn:hover svg { transform: translateX(3px); }
 /* "The difference" eyebrow above the selective note. */
 .hiw-selective-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     font-family: var(--t-font-mono, ui-monospace, monospace);
-    font-size: .62rem;
-    letter-spacing: .16em;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--sage);
-    margin: 0 0 8px;
+    margin: 0 0 10px;
+}
+.hiw-selective-eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(163,201,182,.35), transparent);
 }
 /* Closing CTA for the How-it-works tab (was a dead-end into the footer). */
 .hiw-close-cta {
@@ -8998,3 +8971,33 @@ body[data-page='contact'] .coH-mail .contact-email a { text-underline-offset: 3p
 @supports (content-visibility: auto) {
     .features-section, .about-x-blk { content-visibility: auto; contain-intrinsic-size: auto 600px; }
 }
+
+/* --- status: summary dot + text grouped left (2026-09-30 fix) ------------------
+   The dot floated alone at far left while the text block centered — group
+   them as one left-aligned flex pair; the meta box keeps the right side. */
+body[data-page='status'] .status-summary {
+    justify-content: space-between;
+}
+body[data-page='status'] .status-summary > .status-dot { flex: none; }
+body[data-page='status'] .status-summary > span:nth-child(2) {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-items: start;
+    text-align: left;
+}
+body[data-page='status'] .status-summary time { margin-left: 0; border-left: none; padding-left: 0; }
+body[data-page='status'] .status-summary-meta { flex: none; text-align: right; }
+@media (max-width: 640px) {
+    body[data-page='status'] .status-summary-meta { display: none; }
+}
+
+/* --- status: head group (dot + text as one left-anchored pair, 2026-09-30) ---- */
+body[data-page='status'] .status-head-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: left;
+}
+body[data-page='status'] .status-head-group .status-dot { margin: 0; flex: none; }

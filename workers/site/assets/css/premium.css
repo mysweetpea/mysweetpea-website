@@ -3092,15 +3092,17 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
    the same baseline as its siblings. Mobile keeps the pill in flow (stacked
    layout has room). */
 .about-x-bn.about-x-lead { display: flex; flex-direction: column; justify-content: center; }
-.about-x-lead .about-x-live { position: absolute; top: 14px; left: 0; right: 0; margin: 0; }
 @media (max-width: 720px) {
-    .about-x-lead .about-x-live { position: static; margin: 0 0 12px; }
+    .about-x-bignum .about-x-live { position: static; margin: 0 0 12px; }
 }
 
 /* --- form + redeem polish (2026-09-30) ----------------------------------------- */
-/* Trust microcopy under email fields. */
+/* Trust microcopy under email fields — spans the full srow grid row so it
+   never collapses the label/input rail (the bug: as a 3rd grid child it
+   landed in the rail column, one word per line). */
 .f-trust-note {
-    margin: 6px 2px 0;
+    grid-column: 1 / -1;
+    margin: -6px 2px 0;
     font-size: .76rem;
     color: var(--text-faint);
     font-family: var(--t-font-mono, ui-monospace, monospace);
@@ -3163,3 +3165,57 @@ body[data-page='redeem'] .form-submit:not(:disabled) {
 }
 [data-theme="light"] .f-trust-note, [data-theme="light"] .rc-code-help { color: #4A635B; }
 [data-theme="light"] .rc-step-now { background: rgba(47,107,78,.08); border-color: rgba(46,92,70,.25); }
+
+/* --- redeem: access callout as a proper box (2026-09-30 fix) ------------------- */
+/* Was transparent text floating over the page; now matches the site's callout
+   grammar (card surface, hairline border, sage link-button). */
+body[data-page='redeem'] .redeem-callout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    padding: 22px 24px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.18);
+}
+body[data-page='redeem'] .redeem-callout strong { display: block; color: var(--text); font-size: .98rem; margin-bottom: 3px; }
+body[data-page='redeem'] .redeem-callout span { display: block; font-size: .86rem; color: var(--text-dim); }
+body[data-page='redeem'] .redeem-callout .btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1px solid rgba(197,213,216,.35);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    font-size: .86rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primary-bright); background: rgba(255,255,255,.09); transform: translateY(-1px); }
+[data-theme="light"] body[data-page='redeem'] .redeem-callout { background: rgba(250,253,250,.88); }
+[data-theme="light"] body[data-page='redeem'] .redeem-callout .btn { background: rgba(255,255,255,.6); }
+
+/* --- about: donate + changelog cards (2026-09-30) ------------------------------ */
+/* Same card grammar as the repo boxes; sage icon chip marks internal links
+   (vs the dark GitHub chip) so the two pairs read as siblings, not clones. */
+.about-x-repo-alt .github-icon { color: var(--sage); }
+.about-x-repo-alt .about-x-arrow { color: var(--sage); }
+/* LIVE pill centered over the WHOLE stats band. The left column (.about-x-bn)
+   is the divider's positioning context — opt the LEAD column out so the band
+   becomes the pill's containing block. */
+.about-x-bignum { position: relative; }
+.about-x-bn.about-x-lead { position: static; }
+.about-x-bignum .about-x-live {
+    position: absolute;
+    top: 14px; left: 0; right: 0;
+    display: flex; justify-content: center;
+    margin: 0;
+    z-index: 2;
+}
