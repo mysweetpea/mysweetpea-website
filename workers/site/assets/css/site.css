@@ -9001,3 +9001,6 @@ body[data-page='status'] .status-head-group {
     text-align: left;
 }
 body[data-page='status'] .status-head-group .status-dot { margin: 0; flex: none; }
+
+/* OCR round: hidden attr gates the success banner even if .show lands */
+body[data-page='suggest'] .success-msg[hidden] { display: none !important; }

@@ -53,7 +53,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=h6b17b99d">
-    <link rel="stylesheet" href="/assets/css/site.css?v=h899b1c4a">
+    <link rel="stylesheet" href="/assets/css/site.css?v=hf11fdd8c">
     <link rel="stylesheet" href="/assets/css/premium.css?v=h8ea8edf6">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=hd06288e9">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=hdf458fd2">
@@ -115,7 +115,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
             <div class="view-panel active" data-view="suggest" role="tabpanel">
                 <div class="container reveal">
-                    <div class="success-msg" id="successMsg"><div class="icon" aria-hidden="true"><img src="/assets/icons/icon-ui-check.svg" class="" alt="" width="44" height="44" loading="lazy" decoding="async" aria-hidden="true"></div><p>Thank you! Your suggestion has been submitted. We read every suggestion and reply within a few days.</p></div>
+                    <div class="success-msg" id="successMsg" hidden><div class="icon" aria-hidden="true"><img src="/assets/icons/icon-ui-check.svg" class="" alt="" width="44" height="44" loading="lazy" decoding="async" aria-hidden="true"></div><p>Thank you! Your suggestion has been submitted. We read every suggestion and reply within a few days.</p></div>
                     <div class="card glow-card">
                         <h2>Service Suggestion</h2>
                         <p class="form-desc">Suggest a self-hosted service you would like to see on MySweetPea.</p>
@@ -147,10 +147,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                             <div class="form-hint" id="s-category-hint" aria-live="polite">Pick the group it belongs to — "Other" is fine too.</div>
                         </div>
                         <div class="form-group">
-                            <div class="label-row"><label class="form-label" for="s-reason">Why should we host this? <span class="req-tag">required</span></label><span class="char-counter" id="s-reason-count" aria-hidden="true">0 / 500</span></div>
+                            <div class="label-row"><label class="form-label" for="s-reason">Why should we host this? <span class="req-tag">required</span></label><span class="char-counter" id="s-reason-count" aria-hidden="true" title="Character count">0 / 500</span></div>
                             <textarea class="form-textarea" id="s-reason" aria-describedby="s-reason-hint" aria-invalid="false" placeholder="What would it do for members?" maxlength="500"></textarea>
                             <span class="validation-icon" id="s-reason-icon" style="top: auto; bottom: 14px;"></span>
-                            <div class="form-hint" id="s-reason-hint" aria-live="polite">A sentence or two is plenty — why it's worth hosting.</div>
+                            <div class="form-hint" id="s-reason-hint" aria-live="polite">A sentence or two is plenty — why it's worth hosting. Limit: 500 characters.</div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="s-yourname">Your Name <span class="opt-tag">optional</span></label>
@@ -227,7 +227,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=h1375bb5f" defer></script>
     <script src="/assets/js/lenis-init.js?v=h3379bccf" defer></script>
-    <script src="/assets/js/site.js?v=h4cc2be2d" defer></script>
+    <script src="/assets/js/site.js?v=he071cccb" defer></script>
     <script src="/assets/js/site-data.js?v=hc3e6e712" defer></script>
     <script src="/assets/js/premium.js?v=h591227ca" defer></script>    <script>
 function validateField(id, type) {
@@ -263,6 +263,18 @@ function validateField(id, type) {
                 el.addEventListener('blur', function () { validateField(id, fields[id]); });
             });
         })();
+        /* Enter inside any field submits (no <form> wrapper: the fields live in
+           a plain div by design; this gives the native form's Enter behavior) */
+        ['s-name', 's-url', 's-category', 's-reason', 's-yourname', 's-youremail'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' || e.target.tagName === 'TEXTAREA') return;
+                e.preventDefault();
+                var btn = document.getElementById('s-submit');
+                if (btn && !btn.disabled) btn.click();
+            });
+        });
         document.getElementById('s-submit').addEventListener('click', function() {
             var btn = this;
             btn.classList.add('loading'); btn.disabled = true;
@@ -274,15 +286,21 @@ function validateField(id, type) {
                 your_name: document.getElementById('s-yourname').value.trim() || '',
                 your_email: document.getElementById('s-youremail') ? document.getElementById('s-youremail').value.trim() : ''
             };
-            fetch('/api/suggest', {
+            /* 15s budget: a hung connection must release the button instead of
+               leaving it permanently 'Submitting…' */
+            var post = fetch('/api/suggest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            })
+            });
+            var timeout = new Promise(function (_, rej) {
+                setTimeout(function () { rej(new Error('timeout')); }, 15000);
+            });
+            Promise.race([post, timeout])
             .then(function(r) { return r.text().then(function(t){ if(t){try{return JSON.parse(t);}catch(e){return {ok:r.ok};}} return {ok:r.ok}; }); })
             .then(function(data) {
                 if (data.ok) {
-                    document.getElementById('successMsg').classList.add('show');
+                    var sm = document.getElementById('successMsg'); sm.hidden = false; sm.classList.add('show');
                     document.querySelector('.card').style.display = 'none';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 } else if (data.error === 'sign_in_required') {
@@ -294,7 +312,7 @@ function validateField(id, type) {
                 }
             })
             .catch(function(err) {
-                btn.textContent = 'Network error. Try again.';
+                btn.textContent = err && err.message === 'timeout' ? 'Timed out — try again.' : 'Network error. Try again.';
                 btn.classList.remove('loading'); btn.disabled = false;
                 setTimeout(function() { btn.textContent = 'Submit Suggestion'; }, 3000);
             });
@@ -336,9 +354,19 @@ function validateField(id, type) {
         }
     }
     window.lockForm = lockForm;
-    fetch('/api/auth/state').then(function (r) { return r.json(); }).then(function (st) {
-        if (!st.logged_in) lockForm();
-    }).catch(function () { lockForm(); });
+    fetch('/api/auth/state').then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    }).then(function (st) {
+        /* confirmed logged-out -> hard lock (members-only form) */
+        if (!st || !st.logged_in) lockForm();
+    }).catch(function (err) {
+        /* transient failure (network/5xx/timeout) must NOT permanently lock a
+           member out — fail open; the backend /api/suggest still enforces the
+           session and returns sign_in_required, which routes to lockForm with
+           a re-sign-in message. Log so 'chip stuck' reports are diagnosable. */
+        console.warn('[msp] suggest auth-state check failed (failing open):', err && err.message ? err.message : err);
+    });
 })();
 </script>
 

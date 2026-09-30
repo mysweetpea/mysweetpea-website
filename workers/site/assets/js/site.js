@@ -939,9 +939,9 @@
 (function () {
     'use strict';
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (reduceMotion.matches) return;
 
-
+    /* Vine dividers are STATIC decoration — injected for everyone (the motion
+       gate below only owns the pollen animation). */
     document.querySelectorAll('.vine-divider').forEach(function (el) { el.innerHTML = '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
         /* main stems */
         '<path d="M32 6C22 10 16 20 18 32c2 12 12 20 14 26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
@@ -991,7 +991,6 @@
         reduceMotion.addListener(function (e) { pollenSet(!e.matches); });
     }
 
-    /* (vine injection moved above the motion gate — static decoration) */
 })();
 
 /* ==========================================================================
@@ -1083,7 +1082,7 @@
     if (!metas.length) return;
     function update() {
         var light = document.documentElement.getAttribute('data-theme') === 'light';
-        var COLORS = { dark: '#0C1316', light: '#D8E1DD' };
+        var COLORS = { dark: '#0C1316', light: '#E7EDEA' };   /* light = paint-guard bg (aligned 2026-09) */
         var active = light ? COLORS.light : COLORS.dark;
         var sawMedia = false, sawUnscoped = false;
         metas.forEach(function (m) {
