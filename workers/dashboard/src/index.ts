@@ -270,6 +270,19 @@ async function kvPutBestEffort(env: Env, key: string, value: string, ttl: number
   } catch { /* cache writes are best-effort */ }
 }
 
+// /api/config handler — public-safe deployment config (see route note)
+async function handleConfig(env: Env): Promise<Response> {
+  const cfg = {
+    mainSite: cleanOrigin(env.MAIN_SITE_URL) || 'https://mysweetpea.cc',
+    supportEmail: /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(env.SUPPORT_EMAIL || '') ? (env.SUPPORT_EMAIL as string) : 'support@mysweetpea.cc',
+    media: cleanOrigin(env.JELLYFIN_URL) || 'https://media.mysweetpea.cc',
+    request: cleanOrigin(env.SEERR_URL) || 'https://request.mysweetpea.cc',
+  };
+  const body = JSON.stringify(cfg);
+  await cachePutJson('cache:spa-config', body, 3600).catch(() => {});
+  return new Response(body, { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+}
+
 // ---------- Response caches live in the Cache API, NOT KV ----------
 // Everything under `cache:*` is a cache COPY, never durable state. The Workers
 // KV free tier allows only 1,000 write operations/day (every put() counts,
@@ -738,6 +751,11 @@ export default {
         }
       }
       return json({ logged_in });
+    }
+    if (path === '/api/config') {
+      // PUBLIC (like /api/auth/state): the login gate + pre-login shell adopt
+      // this config too; body is public-safe by construction (no secrets).
+      return handleConfig(env);
     }
     if (path.startsWith('/api/')) {
       const auth = await requireSession(request, env);
@@ -1242,22 +1260,6 @@ export default {
           return JSON.stringify({ requests: cards, linked: true, seerrBase: env.SEERR_URL });
         });
         return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
-      }
-      if (path === '/api/config') {
-        // Public-safe deployment config for the SPA (no secrets by
-        // construction: only non-secret vars + literal fallbacks). Values the
-        // caller can already learn from the served pages. Cached 1h in the
-        // Cache API (free) — config changes propagate within the hour.
-        const cfg = {
-          mainSite: cleanOrigin(env.MAIN_SITE_URL) || 'https://mysweetpea.cc',
-          supportEmail: /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(env.SUPPORT_EMAIL || '') ? env.SUPPORT_EMAIL : 'support@mysweetpea.cc',
-          media: cleanOrigin(env.JELLYFIN_URL) || 'https://media.mysweetpea.cc',
-          request: cleanOrigin(env.SEERR_URL) || 'https://request.mysweetpea.cc',
-        };
-        const body = JSON.stringify(cfg);
-        const cached = new Response(body, { headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
-        await cachePutJson('cache:spa-config', body, 3600).catch(() => {});
-        return cached;
       }
       if (path === '/api/status') {
         // Home "Service status" card — public slug only, shaped for the SPA.
