@@ -372,3 +372,24 @@ body[data-page='home'] .g-contrast strong{color:var(--sage)}
 }
 /* lining figures so future live values don't shift width */
 .record .v .cnt{font-variant-numeric:tabular-nums}
+
+/* --- home polish (2026-09-30 round) ------------------------------------------- */
+/* Installer card mono meta strip (instrument grammar under the button). */
+.gw-meta {
+    margin: 10px 0 0;
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .62rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--sage);
+}
+.gw-meta::after {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 1px;
+    margin-top: 8px;
+    background: linear-gradient(90deg, rgba(163,201,182,.4), transparent);
+}
+/* Tighten the bloom-to-eyebrow dead zone (hero art bottom margin). */
+.ascii-hero { margin-bottom: -8px; }

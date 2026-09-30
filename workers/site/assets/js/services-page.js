@@ -214,3 +214,39 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
                 else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
             }
         });
+
+/* === Service search (2026-09-30) ==============================================
+   Composes with the tier filter: the filter picks the GROUPS, search then
+   hides non-matching CARDS inside visible groups. Matches name + blurb +
+   data-keywords. Empty groups (everything filtered out) collapse too. */
+(function () {
+    'use strict';
+    var input = document.getElementById('svc-search');
+    if (!input) return;
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.service-card[data-service], .coming-soon-card'));
+    var groups = Array.prototype.slice.call(document.querySelectorAll('[data-tier-group]'));
+    var dividers = Array.prototype.slice.call(document.querySelectorAll('[data-tier-divider]'));
+    var t = 0;
+    function apply() {
+        var q = input.value.trim().toLowerCase();
+        cards.forEach(function (card) {
+            var hay = ((card.querySelector('h3') ? card.querySelector('h3').textContent : '') + ' ' +
+                       (card.querySelector('.svc-blurb') ? card.querySelector('.svc-blurb').textContent : '') + ' ' +
+                       (card.getAttribute('data-keywords') || '')).toLowerCase();
+            card.classList.toggle('svc-search-hidden', q !== '' && hay.indexOf(q) === -1);
+        });
+        groups.forEach(function (group) {
+            var visible = group.querySelectorAll('.service-card:not(.svc-search-hidden), .coming-soon-card:not(.svc-search-hidden)').length;
+            group.classList.toggle('svc-search-empty', visible === 0);
+        });
+        dividers.forEach(function (divider) {
+            var tier = divider.getAttribute('data-tier-divider');
+            var group = document.querySelector('[data-tier-group="' + tier + '"]');
+            divider.classList.toggle('svc-search-empty', !group || group.classList.contains('svc-search-empty'));
+        });
+    }
+    input.addEventListener('input', function () {
+        if (t) clearTimeout(t);
+        t = setTimeout(apply, 90); /* debounce — cheap on low-end devices */
+    });
+})();

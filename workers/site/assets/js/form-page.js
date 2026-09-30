@@ -24,6 +24,8 @@
     function validateField(id) {
         var input = document.getElementById(id), ok = valid(fields[id], input.value);
         input.classList.toggle('valid', ok); input.classList.toggle('invalid', input.value.trim().length > 0 && !ok);
+        /* native a11y channel: AT announces invalid fields via aria-invalid */
+        input.setAttribute('aria-invalid', input.value.trim().length > 0 && !ok ? 'true' : 'false');
         var icon = document.getElementById(id + '-icon');
         if (icon) { icon.classList.toggle('show', input.value.trim().length > 0); icon.classList.toggle('valid', ok); icon.classList.toggle('invalid', input.value.trim().length > 0 && !ok); icon.textContent = ok ? '✓' : '×'; }
         updateUsernameChecks(id); updateButtons(); return ok;
@@ -42,17 +44,31 @@
             if (icon) icon.textContent = ok ? '✓' : '×';
         });
     }
-    Object.keys(fields).forEach(function (id) { document.getElementById(id).addEventListener('input', function(){ validateField(id); }); document.getElementById(id).addEventListener('blur', function(){ validateField(id); }); });
-    function allValid(ids) { return ids.every(function(id){ return valid(fields[id], document.getElementById(id).value); }); }
+    /* markup-drift guard: one missing field id used to abort the ENTIRE
+       init loop with a TypeError (and every later binding with it). */
+    Object.keys(fields).forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) { console.warn('[msp] form: field missing from markup:', id); return; }
+        el.addEventListener('input', function(){ validateField(id); });
+        el.addEventListener('blur', function(){ validateField(id); });
+    });
+    function allValid(ids) {
+        return ids.every(function(id){
+            var el = document.getElementById(id);
+            return !!el && valid(fields[id], el.value);
+        });
+    }
     function updateButtons() {
         var gaVerify = document.getElementById('ga-verify');
         var spVerify = document.getElementById('sp-verify');
-        document.getElementById('ga-submit').disabled = !(allValid(['ga-name','ga-email','ga-username','ga-txhash']) && !!chosenCrypto && gaVerify && gaVerify.checked);
-        document.getElementById('sp-submit').disabled = !(allValid(['sp-name','sp-email','sp-message']) && spVerify && spVerify.checked);
+        var gaSubmit = document.getElementById('ga-submit');
+        var spSubmit = document.getElementById('sp-submit');
+        if (gaSubmit) gaSubmit.disabled = !(allValid(['ga-name','ga-email','ga-username','ga-txhash']) && !!chosenCrypto && gaVerify && gaVerify.checked);
+        if (spSubmit) spSubmit.disabled = !(allValid(['sp-name','sp-email','sp-message']) && spVerify && spVerify.checked);
     }
     ['ga-verify','sp-verify'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('change',updateButtons);});
     var spMsg = document.getElementById('sp-message');
-    if (spMsg) spMsg.addEventListener('input', function(){ validateField('sp-message'); syncBloomAndRail(); });
+    if (spMsg) spMsg.addEventListener('input', syncBloomAndRail);   /* validateField('sp-message') already bound by the generic loop */
     document.querySelectorAll('.access-choice-card').forEach(function (card) {
         card.addEventListener('click', function () {
             var tier = card.getAttribute('data-tier');
@@ -100,7 +116,7 @@
     document.querySelectorAll('.crypto-option').forEach(function(button){
         var type=button.getAttribute('data-type');
         if(!WALLETS[type] || WALLETS[type]==='Coming Soon'){button.disabled=true;button.classList.add('unavailable');var label=document.createElement('span');label.className='crypto-soon';label.textContent='Coming soon';button.appendChild(label);return;}
-        button.addEventListener('click',function(){chosenCrypto=type;document.querySelectorAll('.crypto-option').forEach(function(b){b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',b===button?'true':'false');});var display=document.getElementById('wallet-display'),address=document.getElementById('wallet-addr');address.textContent=WALLETS[type];address.setAttribute('aria-label','Copy donation address '+WALLETS[type]);display.hidden=false;renderQR(WALLETS[type]);updateButtons();});
+        button.addEventListener('click',function(){chosenCrypto=type;document.querySelectorAll('.crypto-option').forEach(function(b){b.classList.toggle('selected',b===button);b.setAttribute('aria-pressed',b===button?'true':'false');});var display=document.getElementById('wallet-display'),address=document.getElementById('wallet-addr');address.textContent=WALLETS[type];address.setAttribute('aria-label','Copy '+type+' donation address '+WALLETS[type]);var wl=display.querySelector('.wl');if(wl)wl.textContent='Send your $5+ '+type.toUpperCase()+' donation to:';display.hidden=false;renderQR(WALLETS[type]);updateButtons();});
     });
     /* QR code for the selected wallet (renders once a real address exists) */
     function renderQR(text) {
@@ -131,8 +147,8 @@
         if(!f)return;
         f.addEventListener('submit',function(e){e.preventDefault();document.getElementById(id).click();});
     });
-    document.getElementById('ga-submit').addEventListener('click',function(){if(this.disabled)return;post(ENDPOINTS.donationRequest,{name:document.getElementById('ga-name').value.trim(),email:document.getElementById('ga-email').value.trim(),username:document.getElementById('ga-username').value.trim(),crypto_type:chosenCrypto,tx_hash:document.getElementById('ga-txhash').value.trim()},this,'Submit Seedling Request','/success.html?type=seedling','seedling-overlay');});
-    document.getElementById('sp-submit').addEventListener('click',function(){if(this.disabled)return;post(ENDPOINTS.sweetPeaRequest,{name:document.getElementById('sp-name').value.trim(),email:document.getElementById('sp-email').value.trim(),message:document.getElementById('sp-message').value.trim(),tier:'sweetpea'},this,'Submit Sweet Pea Request','/success.html?type=sweetpea-request','sweetpea-overlay');});
+    document.getElementById('ga-submit').addEventListener('click',function(){if(this.disabled)return;var gv=document.getElementById('ga-verify');post(ENDPOINTS.donationRequest,{name:document.getElementById('ga-name').value.trim(),email:document.getElementById('ga-email').value.trim(),username:document.getElementById('ga-username').value.trim(),crypto_type:chosenCrypto,tx_hash:document.getElementById('ga-txhash').value.trim(),covenant_accepted:!!(gv&&gv.checked)},this,'Submit Seedling Request','/success.html?type=seedling','seedling-overlay');});
+    document.getElementById('sp-submit').addEventListener('click',function(){if(this.disabled)return;var sv=document.getElementById('sp-verify');post(ENDPOINTS.sweetPeaRequest,{name:document.getElementById('sp-name').value.trim(),email:document.getElementById('sp-email').value.trim(),message:document.getElementById('sp-message').value.trim(),tier:'sweetpea',covenant_accepted:!!(sv&&sv.checked)},this,'Submit Sweet Pea Request','/success.html?type=sweetpea-request','sweetpea-overlay');});
     var requested = new URLSearchParams(location.search).get('tier'); if(requested==='sweetpea'){var card=document.querySelector('.access-choice-card[data-tier="sweetpea"]');if(card)card.click();}
     updateButtons();
     /* ==== v109 addition — Conservatory Night-Bloom wiring (bloom + vine rail +
@@ -167,10 +183,14 @@
             var rail = document.querySelector('#' + p.panelId + ' .rail');
             if (!rail) return;
             var nodes = rail.querySelectorAll('.node');
+            if (!nodes.length) return;
             var done = 0;
             for (var i = 0; i < nodes.length; i++) {
                 /* n1 (name) reflects real field state too - no free pass */
-                var ok = !!(i === 0 ? valid('name', document.getElementById(p.n0check).value) : p.nodeOk[i] && p.nodeOk[i]());
+                var n0 = document.getElementById(p.n0check);
+                var ok = !!(i === 0
+                    ? (n0 && valid('name', n0.value))
+                    : (p.nodeOk[i] && p.nodeOk[i]()));
                 nodes[i].classList.toggle('done', ok);
                 if (ok) done++;
             }
@@ -215,15 +235,23 @@
             if (cov && cov.offsetParent) centers.push(offsetWithin(cov, card) + Math.min(40, cov.offsetHeight / 2));
             if (btn && btn.offsetParent) centers.push(offsetWithin(btn, card) + btn.offsetHeight / 2);
             var nodes = rail.querySelectorAll('.node');
+            /* rail spans its own box; convert card-y to rail-y. The offset walk
+               is loop-INVARIANT — hoisted so N nodes don't do N DOM walks. */
+            var railTop = offsetWithin(rail, card);
             for (var i = 0; i < nodes.length && i < centers.length; i++) {
-                /* rail spans its own box; convert card-y to rail-y */
-                var railTop = offsetWithin(rail, card);
                 var y = centers[i] - railTop - 13; /* 13 = half node */
                 nodes[i].style.top = Math.max(-2, Math.min(railH - 24, Math.round(y))) + 'px';
             }
         });
     }
+    var railRaf = 0;
     function alignRailSoon() {
+        /* coalesce storms (resize + every transitionend + MutationObserver
+           batches): one rAF in flight at a time */
+        if (railRaf) return;
+        railRaf = requestAnimationFrame(function () { railRaf = 0; alignRailToRows(); });
+    }
+    function alignRailSoonRaw() {
         requestAnimationFrame(function () { requestAnimationFrame(alignRailToRows); });
     }
     window.addEventListener('resize', alignRailSoon);
@@ -234,6 +262,6 @@
         new MutationObserver(alignRailSoon).observe(p, { attributes: true, attributeFilter: ['hidden', 'class'] });
         p.addEventListener('transitionend', alignRailSoon);
     });
-    setTimeout(alignRailSoon, 350);
-    setTimeout(alignRailSoon, 1200);
+    setTimeout(alignRailSoonRaw, 350);
+    setTimeout(alignRailSoonRaw, 1200);
 })();

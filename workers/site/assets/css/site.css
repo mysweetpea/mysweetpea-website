@@ -18,7 +18,7 @@
     --slate: #85929E;                /* keel slate */
     --text: #EDF3F4;
     --text-dim: #A9BEC2;             /* WCAG AA on --bg */
-    --text-faint: #74878C;
+    --text-faint: #7F9298;
     --border: rgba(143, 175, 181, 0.09);
     --border-primary: rgba(143, 175, 181, 0.28);
     --card-bg: rgba(19, 30, 34, 0.55);
@@ -2132,7 +2132,7 @@ body[data-page='pricing'] .pricing-card.tier-seedling { animation-duration: 8s; 
     --bg: #E7EDEA;                  /* soft sage-tinted canvas, not white */
     --text: #1B2B31;
     --text-dim: #445A61;
-    --text-faint: #66797F;
+    --text-faint: #71848A;
     --primary: #4E7C88;
     --primary-dim: #3E6B77;
     --primary-bright: #2F5560;
@@ -8723,3 +8723,170 @@ body[data-page='contact'] .coH-row .v a { color: var(--sage); }
     body[data-page='contact'] .coH-mail .contact-email { padding: 12px 16px; }
     body[data-page='contact'] .coH-mail .copy-email-btn { margin: 0 12px 12px; }
 }
+
+/* --- cross-page polish (2026-09-30 round) ------------------------------------- */
+/* Skip-to-content: visually hidden until focused (a11y table stakes). */
+.skip-link {
+    position: fixed;
+    top: -100px;
+    left: 16px;
+    z-index: 10000;
+    padding: 10px 18px;
+    border-radius: 0 0 12px 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    color: var(--text);
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .8rem;
+    text-decoration: none;
+    transition: top .2s ease;
+}
+.skip-link:focus { top: 0; }
+/* Focus-visible rings unified on filter pills + GitHub pills (was inconsistent). */
+.view-tab:focus-visible, .value-tab:focus-visible,
+.filter-btn:focus-visible, .gh-link:focus-visible,
+.github-link:focus-visible, .copy-email-btn:focus-visible,
+.about-x-repo:focus-visible, .faq-question:focus-visible {
+    outline: 2px solid var(--primary-bright, var(--primary));
+    outline-offset: 2px;
+}
+/* Reduced motion: fold the ambient loops (logo float, garden breathing,
+   particle drift) into the media query — infinite animations are the main
+   battery drain on low-end devices. */
+@media (prefers-reduced-motion: reduce) {
+    .hero img.logo, .about-x-hero .logo, body[data-page='404'] .hero img.logo { animation: none; }
+    .msb-wrap .msb-bloom, .msb-wrap .msb-sparks { animation: none !important; }
+    .petal, .particle, .speck, .pollen { animation: none !important; }
+    .resp-dot, .about-x-dot, .coH-v .d { animation: none; }
+}
+/* Low-resource friendly: skip layout+paint for far-below-fold sections.
+   contain-intrinsic-size keeps the scrollbar stable; auto keyword remembers
+   real size after first render. Biggest single win for the long pages
+   (home 8.5k px, about 5.3k px) on low-RAM devices. */
+.features-section, .about-x-blk, .footer-grid, .record-band,
+#sec-garden, #sec-features, #sec-verify, #sec-gateway, #sec-record {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+}
+
+/* --- services: search row + card polish (2026-09-30) ------------------------- */
+.svc-search { position: relative; display: inline-flex; align-items: center; margin-right: 10px; }
+.svc-search-ico { position: absolute; left: 12px; color: var(--text-faint); pointer-events: none; transition: color .25s ease; }
+.svc-search:focus-within .svc-search-ico { color: var(--sage); }
+.svc-search-input {
+    width: 200px; padding: 9px 12px 9px 34px;
+    border-radius: 10px;
+    border: 1px solid rgba(197,213,216,.22);
+    background: linear-gradient(160deg, rgba(255,255,255,.03), transparent 40%), rgba(14,22,26,.6);
+    color: var(--text); font: inherit; font-size: .88rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    transition: border-color .25s var(--ease-premium, ease), box-shadow .25s var(--ease-premium, ease);
+}
+.svc-search-input:focus { outline: none; border-color: var(--sage); box-shadow: 0 0 0 3px rgba(163,201,182,.14); }
+.svc-search-input::placeholder { color: var(--text-dim); }
+.service-card.svc-search-hidden, .coming-soon-card.svc-search-hidden { display: none; }
+[data-tier-group].svc-search-empty, [data-tier-divider].svc-search-empty { display: none; }
+/* Status row pinned to card bottom: ragged 1-line vs 4-line blurbs no longer
+   move the status/foot rows around. */
+.card-inner { display: flex; flex-direction: column; height: 100%; }
+.svc-blurb { flex: 1 1 auto; }
+@media (max-width: 640px) {
+    .svc-search { width: 100%; margin: 0 0 8px; }
+    .svc-search-input { width: 100%; }
+}
+[data-theme="light"] .svc-search-input {
+    background: linear-gradient(160deg, rgba(255,255,255,.6), transparent 40%), rgba(250,253,250,.88);
+    border-color: rgba(46,92,70,.16);
+}
+
+/* --- icon contrast fix (2026-09-30) -------------------------------------------
+   KoalaSync's brand SVG is near-black on dark (lum 17-45 on a 27-lum chip).
+   invert+rotate keeps the hue relationships while lifting it readable. */
+.service-card[data-service="koalasync"] .icon-chip img {
+    filter: invert(1) hue-rotate(180deg) brightness(.92);
+    border-radius: 6px;
+}
+[data-theme="light"] .service-card[data-service="koalasync"] .icon-chip img { filter: none; }
+
+/* --- pricing polish (2026-09-30) ---------------------------------------------- */
+/* Icon chips: hover name caption (title/alt exist; this makes it visible). */
+.hiw-inc-chip { position: relative; }
+.hiw-inc-chip::after {
+    content: attr(data-name);
+    position: absolute;
+    left: 50%; bottom: calc(100% + 8px);
+    transform: translateX(-50%) translateY(4px);
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-primary);
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .62rem;
+    letter-spacing: .08em;
+    color: var(--text);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 20;
+}
+.hiw-inc-chip:hover::after, .hiw-inc-chip:focus-visible::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* Explore link promoted to a proper secondary button. */
+.hiw-included-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 11px 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(197,213,216,.35);
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+    background: rgba(255,255,255,.05);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+.hiw-included-btn:hover { border-color: var(--primary-bright); background: rgba(255,255,255,.09); transform: translateY(-1px); }
+.hiw-included-btn svg { transition: transform .2s ease; }
+.hiw-included-btn:hover svg { transform: translateX(3px); }
+/* "The difference" eyebrow above the selective note. */
+.hiw-selective-eyebrow {
+    font-family: var(--t-font-mono, ui-monospace, monospace);
+    font-size: .62rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--sage);
+    margin: 0 0 8px;
+}
+/* Closing CTA for the How-it-works tab (was a dead-end into the footer). */
+.hiw-close-cta {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-top: 34px; padding-top: 26px;
+    border-top: 1px dashed var(--border);
+}
+[data-theme="light"] .hiw-included-btn { background: rgba(255,255,255,.6); border-color: rgba(46,92,70,.25); }
+
+/* --- status polish (2026-09-30) ------------------------------------------------ */
+/* Checking badge: not clickable (was a misleading affordance) + skeleton shimmer
+   so waiting reads intentional. */
+.status-badge { cursor: default; }
+.status-badge.status-unknown .badge-label {
+    position: relative;
+    overflow: hidden;
+}
+.status-badge.status-unknown .badge-label::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(197,213,216,.12), transparent);
+    animation: badgeShimmer 1.8s ease-in-out infinite;
+}
+@keyframes badgeShimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .status-badge.status-unknown .badge-label::after { animation: none; }
+}
+/* Collapse the dead gap between the auto-update note and the footer. */
+body[data-page='status'] .status-section { padding-bottom: 40px; }
+body[data-page='status'] .status-updated { margin-bottom: 0; }

@@ -410,6 +410,17 @@
         // Reset affordance only while a filter is active
         var resetBtn = document.getElementById('cl2-reset');
         if (resetBtn) resetBtn.hidden = !!active.all;
+        // Deep-link state: shareable #repo=...&type=... (f=features, i=improvements, d=fixes)
+        try {
+            var params = [];
+            if (active['repo:portfolio']) params.push('repo=portfolio');
+            if (active['repo:homelab-k8s']) params.push('repo=homelab');
+            if (active['cat:f']) params.push('type=f');
+            if (active['cat:i']) params.push('type=i');
+            if (active['cat:d']) params.push('type=d');
+            var h = params.length ? '#' + params.join('&') : '';
+            if (location.hash !== h) history.replaceState(null, '', location.pathname + location.search + h);
+        } catch (e) { /* history unavailable — never break filtering */ }
         if (data) renderFeed();  // renderFeed re-renders the graph too
     }
 
@@ -442,7 +453,7 @@
         });
     }
 
-    (function () {
+    function loadFeed() {
         var ctl;
         try { ctl = new AbortController(); } catch (e) { ctl = null; }
         if (ctl) setTimeout(function () { ctl.abort(); }, 10000);
@@ -451,7 +462,18 @@
             if (timer) { clearTimeout(timer); timer = null; }
             console.warn('[cl2] activity feed failed:', err);
             feed.textContent = '';
-            feed.appendChild(el('div', 'cl2-empty', "Couldn't load the activity feed. Refresh to try again."));
+            var box = el('div', 'cl2-empty', "Couldn't load the activity feed.");
+            var retry = document.createElement('button');
+            retry.type = 'button';
+            retry.className = 'cl2-chip cl2-retry';
+            retry.textContent = 'Retry';
+            retry.addEventListener('click', function () {
+                feed.textContent = '';
+                feed.appendChild(el('div', 'cl2-skel'));
+                loadFeed();
+            });
+            box.appendChild(retry);
+            feed.appendChild(box);
         };
         // belt-and-braces: even without AbortController the pulse can't spin forever
         if (!ctl) timer = setTimeout(function () { fail(new Error('timeout')); }, 12000);
@@ -474,5 +496,22 @@
         } catch (syncErr) {
             fail(syncErr);
         }
+    }
+    loadFeed();
+
+    /* Deep-link state: apply #repo=portfolio&type=fixes on first load. Runs
+       before data arrives — chip states sync, feed renders when data lands. */
+    (function () {
+        var h = (location.hash || '').slice(1);
+        if (!h) return;
+        h.split('&').forEach(function (pair) {
+            var kv = pair.split('=');
+            if (kv.length !== 2) return;
+            if (kv[0] === 'repo' && kv[1] === 'portfolio') applyFilter('repo:portfolio');
+            if (kv[0] === 'repo' && kv[1] === 'homelab') applyFilter('repo:homelab-k8s');
+            if (kv[0] === 'type' && kv[1] === 'f') applyFilter('cat:f');
+            if (kv[0] === 'type' && kv[1] === 'i') applyFilter('cat:i');
+            if (kv[0] === 'type' && kv[1] === 'd') applyFilter('cat:d');
+        });
     })();
 })();

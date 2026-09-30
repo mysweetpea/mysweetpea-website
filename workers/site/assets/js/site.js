@@ -1515,3 +1515,13 @@
     window.addEventListener('load', applyThemeAssets);
     setTimeout(applyThemeAssets, 300);
 })();
+
+/* === Auto-year (footer copyright) ============================================
+   One listener-free pass on load; spans carry data-year. */
+(function () {
+    'use strict';
+    var y = String(new Date().getFullYear());
+    document.querySelectorAll('[data-year]').forEach(function (el) {
+        el.textContent = y;
+    });
+})();
