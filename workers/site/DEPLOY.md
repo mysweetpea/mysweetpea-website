@@ -1,4 +1,39 @@
-# MySweetPea — Cache-Busting & Deploy Notes
+# MySweetPea — Deploy Notes
+
+## Deploy ritual (CURRENT — content-hash versioning via deploy.py)
+
+The manual ?v= sweep is RETIRED. From `workers/site/`:
+
+```bash
+python deploy.py        # bake + hash-version every pin + regenerate sw.js + gates
+# gates: node --check all JS, control-byte scan, JSON parse, CSP drift reminder
+# then: git add/commit/push + npx wrangler deploy (both still manual)
+```
+
+How it works:
+- Every `PATH?v=N` pin in every HTML page is rewritten to `PATH?v=h<sha256-8>`
+  of the file's current bytes. Identical content = identical URL = warm caches;
+  different content = new URL everywhere simultaneously. Mixed-version drift
+  (the fonts.css v107/v108 class of bug) is structurally impossible.
+- `assets/site-data.json` is BAKED into `assets/js/site-data.js` between the
+  `__MSP_BAKED_START__/__MSP_BAKED_END__` markers (validated fallback so a
+  failed/corrupted fetch can never blank the site) and `BAKED_HASH` is stamped.
+- `sw.js`: `CACHE = 'mysweetpea-<hash-of-hashes>'` and the CORE precache
+  entries carry the SAME ?v= URLs the HTML requests.
+- `python deploy.py --check` = read-only drift report.
+
+Data-driven editing (what to change and where):
+- Service catalog / coming-soon / suggest categories / pricing featured
+  order: edit `assets/site-data.json` (the single source of truth) then run
+  `python deploy.py`. Pages reconcile at runtime (adopt-by-name, never
+  duplicate; retired items hidden). Static HTML stays the SEO/no-JS skeleton.
+- Monitor IDs: NO LONGER HARDCODED anywhere. `site-data.js` resolves
+  Kuma monitor IDs at runtime by name from the public status API
+  (7-day localStorage cache `msp.monitors.v1`; baked extraction-time hints
+  as last resort). Renumbering a monitor in Kuma self-heals within a visit.
+- Editing inline JS in any HTML file still requires `python rebuild_csp.py`.
+
+## Cache-busting (LEGACY — kept for history)
 
 ## Cache-busting (IMPORTANT)
 
