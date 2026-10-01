@@ -9054,3 +9054,13 @@ body[data-page='pricing'] .hiw-selective{ margin-top:8px; }
 @media (max-width: 768px) {
     .top-nav { padding: 12px clamp(16px, 4vw, 22px); }
 }
+
+/* == FLUID HERO LOGO =========================================================
+   One clamp rule replaces the per-page width ladders (160px x6, 120px
+   mobile overrides): scales 120->160 continuously. Home keeps its own
+   larger rule via :not exclusion. Same specificity as the page rules,
+   later source order wins; height:auto preserves aspect. ================ */
+body[data-page]:not([data-page='home']) .hero img.logo {
+    width: clamp(120px, 11vw, 160px);
+    height: auto;
+}

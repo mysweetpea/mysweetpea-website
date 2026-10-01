@@ -249,7 +249,7 @@
 
         var max = 0, grand = 0;
         days.forEach(function (dy) { if (dy.total > max) max = dy.total; grand += dy.total; });
-        var H = window.innerWidth <= 760 ? 88 : 128;
+        var H = window.innerWidth <= 768 ? 88 : 128; /* matches the CSS 768 ladder */
 
         days.forEach(function (dy, idx) {
             var col = el('button', 'cl2-col');
