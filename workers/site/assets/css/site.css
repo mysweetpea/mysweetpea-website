@@ -9022,7 +9022,6 @@ body[data-page='form'] .form-selective{
   margin:28px 0 22px;
 }
 body[data-page='form'] .form-submit{ margin-top:8px; }
-body[data-page='redeem'] .redeem-callout{ margin-top:44px; }
-body[data-page='pricing'] .hiw-selective-eyebrow{ margin-bottom:26px; }
+body[data-page='pricing'] .hiw-selective-eyebrow{ margin-bottom:26px; margin-top:24px; } /* margin-top: air between the steps band above and the eyebrow */
 body[data-page='pricing'] .hiw-selective{ margin-top:8px; }
 /* == END USER POLISH BATCH == */

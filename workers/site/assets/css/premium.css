@@ -1860,7 +1860,7 @@ body[data-page='redeem'] #rc-submit:disabled { background: rgba(163,201,182,.18)
 
 /* 1) callout: no more heavy bordered panel above the code — quiet inline note */
 body[data-page='redeem'] .redeem-callout { border: none; background: transparent;
-    padding: 0; margin: 0 auto 26px; max-width: 520px; text-align: center; display: block; }
+    padding: 0; margin: 44px auto 26px; max-width: 520px; text-align: center; display: block; }
 body[data-page='redeem'] .redeem-callout strong { display: inline; color: var(--text-dim);
     font-weight: 600; }
 body[data-page='redeem'] .redeem-callout span { display: inline; font-size: .88rem; }
