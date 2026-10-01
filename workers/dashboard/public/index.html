@@ -1321,7 +1321,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #panel-services .sv-card:active{transform:translateY(-1px) scale(.985)}
 #panel-services .sv-card.isdown{border-color:rgba(240,110,110,.3)}
 #panel-services .sv-card.isdown::before{background:linear-gradient(180deg,rgba(240,110,110,.35),transparent)}
-#panel-services .sv-card .top{display:flex;gap:10px;align-items:center;min-width:0;position:relative}
+#panel-services .sv-card .top{display:flex;gap:10px;align-items:center;min-width:0;position:relative;padding-right:36px}
 #panel-services .sv-card .svc-ico{width:36px;height:36px;border-radius:11px;background:radial-gradient(60px 40px at 50% 20%,var(--v-soft),rgba(255,255,255,.04));border:1px solid var(--border);flex:none;object-fit:contain;padding:6px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 #panel-services .sv-card:hover .svc-ico{transform:scale(1.08)}
 #panel-services .sv-card .nm{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1330,7 +1330,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #panel-services .sv-card .sv-cat{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%;flex:none}
 #panel-services .sv-card .sv-uppill{font-size:.56rem;padding:2px 8px}
 #panel-services .sv-card .sv-live{font-size:.54rem;letter-spacing:.12em}
-#panel-services .sv-card .sv-pin{opacity:.4;transition:opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1)}
+#panel-services .sv-card .sv-pin{opacity:.4;transition:opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1);z-index:2;top:6px;right:6px;width:28px;height:28px;font-size:14px}
 #panel-services .sv-card:hover .sv-pin{opacity:.8}
 #panel-services .sv-card .sv-pin:hover{opacity:1!important;transform:scale(1.25)}
 #panel-services .sv-card .sv-pin.pinned{color:var(--gold);opacity:1;text-shadow:0 0 12px rgba(217,168,108,.5)}
@@ -1379,6 +1379,8 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #panel-services .sv-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
  #panel-services .sv-card{padding:10px 8px 8px;gap:6px}
  #panel-services .sv-card .svc-ico{width:30px;height:30px;padding:4px;border-radius:9px}
+ #panel-services .sv-card .sv-pin{width:24px;height:24px;font-size:12px;top:3px;right:3px}
+ #panel-services .sv-card .top{padding-right:28px}
  #panel-services .sv-card .nm{font-size:.74rem}
  #panel-services .sv-card .bl{font-size:.6rem;-webkit-line-clamp:1}
  #panel-services .sv-card .sv-uppill{display:none}
