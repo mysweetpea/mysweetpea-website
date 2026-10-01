@@ -1324,7 +1324,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #panel-services .sv-card .svc-ico{width:36px;height:36px;border-radius:11px;background:radial-gradient(60px 40px at 50% 20%,var(--v-soft),rgba(255,255,255,.04));border:1px solid var(--border);flex:none;object-fit:contain;padding:6px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 #panel-services .sv-card:hover .svc-ico{transform:scale(1.08)}
 #panel-services .sv-card .nm{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#panel-services .sv-card .bl{display:none}
+#panel-services .sv-card .bl{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:.68rem;line-height:1.35;color:var(--text-dim);min-height:1.35em}
 #panel-services .sv-card .meta{position:relative;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:auto}
 #panel-services .sv-card .sv-cat{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%;flex:none}
 #panel-services .sv-card .sv-uppill{font-size:.56rem;padding:2px 8px}
@@ -1378,6 +1378,7 @@ dialog#sg-dialog .sgf-actions .sgf-note{display:none}
  #panel-services .sv-card{padding:10px 8px 8px;gap:6px}
  #panel-services .sv-card .svc-ico{width:30px;height:30px;padding:4px;border-radius:9px}
  #panel-services .sv-card .nm{font-size:.74rem}
+ #panel-services .sv-card .bl{font-size:.6rem;-webkit-line-clamp:1}
  #panel-services .sv-card .sv-uppill{display:none}
  #panel-services .sv-card .meta{padding-top:6px;justify-content:center}
  #panel-services .sv-card .sv-cat{display:none}
