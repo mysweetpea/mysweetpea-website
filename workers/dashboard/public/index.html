@@ -3230,7 +3230,7 @@ function guideDetailHtml(key) {
   const SV_CATS = {}; /* derived: display name -> cat (single source: SERVICES[].cat) */
   SERVICES.forEach((s) => { SV_CATS[s.name] = s.cat; });
   const SV_CAT_LABELS = [['all','All'],['media','Media'],['cloud','Cloud & Files'],['tools','Tools'],['ai','AI']];
-  window.svState = { filter: 'all', sort: 'default', featured: 0, upmap: {}, monmap: {} };
+  window.svState = { filter: 'all', sort: 'default', featured: 0, upmap: {}, monmap: {}, updmap: {} };
   const svState = window.svState;
   const svLS = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
   const svLSset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
@@ -3276,13 +3276,14 @@ function guideDetailHtml(key) {
     const host = svcGrid; if (!host) return;
     let list = SERVICES.filter((s) => svState.filter === 'all' || SV_CATS[s.name] === svState.filter);
     if (svState.sort === 'az') list = list.slice().sort((a, b) => a.name.localeCompare(b.name));
-    else if (svState.sort === 'recent') {
-      /* most recently opened first; never-opened keep catalog order after them */
+    else if (svState.sort === 'updated') {
+      /* most recently UPDATED first (real update dates from /api/updates);
+         services with no recorded update keep catalog order after them */
       list = list.slice().sort((a, b) => {
-        const ia = svRecent.indexOf(a.name), ib = svRecent.indexOf(b.name);
-        if (ia >= 0 && ib >= 0) return ia - ib;
-        if (ia >= 0) return -1;
-        if (ib >= 0) return 1;
+        const da = svState.updmap[a.key], db = svState.updmap[b.key];
+        if (da && db) return String(db).localeCompare(String(da));
+        if (da) return -1;
+        if (db) return 1;
         return 0;
       });
     } else {
@@ -3302,7 +3303,7 @@ function guideDetailHtml(key) {
     document.querySelectorAll('.sv-fchip').forEach((b) => b.classList.toggle('on', b.dataset.f === f));
     svRenderGrid();
   };
-  const SV_SORTS = [['default', 'Most used'], ['az', 'A\u2013Z'], ['recent', 'Recently opened']];
+  const SV_SORTS = [['default', 'Most used'], ['az', 'A\u2013Z'], ['updated', 'Recently updated']];
   window.svToggleSort = function () {
     const i = SV_SORTS.findIndex((s) => s[0] === svState.sort);
     svState.sort = SV_SORTS[(i + 1) % SV_SORTS.length][0];
@@ -3373,6 +3374,15 @@ function guideDetailHtml(key) {
     svSpotTimer = requestAnimationFrame(step);
   };
   window.svSpotTimerReset();
+  // service update dates (for the 'Recently updated' sort) — /api/updates is SWR-cached 30min server-side
+  fetch('/api/updates').then((r) => (r.ok ? r.json() : null)).then((d) => {
+    ((d && d.updates) || []).forEach((u) => {
+      if (!u || !u.service || !u.date) return;
+      const prev = svState.updmap[u.service];
+      if (!prev || String(u.date) > String(prev)) svState.updmap[u.service] = u.date;
+    });
+    if (svState.sort === 'updated') svRenderGrid();
+  }).catch(() => {});
   // OPT: one fetch instead of two — extended carries current + up24 + beats
   fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((d) => {
     const ms = (d && d.monitors) || [];
