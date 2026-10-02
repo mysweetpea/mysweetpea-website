@@ -2610,13 +2610,15 @@ function guideDetailHtml(key) {
     '<section class="card" id="sec-status" hidden><p class="eyebrow">Service status</p><h3>Service status</h3><div class="skel"></div></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats">' +
-    '<section class="card st2-hero" id="st2-hero" aria-label="This week on MySweetPea">' +
+    '<div class="st3-grid">' +
+    '<section class="card st2-hero st3-hero" id="st2-hero" aria-label="This week on MySweetPea">' +
     '<p class="eyebrow st2-eyebrow">This week</p>' +
     '<div class="st2-num" id="st2-num" hidden></div>' +
     '<p class="st2-empty" id="st2-empty" hidden>Your week starts with your first play.</p>' +
     '<p class="st2-sub" id="st2-sub"></p>' +
     '<div class="st2-pills" id="st2-pills" role="group" aria-label="Stats period"><button type="button" class="st2-pill on" data-p="week">Week</button><button type="button" class="st2-pill" data-p="month">Month</button><button type="button" class="st2-pill" data-p="all">All time</button></div>' +
     '</section>' +
+    '<section class="card st3-up-card" id="st-up-card" hidden aria-label="Service uptime"><p class="eyebrow">Fleet health</p><h3>Every service, last 24h</h3><div class="st-rings" id="st-rings"><div class="skel"></div></div><p class="st-rings-cap" id="st-rings-cap" hidden></p></section>' +
     '<section class="card" id="st-top-card" hidden aria-label="Most watched"><p class="eyebrow">Top titles</p><h3>Most watched</h3><div class="hm-rail st-top-rail" id="st-top"></div></section>' +
     '<section class="card" id="st-love-card" hidden aria-label="What the household loves"><p class="eyebrow">What you love</p><h3>What the household loves</h3><div id="st-love"></div></section>' +
     '<section class="card" id="sec-stats"><p class="eyebrow">The full ledger</p><h3>The garden in numbers<button type="button" class="mini icon-btn" id="stats-refresh" aria-label="Refresh statistics" title="Refresh statistics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></h3>' +
@@ -2624,6 +2626,7 @@ function guideDetailHtml(key) {
     '<section id="sec-stats-charts" hidden aria-label="Library charts"><p class="eyebrow">By the numbers</p><div id="stats-charts" aria-live="polite"></div><noscript><p class="dim">Charts need JavaScript — the totals above still show.</p></noscript></section>' +
     '<section id="sec-growth" hidden aria-label="Library growth"></section>' +
     '<div id="stats-services" aria-live="polite"></div></section>' +
+    '</div>' +
     '</div>' +
     '<div class="tabpanel" id="panel-media" role="tabpanel" aria-labelledby="tab-media">' +
     '<section id="sec-media-m" class="media-sec"></section>' +
@@ -2863,7 +2866,7 @@ function guideDetailHtml(key) {
       kpi.innerHTML =
       kpiTile('Movies', s.movies, KPI_ICONS.film) +
       kpiTile('Episodes', s.episodes, KPI_ICONS.tv) +
-      kpiTile('Photos &amp; videos', pvTotal, KPI_ICONS.image) +
+      kpiTile('Photos & videos', pvTotal, KPI_ICONS.image) +
       kpiTile('Members', s.users, KPI_ICONS.users);
       kpi.querySelectorAll('.stat .n').forEach(animateCount);
     }
@@ -3071,6 +3074,40 @@ function guideDetailHtml(key) {
     host.innerHTML = h;
     card.hidden = false;
   }
+  // ===== STATS v3: fleet-health rings — real per-service 24h uptime from the
+  // shared /api/status/extended payload (same fetch the services tab uses, no
+  // new endpoint). Ring = stroke-dasharray donut; % = 24h window (Kuma only
+  // exposes _24 — uptime labels must match the data window, site law).
+  function renderRings(monitors) {
+    const card = document.getElementById('st-up-card');
+    const host = document.getElementById('st-rings');
+    const cap = document.getElementById('st-rings-cap');
+    if (!card || !host || !cap) return;
+    const list = (Array.isArray(monitors) ? monitors : []).filter((m) => m && m.name);
+    if (!list.length) { card.hidden = true; host.innerHTML = ''; return; }
+    const R = 15.9155, C = 2 * Math.PI * R;
+    const html = list.map((m) => {
+      const pct = (typeof m.up24 === 'number' && isFinite(m.up24)) ? Math.max(0, Math.min(100, m.up24)) : null;
+      const down = m.current === false;
+      const frac = pct == null ? 0 : pct / 100;
+      const col = down ? 'var(--down)' : (pct == null ? 'var(--text-dim)' : (pct >= 99.5 ? 'var(--up,var(--sage))' : 'var(--gold)'));
+      const label = pct == null ? '—' : (pct >= 99.95 ? '100' : pct.toFixed(pct >= 99.5 ? 1 : 2).replace(/\.?0+$/, ''));
+      return '<div class="st-ring' + (down ? ' down' : '') + '" title="' + esc(m.name) + ': ' + (pct == null ? 'no data' : pct + '% uptime, last 24h') + '">' +
+        '<svg viewBox="0 0 42 42" role="img" aria-label="' + esc(m.name) + ' ' + (pct == null ? 'no data' : pct + '%') + ' last 24h">' +
+        '<circle class="st-ring-bg" cx="21" cy="21" r="' + R + '" fill="none" stroke-width="4.2"></circle>' +
+        '<circle cx="21" cy="21" r="' + R + '" fill="none" stroke="' + col + '" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="' + (frac * C).toFixed(2) + ' ' + C.toFixed(2) + '" transform="rotate(-90 21 21)"></circle>' +
+        '</svg>' +
+        '<span class="st-ring-n">' + label + '</span>' +
+        '<span class="st-ring-l">' + esc(m.name.length > 12 ? m.name.slice(0, 11) + '…' : m.name) + '</span>' +
+        (down ? '<span class="st-ring-dot"></span>' : '') +
+        '</div>';
+    }).join('');
+    host.innerHTML = html;
+    const downN = list.filter((m) => m.current === false).length;
+    cap.textContent = downN ? downN + ' service' + (downN > 1 ? 's' : '') + ' down right now' : 'all ' + list.length + ' operational right now';
+    cap.hidden = false;
+    card.hidden = false;
+  }
   async function loadStats(force) {
     if (statsLoading || (statsLoaded && !force)) return;
     statsLoading = true;
@@ -3084,6 +3121,12 @@ function guideDetailHtml(key) {
     st2Render(d);
     growthFetch(!!force).then(renderGrowth).catch(() => renderGrowth(null));
     watchStatsFetch(!!force).then((ws) => { renderLove(ws); }).catch(() => {});
+    // Fleet-health rings — SAME extended-status payload the services tab and
+    // home graft already pull (promise-cache there? not shared across blocks,
+    // so a plain fetch + 3min Cache API server-side keeps it single-upstream).
+    fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((sx) => {
+      renderRings(sx && sx.monitors);
+    }).catch(() => { renderRings(null); });
     // Top titles share the most-played fetch with the Media tab (one upstream query)
     fetch('/api/media/mostplayed').then((r) => (r.ok ? r.json() : null)).then((mp) => {
       renderTopTitles(mp && mp.items);
@@ -4680,6 +4723,35 @@ function relFuture(v) {
 .st-device small{font-size:.66rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
 @media(max-width:760px){.st-love-num .sc-num{grid-template-columns:84px 48px 1fr}}
 @media(prefers-reduced-motion:reduce){.st-top-rail .hm-pcard,.st-device{transition:none}}
+/* ===== STATS v3: bento grid + fleet-health rings + compaction ===== */
+.st3-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:stretch}
+.st3-grid .card{padding:26px 28px}
+.st3-grid .card h3{margin-top:4px;font-size:1.05rem}
+.st3-hero{grid-column:1}
+.st3-up-card{grid-column:2}
+#st-top-card,#st-love-card{grid-column:auto}
+#sec-stats{grid-column:1/-1}
+/* fleet rings */
+.st-rings{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:12px 8px;margin-top:14px}
+.st-ring{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.st-ring svg{width:64px;height:64px;display:block}
+.st-ring-bg{stroke:rgba(139,126,246,.12)}
+.st-ring-n{position:absolute;top:24px;left:0;right:0;font-family:'Fraunces','Inter',Georgia,serif;font-size:.86rem;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
+.st-ring-l{font-size:.6rem;letter-spacing:.05em;color:var(--text-dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.st-ring.down svg{filter:drop-shadow(0 0 6px rgba(229,72,77,.35))}
+.st-ring-dot{position:absolute;top:6px;right:14px;width:8px;height:8px;border-radius:99px;background:var(--down);border:2px solid var(--bg)}
+.st-rings-cap{margin:12px 0 0;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-family:'JetBrains Mono',ui-monospace,monospace}
+/* compaction: existing sections inside the ledger card breathe less */
+#sec-stats .stats{margin:14px 0 6px;gap:10px}
+#sec-stats-charts{margin-top:14px}
+#sec-stats-charts .sc-charts{margin-top:10px}
+#sec-growth{margin-top:6px}
+#stats-services{margin-top:2px}
+#stats-services .svc-stats{gap:8px}
+#stats-services .svc-stats .stat{padding:10px 12px}
+/* mobile: stack */
+@media(max-width:1023.98px){.st3-grid{grid-template-columns:1fr}.st3-hero,.st3-up-card,#st-top-card,#st-love-card{grid-column:1}}
+@media(prefers-reduced-motion:reduce){.st-ring-dot{animation:none}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
