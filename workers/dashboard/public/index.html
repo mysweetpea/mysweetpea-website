@@ -2861,10 +2861,12 @@ function guideDetailHtml(key) {
     users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>'
   };
   const fmtStorage = (mb) => (mb == null ? '—' : (mb >= 1024 ? (mb / 1024).toFixed(1) + ' GB' : Math.round(mb) + ' MB'));
-  const statTile = (label, value) => '<div class="stat"><div class="n">' + (typeof value === 'number' ? Number(value).toLocaleString() : esc(String(value))) + '</div><div class="l">' + esc(label) + '</div></div>';
+  const statTile = (label, value, share) => '<div class="stat"><div class="n">' + (typeof value === 'number' ? Number(value).toLocaleString() : esc(String(value))) + '</div><div class="l">' + esc(label) + '</div>' + (typeof share === 'number' ? '<div class="stat-bar"><i style="width:' + Math.max(3, Math.round(share)) + '%"></i></div>' : '') + '</div>';
   const kpiTile = (label, value, icon) => '<div class="stat"><svg class="kpi-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + icon + '</svg><div class="n">' + (value == null ? '—' : Number(value).toLocaleString()) + '</div><div class="l">' + esc(label) + '</div></div>';
   const statSection = (label, tiles) => {
-    const inner = tiles.filter((t) => t[1] != null).map((t) => statTile(t[0], t[1])).join('');
+    const filled = tiles.filter((t) => t[1] != null);
+    const maxV = Math.max.apply(null, filled.map((t) => (typeof t[1] === 'number' ? t[1] : 0)).concat([0]));
+    const inner = filled.map((t) => statTile(t[0], t[1], (typeof t[1] === 'number' && maxV > 0) ? (t[1] / maxV) * 100 : null)).join('');
     if (!inner) return '';
     return '<div class="svc-sec"><p class="eyebrow">' + esc(label) + '</p><div class="svc-stats">' + inner + '</div></div>';
   };
@@ -3048,10 +3050,19 @@ function guideDetailHtml(key) {
     if (!card || !host) return;
     const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0).slice(0, 9);
     if (!list.length) { card.hidden = true; host.innerHTML = ''; return; }
-    host.innerHTML = list.map((x) => hmPosterCard(x, 0).replace(
-      '<span class="hm-poster',
-      '<span class="st-top-count"><b>' + Number(x.playCount).toLocaleString() + '</b> plays</span><span class="hm-poster'
-    )).join('');
+    const max = Number(list[0].playCount) || 1;
+    const total = list.reduce((a, x) => a + (Number(x.playCount) || 0), 0);
+    const JF_ITEM_URL = (window.MSP_CFG && window.MSP_CFG.media) || 'https://media.mysweetpea.cc';
+    host.innerHTML = '<div class="st-top-list">' + list.map((x, i) => {
+      const plays = Number(x.playCount) || 0;
+      const share = Math.round((plays / total) * 100);
+      const art = (x && x.img) ? '<img class="st-row-art" loading="lazy" alt="" src="' + esc(x.img) + '"/>' : '<span class="st-row-art st-row-fallback hm-g' + (i % 3) + '">' + esc(String(x.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
+      return '<a class="st-row" href="' + (JF_ITEM_URL + '/web/index.html#!/item?id=' + encodeURIComponent(String(x.id ?? ''))) + '" target="_blank" rel="noopener">' +
+        '<span class="st-rank">' + (i + 1) + '</span>' + art +
+        '<span class="st-row-main"><span class="st-row-title">' + esc(x.name || 'Untitled') + '</span>' +
+        '<span class="st-row-bar"><i style="width:' + Math.max(4, Math.round((plays / max) * 100)) + '%"></i></span></span>' +
+        '<span class="st-row-num"><b>' + plays.toLocaleString() + '</b> plays<small>' + share + '% of top ' + list.length + '</small></span></a>';
+    }).join('') + '</div>';
     card.hidden = false;
   }
   // Fleet-health mini rows (hero card filler): dot + name + 24h % per service.
@@ -5064,6 +5075,24 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .rq-card-full:hover .rq-arrow{transform:translateX(3px)}
 .rq-card-full .rq-foot .hm-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:640px){.rq-poster-lg{width:72px}.rq-prog{max-width:none}}
+
+/* ===== STATS POLISH: top-titles ranked list + ledger share bars ===== */
+.st-top-list{display:flex;flex-direction:column;margin-top:10px;grid-column:1/-1}
+.st-row{display:flex;align-items:center;gap:14px;padding:10px 4px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text);border-radius:10px;transition:background var(--t-fast)}
+.st-row:last-child{border-bottom:none}
+.st-row:hover{background:rgba(139,126,246,.06)}
+.st-rank{font-family:'Instrument Serif',Georgia,serif;font-size:1.3rem;color:var(--primary-bright);width:26px;text-align:center;flex:none;line-height:1}
+.st-row-art{width:44px;height:66px;border-radius:8px;object-fit:cover;flex:none;border:1px solid var(--border);display:block}
+span.st-row-art{display:grid;place-items:center;font-family:'Instrument Serif',Georgia,serif;font-size:1.2rem;color:var(--text)}
+.st-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px}
+.st-row-title{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-row-bar{display:block;height:5px;border-radius:99px;background:rgba(139,126,246,.12);overflow:hidden}
+.st-row-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage))}
+.st-row-num{flex:none;text-align:right;display:flex;flex-direction:column;gap:2px}
+.st-row-num b{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-variant-numeric:tabular-nums}
+.st-row-num small{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text-faint);letter-spacing:.08em}
+.stat-bar{height:4px;border-radius:99px;background:rgba(139,126,246,.12);overflow:hidden;margin-top:9px}
+.stat-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage));transition:width .5s ease}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
