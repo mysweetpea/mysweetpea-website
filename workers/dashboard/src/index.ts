@@ -564,7 +564,7 @@ async function fetchJellyfinGrowthItems(env: Env): Promise<{ items: any[]; parti
       '&Fields=DateCreated&EnableImages=false&EnableUserData=false' +
       '&SortBy=DateCreated&SortOrder=Descending' +
       '&StartIndex=' + (page * GROWTH_PAGE) + '&Limit=' + GROWTH_PAGE,
-      { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+      { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
     if (!r.ok) throw new Error('jellyfin ' + r.status);
     const d = await r.json() as any;
     const pageItems = (Array.isArray(d && d.Items) ? d.Items : []) as any[];
@@ -593,7 +593,7 @@ async function produceGrowth(env: Env): Promise<string> {
   growth.libraryEpisodes = null;
   try {
     const r = await fetch(String(env.JELLYFIN_URL || '').replace(/\/+$/, '') + '/Items/Counts',
-      { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+      { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
     if (r.ok) {
       const c = await r.json() as any;
       const sum = ['MovieCount', 'SeriesCount', 'EpisodeCount']
@@ -1093,7 +1093,7 @@ export default {
           await Promise.all([
             (async () => {
               try {
-                const r = await fetch(env.JELLYFIN_URL + '/Items/Counts', { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+                const r = await fetch(env.JELLYFIN_URL + '/Items/Counts', { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
                 if (r.ok) {
                   const d = await r.json() as any;
                   out.movies = d.MovieCount ?? null;
@@ -1109,7 +1109,7 @@ export default {
               try {
                 const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID +
                   '&Recursive=true&Filters=IsResumable&Limit=1',
-                  { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+                  { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
                 if (r.ok) {
                   const d = await r.json() as any;
                   out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : null;
@@ -1121,7 +1121,7 @@ export default {
               try {
                 const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID +
                   '&Recursive=true&Filters=IsResumable&Fields=UserData,PlaybackPositionTicks&Limit=50',
-                  { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+                  { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
@@ -1196,7 +1196,7 @@ export default {
           const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID +
             '&Recursive=true&SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable' +
             '&IncludeItemTypes=Movie,Episode&Limit=12&Fields=ProductionYear,SeriesName&EnableImages=true',
-            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((d.Items ?? []) as any[]).map((it) => ({
@@ -1215,7 +1215,7 @@ export default {
         // SWR: instant from cache (fresh OR stale); refresh in background.
         const payload = await swrJson(ctx, env, 'cache:media-latest', 300000, async () => {
           const r = await fetch(env.JELLYFIN_URL + '/Items/Latest?userId=' + env.JELLYFIN_USER_ID + '&Limit=12&EnableImages=true',
-            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((Array.isArray(d) ? d : []) as any[]).map((it) => ({
@@ -1233,7 +1233,7 @@ export default {
         // Most-played movies+series (PlayCount desc). Deep Media tab — not on Home.
         const payload = await swrJson(ctx, env, 'cache:media-mostplayed', 600000, async () => {
           const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
-            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((d.Items ?? []) as any[]).map((it) => ({
@@ -1249,7 +1249,7 @@ export default {
         // Fresh picks: highest-rated unwatched movies. Deep Media tab — not on Home.
         const payload = await swrJson(ctx, env, 'cache:media-unplayed', 600000, async () => {
           const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=CommunityRating&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie&Filters=IsUnplayed&Fields=ProductionYear,CommunityRating,Genres&EnableImages=true',
-            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((d.Items ?? []) as any[]).map((it) => ({
@@ -1265,7 +1265,7 @@ export default {
         // Top genres by item count (user-scoped). Deep Media tab — not on Home.
         const payload = await swrJson(ctx, env, 'cache:media-genres', 900000, async () => {
           const r = await fetch(env.JELLYFIN_URL + '/Genres?userId=' + env.JELLYFIN_USER_ID + '&Limit=10&SortBy=ItemCount&SortOrder=Descending',
-            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const genres = ((d.Items ?? []) as any[]).map((g) => ({ name: g.Name }));
@@ -1281,7 +1281,7 @@ export default {
         // route, and admin-scoped IsPlayed covers only admin plays (3 items).
         // Honest-degrade: no fabricated bars.
         const payload = await swrJson(ctx, env, 'cache:media-watchstats', 900000, async () => {
-          const UA = { 'x-emby-token': env.JELLYFIN_API_KEY, 'user-agent': SEERR_UA };
+          const UA = { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"`, 'user-agent': SEERR_UA };
           const GENRE_NAMES = ['Action', 'Adventure', 'Animation', 'Anime', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western'];
           const [genreCounts, devices] = await Promise.all([
             (async () => {
@@ -1322,7 +1322,7 @@ export default {
         // without pretending to have global trending data (honest-degrade law).
         const payload = await swrJson(ctx, env, 'cache:media-trending', 1800000, async () => {
           const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=CommunityRating,PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
-            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((d.Items ?? []) as any[]).map((it) => ({
@@ -1340,7 +1340,7 @@ export default {
         // resume-source if no play counts yet. 30-min cache (browsing shifts it).
         const payload = await swrJson(ctx, env, 'cache:media-recommend-v3', 1800000, async () => {
           const q = (extra: string) => env.JELLYFIN_URL + extra;
-          const H = { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } };
+          const H = { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } };
           let seedId = '';
           let seedName = '';
           try {
