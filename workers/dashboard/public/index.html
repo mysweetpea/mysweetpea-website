@@ -551,7 +551,8 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-btn.primary{background:linear-gradient(135deg,var(--v),var(--primary-dim));border-color:transparent;color:var(--bg);box-shadow:0 3px 12px rgba(139,126,246,.3)}
 .hm-btn.primary:hover{color:var(--bg)}
 .hm-banner-acct{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px 28px 18px;border-top:1px solid var(--border);position:relative}
-.hm-banner-acct::before{content:'YOUR ACCOUNT';position:absolute;top:-7px;left:28px;height:14px;line-height:14px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.56rem;font-weight:600;letter-spacing:.18em;color:var(--text-faint);background:linear-gradient(120deg,var(--v-soft) 0%,var(--c-soft) 45%,transparent 75%),var(--card);padding:0 8px;border-radius:4px}
+/* label floats fully ABOVE the border line (no tile-corner collision possible) */
+.hm-banner-acct::before{content:'YOUR ACCOUNT';position:absolute;top:-24px;left:28px;height:16px;line-height:16px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.56rem;font-weight:600;letter-spacing:.18em;color:var(--text-faint);padding:0 2px}
 .hm-banner-acct .hm-tile-banner{width:100%;min-width:0;padding:13px 14px;box-shadow:none;background:var(--card);transition:transform var(--t-fast),border-color var(--t-fast),background var(--t-fast)}
 .hm-tile-banner:hover{background:var(--card);border-color:var(--border-primary)}
 .hm-tile-banner .hm-tile-th{margin-bottom:8px}
@@ -4909,7 +4910,7 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 @media(max-width:640px){#rf-dialog .dlg-h{padding:18px 18px 12px}#rf-dialog .sgf{padding:14px 18px 20px;gap:13px}#rf-dialog .sgf-note{padding:0 18px}#rf-dialog .rf-list{margin:12px 18px 4px}}
 
 /* banner: YOUR ACCOUNT label clearance above first tile (referrals now leads the row) */
-.hm-banner-acct{padding-top:20px}
+.hm-banner-acct{padding-top:16px}
 /* referrals tile in banner: match sibling tile grammar exactly */
 #rf-open.hm-tile .hm-tile-th{margin-bottom:10px}
 
