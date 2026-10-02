@@ -2220,7 +2220,7 @@ const PLATFORMS_JF_MOONFIN = [
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
-    { title: 'Get Moonfin from the Play Store', text: 'Install Moonfin on your Android phone or tablet.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.android', btn: 'Get Moonfin' },
+    { title: 'Get Moonfin from the Play Store', text: 'Install Moonfin on your Android phone or tablet — it is the same app as Android TV, one install covers both.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
@@ -2251,7 +2251,7 @@ const PLATFORMS_JF_OFFICIAL = [
     { title: 'Sign in', text: 'Use your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
-    { title: 'Get the official Jellyfin app', text: 'Install Jellyfin from the App Store — the free, official iOS client.', url: 'https://apps.apple.com/us/app/jellyfin/id1486644166', btn: 'Get Jellyfin' },
+    { title: 'Get the official Jellyfin app', text: 'Install Jellyfin Mobile from the App Store — the free, official iOS client.', url: 'https://apps.apple.com/us/app/jellyfin-mobile/id1480192618', btn: 'Get Jellyfin' },
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
@@ -4763,6 +4763,33 @@ function relFuture(v) {
   .acct-menu{margin-left:auto}
 }
 @media(prefers-reduced-motion:reduce){.site-back,.acct-trigger,.tab{transition:none}}
+
+/* ===== GUIDES v2 premium polish ===== */
+/* service chip rail: softer cards, clearer active state */
+.svc-guide-nav{display:flex;flex-direction:column;gap:8px}
+.svc-guide-chip{border-radius:13px;padding:11px 14px;border:1px solid var(--border);background:linear-gradient(160deg,rgba(139,126,246,.04),transparent 65%);transition:border-color .22s ease,background .22s ease,transform .22s ease}
+.svc-guide-chip:hover{border-color:rgba(139,126,246,.4);transform:translateX(2px)}
+.svc-guide-chip[aria-pressed="true"]{border-color:rgba(139,126,246,.55);background:linear-gradient(135deg,rgba(139,126,246,.16),rgba(69,214,200,.08));box-shadow:0 0 16px rgba(139,126,246,.12),inset 0 1px 0 rgba(255,255,255,.05)}
+/* detail header: bigger serif + gradient underline */
+.svc-guide-title{font-size:1.5rem;letter-spacing:-.01em;padding-bottom:12px;position:relative;margin-bottom:10px}
+.svc-guide-title::after{content:'';position:absolute;left:0;bottom:0;width:64px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--primary),var(--sage));box-shadow:0 0 10px rgba(139,126,246,.35)}
+.svc-guide-intro{font-size:.95rem;color:var(--text-dim);margin-bottom:18px}
+/* steps: connected timeline */
+.svc-guide-step{position:relative;padding:16px 0 18px;border-bottom:none}
+.svc-guide-step:not(:last-child)::before{content:'';position:absolute;left:16px;top:46px;bottom:-4px;width:1px;background:linear-gradient(180deg,rgba(139,126,246,.3),rgba(139,126,246,.05))}
+.svc-guide-num{width:32px;height:32px;font-size:.8rem;background:linear-gradient(135deg,rgba(139,126,246,.22),rgba(69,214,200,.12));border:1px solid rgba(139,126,246,.4);color:var(--primary-bright);box-shadow:0 0 12px rgba(139,126,246,.15)}
+.svc-guide-body h4{font-size:.98rem;margin-bottom:4px}
+.svc-guide-body p{color:var(--text-dim);line-height:1.55}
+/* step buttons: filled gradient primary */
+.svc-guide-btn{border:none;background:linear-gradient(135deg,var(--primary),var(--primary-dim,var(--primary)));color:#0C1316;font-weight:700;padding:8px 18px;border-radius:10px;transition:transform .2s ease,box-shadow .2s ease}
+.svc-guide-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(139,126,246,.3)}
+/* platform pills: subtle fill on hover/active */
+.gp-pill{transition:border-color .2s ease,background .2s ease,color .2s ease}
+.gp-pill:hover{color:var(--text);background:rgba(139,126,246,.08)}
+.gp-pill.active{background:linear-gradient(135deg,rgba(139,126,246,.22),rgba(69,214,200,.14));color:var(--text);border-color:rgba(139,126,246,.5);box-shadow:0 0 12px rgba(139,126,246,.15)}
+.gp-cap,.plat-cap{font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim)}
+@media(max-width:1023.98px){.svc-guide-title{font-size:1.3rem}}
+@media(prefers-reduced-motion:reduce){.svc-guide-chip,.svc-guide-btn,.gp-pill{transition:none}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
