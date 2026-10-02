@@ -1219,10 +1219,8 @@ a.hm-req{text-decoration:none;color:var(--text)}
 /* GRAFT 2 — site nav grammar: tabs centered, mono lowercase labels, serif brand.
    Desktop/tablet only (mobile dropdown untouched). Sliding pill kept. */
 @media (min-width:761px){
-  .nav-tabs{position:absolute;left:50%;transform:translateX(-50%)}
   .tab{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.7rem;font-weight:600;
        letter-spacing:.12em;text-transform:lowercase;padding:8px 14px}
-  .brand span{font-family:'Instrument Serif',Georgia,serif;font-weight:400;letter-spacing:.01em}
 }
 @media (min-width:761px) and (max-width:1180px){
   .site-back .sb-txt{display:none}
@@ -2561,7 +2559,6 @@ function guideDetailHtml(key) {
   app.innerHTML =
     '<div class="shell">' +
     '<nav class="top-nav" id="top-nav" aria-label="Primary navigation">' +
-    '<a class="brand" href="#" data-goto="home" title="MySweetPea" onclick="event.preventDefault();setTab(\'home\')"><img src="/icons/logo.svg" alt=""/> <span class="back-label">MySweetPea</span></a>' +
     '<div class="nav-tabs" id="tabs" role="tablist" aria-label="Dashboard sections">' +
     '<div class="tab-pill" id="tab-pill" aria-hidden="true"></div>' + TABS.map((t) => '<button type="button" class="tab" id="tab-' + t + '" data-tab="' + t + '" role="tab" aria-controls="panel-' + t + '" aria-selected="false">' + TAB_LABELS[t] + (t === 'security' ? '<span class="tab-dot" aria-hidden="true"></span>' : '') + '</button>').join('') +
     '</div>' +
@@ -4724,6 +4721,10 @@ function relFuture(v) {
 @media(prefers-reduced-motion:reduce){.st-top-grid .hm-pcard,.st-top-grid .hm-poster img,.st-fleet-row{transition:none}}
 /* ===== NAV v2 premium restyle (append wins cascade) ===== */
 .top-nav{padding:12px 26px;background:linear-gradient(180deg,rgba(10,11,20,.88),rgba(10,11,20,.78));border-bottom:1px solid rgba(139,126,246,.14);box-shadow:0 8px 28px rgba(0,0,0,.28)}
+/* no brand: tabs anchor left; track must shrink, never collide with right cluster */
+.nav-tabs{min-width:0;overflow-x:auto;scrollbar-width:none;flex:0 1 auto;margin:0 auto}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-id{flex:none}
 .top-nav.nav-scrolled{padding:9px 26px;background:linear-gradient(180deg,rgba(10,11,20,.95),rgba(10,11,20,.88));box-shadow:0 10px 34px rgba(0,0,0,.38)}
 /* brand: ring-lit logo + serif */
 .brand img{border-radius:9px;box-shadow:0 0 0 1px rgba(139,126,246,.35),0 0 14px rgba(139,126,246,.22)}
