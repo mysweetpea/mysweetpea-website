@@ -3793,19 +3793,27 @@ function guideDetailHtml(key) {
     const title = String((r && r.title) || 'Untitled request');
     const initial = esc(title.trim().charAt(0).toUpperCase() || '?');
     const when = relTime(r && r.requestedAt);
-    const type = (r && r.type === 'tv') ? 'Series' : 'Movie';
-    const seasonsLine = (r && r.type === 'tv' && st.key === 'partial' && r.seasonsTotal > 0)
-      ? '<span class="rq-seasons">Seasons: ' + esc(r.seasonsAvailable != null ? r.seasonsAvailable : 0) + ' of ' + esc(r.seasonsTotal) + ' in library</span>' : '';
-    return '<a class="rq-card" href="' + esc(r && r.link) + '" target="_blank" rel="noopener noreferrer">' +
-      rqPosterArt(r && r.posterUrl, initial, 'rq-poster hm-g' + (i % 3), 'rq-poster-init') +
+    const isTv = (r && r.type === 'tv');
+    const typePill = '<span class="rq-type' + (isTv ? ' tv' : '') + '">' + (isTv ? 'Series' : 'Movie') + '</span>';
+    const idTag = (r && r.id != null) ? '<span class="rq-id">#' + esc(r.id) + '</span>' : '';
+    // Seasons: any tv with season data shows coverage (available of total)
+    const seasonsLine = (isTv && r.seasonsTotal > 0)
+      ? '<span class="rq-seasons"><span class="rq-seasons-bar"><i style="width:' + Math.max(4, Math.round(((r.seasonsAvailable != null ? r.seasonsAvailable : 0) / r.seasonsTotal) * 100)) + '%"></i></span>' + esc(r.seasonsAvailable != null ? r.seasonsAvailable : 0) + ' of ' + esc(r.seasonsTotal) + ' seasons in library</span>' : '';
+    const pct = (r && r.pct != null) ? Math.max(0, Math.min(100, Number(r.pct) || 0)) : null;
+    const prog = (pct != null)
+      ? '<span class="rq-prog-row"><span class="hm-bar rq-prog"><i style="width:' + pct + '%"></i></span><span class="rq-prog-n">' + pct + '%</span>' + ((r && r.etaText) ? '<span class="hm-eta">' + esc(r.etaText) + '</span>' : '') + '</span>'
+      : ((r && r.etaText) ? '<span class="rq-prog-row"><span class="hm-eta">' + esc(r.etaText) + '</span></span>' : '');
+    return '<a class="rq-card rq-card-full" href="' + esc(r && r.link) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="rq-head">' + typePill + idTag + (when ? '<span class="rq-when">' + esc(when) + '</span>' : '') + '</span>' +
+      '<span class="rq-body">' +
+      rqPosterArt(r && r.posterUrl, initial, 'rq-poster rq-poster-lg hm-g' + (i % 3), 'rq-poster-init') +
       '<span class="rq-main"><span class="rq-title">' + esc(title) + '</span>' +
-      '<span class="rq-meta">' + esc(type) + (when ? ' &middot; requested ' + esc(when) : '') + '</span>' +
       seasonsLine +
-      '<span class="rq-foot"><span class="' + rqChipClass(st.tone) + '">' + esc(st.label) + '</span>' +
-      ((r && r.etaText) ? '<span class="hm-eta">ETA ' + esc(r.etaText) + '</span>' : '') +
-      '<span class="rq-open">Open in Seerr &rarr;</span></span>' +
-      ((r && r.pct != null) ? '<span class="hm-bar rq-prog"><i style="width:' + Math.max(0, Math.min(100, Number(r.pct) || 0)) + '%"></i></span>' : '') +
-      '</span></a>';
+      '<span class="rq-foot"><span class="' + rqChipClass(st.tone) + '">' + esc(st.label) + '</span></span>' +
+      prog +
+      '</span></span>' +
+      '<span class="rq-open-row"><span class="rq-open">Open in Seerr</span><span class="rq-arrow">&rarr;</span></span>' +
+      '</a>';
   }
   function rqRenderFull(d) {
     const host = document.getElementById('rq-full');
@@ -5033,6 +5041,29 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .media-row::-webkit-scrollbar-track{background:rgba(139,126,246,.06);border-radius:99px}
 .media-row::-webkit-scrollbar-thumb{background:rgba(139,126,246,.4);border-radius:99px}
 .media-row::-webkit-scrollbar-thumb:hover{background:rgba(139,126,246,.6)}
+
+/* ===== REQUESTS v2 (media tab, detailed cards) ===== */
+.rq-card-full{flex-direction:column;gap:12px;padding:16px 16px 12px;transition:transform var(--t-fast),border-color var(--t-fast),box-shadow var(--t-fast)}
+.rq-card-full:hover{transform:translateY(-2px);border-color:var(--border-primary);box-shadow:var(--e2)}
+.rq-head{display:flex;align-items:center;gap:10px}
+.rq-type{font-family:'JetBrains Mono',monospace;font-size:.56rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--primary-bright);border:1px solid var(--border-primary);padding:3px 9px;border-radius:99px;background:rgba(139,126,246,.08)}
+.rq-type.tv{color:var(--sage);border-color:rgba(69,214,200,.35);background:rgba(69,214,200,.07)}
+.rq-id{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text-faint)}
+.rq-when{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text-faint)}
+.rq-body{display:flex;gap:14px;min-width:0}
+.rq-poster-lg{width:92px;border-radius:10px}
+.rq-seasons{display:flex;flex-direction:column;gap:5px;font-size:.78rem;color:var(--text-dim)}
+.rq-seasons-bar{display:block;height:4px;border-radius:99px;background:rgba(139,126,246,.14);overflow:hidden;max-width:220px}
+.rq-seasons-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage))}
+.rq-prog-row{display:flex;align-items:center;gap:10px}
+.rq-prog{flex:1;max-width:220px}
+.rq-prog-n{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--text)}
+.rq-open-row{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:10px;margin-top:auto}
+.rq-open-row .rq-open{font-size:.78rem;color:var(--primary-bright)}
+.rq-arrow{font-size:.9rem;color:var(--primary-bright);transition:transform var(--t-fast)}
+.rq-card-full:hover .rq-arrow{transform:translateX(3px)}
+.rq-card-full .rq-foot .hm-chip{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:640px){.rq-poster-lg{width:72px}.rq-prog{max-width:none}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
