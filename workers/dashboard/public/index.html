@@ -2653,6 +2653,7 @@ function guideDetailHtml(key) {
     '<div><label for="sg-youremail">Your email<span class="opt">optional</span></label><input type="email" id="sg-youremail" maxlength="120" placeholder="Only if you want us to follow up with you." autocomplete="off"/></div>' +
     '<div class="full sgf-actions"><button type="submit" class="sgf-submit" id="sg-submit" disabled>Send suggestion</button></div>' +
     '</form></dialog>' +
+    '' +
     '</div>' +
     '<div class="tabpanel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">' +
     '<section class="card" id="sec-guides"><p class="eyebrow">Setup guides</p><h3>Setup guides<span class="tier-echo" id="tier-echo-guides"></span></h3><pre class="ripple-strip" id="ripple-strip-guides" aria-hidden="true"></pre><p class="dim" style="margin:10px 0 16px">How to get started with each MySweetPea service — step by step.</p>' +
@@ -2707,7 +2708,16 @@ function guideDetailHtml(key) {
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
-    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>Private alternatives to the services you use every day. No ads, no tracking, no subscriptions &mdash; just community-funded, self-hosted software.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a href="https://status.mysweetpea.cc" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer></div>';
+    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>Private alternatives to the services you use every day. No ads, no tracking, no subscriptions &mdash; just community-funded, self-hosted software.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a href="https://status.mysweetpea.cc" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
+    '<div class="dlg-h"><h3>Recommend a friend</h3><button type="button" class="dlg-x" id="rf-close" aria-label="Close">✕</button></div>' +
+    '<p class="dim sgf-note">Vouch for someone to get garden access. We will reach out to them after we review — you will see the status here.</p>' +
+    '<div id="rf-list" class="rf-list" hidden></div>' +
+    '<form id="rff" class="sgf">' +
+    '<div class="full"><label class="sgf-lbl" for="rf-name">Their name <span class="req">REQUIRED</span></label><input id="rf-name" name="name" type="text" maxlength="60" required autocomplete="off" placeholder="Who are you vouching for?"/></div>' +
+    '<div class="full"><label class="sgf-lbl" for="rf-service">What should they get? <span class="req">REQUIRED</span></label><input id="rf-service" name="service" type="text" maxlength="40" required autocomplete="off" placeholder="e.g. Full access, just Jellyfin, files & photos"/></div>' +
+    '<div class="full"><label class="sgf-lbl" for="rf-note">Why they fit <span class="opt">OPTIONAL</span></label><textarea id="rf-note" name="note" rows="3" maxlength="200" placeholder="How do you know them? Anything we should know?"></textarea></div>' +
+    '<div class="full sgf-actions"><button type="submit" class="sgf-submit" id="rf-submit">Send recommendation</button></div>' +
+    '</form></dialog></div>';
   /* config adoption re-run: the shell (footer site links, emails, gate logo)
      was just injected — mspApplyConfig ran before it existed */
   if (typeof mspApplyConfig === 'function') mspApplyConfig();
@@ -3493,6 +3503,65 @@ function guideDetailHtml(key) {
   }).catch(() => {});
   // suggest dialog wiring (native <dialog>: Esc + backdrop-click close)
   window.openSuggestDialog = function () { const d = document.getElementById('sg-dialog'); if (d && !d.open) d.showModal(); };
+
+  /* ===== Referrals: recommend-a-friend (Tier 2) ===== */
+  window.openReferralDialog = function () {
+    const d = document.getElementById('rf-dialog');
+    if (!d) return;
+    d.showModal();
+    rfRefreshList();
+  };
+  function rfRefreshList() {
+    const host = document.getElementById('rf-list');
+    if (!host) return Promise.resolve();
+    return fetch('/api/referral').then((r) => (r.ok ? r.json() : { referrals: [] })).then((d) => {
+      const list = (d && d.referrals) || [];
+      if (!list.length) { host.hidden = true; host.innerHTML = ''; return; }
+      const dot = { pending: 'var(--gold)', approved: 'var(--up)', created: 'var(--up)', declined: 'var(--down)' };
+      host.hidden = false;
+      host.innerHTML = '<p class="rf-cap">Your referrals</p>' + list.map((r) =>
+        '<div class="rf-row"><span class="rf-dot" style="background:' + (dot[r.status] || 'var(--text-dim)') + '"></span>' +
+        '<span class="rf-name">' + esc(r.name) + '</span><span class="rf-svc">' + esc(r.service) + '</span>' +
+        '<span class="rf-status">' + esc(r.status) + '</span></div>').join('');
+    }).catch(() => {});
+  }
+  (function () {
+    const d = document.getElementById('rf-dialog');
+    if (!d) return;
+    const x = document.getElementById('rf-close');
+    if (x) x.addEventListener('click', function () { d.close(); });
+    let down = null;
+    d.addEventListener('pointerdown', function (e) { down = e.target; });
+    d.addEventListener('click', function (e) { if (down === d && e.target === d) d.close(); down = null; });
+    const f = document.getElementById('rff');
+    if (f) f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('rf-submit');
+      const name = document.getElementById('rf-name').value;
+      const service = document.getElementById('rf-service').value;
+      const note = document.getElementById('rf-note').value;
+      if (!name.trim() || !service.trim()) return;
+      btn.disabled = true; btn.textContent = 'Sending…';
+      fetch('/api/referral', { method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: name, service: service, note: note }) })
+        .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+        .then(function (res) {
+          btn.disabled = false; btn.textContent = 'Send recommendation';
+          if (res.ok) {
+            f.reset();
+            rfRefreshList();
+            const n = document.getElementById('rf-list');
+            if (n) { n.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+          } else {
+            btn.textContent = (res.j && res.j.error === 'too many pending referrals')
+              ? 'Too many pending — wait for review' : 'Failed — try again';
+            setTimeout(function () { btn.textContent = 'Send recommendation'; }, 3200);
+          }
+        })
+        .catch(function () { btn.disabled = false; btn.textContent = 'Failed — try again'; });
+    });
+  })();
+
   (function () {
     const sgd = document.getElementById('sg-dialog');
     if (!sgd) return;
@@ -3629,7 +3698,11 @@ function guideDetailHtml(key) {
     return tile('security', 'Security', '<path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/>', 'Security checklist', 'MFA, passkeys &amp; recovery codes') +
       tile('account', 'Your devices', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Devices &amp; sessions', 'See where you are signed in') +
       tile('security', 'Recent activity', '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>', 'Recent activity', 'Your latest account events') +
-      tile('guides', 'Watch anywhere', '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>', 'Setup guides', 'Phone, TV &amp; browser how-tos');
+      tile('guides', 'Watch anywhere', '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>', 'Setup guides', 'Phone, TV &amp; browser how-tos') +
+      '<button type="button" class="hm-card hm-tile" id="rf-open" onclick="openReferralDialog()">' +
+      '<span class="hm-tile-th"><span class="hm-tile-tt">Referrals</span>' + go + '</span>' +
+      '<span class="hm-tile-row"><span class="hm-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg></span>' +
+      '<span class="hm-tile-txt"><span class="hm-tile-lbl">Recommend a friend</span><span class="hm-tile-sub">Vouch for someone &amp; track it</span></span></span></button>';
   }
   async function hmLoadBanner() {
     const gw = document.getElementById('hm-greet-word');
@@ -4804,6 +4877,37 @@ function relFuture(v) {
 /* media rails already have hover grammar (hm-polish) - unify rail header spacing */
 @media(max-width:1023.98px){.hm-tile:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){.hm-tile,.hm-svcrow{transition:none}}
+
+/* ===== Referrals (recommend-a-friend) ===== */
+.rf-list{margin:0 0 16px;border:1px solid var(--border);border-radius:12px;padding:4px 14px;background:rgba(139,126,246,.04)}
+.rf-cap{font-size:.62rem;letter-spacing:.13em;text-transform:uppercase;color:var(--text-dim);margin:10px 0 6px}
+.rf-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.85rem}
+.rf-row:last-child{border-bottom:none}
+.rf-dot{width:7px;height:7px;border-radius:99px;flex:none}
+.rf-name{color:var(--text);font-weight:600}
+.rf-svc{color:var(--text-dim);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-status{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
+#rff textarea{min-height:70px;resize:vertical}
+
+/* rf-dialog: mirror sg-dialog sizing (it has no width rules of its own -> collapsed 0x0) */
+dialog#rf-dialog{margin:auto;border:1px solid var(--border-primary);border-radius:var(--radius);background:linear-gradient(150deg,var(--v-soft) 0%,transparent 45%),#12142A;color:var(--text);padding:24px 26px;max-width:640px;width:calc(100vw - 40px);box-shadow:0 24px 80px rgba(0,0,0,.55)}
+dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
+@media(max-width:640px){dialog#rf-dialog{max-width:none;width:100vw;max-height:100vh;height:100dvh;border-radius:0;border:0}}
+
+/* rf-dialog chrome: same grammar as sg-dialog (scoped rules there don't reach the shell-root copy) */
+#rf-dialog .dlg-h{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 14px;border-bottom:1px solid var(--border);margin:0}
+#rf-dialog .dlg-x{width:36px;height:36px;border-radius:11px;border:1px solid var(--border);background:none;color:var(--text-dim);font-size:.85rem;cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .2s,color .2s}
+#rf-dialog .dlg-x:hover{color:var(--text);border-color:rgba(151,146,255,.3)}
+#rf-dialog .sgf-note{padding:0 28px;margin-top:14px}
+#rf-dialog .sgf{padding:16px 28px 24px;gap:14px}
+#rf-dialog .sgf-lbl{display:block;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px;font-weight:600}
+#rf-dialog .sgf-lbl .req{color:var(--gold);font-size:.58rem;margin-left:6px}
+#rf-dialog .sgf-lbl .opt{color:var(--text-faint);font-size:.58rem;margin-left:6px}
+#rf-dialog .sgf-actions{margin-top:4px}
+#rf-dialog .rf-list{margin:14px 28px 4px}
+#rf-dialog ::backdrop{background:rgba(8,9,15,.7);backdrop-filter:blur(4px)}
+#rf-dialog h3{margin:0;font-size:1.15rem}
+@media(max-width:640px){#rf-dialog .dlg-h{padding:18px 18px 12px}#rf-dialog .sgf{padding:14px 18px 20px;gap:13px}#rf-dialog .sgf-note{padding:0 18px}#rf-dialog .rf-list{margin:12px 18px 4px}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */

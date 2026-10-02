@@ -48,6 +48,7 @@ export interface Env {
   AFFINE_DB_URL?: string;       // full postgres DSN for the affine database
   OPENWEBUI_URL?: string;       // internal URL reachable from the worker is NOT possible;
   OPENWEBUI_STATS_B64?: string; // so webui.db snapshot, base64 (users+chats only)
+  GOTIFY_REFERRAL_TOKEN?: string; // referral pings -> Gotify app 14 'Referrals'
   GITHUB_TOKEN?: string; // optional — homelab-k8s is public; token only lifts the 60/hr anon limit
   GH_COMMITS_REPO?: string; // optional — commits source repo 'owner/name' (default: mysweetpea/mysweetpea-homelab)
   MAIN_SITE_URL?: string;   // optional — marketing site origin (default: https://mysweetpea.cc)
@@ -65,6 +66,7 @@ interface SessionData {
 }
 
 const COOKIE = 'msp_dash_session';
+const REFERRAL_STATUSES_OK = new Set(['pending', 'approved', 'declined', 'created']);
 const SCOPES = 'openid profile email offline_access goauthentik.io/api';
 
 function b64uEncode(buf: ArrayBuffer | Uint8Array): string {
@@ -191,6 +193,26 @@ async function refreshSession(env: Env, sess: SessionData): Promise<SessionData 
   // Reset `created` so the 10-minute refresh window restarts. Without this the
   // stamp stays old and EVERY request re-runs this token round-trip.
   return { ...sess, at: t.access_token, rt: t.refresh_token ?? sess.rt, created: Date.now() };
+}
+
+// ---------- Referrals ----------
+// KV layout: referral:<id> = { id, by, byName, name, service, note, status, at }
+// plus referral-index = array of ids (small; one KV list call avoided, one put per referral).
+async function listReferrals(env: Env, by?: string): Promise<any[]> {
+  const ids: string[] = JSON.parse((await env.SESSIONS.get('referral-index')) || '[]');
+  const out: any[] = [];
+  for (const id of ids.slice(-200)) {
+    try {
+      const rec = JSON.parse((await env.SESSIONS.get('referral:' + id)) || 'null');
+      if (rec && (!by || rec.by === by)) out.push(rec);
+    } catch { /* skip bad record */ }
+  }
+  return out.reverse(); // newest first
+}
+async function indexReferral(env: Env, id: string): Promise<void> {
+  const ids: string[] = JSON.parse((await env.SESSIONS.get('referral-index')) || '[]');
+  ids.push(id);
+  await env.SESSIONS.put('referral-index', JSON.stringify(ids.slice(-200)));
 }
 
 async function requireSession(request: Request, env: Env): Promise<{ sess: SessionData; sid: string } | Response> {
@@ -791,6 +813,23 @@ export default {
       }
       await env.SESSIONS.put('svc-stats:' + key, JSON.stringify(clean), { expirationTtl: 172800 });
       return json({ ok: true, fields: Object.keys(clean).length });
+    }
+    if (path === '/api/referral/status' && request.method === 'PATCH') {
+      // Owner-only status flip (internal header, like the ingest route).
+      if (request.headers.get('x-msp-internal') !== env.MSP_INTERNAL_HEADER) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      let body: any;
+      try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+      const id = typeof body?.id === 'string' ? body.id.slice(0, 40) : '';
+      const status = typeof body?.status === 'string' ? body.status : '';
+      if (!id || !REFERRAL_STATUSES_OK.has(status)) return json({ error: 'bad id/status' }, 400);
+      const raw = await env.SESSIONS.get('referral:' + id);
+      if (!raw) return json({ error: 'not found' }, 404);
+      const rec = JSON.parse(raw);
+      rec.status = status;
+      await env.SESSIONS.put('referral:' + id, JSON.stringify(rec));
+      return json({ ok: true });
     }
     if (path.startsWith('/api/')) {
       const auth = await requireSession(request, env);
@@ -1408,6 +1447,51 @@ export default {
         // previous shape for up to an hour (v2 added libraryTotal*).
         const payload = await swrJson(ctx, env, 'cache:growth:v2', 3600000, () => produceGrowth(env));
         return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
+      }
+
+      // ---------- Referrals: "I recommended a friend" ----------
+      // POST /api/referral {name, service, note?} -> KV + Gotify ping
+      // GET  /api/referral       -> my referrals (with status)
+      // Status flips: pending -> approved|declined|created, set by the owner
+      // (admin) via PATCH with the internal header; members read-only.
+      if (path === '/api/referral' && request.method === 'POST') {
+        let body: any;
+        try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+        const clean = (v: unknown, max: number) =>
+          (typeof v === 'string' ? v : '').replace(/[^\p{L}\p{N} @.+,!?'’-]/gu, '').trim().slice(0, max);
+        const name = clean(body?.name, 60);
+        const service = clean(body?.service, 40);
+        const note = clean(body?.note, 200);
+        if (name.length < 2 || !service) return json({ error: 'name and service required' }, 400);
+        // rate limit: max 5 open referrals per user
+        const mine = await listReferrals(env, sess.sub);
+        if (mine.filter((r) => r.status === 'pending').length >= 5) {
+          return json({ error: 'too many pending referrals' }, 429);
+        }
+        const id = crypto.randomUUID().slice(0, 8);
+        const rec = { id, by: sess.sub, byName: sess.name || sess.username, name, service, note,
+          status: 'pending', at: Date.now() };
+        await env.SESSIONS.put(`referral:${id}`, JSON.stringify(rec));
+        await indexReferral(env, id);
+        // Gotify ping (best-effort — the referral is already stored)
+        if (env.GOTIFY_REFERRAL_TOKEN) {
+          try {
+            await fetch('https://gotify.mysweetpea.cc/message?token=' + env.GOTIFY_REFERRAL_TOKEN, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0' },
+              body: JSON.stringify({
+                title: 'Referral: ' + name,
+                message: sess.name + ' recommends ' + name + ' for ' + service + (note ? ' — "' + note + '"' : ''),
+                priority: 5,
+              }),
+            });
+          } catch { /* stored regardless */ }
+        }
+        return json({ ok: true, id });
+      }
+      if (path === '/api/referral' && request.method === 'GET') {
+        const mine = await listReferrals(env, sess.sub);
+        return json({ referrals: mine });
       }
 
       // DELETE endpoints
