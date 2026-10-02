@@ -2625,6 +2625,8 @@ function guideDetailHtml(key) {
     '</div>' +
     '</div>' +
     '<div class="tabpanel" id="panel-media" role="tabpanel" aria-labelledby="tab-media">' +
+    '<div class="md-head"><p class="eyebrow">Media</p><h2 class="md-title">Tonight&rsquo;s picks<span class="md-dot">.</span></h2></div>' +
+    '<a class="hm-hero md-hero" id="md-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
     '<section class="card" id="sec-requests"><p class="eyebrow">Requests</p><h3>Your requests</h3><div id="rq-full"><div class="skel"></div></div></section>' +
     '<section class="card" id="sec-library"><p class="eyebrow">Your library</p><h3>Library</h3><div id="lib-body"><div class="skel"></div></div><p class="dim lib-cap">Library totals — live from Jellyfin</p></section>' +
@@ -3294,8 +3296,16 @@ function guideDetailHtml(key) {
       if (mp && mp.items && mp.items.length) out += '<section class="card"><p class="eyebrow">All time</p><h3>Most played</h3><div class="media-row">' + mp.items.map(it => deepCard(it, playsChip(it) + rateChip(it))).join('') + '</div></section>';
       if (be && be.items && be.items.length) out += '<section class="card"><p class="eyebrow">Personal picks</p><h3>Because you watched' + (be.seed ? ' <span class="hm-seed-pill">' + esc(be.seed) + '</span>' : '') + '</h3><div class="media-row">' + be.items.map(it => deepCard(it, rateChip(it))).join('') + '</div></section>';
       if (fr && fr.items && fr.items.length) out += '<section class="card"><p class="eyebrow">Unwatched \u00b7 top rated</p><h3>Fresh picks</h3><div class="media-row">' + fr.items.map(it => deepCard(it, rateChip(it))).join('') + '</div></section>';
-      if (ge && ge.genres && ge.genres.length) out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3><div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'https://media.mysweetpea.cc/web/index.html#!/movies?genre=\' + encodeURIComponent(\'' + esc(g.name) + '\'), \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div></section>';
+      if (ge && ge.genres && ge.genres.length) {
+        const MOODS = [['Mind-bending', 'Sci-Fi'], ['Edge of seat', 'Thriller'], ['True story', 'Documentary'], ['Visually stunning', 'Fantasy'], ['Make me laugh', 'Comedy'], ['Keep me up tonight', 'Horror'], ['Based on a book', 'Drama']];
+        const have = new Set(ge.genres.map(g => g.name));
+        const moodChips = MOODS.filter(m2 => have.has(m2[1]));
+        const genreUrl = (name) => 'https://media.mysweetpea.cc/web/index.html#!/movies?genre=' + encodeURIComponent(name);
+        if (moodChips.length) out += '<section class="card"><p class="eyebrow">Browse by mood</p><h3>Pick a mood</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + (have.size ? '<p class="dim md-mood-cap">Moods open their genre in Jellyfin.</p>' : '') + '</section>';
+        out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3><div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div></section>';
+      }
       host.innerHTML = out;
+      hmLoadHero('md-hero');
     })();
   })();
   // ===== SERVICES LAUNCHER =====
@@ -3740,8 +3750,8 @@ function guideDetailHtml(key) {
     if (elGp) elGp.hidden = !growthOk;
     ['hm-stat-hours', 'hm-stat-reqs', 'hm-stat-devs', 'hm-stat-growth'].forEach((id) => { const n = document.getElementById(id); if (n) { n.dataset.counted = ''; animateCount(n); } });
   }
-  async function hmLoadHero() {
-    const host = document.getElementById('hm-hero');
+  async function hmLoadHero(hostId, kicker) {
+    const host = document.getElementById(hostId || 'hm-hero');
     if (!host) return;
     let items = [];
     try { const r = await fetch('/api/media/continue'); if (r.ok) { const d = await r.json(); items = (d && d.items) || []; } } catch (e) {}
@@ -3756,7 +3766,7 @@ function guideDetailHtml(key) {
       '<img class="hm-hero-art" alt="" src="' + esc(hmBackdrop(it.id, 1600)) + '" onerror="this.style.display=\'none\'">' +
       '<span class="hm-hero-scrim"></span>' +
       '<span class="hm-hero-inner"><span class="hm-hero-copy">' +
-      '<span class="hm-kicker">Continue watching</span>' +
+      '<span class="hm-kicker">' + (kicker || 'Continue watching') + '</span>' +
       '<span class="hm-hero-title">' + esc(title) + '</span>' +
       (subBits.length ? '<span class="hm-hero-meta">' + esc(subBits.filter(Boolean).join(' · ')) + (pct ? ' — ' + pct + '% watched' : '') + '</span>' : '') +
       '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Resume</span>' +
@@ -4965,6 +4975,14 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 @media(prefers-reduced-motion:reduce){.ct3-cta{transition:none}}
 
 .ct3-when{margin-top:14px;font-size:.86rem;display:flex;align-items:center}
+
+/* ===== MEDIA TAB A+C HYBRID ===== */
+.md-head{margin:4px 0 18px}
+.md-title{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:2rem;letter-spacing:-.01em;margin-top:6px}
+.md-dot{color:var(--primary-bright)}
+.md-hero{margin-bottom:22px}
+.md-mood .md-mood-chip{font-weight:600}
+.md-mood-cap{margin-top:12px;font-size:.78rem}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
