@@ -2662,26 +2662,21 @@ function guideDetailHtml(key) {
     '</div>' +
     '<div class="tabpanel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact">' +
     '<div class="ct3-wrap">' +
-    '<div class="ct3-head"><p class="eyebrow">Contact</p><h3 class="ct3-h">Talk to a <em class="ct2-human">human</em>.</h3>' +
-    '<p class="dim">Stuck on an account? Curious about a service? Just want to say hello &mdash; it all lands on a human desk.</p></div>' +
-    '<div class="ct3-stats">' +
-    '<div class="ct3-stat"><span class="mono ct3-n" style="color:var(--up)">24&ndash;48h</span><span class="ct3-cap">reply time</span></div>' +
-    '<div class="ct3-stat"><span class="mono ct3-n">1 human</span><span class="ct3-cap">reads it</span></div>' +
-    '<div class="ct3-stat"><span class="mono ct3-n">0</span><span class="ct3-cap">bots involved</span></div>' +
-    '</div>' +
+    '<div class="ct3-head"><p class="eyebrow">Contact</p><h3 class="ct3-h">Need a hand?</h3>' +
+    '<p class="dim">Account trouble, a service acting up, or just something on your mind — email reaches me directly.</p></div>' +
     '<section class="card ct3-card"><div class="ct3-top">' +
     '<p class="eyebrow">The address</p>' +
     '<div class="ct3-mailrow"><a class="mono ct3-mail" href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><button type="button" class="ct3-copy" id="ct-copy">Copy</button></div>' +
-    '<a class="btn ct3-cta" href="mailto:support@mysweetpea.cc">Open email app</a>' +
+    '<p class="dim ct3-when"><span class="dot ok" style="margin-right:8px"></span>Replies usually land within 24&ndash;48 hours.</p>' +
     '</div>' +
-    '<div class="ct3-help"><p class="eyebrow">Before you write &mdash; help us reply faster</p>' +
+    '<div class="ct3-help"><p class="eyebrow">Before you write</p>' +
     '<div class="ct3-list">' +
     '<span class="mono ct3-k">01</span><span class="ct3-v">Skim the <a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html" target="_blank" rel="noopener noreferrer">How It Works</a> page &mdash; access, the donation &amp; your sign-in live there</span>' +
-    '<span class="mono ct3-k">02</span><span class="ct3-v">Your name, so we know who you are</span>' +
-    '<span class="mono ct3-k">03</span><span class="ct3-v">The topic &mdash; account, service, or donation</span>' +
+    '<span class="mono ct3-k">02</span><span class="ct3-v">Your name, so I know who you are</span>' +
+    '<span class="mono ct3-k">03</span><span class="ct3-v">What it is &mdash; account, service, or donation</span>' +
     '<span class="mono ct3-k">04</span><span class="ct3-v">Your username, if you already have one</span>' +
     '</div>' +
-    '<p class="dim ct3-note">Include as much detail as you can &mdash; it helps us help you faster.</p>' +
+    '<p class="dim ct3-note">The more detail, the faster the reply.</p>' +
     '</div></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-security" role="tabpanel" aria-labelledby="tab-security">' +
@@ -4968,6 +4963,8 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .ct3-note{margin-top:14px;font-size:.82rem;color:var(--text-faint)}
 @media(max-width:640px){.ct3-card{padding:18px 16px}.ct3-h{font-size:1.35rem}}
 @media(prefers-reduced-motion:reduce){.ct3-cta{transition:none}}
+
+.ct3-when{margin-top:14px;font-size:.86rem;display:flex;align-items:center}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
