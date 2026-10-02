@@ -1322,6 +1322,8 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #panel-services .sv-card.isdown{border-color:rgba(240,110,110,.3)}
 #panel-services .sv-card.isdown::before{background:linear-gradient(180deg,rgba(240,110,110,.35),transparent)}
 #panel-services .sv-card .top{display:flex;gap:10px;align-items:center;min-width:0;position:relative;padding-right:36px}
+#panel-services .sv-card .top > div{min-width:0;flex:1}
+#panel-services .sv-card .nm{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 #panel-services .sv-card .svc-ico{width:36px;height:36px;border-radius:11px;background:radial-gradient(60px 40px at 50% 20%,var(--v-soft),rgba(255,255,255,.04));border:1px solid var(--border);flex:none;object-fit:contain;padding:6px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
 #panel-services .sv-card:hover .svc-ico{transform:scale(1.08)}
 #panel-services .sv-card .nm{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1380,7 +1382,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #panel-services .sv-card{padding:10px 8px 8px;gap:6px}
  #panel-services .sv-card .svc-ico{width:30px;height:30px;padding:4px;border-radius:9px}
  #panel-services .sv-card .sv-pin{width:24px;height:24px;font-size:12px;top:3px;right:3px}
- #panel-services .sv-card .top{padding-right:28px}
+ #panel-services .sv-card .top > div{margin-right:26px}
  #panel-services .sv-card .nm{font-size:.74rem}
  #panel-services .sv-card .bl{font-size:.6rem;-webkit-line-clamp:1}
  #panel-services .sv-card .sv-uppill{display:none}
