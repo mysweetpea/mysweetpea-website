@@ -3695,14 +3695,13 @@ function guideDetailHtml(key) {
       '<span class="hm-tile-th"><span class="hm-tile-tt">' + tt + '</span>' + go + '</span>' +
       '<span class="hm-tile-row"><span class="hm-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ico + '</svg></span>' +
       '<span class="hm-tile-txt"><span class="hm-tile-lbl">' + lbl + '</span><span class="hm-tile-sub">' + sub + '</span></span></span></button>';
-    return tile('security', 'Security', '<path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/>', 'Security checklist', 'MFA, passkeys &amp; recovery codes') +
-      tile('account', 'Your devices', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Devices &amp; sessions', 'See where you are signed in') +
-      tile('security', 'Recent activity', '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>', 'Recent activity', 'Your latest account events') +
-      tile('guides', 'Watch anywhere', '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>', 'Setup guides', 'Phone, TV &amp; browser how-tos') +
-      '<button type="button" class="hm-card hm-tile" id="rf-open" onclick="openReferralDialog()">' +
+    return '<button type="button" class="hm-card hm-tile" id="rf-open" onclick="openReferralDialog()">' +
       '<span class="hm-tile-th"><span class="hm-tile-tt">Referrals</span>' + go + '</span>' +
       '<span class="hm-tile-row"><span class="hm-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg></span>' +
-      '<span class="hm-tile-txt"><span class="hm-tile-lbl">Recommend a friend</span><span class="hm-tile-sub">Vouch for someone &amp; track it</span></span></span></button>';
+      '<span class="hm-tile-txt"><span class="hm-tile-lbl">Recommend a friend</span><span class="hm-tile-sub">Vouch for someone &amp; track it</span></span></span></button>' +
+      tile('account', 'Your devices', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Devices &amp; sessions', 'See where you are signed in') +
+      tile('security', 'Recent activity', '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>', 'Recent activity', 'Your latest account events') +
+      tile('guides', 'Watch anywhere', '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>', 'Setup guides', 'Phone, TV &amp; browser how-tos');
   }
   async function hmLoadBanner() {
     const gw = document.getElementById('hm-greet-word');
