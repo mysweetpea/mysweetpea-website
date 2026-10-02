@@ -2713,7 +2713,7 @@ function guideDetailHtml(key) {
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
-    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a href="https://status.mysweetpea.cc" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
+    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
     '<div class="dlg-h"><h3>Recommend a friend</h3><button type="button" class="dlg-x" id="rf-close" aria-label="Close">✕</button></div>' +
     '<p class="dim sgf-note">Vouch for someone to get garden access. We will reach out to them after we review — you will see the status here.</p>' +
     '<div id="rf-list" class="rf-list" hidden></div>' +
@@ -4683,11 +4683,18 @@ function relFuture(v) {
         card.appendChild(span);
       });
     }
-    // svRenderGrid rebuilds .sv-card elements (filters/sort/status) — re-apply hints after each render
-    if (typeof window.svRenderGrid === 'function') {
+    // svRenderGrid rebuilds .sv-card elements (filters/sort/status) — re-apply hints after each render.
+    // Main block assigns svRenderGrid ASYNC (post-auth), so poll until it exists, then wrap once.
+    var updWrapTries = 0;
+    (function updWrapWhenReady() {
+      if (typeof window.svRenderGrid !== 'function') {
+        if (++updWrapTries > 100) return; // ~30s: main grid never arrived, bail
+        return setTimeout(updWrapWhenReady, 300);
+      }
+      if (window.svRenderGrid.toString().indexOf('updApplyHints') !== -1) return; // already wrapped
       var origGrid = window.svRenderGrid;
       window.svRenderGrid = function () { origGrid(); updApplyHints(); };
-    }
+    })();
     // single close path so aria-expanded never desyncs from the visual state
     function updClosePop() {
       var pop = document.getElementById('upd-pop');
