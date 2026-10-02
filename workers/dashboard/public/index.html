@@ -4907,6 +4907,29 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 #rf-dialog ::backdrop{background:rgba(8,9,15,.7);backdrop-filter:blur(4px)}
 #rf-dialog h3{margin:0;font-size:1.15rem}
 @media(max-width:640px){#rf-dialog .dlg-h{padding:18px 18px 12px}#rf-dialog .sgf{padding:14px 18px 20px;gap:13px}#rf-dialog .sgf-note{padding:0 18px}#rf-dialog .rf-list{margin:12px 18px 4px}}
+
+/* banner: YOUR ACCOUNT label clearance above first tile (referrals now leads the row) */
+.hm-banner-acct{padding-top:20px}
+/* referrals tile in banner: match sibling tile grammar exactly */
+#rf-open.hm-tile .hm-tile-th{margin-bottom:10px}
+
+/* ===== Referral dialog form: premium ===== */
+#rf-dialog .sgf{gap:16px}
+#rf-dialog .sgf-lbl{display:flex;align-items:center;gap:8px;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);font-weight:600}
+#rf-dialog .sgf-lbl .req{color:var(--gold);font-size:.54rem;letter-spacing:.12em;padding:2px 7px;border:1px solid rgba(217,168,108,.35);border-radius:99px;background:rgba(217,168,108,.07)}
+#rf-dialog .sgf-lbl .opt{color:var(--text-faint);font-size:.54rem;letter-spacing:.12em;padding:2px 7px;border:1px solid var(--border);border-radius:99px}
+#rf-dialog .sgf input,#rf-dialog .sgf textarea{background:rgba(10,12,22,.55);border:1px solid rgba(151,146,255,.15);border-radius:12px;padding:12px 14px;font-size:.92rem;transition:border-color .2s ease,box-shadow .2s ease,background .2s ease}
+#rf-dialog .sgf input:hover,#rf-dialog .sgf textarea:hover{border-color:rgba(151,146,255,.3)}
+#rf-dialog .sgf input:focus,#rf-dialog .sgf textarea:focus{border-color:var(--primary);background:rgba(10,12,22,.75);box-shadow:0 0 0 3px rgba(139,126,246,.16);outline:none}
+#rf-dialog .sgf textarea{min-height:84px;resize:vertical;line-height:1.5}
+#rf-dialog .sgf-submit{border:none;background:linear-gradient(135deg,var(--primary),var(--primary-dim,var(--primary)));color:#0C1316;font-weight:700;font-size:.92rem;padding:13px 18px;border-radius:12px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,filter .2s ease}
+#rf-dialog .sgf-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 28px rgba(139,126,246,.4)}
+#rf-dialog .sgf-submit:active:not(:disabled){transform:translateY(0) scale(.98)}
+#rf-dialog .sgf-submit:disabled{opacity:.55;cursor:progress}
+/* referral list rows: hairline cards */
+#rf-dialog .rf-row{padding:9px 2px}
+#rf-dialog .rf-status{padding:2px 9px;border-radius:99px;border:1px solid var(--border)}
+#rf-dialog .rf-status{color:var(--up)}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
