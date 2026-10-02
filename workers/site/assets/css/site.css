@@ -7998,15 +7998,17 @@ body[data-page='status'] .status-line.is-down .line-name { color: var(--error); 
 @media (max-width: 768px) {
   body[data-page='status'] .status-summary { padding: 18px 20px; }
   body[data-page='status'] .status-summary .status-summary-main strong { font-size: 1.22rem; }
+  body[data-page='status'] .status-section { padding-inline: 0; }
   body[data-page='status'] .status-summary-meta { display: none; }
   body[data-page='status'] .status-console { border-radius: 12px; }
   body[data-page='status'] .status-line:last-child { border-radius: 0 0 12px 12px; }
   body[data-page='status'] .status-line {
-    grid-template-columns: 26px minmax(0,1fr) auto minmax(52px,auto);
+    grid-template-columns: 26px minmax(0,1fr) auto;
     grid-template-areas:
-      "icon name name badge"
-      "strip strip strip strip"
-      "pct lat lat checks";
+      "icon name badge"
+      "strip strip strip"
+      "pct lat lat"
+      "checks checks checks";
     gap: 9px 12px;
     padding: 12px 14px;
   }
