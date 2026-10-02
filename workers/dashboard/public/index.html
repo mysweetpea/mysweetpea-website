@@ -2860,7 +2860,7 @@ function guideDetailHtml(key) {
   const statSection = (label, tiles) => {
     const inner = tiles.filter((t) => t[1] != null).map((t) => statTile(t[0], t[1])).join('');
     if (!inner) return '';
-    return '<p class="eyebrow" style="margin-top:20px">' + esc(label) + '</p><div class="svc-stats">' + inner + '</div>';
+    return '<div class="svc-sec"><p class="eyebrow">' + esc(label) + '</p><div class="svc-stats">' + inner + '</div></div>';
   };
   function renderStats(s) {
     const kpi = document.getElementById('stats-kpi');
@@ -4695,6 +4695,33 @@ function relFuture(v) {
 .st-fleet-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st-fleet-pct{margin-left:auto;color:var(--text-dim);font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem}
 .st-fleet-row.down .st-fleet-pct{color:var(--down)}
+/* ===== STATS v5 premium polish ===== */
+/* ledger: sections as columns, not stacked walls */
+#stats-services{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px 28px;margin-top:18px}
+.svc-sec{display:flex;flex-direction:column;min-width:0}
+#stats-services .eyebrow{margin:0 0 10px;font-size:.62rem;display:flex;align-items:center;gap:10px}
+#stats-services .eyebrow::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+#stats-services .svc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#stats-services .svc-stats .stat{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:10px;background:linear-gradient(160deg,rgba(139,126,246,.05),transparent 70%);transition:border-color .25s ease}
+#stats-services .svc-stats .stat:hover{border-color:var(--border-primary)}
+#stats-services .svc-stats .stat .n{font-size:1.15rem}
+#stats-services .svc-stats .stat .l{margin:0;font-size:.6rem;text-align:right}
+/* fleet rows: pill % + hover */
+.st-fleet-row{padding:6px 8px;margin:0 -8px;border-radius:8px;border-bottom:none;transition:background .2s ease}
+.st-fleet-row:hover{background:rgba(139,126,246,.07)}
+.st-fleet-row+.st-fleet-row{border-top:1px solid rgba(139,126,246,.08)}
+.st-fleet-pct{padding:2px 8px;border-radius:99px;background:rgba(74,222,156,.1);color:var(--up);font-weight:600}
+.st-fleet-row.down .st-fleet-pct{background:rgba(240,138,138,.12)}
+/* poster grid: lift + zoom on hover, quieter badge */
+.st-top-grid .hm-pcard{transition:transform .3s cubic-bezier(.16,1,.3,1)}
+.st-top-grid .hm-pcard:hover{transform:translateY(-3px)}
+.st-top-grid .hm-pcard:hover .hm-poster img{transform:scale(1.05)}
+.st-top-grid .hm-poster img{transition:transform .4s cubic-bezier(.16,1,.3,1)}
+.st-top-count{border-radius:7px;padding:2px 7px;font-size:.64rem}
+.st-top-count b{font-size:.78rem}
+@media(max-width:1023.98px){#stats-services{grid-template-columns:1fr 1fr;gap:18px 20px}}
+@media(max-width:640px){#stats-services{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.st-top-grid .hm-pcard,.st-top-grid .hm-poster img,.st-fleet-row{transition:none}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
