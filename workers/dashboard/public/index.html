@@ -3301,8 +3301,9 @@ function guideDetailHtml(key) {
         const have = new Set(ge.genres.map(g => g.name));
         const moodChips = MOODS.filter(m2 => have.has(m2[1]));
         const genreUrl = (name) => 'https://media.mysweetpea.cc/web/index.html#!/movies?genre=' + encodeURIComponent(name);
-        if (moodChips.length) out += '<section class="card"><p class="eyebrow">Browse by mood</p><h3>Pick a mood</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + (have.size ? '<p class="dim md-mood-cap">Moods open their genre in Jellyfin.</p>' : '') + '</section>';
-        out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3><div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div></section>';
+        const genreRow = '<div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div>';
+        if (moodChips.length) out += '<section class="card"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
+        else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
       }
       host.innerHTML = out;
       hmLoadHero('md-hero');
@@ -4983,6 +4984,15 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .md-hero{margin-bottom:22px}
 .md-mood .md-mood-chip{font-weight:600}
 .md-mood-cap{margin-top:12px;font-size:.78rem}
+
+/* ===== MEDIA less-scroll: 2-col desktop + slim hero ===== */
+@media(min-width:981px){
+  #sec-media-m{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+  #sec-media-m .card{margin-bottom:0}
+  .md-hero{height:240px;margin-bottom:16px}
+}
+@media(max-width:980px){.md-hero{height:240px}}
+.md-browse-or{color:var(--text-faint);font-weight:400}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
