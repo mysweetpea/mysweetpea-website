@@ -7444,7 +7444,7 @@ body[data-page='form'] .vc-text {
 [data-theme='light'] .lightbox-shotwrap { background: #E6EEEC; }
 [data-theme='light'] .lightbox-ico { background: rgba(143, 175, 181, 0.1); border-color: var(--border); }
 [data-theme='light'] .lightbox-shotwrap::after { background: linear-gradient(180deg, rgba(240, 246, 244, 0), rgba(240, 246, 244, 0.55)); }
-@media (max-width: 768px) { .lightbox { padding: 14px; } .lightbox-figure { max-width: 96vw; } .lightbox-shotwrap img#lightboxShot { max-height: 44vh; } .lightbox-actions { margin-left: 0; flex-basis: 100%; } .lb-btn { flex: 1; justify-content: center; padding: 11px 14px; } .lightbox-head { gap: 11px; } }
+@media (max-width: 768px) { .lightbox { padding: 14px; } .lightbox-figure { max-width: 96vw; } .lightbox-shotwrap img#lightboxShot { max-height: 44vh; } .lightbox-actions { margin-left: 0; flex-basis: 100%; } .lb-btn { flex: 1 1 0; justify-content: center; padding: 11px 14px; white-space: nowrap; min-width: 0; height: 46px; } .lightbox-head { gap: 11px; } }
 @media (prefers-reduced-motion: reduce) { .lightbox-figure { animation: none; } }
 
 /* v2.1: one-line meta — LIVE + colored tier chip, single row */
