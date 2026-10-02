@@ -3219,3 +3219,13 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
     margin: 0;
     z-index: 2;
 }
+
+/* --- about mobile (2026-10-02) ----------------------------------------------- */
+/* Manifest section headers stacked: the index eyebrow squeezed the h2 to 118px
+   (long words clipped). "Your part" row: links wrapped a hair over the line
+   (174px needed vs 185px line) — nowrap keeps "Star on GitHub · Donate" one line. */
+@media (max-width: 560px) {
+  .about-x-shead { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .about-x-mf-total { flex-wrap: nowrap; }
+  .about-x-mf-v { white-space: nowrap; }
+}
