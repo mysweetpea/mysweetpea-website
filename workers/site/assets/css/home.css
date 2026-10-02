@@ -24,6 +24,12 @@ body[data-page='home'] .what-proof{display:flex;flex-wrap:wrap;align-items:cente
 body[data-page='home'] .what-pill{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--text-dim);background:rgba(143,175,181,.07);border:1px solid var(--border);border-radius:999px;padding:8px 13px;white-space:nowrap;transition:border-color .25s ease,color .25s ease,background .25s ease}
 body[data-page='home'] .what-pill:hover{border-color:var(--border-primary);color:var(--text)}
 body[data-page='home'] .what-sep{color:var(--text-faint)}
+/* mobile: pills 1-3 share one row (tighter type, seps hidden, small gap) */
+@media(max-width:560px){
+  body[data-page='home'] .what-proof{gap:6px}
+  body[data-page='home'] .what-sep{display:none}
+  body[data-page='home'] .what-pill{font-size:.5rem;letter-spacing:.04em;padding:6px 8px;white-space:nowrap}
+}
 
 /* ===== GARDEN — expandable exposure rows (button + hidden region, no <details>) ===== */
 body[data-page='home'] .garden-rows{max-width:1080px;margin:34px auto 0;padding:0 20px}
