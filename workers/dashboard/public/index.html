@@ -1966,8 +1966,13 @@ function mergeStats(d) {
   return { movies: num(s.movies), series: num(s.series), photos: num(s.photos), sessions: num(s.sessions),
     episodes: num(s.episodes), songs: num(s.songs), boxsets: num(s.boxsets), users: num(s.users),
     videos: num(s.videos), usage_mb: num(s.usage_mb), jf_resume: num(s.jf_resume),
+    jf_devices: num(s.jf_devices),
     seerr_total: num(s.seerr_total), seerr_pending: num(s.seerr_pending),
-    seerr_approved: num(s.seerr_approved), seerr_available: num(s.seerr_available), seerr_media: num(s.seerr_media) };
+    seerr_approved: num(s.seerr_approved), seerr_available: num(s.seerr_available), seerr_media: num(s.seerr_media),
+    nc_files: num(s.nc_files), nc_shares: num(s.nc_shares), nc_activity: num(s.nc_activity),
+    vw_users: num(s.vw_users), vw_items: num(s.vw_items),
+    affine_workspaces: num(s.affine_workspaces), affine_users: num(s.affine_users), affine_docs: num(s.affine_docs),
+    owui_users: num(s.owui_users), owui_chats: num(s.owui_chats) };
 }
 function relTime(v) {
   const t = (typeof v === 'number') ? v : Date.parse(String(v || ''));
@@ -2617,10 +2622,9 @@ function guideDetailHtml(key) {
     '<p class="st2-empty" id="st2-empty" hidden>Your week starts with your first play.</p>' +
     '<p class="st2-sub" id="st2-sub"></p>' +
     '<div class="st2-pills" id="st2-pills" role="group" aria-label="Stats period"><button type="button" class="st2-pill on" data-p="week">Week</button><button type="button" class="st2-pill" data-p="month">Month</button><button type="button" class="st2-pill" data-p="all">All time</button></div>' +
+    '<div class="st-fleet" id="st-fleet" hidden><p class="eyebrow" style="margin-top:22px">Fleet health &middot; 24h</p><div class="st-fleet-rows" id="st-fleet-rows"></div></div>' +
     '</section>' +
-    '<section class="card st3-up-card" id="st-up-card" hidden aria-label="Service uptime"><p class="eyebrow">Fleet health</p><h3>Every service, last 24h</h3><div class="st-rings" id="st-rings"><div class="skel"></div></div><p class="st-rings-cap" id="st-rings-cap" hidden></p></section>' +
-    '<section class="card" id="st-top-card" hidden aria-label="Most watched"><p class="eyebrow">Top titles</p><h3>Most watched</h3><div class="hm-rail st-top-rail" id="st-top"></div></section>' +
-    '<section class="card" id="st-love-card" hidden aria-label="What the household loves"><p class="eyebrow">What you love</p><h3>What the household loves</h3><div id="st-love"></div></section>' +
+    '<section class="card" id="st-top-card" hidden aria-label="Most watched"><p class="eyebrow">Top titles</p><h3>Most watched</h3><div class="st-top-grid" id="st-top"></div></section>' +
     '<section class="card" id="sec-stats"><p class="eyebrow">The full ledger</p><h3>The garden in numbers<button type="button" class="mini icon-btn" id="stats-refresh" aria-label="Refresh statistics" title="Refresh statistics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></h3>' +
     '<div class="stats" id="stats-kpi" aria-live="polite"></div>' +
     '<section id="sec-stats-charts" hidden aria-label="Library charts"><p class="eyebrow">By the numbers</p><div id="stats-charts" aria-live="polite"></div><noscript><p class="dim">Charts need JavaScript — the totals above still show.</p></noscript></section>' +
@@ -2879,6 +2883,11 @@ function guideDetailHtml(key) {
     if (s.seerr_media != null) seerrTiles.push(['Titles tracked', s.seerr_media]);
     h += statSection('Seerr', seerrTiles);
     h += statSection('Accounts', [['Members', s.users], ['Active sessions', s.sessions]]);
+    // In-cluster services (KV snapshots pushed by the cluster; absent = '—')
+    h += statSection('Nextcloud', [['Files', s.nc_files], ['Shares', s.nc_shares], ['Activity (30d)', s.nc_activity]]);
+    h += statSection('Vaultwarden', [['Members', s.vw_users], ['Items', s.vw_items]]);
+    h += statSection('AFFiNE', [['Workspaces', s.affine_workspaces], ['Members', s.affine_users], ['Docs', s.affine_docs]]);
+    h += statSection('Open WebUI', [['Members', s.owui_users], ['Chats', s.owui_chats]]);
     svc.innerHTML = h;
   }
   // ===== aurora polish 4 (fix3): hand-rolled stats charts — same payload/refresh flow as renderStats =====
@@ -3027,24 +3036,11 @@ function guideDetailHtml(key) {
     pills.querySelectorAll('.st2-pill').forEach((x) => x.classList.remove('on'));
     b.classList.add('on');
   });
-  // ===== STATS TAB v2: top titles (real PlayCount leaders) + what-you-love
-  // (genre bars from real per-genre counts + device apps from /Devices).
-  // Same promise-cache pattern as growthFetch — home teaser and stats share.
-  let watchStatsData = null;
-  function watchStatsFetch(force) {
-    const hit = watchStatsData;
-    if (hit && !force) return hit;
-    const p = fetch('/api/media/watchstats')
-      .then((r) => (r.ok ? r.json() : { failed: true }))
-      .catch(() => ({ failed: true }));
-    p.then((d) => { if (d && !d.failed) watchStatsData = p; });
-    return p;
-  }
   function renderTopTitles(items) {
     const card = document.getElementById('st-top-card');
     const host = document.getElementById('st-top');
     if (!card || !host) return;
-    const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0);
+    const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0).slice(0, 9);
     if (!list.length) { card.hidden = true; host.innerHTML = ''; return; }
     host.innerHTML = list.map((x) => hmPosterCard(x, 0).replace(
       '<span class="hm-poster',
@@ -3052,61 +3048,24 @@ function guideDetailHtml(key) {
     )).join('');
     card.hidden = false;
   }
-  function renderLove(ws) {
-    const card = document.getElementById('st-love-card');
-    const host = document.getElementById('st-love');
-    if (!card || !host) return;
-    const genres = (ws && Array.isArray(ws.genres) ? ws.genres : []).filter((g) => g && g.count > 0);
-    const devices = (ws && Array.isArray(ws.devices) ? ws.devices : []).filter((d) => d && d.app);
-    if (!genres.length && !devices.length) { card.hidden = true; host.innerHTML = ''; return; }
-    const max = genres.reduce((a, g) => Math.max(a, g.count), 0) || 1;
-    let h = '';
-    if (genres.length) {
-      h += '<p class="eyebrow" style="margin-top:2px">By genre</p><div class="sc-nums st-love-num">' +
-        genres.map((g) => '<div class="sc-num"><span class="sc-nl">' + esc(g.name) + '</span><span class="sc-nv">' + Number(g.count).toLocaleString() + '</span><span class="sc-nb"><i style="width:' + Math.max(4, Math.round((g.count / max) * 100)) + '%;background:var(--v)"></i></span></div>').join('') +
-        '</div>';
-    }
-    if (devices.length) {
-      h += '<p class="eyebrow" style="margin-top:20px">Where it plays</p><div class="st-devices">' +
-        devices.map((d) => '<span class="st-device"><b>' + esc(d.app) + '</b>' + (d.last ? '<small>' + esc(d.last) + '</small>' : '') + '</span>').join('') +
-        '</div>';
-    }
-    host.innerHTML = h;
-    card.hidden = false;
-  }
-  // ===== STATS v3: fleet-health rings — real per-service 24h uptime from the
-  // shared /api/status/extended payload (same fetch the services tab uses, no
-  // new endpoint). Ring = stroke-dasharray donut; % = 24h window (Kuma only
-  // exposes _24 — uptime labels must match the data window, site law).
-  function renderRings(monitors) {
-    const card = document.getElementById('st-up-card');
-    const host = document.getElementById('st-rings');
-    const cap = document.getElementById('st-rings-cap');
-    if (!card || !host || !cap) return;
+  // Fleet-health mini rows (hero card filler): dot + name + 24h % per service.
+  function renderFleet(monitors) {
+    const wrap = document.getElementById('st-fleet');
+    const host = document.getElementById('st-fleet-rows');
+    if (!wrap || !host) return;
     const list = (Array.isArray(monitors) ? monitors : []).filter((m) => m && m.name);
-    if (!list.length) { card.hidden = true; host.innerHTML = ''; return; }
-    const R = 15.9155, C = 2 * Math.PI * R;
-    const html = list.map((m) => {
+    if (!list.length) { wrap.hidden = true; host.innerHTML = ''; return; }
+    host.innerHTML = list.map((m) => {
       const pct = (typeof m.up24 === 'number' && isFinite(m.up24)) ? Math.max(0, Math.min(100, m.up24)) : null;
       const down = m.current === false;
-      const frac = pct == null ? 0 : pct / 100;
-      const col = down ? 'var(--down)' : (pct == null ? 'var(--text-dim)' : (pct >= 99.5 ? 'var(--up,var(--sage))' : 'var(--gold)'));
-      const label = pct == null ? '—' : (pct >= 99.95 ? '100' : pct.toFixed(pct >= 99.5 ? 1 : 2).replace(/\.?0+$/, ''));
-      return '<div class="st-ring' + (down ? ' down' : '') + '" title="' + esc(m.name) + ': ' + (pct == null ? 'no data' : pct + '% uptime, last 24h') + '">' +
-        '<svg viewBox="0 0 42 42" role="img" aria-label="' + esc(m.name) + ' ' + (pct == null ? 'no data' : pct + '%') + ' last 24h">' +
-        '<circle class="st-ring-bg" cx="21" cy="21" r="' + R + '" fill="none" stroke-width="4.2"></circle>' +
-        '<circle cx="21" cy="21" r="' + R + '" fill="none" stroke="' + col + '" stroke-width="4.2" stroke-linecap="round" stroke-dasharray="' + (frac * C).toFixed(2) + ' ' + C.toFixed(2) + '" transform="rotate(-90 21 21)"></circle>' +
-        '</svg>' +
-        '<span class="st-ring-n">' + label + '</span>' +
-        '<span class="st-ring-l">' + esc(m.name.length > 12 ? m.name.slice(0, 11) + '…' : m.name) + '</span>' +
-        (down ? '<span class="st-ring-dot"></span>' : '') +
-        '</div>';
+      const col = down ? 'var(--down)' : (pct == null ? 'var(--text-dim)' : 'var(--up)');
+      const label = pct == null ? '—' : (pct >= 99.95 ? '100%' : pct.toFixed(pct >= 99.5 ? 1 : 2).replace(/\.?0+$/, '') + '%');
+      return '<span class="st-fleet-row' + (down ? ' down' : '') + '" title="' + esc(m.name) + ': ' + (pct == null ? 'no data' : pct + '% uptime, last 24h') + '">' +
+        '<i class="st-fleet-dot" style="background:' + col + '"></i>' +
+        '<span class="st-fleet-name">' + esc(m.name) + '</span>' +
+        '<span class="st-fleet-pct">' + label + '</span></span>';
     }).join('');
-    host.innerHTML = html;
-    const downN = list.filter((m) => m.current === false).length;
-    cap.textContent = downN ? downN + ' service' + (downN > 1 ? 's' : '') + ' down right now' : 'all ' + list.length + ' operational right now';
-    cap.hidden = false;
-    card.hidden = false;
+    wrap.hidden = false;
   }
   async function loadStats(force) {
     if (statsLoading || (statsLoaded && !force)) return;
@@ -3120,13 +3079,8 @@ function guideDetailHtml(key) {
     renderStats(mergeStats(d));
     st2Render(d);
     growthFetch(!!force).then(renderGrowth).catch(() => renderGrowth(null));
-    watchStatsFetch(!!force).then((ws) => { renderLove(ws); }).catch(() => {});
-    // Fleet-health rings — SAME extended-status payload the services tab and
-    // home graft already pull (promise-cache there? not shared across blocks,
-    // so a plain fetch + 3min Cache API server-side keeps it single-upstream).
-    fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((sx) => {
-      renderRings(sx && sx.monitors);
-    }).catch(() => { renderRings(null); });
+    // Fleet health rows inside the hero (compact dot+name+% list, real Kuma 24h)
+    fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((sx) => { renderFleet(sx && sx.monitors); }).catch(() => {});
     // Top titles share the most-played fetch with the Media tab (one upstream query)
     fetch('/api/media/mostplayed').then((r) => (r.ok ? r.json() : null)).then((mp) => {
       renderTopTitles(mp && mp.items);
@@ -4709,38 +4663,18 @@ function relFuture(v) {
 .dash-footer .footer-status{font-family:'JetBrains Mono',ui-monospace,'Cascadia Mono','Courier New',monospace;
   font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);gap:9px}
 .dash-footer .footer-status .status-dot{width:7px;height:7px}
-/* ===== STATS TAB v2 (mockup-18 grammar): top-titles rail + what-you-love ===== */
-.st-top-rail{display:grid;grid-auto-flow:column;grid-auto-columns:132px;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
-.st-top-rail .hm-pcard{position:relative;width:auto}
-.st-top-count{position:absolute;top:8px;left:8px;z-index:5;background:rgba(8,9,15,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:8px;padding:3px 8px;font-size:.68rem;letter-spacing:.04em;color:var(--text-dim)}
-.st-top-count b{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
-.st-love-num{display:grid;gap:10px}
-.st-love-num .sc-num{grid-template-columns:110px 56px 1fr}
-.st-love-num .sc-num .sc-nl{text-align:right}
-.st-devices{display:flex;flex-wrap:wrap;gap:10px}
-.st-device{display:inline-flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:linear-gradient(160deg,rgba(139,126,246,.06),transparent 60%)}
-.st-device b{font-size:.82rem;font-weight:600;color:var(--text)}
-.st-device small{font-size:.66rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
-@media(max-width:760px){.st-love-num .sc-num{grid-template-columns:84px 48px 1fr}}
-@media(prefers-reduced-motion:reduce){.st-top-rail .hm-pcard,.st-device{transition:none}}
-/* ===== STATS v3: bento grid + fleet-health rings + compaction ===== */
+/* ===== STATS v4: 3x3 poster grid, bento (hero|top-titles), svc-ledger compaction ===== */
 .st3-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:stretch}
 .st3-grid .card{padding:26px 28px}
 .st3-grid .card h3{margin-top:4px;font-size:1.05rem}
 .st3-hero{grid-column:1}
-.st3-up-card{grid-column:2}
-#st-top-card,#st-love-card{grid-column:auto}
+#st-top-card{grid-column:2}
 #sec-stats{grid-column:1/-1}
-/* fleet rings */
-.st-rings{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:12px 8px;margin-top:14px}
-.st-ring{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
-.st-ring svg{width:64px;height:64px;display:block}
-.st-ring-bg{stroke:rgba(139,126,246,.12)}
-.st-ring-n{position:absolute;top:24px;left:0;right:0;font-family:'Fraunces','Inter',Georgia,serif;font-size:.86rem;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums}
-.st-ring-l{font-size:.6rem;letter-spacing:.05em;color:var(--text-dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.st-ring.down svg{filter:drop-shadow(0 0 6px rgba(229,72,77,.35))}
-.st-ring-dot{position:absolute;top:6px;right:14px;width:8px;height:8px;border-radius:99px;background:var(--down);border:2px solid var(--bg)}
-.st-rings-cap{margin:12px 0 0;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);font-family:'JetBrains Mono',ui-monospace,monospace}
+.st-top-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 16px;margin-top:14px}
+.st-top-grid .hm-pcard{width:auto}
+.st-top-grid .hm-pcard .mtitle{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-top-grid .hm-pcard .msub{font-size:.7rem}
+.st-top-grid .hm-poster{max-width:150px}
 /* compaction: existing sections inside the ledger card breathe less */
 #sec-stats .stats{margin:14px 0 6px;gap:10px}
 #sec-stats-charts{margin-top:14px}
@@ -4750,8 +4684,17 @@ function relFuture(v) {
 #stats-services .svc-stats{gap:8px}
 #stats-services .svc-stats .stat{padding:10px 12px}
 /* mobile: stack */
-@media(max-width:1023.98px){.st3-grid{grid-template-columns:1fr}.st3-hero,.st3-up-card,#st-top-card,#st-love-card{grid-column:1}}
-@media(prefers-reduced-motion:reduce){.st-ring-dot{animation:none}}
+@media(max-width:1023.98px){.st3-grid{grid-template-columns:1fr}.st3-hero,#st-top-card{grid-column:1}.st-top-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 10px}}
+@media(max-width:560px){.st-top-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 8px}.st-top-grid .hm-pcard .msub{display:none}}
+/* fleet rows in hero */
+.st-fleet-rows{display:flex;flex-direction:column;margin-top:10px}
+.st-fleet-row{display:flex;align-items:center;gap:10px;padding:5.5px 0;border-bottom:1px solid var(--border);font-size:.78rem}
+.st-fleet-row:last-child{border-bottom:none}
+.st-fleet-dot{width:7px;height:7px;border-radius:99px;flex:none}
+.st-fleet-row.down .st-fleet-dot{box-shadow:0 0 6px var(--down)}
+.st-fleet-name{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-fleet-pct{margin-left:auto;color:var(--text-dim);font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.72rem}
+.st-fleet-row.down .st-fleet-pct{color:var(--down)}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */

@@ -39,6 +39,15 @@ export interface Env {
   IMMICH_API_KEY: string;
   JELLYFIN_USER_ID: string;
   AUTHENTIK_ADMIN_TOKEN: string;
+  // Optional per-service stats sources (stats tab "beyond the library" tiles).
+  // Each absent -> its tiles render '—' (honest degrade).
+  NEXTCLOUD_URL?: string;       // e.g. https://cloud.mysweetpea.cc
+  NEXTCLOUD_ADMIN_USER?: string;
+  NEXTCLOUD_ADMIN_PASS?: string;
+  VAULTWARDEN_DB_B64?: string;  // lazy: whole sqlite snapshot, base64 (users+items only read)
+  AFFINE_DB_URL?: string;       // full postgres DSN for the affine database
+  OPENWEBUI_URL?: string;       // internal URL reachable from the worker is NOT possible;
+  OPENWEBUI_STATS_B64?: string; // so webui.db snapshot, base64 (users+chats only)
   GITHUB_TOKEN?: string; // optional — homelab-k8s is public; token only lifts the 60/hr anon limit
   GH_COMMITS_REPO?: string; // optional — commits source repo 'owner/name' (default: mysweetpea/mysweetpea-homelab)
   MAIN_SITE_URL?: string;   // optional — marketing site origin (default: https://mysweetpea.cc)
@@ -757,6 +766,32 @@ export default {
       // this config too; body is public-safe by construction (no secrets).
       return handleConfig(env);
     }
+    if (path === '/api/ingest/svc-stats' && request.method === 'POST') {
+      // Cluster -> worker snapshot push (in-cluster services can't be reached
+      // by the worker directly). Auth: shared internal header, NOT user auth.
+      // Body: { key: 'nextcloud'|'vaultwarden'|'affine'|'openwebui', stats: {...} }
+      // Stored under svc-stats:<key> with 48h TTL — a dead pusher degrades to
+      // '—' tiles instead of showing stale numbers forever.
+      if (request.headers.get('x-msp-internal') !== env.MSP_INTERNAL_HEADER) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      let body: any;
+      try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+      const ALLOWED = new Set(['nextcloud', 'vaultwarden', 'affine', 'openwebui']);
+      const key = typeof body?.key === 'string' ? body.key : '';
+      if (!ALLOWED.has(key)) return json({ error: 'bad key' }, 400);
+      const stats = body?.stats;
+      if (!stats || typeof stats !== 'object') return json({ error: 'bad stats' }, 400);
+      // Whitelist numeric fields only — never store arbitrary JSON.
+      const clean: Record<string, number | null> = {};
+      for (const [k, v] of Object.entries(stats as Record<string, unknown>)) {
+        if (!/^[a-z_]{1,40}$/.test(k)) continue;
+        if (typeof v === 'number' && isFinite(v)) clean[k] = v;
+        else if (v === null) clean[k] = null;
+      }
+      await env.SESSIONS.put('svc-stats:' + key, JSON.stringify(clean), { expirationTtl: 172800 });
+      return json({ ok: true, fields: Object.keys(clean).length });
+    }
     if (path.startsWith('/api/')) {
       const auth = await requireSession(request, env);
       if (auth instanceof Response) return auth;
@@ -994,14 +1029,28 @@ export default {
       }
       if (path === '/api/stats') {
         // SWR: instant from cache (fresh OR stale); refresh in background.
+        // Per-service tiles for in-cluster-only services (Nextcloud,
+        // Vaultwarden, AFFiNE, Open WebUI) come from a KV snapshot pushed by
+        // the cluster (svc-stats:<key>) — the worker cannot reach
+        // cluster-internal hosts, and public origins sit behind BFM.
+        const out: Record<string, number | string | null> = {
+          movies: null, series: null, episodes: null, songs: null, boxsets: null, jf_resume: null,
+          jf_watch_hours: null, jf_resume_titles: null, jf_top_title: null,
+          photos: null, videos: null, usage_mb: null,
+          users: null, sessions: null,
+          seerr_total: null, seerr_pending: null, seerr_approved: null, seerr_available: null, seerr_media: null,
+          nc_files: null, nc_shares: null, nc_activity: null,
+          vw_users: null, vw_items: null,
+          affine_users: null, affine_docs: null, affine_workspaces: null,
+          owui_users: null, owui_chats: null,
+        };
         const payload = await swrJson(ctx, env, 'cache:stats', 300000, async () => {
-          const out: Record<string, number | string | null> = {
-            movies: null, series: null, episodes: null, songs: null, boxsets: null, jf_resume: null,
-            jf_watch_hours: null, jf_resume_titles: null, jf_top_title: null,
-            photos: null, videos: null, usage_mb: null,
-            users: null, sessions: null,
-            seerr_total: null, seerr_pending: null, seerr_approved: null, seerr_available: null, seerr_media: null,
-          };
+          for (const k of ['svc-stats:nextcloud', 'svc-stats:vaultwarden', 'svc-stats:affine', 'svc-stats:openwebui']) {
+            try {
+              const raw = await env.SESSIONS.get(k);
+              if (raw) Object.assign(out, JSON.parse(raw) as Record<string, number | null>);
+            } catch { /* bad snapshot -> keep nulls (honest) */ }
+          }
           await Promise.all([
             (async () => {
               try {
