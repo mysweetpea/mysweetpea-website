@@ -2661,21 +2661,28 @@ function guideDetailHtml(key) {
     '<div class="svc-guide"><div class="svc-guide-nav" id="guide-nav" role="group" aria-label="Choose a service"></div><div class="svc-guide-detail" id="guide-body" aria-live="polite"></div></div></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact">' +
-    '<section class="card"><p class="eyebrow">Contact</p><h3>Talk to a <em class="ct2-human">human</em>.</h3>' +
-    '<p class="dim">The fastest way to reach us is by email. Whether you are stuck creating an account, curious about a service, or just want to say hello &mdash; we are happy to help.</p>' +
-    '<p class="dim ct2-sub">No tickets, no bots pretending &mdash; a real person reads every email.</p>' +
-    '<div class="contact-mail"><a class="contact-pill ct2-mail" href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></div>' +
-    '<div class="contact-actions"><button type="button" class="ob-btn" id="ct-copy">Copy email address</button></div>' +
-    '<p class="dim contact-note"><span class="dot ok" style="margin-right:8px"></span>We usually reply within 24&ndash;48 hours.</p></section>' +
-    '<section class="card"><p class="eyebrow">Before you write</p><h3>Before you write</h3>' +
-    '<p class="dim">A few things that help us reply faster.</p>' +
-    '<ul class="ct-list">' +
-    '<li><span>Many questions are answered on the <a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html" target="_blank" rel="noopener noreferrer">How It Works</a> page &mdash; how to get access, what the $5 donation covers, and how your sign-in works.</span></li>' +
-    '<li><span><b>Your name</b> &mdash; so we know who you are.</span></li>' +
-    '<li><span><b>What you need help with</b> &mdash; account, service, or donation.</span></li>' +
-    '<li><span><b>Your username</b> &mdash; if you already have one.</span></li>' +
-    '</ul>' +
-    '<p class="dim ct-detail">Include as much detail as you can &mdash; it helps us help you faster.</p></section>' +
+    '<div class="ct3-wrap">' +
+    '<div class="ct3-head"><p class="eyebrow">Contact</p><h3 class="ct3-h">Talk to a <em class="ct2-human">human</em>.</h3>' +
+    '<p class="dim">Stuck on an account? Curious about a service? Just want to say hello &mdash; it all lands on a human desk.</p></div>' +
+    '<div class="ct3-stats">' +
+    '<div class="ct3-stat"><span class="mono ct3-n" style="color:var(--up)">24&ndash;48h</span><span class="ct3-cap">reply time</span></div>' +
+    '<div class="ct3-stat"><span class="mono ct3-n">1 human</span><span class="ct3-cap">reads it</span></div>' +
+    '<div class="ct3-stat"><span class="mono ct3-n">0</span><span class="ct3-cap">bots involved</span></div>' +
+    '</div>' +
+    '<section class="card ct3-card"><div class="ct3-top">' +
+    '<p class="eyebrow">The address</p>' +
+    '<div class="ct3-mailrow"><a class="mono ct3-mail" href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><button type="button" class="ct3-copy" id="ct-copy">Copy</button></div>' +
+    '<a class="btn ct3-cta" href="mailto:support@mysweetpea.cc">Open email app</a>' +
+    '</div>' +
+    '<div class="ct3-help"><p class="eyebrow">Before you write &mdash; help us reply faster</p>' +
+    '<div class="ct3-list">' +
+    '<span class="mono ct3-k">01</span><span class="ct3-v">Skim the <a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html" target="_blank" rel="noopener noreferrer">How It Works</a> page &mdash; access, the donation &amp; your sign-in live there</span>' +
+    '<span class="mono ct3-k">02</span><span class="ct3-v">Your name, so we know who you are</span>' +
+    '<span class="mono ct3-k">03</span><span class="ct3-v">The topic &mdash; account, service, or donation</span>' +
+    '<span class="mono ct3-k">04</span><span class="ct3-v">Your username, if you already have one</span>' +
+    '</div>' +
+    '<p class="dim ct3-note">Include as much detail as you can &mdash; it helps us help you faster.</p>' +
+    '</div></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-security" role="tabpanel" aria-labelledby="tab-security">' +
     '<section class="card" id="sec-security"><p class="eyebrow">Security</p><h3>Security</h3><div class="skel"></div></section>' +
@@ -3925,9 +3932,11 @@ function guideDetailHtml(key) {
   const ctCopy = document.getElementById('ct-copy');
   if (ctCopy) ctCopy.addEventListener('click', async () => {
     const email = 'support@mysweetpea.cc';
+    const setLabel = (t) => { try { ctCopy.textContent = t; } catch (e2) {} };
     try {
       await navigator.clipboard.writeText(email);
-      toast('Copied', { ok: true });
+      setLabel('COPIED ✓'); toast('Copied', { ok: true });
+      setTimeout(() => setLabel('Copy'), 1600);
     } catch (e) {
       const ta = document.createElement('textarea');
       ta.value = email;
@@ -4931,6 +4940,34 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 #rf-dialog .rf-row{padding:9px 2px}
 #rf-dialog .rf-status{padding:2px 9px;border-radius:99px;border:1px solid var(--border)}
 #rf-dialog .rf-status{color:var(--up)}
+
+/* ===== CONTACT v3 (postcard hybrid) ===== */
+.ct3-wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column}
+.ct3-head{text-align:center;margin-bottom:22px}
+.ct3-h{font-family:'Fraunces','Inter',Georgia,serif;font-size:1.6rem;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.ct3-head .dim{font-size:.92rem}
+.ct3-stats{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.ct3-stat{display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 8px;border-right:1px solid var(--border);background:rgba(139,126,246,.04)}
+.ct3-stat:last-child{border-right:none}
+.ct3-n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:1rem;color:var(--text)}
+.ct3-cap{font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint)}
+.ct3-card{padding:24px 26px}
+.ct3-top{position:relative}
+.ct3-mailrow{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border-primary);border-radius:12px;padding:13px 16px;background:rgba(10,12,22,.5)}
+.ct3-mail{color:var(--text);font-size:.98rem;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s ease}
+.ct3-mail:hover{border-bottom-color:var(--sage)}
+.ct3-copy{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;border:1px solid var(--border-primary);background:transparent;color:var(--primary-bright);padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .2s ease;flex:none}
+.ct3-copy:hover{background:rgba(139,126,246,.12);border-color:rgba(139,126,246,.5)}
+.ct3-cta{margin-top:14px;width:100%;justify-content:center;border:none;background:linear-gradient(135deg,var(--primary),#5B9DF6);color:#0C1316;font-weight:700;font-size:.9rem;padding:13px 18px;border-radius:12px;cursor:pointer;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
+.ct3-cta:hover{transform:translateY(-1px);box-shadow:0 9px 26px rgba(139,126,246,.35)}
+.ct3-help{border-top:1px solid var(--border);margin-top:22px;padding-top:18px}
+.ct3-list{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;font-size:.88rem}
+.ct3-k{color:var(--gold);font-size:.72rem;padding-top:2px}
+.ct3-v{color:var(--text-dim)}
+.ct3-v a{color:var(--primary-bright)}
+.ct3-note{margin-top:14px;font-size:.82rem;color:var(--text-faint)}
+@media(max-width:640px){.ct3-card{padding:18px 16px}.ct3-h{font-size:1.35rem}}
+@media(prefers-reduced-motion:reduce){.ct3-cta{transition:none}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
