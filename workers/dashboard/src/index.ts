@@ -1210,10 +1210,17 @@ export default {
                 const r = await fetch(env.JELLYFIN_URL + '/Devices', { headers: UA });
                 if (!r.ok) return [];
                 const d = await r.json() as any;
-                return ((d.Items ?? []) as any[]).map((x) => ({
-                  app: typeof x.AppName === 'string' ? x.AppName : 'Unknown',
-                  last: typeof x.DateLastActivity === 'string' ? x.DateLastActivity.slice(0, 10) : null,
-                })).slice(0, 24);
+                // Real client apps only: drop infra speakers (Seerr, curl, setup-script)
+                // + sort newest-activity first, cap 12
+                const INFRA = /^(seerr|curl|setup-script)$/i;
+                return ((d.Items ?? []) as any[])
+                  .filter((x) => !INFRA.test(String(x.AppName || '')))
+                  .map((x) => ({
+                    app: typeof x.AppName === 'string' ? x.AppName : 'Unknown',
+                    last: typeof x.DateLastActivity === 'string' ? x.DateLastActivity.slice(0, 10) : null,
+                  }))
+                  .sort((a, b) => (b.last || '').localeCompare(a.last || ''))
+                  .slice(0, 12);
               } catch { return []; }
             })(),
           ]);
