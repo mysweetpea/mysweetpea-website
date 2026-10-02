@@ -1439,6 +1439,70 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #panel-services .sv-glance .sv-toolbar::-webkit-scrollbar{display:none}
  #panel-services .sv-glance .sv-fchip{flex:none}
 }
+
+/* ===== SERVICES POLISH 2 (user round: sort identity, motion, suggest prominence, card size, uptime icons) ===== */
+/* A) SORT: chip-of-chips -> distinct control w/ label + value + caret */
+#panel-services .sv-fchip.sv-sort{margin-left:auto;background:rgba(139,126,246,.10);border-color:var(--border-primary);color:var(--text);display:inline-flex;align-items:center;gap:8px;padding:8px 14px}
+#panel-services .sv-fchip.sv-sort .sv-sort-lbl{font-family:'JetBrains Mono',monospace;font-size:.54rem;font-weight:600;letter-spacing:.16em;color:var(--text-faint)}
+#panel-services .sv-fchip.sv-sort .sv-sort-val{font-size:.78rem;font-weight:700;min-width:44px;text-align:left}
+#panel-services .sv-fchip.sv-sort .sv-sort-car{font-size:.7rem;color:var(--primary-bright);transition:transform .25s cubic-bezier(.16,1,.3,1)}
+#panel-services .sv-fchip.sv-sort:hover .sv-sort-car{transform:translateY(1px)}
+/* B) MOTION — featured spotlight: soft crossfade on change */
+#sv-spot .sv-spot-main{transition:opacity .3s ease}
+#sv-spot.spot-swap .sv-spot-main{opacity:0}
+/* spotlight progress bar: subtle glow head */
+#sv-spot .sv-spot-timer i{box-shadow:0 0 8px rgba(139,126,246,.5)}
+/* featured icon: gentle breathing (reduced-motion respects) */
+#sv-spot .sv-spot-ico img{animation:svSpotBreathe 5s ease-in-out infinite}
+@keyframes svSpotBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+/* card hover: lift + icon nudge + title tint (desktop) */
+#panel-services .sv-card:hover .nm{color:var(--primary-bright)}
+/* filter chips: active state pops with tiny scale */
+#panel-services .sv-glance .sv-fchip.on{transform:scale(1.04)}
+#panel-services .sv-glance .sv-fchip{transition:all .22s cubic-bezier(.16,1,.3,1)}
+/* LIVE dots across cards: staggered shimmer */
+#panel-services .sv-card .sv-livedot{animation:svEPulse 2.4s ease-in-out infinite}
+#panel-services .sv-grid .sv-card:nth-child(2n) .sv-livedot{animation-delay:.6s}
+#panel-services .sv-grid .sv-card:nth-child(3n) .sv-livedot{animation-delay:1.2s}
+/* sort value flip animation on toggle */
+#panel-services .sv-fchip.sv-sort .sv-sort-val{transition:opacity .18s ease,transform .18s ease}
+#panel-services .sv-fchip.sv-sort.sorting .sv-sort-val{opacity:0;transform:translateY(3px)}
+/* C) SUGGEST: unmissable — gradient CTA in header */
+#panel-services .svhead .sv-ghostbtn{background:linear-gradient(135deg,var(--primary),var(--primary-dim));border-color:transparent;color:#fff;font-weight:700;box-shadow:0 4px 16px rgba(139,126,246,.35);padding:9px 18px;transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s}
+#panel-services .svhead .sv-ghostbtn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(139,126,246,.45)}
+#panel-services .svhead .sv-ghostbtn::before{content:'';width:6px;height:6px;border-radius:99px;background:var(--sage);box-shadow:0 0 8px rgba(69,214,200,.8);animation:svEPulse 2.4s ease-in-out infinite}
+/* foot-note link upgraded to match */
+#panel-services .sv-foot-note a{font-weight:700;text-decoration:underline;text-decoration-color:rgba(69,214,200,.4);text-underline-offset:3px}
+/* D) BIGGER CARDS — desktop wider tiles, mobile 1-col-with-blurbs */
+#panel-services .sv-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+#panel-services .sv-card{padding:15px 15px 12px;gap:10px}
+#panel-services .sv-card .nm{font-size:.95rem}
+#panel-services .sv-card .meta{padding-top:10px}
+@media (max-width:768px){
+ /* mobile: 2-col keeps scanning but everything breathes + blurb clamps 2 lines */
+ #panel-services .sv-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ #panel-services .sv-card{padding:32px 12px 11px;gap:8px}
+ #panel-services .sv-card .nm{font-size:.85rem;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.25}
+ #panel-services .sv-card .bl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:.66rem;line-height:1.3;min-height:1.72em}
+ #panel-services .sv-card .meta{flex-wrap:wrap;row-gap:4px}
+ #panel-services .sv-card .sv-cat{display:none}
+ /* suggest button mobile: full-width gradient bar under title — impossible to miss */
+ #panel-services .svhead .sv-ghostbtn{order:4;width:100%;justify-content:center;padding:12px 18px;font-size:.86rem}
+ /* sort control mobile: full-width bar above grid */
+ #panel-services .sv-glance .sv-fchip.sv-sort{margin-left:0;width:100%;justify-content:flex-start;order:-1}
+ #panel-services .sv-glance .sv-toolbar{flex-wrap:wrap}
+ #panel-services .sv-glance .sv-fchip.sv-sort .sv-sort-val{flex:1}
+}
+/* E) UPTIME ICONS */
+#sec-uptime .up-row .up-ico{width:20px;height:20px;object-fit:contain;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+#sec-uptime .up-row .left{gap:8px}
+@media (max-width:768px){
+ #sec-uptime .up-row .up-ico{width:18px;height:18px}
+}
+@media (prefers-reduced-motion:reduce){
+ #sv-spot .sv-spot-ico img{animation:none}
+ #panel-services .svhead .sv-ghostbtn::before{animation:none}
+}
 </style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
@@ -3155,7 +3219,12 @@ function guideDetailHtml(key) {
   };
   window.svToggleSort = function () {
     svState.sort = svState.sort === 'default' ? 'az' : 'default';
-    const b = document.getElementById('sv-sortbtn'); if (b) b.textContent = svState.sort === 'az' ? 'A–Z' : 'Default';
+    const b = document.getElementById('sv-sortbtn');
+    if (b) {
+      const val = b.querySelector('.sv-sort-val');
+      b.classList.add('sorting');
+      setTimeout(() => { val.textContent = svState.sort === 'az' ? 'A\u2013Z' : 'Default'; b.classList.remove('sorting'); }, 180);
+    }
     svRenderGrid();
   };
   // aurora polish 4 (fix2): feature ALL services (SERVICES order), not a hand-picked subset
@@ -3163,6 +3232,13 @@ function guideDetailHtml(key) {
   window.svRenderSpot = function () {
     const host = document.getElementById('sv-spot'); if (!host) return;
     const s = SERVICES.find((x) => x.name === SV_FEATURED[svState.featured % SV_FEATURED.length]) || SERVICES[0];
+    /* featured-cycle animation: fade body out, swap, fade back in (reduced-motion safe) */
+    const rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!rm && host.dataset.spotInit === '1') {
+      host.classList.add('spot-swap');
+      setTimeout(() => host.classList.remove('spot-swap'), 300);
+    }
+    host.dataset.spotInit = '1';
     host.innerHTML = '<div class="sv-spot-ico">' + svIcon(s, 'spotimg') + '</div>' +
       '<div class="sv-spot-main"><div class="sv-cat">Featured</div><div class="sv-spot-name">' + esc(s.name) + '</div>' +
       '<div class="sv-spot-blurb">' + esc(s.blurb) + '</div>' +
@@ -3177,7 +3253,7 @@ function guideDetailHtml(key) {
   (function svToolbar() {
     const host = document.getElementById('sv-toolbar'); if (!host) return;
     host.innerHTML = SV_CAT_LABELS.map((c, ci) => '<button type="button" class="sv-fchip' + (ci === 0 ? ' on' : '') + '" data-f="' + c[0] + '" onclick="window.svSetFilter(\'' + c[0] + '\')">' + c[1] + '</button>').join('') +
-      '<button type="button" class="sv-fchip sv-sort" id="sv-sortbtn" onclick="window.svToggleSort()">Default</button>';
+      '<button type="button" class="sv-fchip sv-sort" id="sv-sortbtn" onclick="window.svToggleSort()"><span class="sv-sort-lbl">SORT</span><span class="sv-sort-val">Default</span><span class="sv-sort-car">\u25BE</span></button>';
   })();
   // OPT: rotate the spotlight only while the Services tab is visible (resettable; paused for reduced motion)
   // aurora polish 4 (fix2): progress-slider timer — rAF drives the bar width via performance.now() deltas
@@ -3675,7 +3751,9 @@ function guideDetailHtml(key) {
     let lastGroup = null;
     shown.forEach((r) => {
       if (r.group && r.group !== lastGroup) { html += '<div class="up-group">' + esc(r.group) + '</div>'; lastGroup = r.group; }
-      html += '<div class="row up-row"><div class="left"><span class="dot ' + (r.m.current ? 'ok' : 'down') + '"></span><span>' + esc(r.m.name || 'Monitor') + '</span></div><span class="strip">' + beatStrip(r.m.beats) + '</span><span class="dim">' + (r.m.up24 == null ? '—' : Math.round(r.m.up24) + '%') + '</span></div>';
+      const usvc = SERVICES.find((s) => (s.mon || []).some((k) => String(r.m.name || '').toLowerCase().indexOf(k) >= 0));
+      const uico = usvc && usvc.icon ? '<img class="up-ico" src="' + usvc.icon + '" alt="" loading="lazy">' : '';
+      html += '<div class="row up-row"><div class="left"><span class="dot ' + (r.m.current ? 'ok' : 'down') + '"></span>' + uico + '<span>' + esc(r.m.name || 'Monitor') + '</span></div><span class="strip">' + beatStrip(r.m.beats) + '</span><span class="dim">' + (r.m.up24 == null ? '—' : Math.round(r.m.up24) + '%') + '</span></div>';
     });
     if (rows.length > shown.length) html += '<p class="dim up-more">+' + (rows.length - shown.length) + ' more</p>';
     html += '</div>';
