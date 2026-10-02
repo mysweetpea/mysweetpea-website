@@ -4749,7 +4749,14 @@ function relFuture(v) {
 .acct-trigger:hover{border-color:rgba(139,126,246,.45);background:rgba(139,126,246,.1)}
 .acct-trigger.tier-sweetpea{border-color:rgba(217,168,108,.5);box-shadow:0 0 0 1px rgba(217,168,108,.22),0 0 16px rgba(217,168,108,.14)}
 @media(max-width:1023.98px){.top-nav{padding:10px 16px}.top-nav.nav-scrolled{padding:8px 16px}}
-@media(max-width:480px){.back-label{font-size:.88rem;max-width:20ch;overflow:hidden;text-overflow:ellipsis}.brand{gap:8px}.brand img{width:24px;height:24px}.site-back .sb-txt{display:none}.site-back{width:36px;padding:0;justify-content:center}}
+@media(max-width:480px){.site-back .sb-txt{display:none}.site-back{width:36px;padding:0;justify-content:center}}
+/* mobile nav split: site-back + bell LEFT, account + hamburger RIGHT */
+@media(max-width:760px){
+  .top-nav{justify-content:space-between}
+  .nav-tabs{left:12px;right:12px}
+  .nav-id{flex:1 1 auto;display:flex;align-items:center}
+  .acct-menu{margin-left:auto}
+}
 @media(prefers-reduced-motion:reduce){.site-back,.acct-trigger,.tab{transition:none}}
 </style>
 <script id="graft-hb-js">
