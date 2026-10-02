@@ -1185,6 +1185,24 @@ export default {
         });
         return json(JSON.parse(payload));
       }
+      if (path === '/api/media/trending') {
+        // Home 'Trending now' rail: highest CommunityRating across movies+series,
+        // then PlayCount as tiebreak. Reads as 'the best of the library right now'
+        // without pretending to have global trending data (honest-degrade law).
+        const payload = await swrJson(ctx, env, 'cache:media-trending', 1800000, async () => {
+          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=CommunityRating,PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
+            { headers: { 'x-emby-token': env.JELLYFIN_API_KEY } });
+          if (!r.ok) throw new Error('jellyfin ' + r.status);
+          const d = await r.json() as any;
+          const items = ((d.Items ?? []) as any[]).map((it) => ({
+            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
+            rating: it.CommunityRating ?? null,
+            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items });
+        });
+        return json(JSON.parse(payload));
+      }
       if (path === '/api/media/recommend') {
         // Because-you-watched: Similar to the most-played movie (userId-scoped).
         // 3-step: most-played id -> /Items/{id}/Similar?userId=... Falls back to

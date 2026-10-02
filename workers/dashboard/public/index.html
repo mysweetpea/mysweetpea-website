@@ -1601,7 +1601,8 @@ a.hm-req{text-decoration:none;color:var(--text)}
 /* 6. NEW/rating badges: consistent position + backdrop blur for legibility over art */
 #panel-home .hm-pbadge{backdrop-filter:blur(6px)}
 /* 7. Trending now: rank numeral whisper (premium editorial touch) */
-#panel-home #hm-because .hm-pcard::before{counter-increment:hmrank;content:counter(hmrank,decimal-leading-zero);position:absolute;top:8px;left:8px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;color:rgba(238,240,251,.85);background:rgba(8,9,15,.55);backdrop-filter:blur(6px);border-radius:7px;padding:2px 7px;z-index:2}
+#panel-home #hm-because .hm-pcard{position:relative}
+#panel-home #hm-because .hm-pcard::before{counter-increment:hmrank;content:counter(hmrank,decimal-leading-zero);position:absolute;top:8px;left:8px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;color:rgba(238,240,251,.92);background:rgba(8,9,15,.62);backdrop-filter:blur(6px);border-radius:7px;padding:2px 7px;z-index:5}
 #panel-home #hm-because .hm-rail{counter-reset:hmrank}
 /* 8. get-started card: quieter border, buttons consistent */
 #panel-home .card{transition:border-color .2s}
