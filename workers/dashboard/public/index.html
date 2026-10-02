@@ -2993,13 +2993,30 @@ function guideDetailHtml(key) {
     const footer = g.importVisible
       ? 'Initial import (up to ' + esc(g.importEnd) + '): +' + Number(g.importTotal).toLocaleString() + ' &middot; Pipeline era: +' + Number(g.pipelineTotal).toLocaleString()
       : '+' + Number(g.pipelineTotal).toLocaleString() + ' this month';
+    // daily story: how many of the window's days had additions + avg/day
+    const active = g.daily.filter((d) => (Number(d.total) || 0) > 0).length;
+    const sumAll = g.daily.reduce((a, d) => a + (Number(d.total) || 0), 0);
+    const avgDay = g.daily.length ? Math.round(sumAll / g.daily.length) : 0;
+    const firstDay = g.daily.length ? g.daily[0].date : '';
+    const lastDay = g.daily.length ? g.daily[g.daily.length - 1].date : '';
+    const fmtDay = (s) => { const t = Date.parse(String(s) + 'T00:00:00Z'); return isFinite(t) ? new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''; };
     sec.innerHTML = '<p class="eyebrow">Library growth</p>' +
       '<div class="gr-num">+' + Number(g.addedThisWeek).toLocaleString() + '<small> added this week</small></div>' +
-      '<div class="gr-chips">' +
-      '<span class="gr-chip"><b>+' + Number(g.addedToday).toLocaleString() + '</b> today</span>' +
-      '<span class="gr-chip"><b>' + Number(g.streakDays).toLocaleString() + '</b>-day streak</span>' +
-      '<span class="gr-chip"><b>' + libAll + '</b> items in library</span></div>' +
-      '<div class="gr-bars" role="img" aria-label="Daily additions over the last 30 days">' + bars + '</div>' +
+      '<div class="gr-stats">' +
+      '<div class="gr-stat"><b>+' + Number(g.addedToday).toLocaleString() + '</b><span>added today</span></div>' +
+      '<div class="gr-stat"><b>' + Number(g.streakDays).toLocaleString() + '</b><span>day streak</span></div>' +
+      '<div class="gr-stat"><b>' + active + '</b><span>of ' + g.daily.length + ' days growing</span></div>' +
+      '<div class="gr-stat"><b>~' + avgDay.toLocaleString() + '</b><span>avg per day</span></div>' +
+      '<div class="gr-stat"><b>' + libAll + '</b><span>items total</span></div>' +
+      '</div>' +
+      '<div class="gr-legend">' +
+      '<span><i style="background:var(--v)"></i>movies</span>' +
+      '<span><i style="background:var(--c)"></i>series</span>' +
+      '<span><i style="background:var(--gold)"></i>episodes</span>' +
+      '<span class="gr-legend-note">' + (g.daily.length - active) + ' quiet days</span></div>' +
+      '<div class="gr-bars-wrap"><div class="gr-gridlines" aria-hidden="true"><i></i><i></i><i></i></div>' +
+      '<div class="gr-bars" role="img" aria-label="Daily additions over the last 30 days">' + bars + '</div></div>' +
+      '<div class="gr-axis"><span>' + esc(fmtDay(firstDay)) + '</span><span>every bar is one day</span><span>' + esc(fmtDay(lastDay)) + '</span></div>' +
       '<div class="gr-area-wrap"><svg class="gr-area" viewBox="0 0 800 100" preserveAspectRatio="none" role="img" aria-label="Cumulative library growth">' +
       '<defs><linearGradient id="grFill" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" style="stop-color:var(--v);stop-opacity:.5"/>' +
@@ -5093,6 +5110,24 @@ span.st-row-art{display:grid;place-items:center;font-family:'Instrument Serif',G
 .st-row-num small{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--text-faint);letter-spacing:.08em}
 .stat-bar{height:4px;border-radius:99px;background:rgba(139,126,246,.12);overflow:hidden;margin-top:9px}
 .stat-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage));transition:width .5s ease}
+
+/* ===== GROWTH v2 readability ===== */
+.gr-stats{display:flex;flex-wrap:wrap;margin-top:16px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.gr-stat{flex:1 1 120px;display:flex;flex-direction:column;gap:3px;padding:13px 16px;border-right:1px solid var(--border);background:rgba(139,126,246,.04)}
+.gr-stat:last-child{border-right:none}
+.gr-stat b{font-family:'JetBrains Mono',monospace;font-size:1.12rem;font-variant-numeric:tabular-nums;color:var(--text)}
+.gr-stat span{font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+.gr-legend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:14px}
+.gr-legend span{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)}
+.gr-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.gr-legend-note{margin-left:auto;color:var(--text-faint) !important;text-transform:none !important;letter-spacing:.04em !important}
+.gr-bars-wrap{position:relative;margin-top:10px}
+.gr-gridlines{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+.gr-gridlines i{height:1px;background:rgba(139,126,246,.09)}
+.gr-bars{position:relative;height:150px}
+.gr-axis{display:flex;justify-content:space-between;margin-top:7px}
+.gr-axis span{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:var(--text-faint)}
+@media(max-width:640px){.gr-stat{flex:1 1 45%}.gr-bars{height:110px}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
