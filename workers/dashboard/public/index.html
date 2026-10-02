@@ -2617,7 +2617,9 @@ function guideDetailHtml(key) {
     '<p class="st2-sub" id="st2-sub"></p>' +
     '<div class="st2-pills" id="st2-pills" role="group" aria-label="Stats period"><button type="button" class="st2-pill on" data-p="week">Week</button><button type="button" class="st2-pill" data-p="month">Month</button><button type="button" class="st2-pill" data-p="all">All time</button></div>' +
     '</section>' +
-    '<section class="card" id="sec-stats"><p class="eyebrow">Statistics</p><h3>The garden in numbers<button type="button" class="mini icon-btn" id="stats-refresh" aria-label="Refresh statistics" title="Refresh statistics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></h3>' +
+    '<section class="card" id="st-top-card" hidden aria-label="Most watched"><p class="eyebrow">Top titles</p><h3>Most watched</h3><div class="hm-rail st-top-rail" id="st-top"></div></section>' +
+    '<section class="card" id="st-love-card" hidden aria-label="What the household loves"><p class="eyebrow">What you love</p><h3>What the household loves</h3><div id="st-love"></div></section>' +
+    '<section class="card" id="sec-stats"><p class="eyebrow">The full ledger</p><h3>The garden in numbers<button type="button" class="mini icon-btn" id="stats-refresh" aria-label="Refresh statistics" title="Refresh statistics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></h3>' +
     '<div class="stats" id="stats-kpi" aria-live="polite"></div>' +
     '<section id="sec-stats-charts" hidden aria-label="Library charts"><p class="eyebrow">By the numbers</p><div id="stats-charts" aria-live="polite"></div><noscript><p class="dim">Charts need JavaScript — the totals above still show.</p></noscript></section>' +
     '<section id="sec-growth" hidden aria-label="Library growth"></section>' +
@@ -3022,6 +3024,53 @@ function guideDetailHtml(key) {
     pills.querySelectorAll('.st2-pill').forEach((x) => x.classList.remove('on'));
     b.classList.add('on');
   });
+  // ===== STATS TAB v2: top titles (real PlayCount leaders) + what-you-love
+  // (genre bars from real per-genre counts + device apps from /Devices).
+  // Same promise-cache pattern as growthFetch — home teaser and stats share.
+  let watchStatsData = null;
+  function watchStatsFetch(force) {
+    const hit = watchStatsData;
+    if (hit && !force) return hit;
+    const p = fetch('/api/media/watchstats')
+      .then((r) => (r.ok ? r.json() : { failed: true }))
+      .catch(() => ({ failed: true }));
+    p.then((d) => { if (d && !d.failed) watchStatsData = p; });
+    return p;
+  }
+  function renderTopTitles(items) {
+    const card = document.getElementById('st-top-card');
+    const host = document.getElementById('st-top');
+    if (!card || !host) return;
+    const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0);
+    if (!list.length) { card.hidden = true; host.innerHTML = ''; return; }
+    host.innerHTML = list.map((x) => hmPosterCard(x, 0).replace(
+      '<span class="hm-poster',
+      '<span class="st-top-count"><b>' + Number(x.playCount).toLocaleString() + '</b> plays</span><span class="hm-poster'
+    )).join('');
+    card.hidden = false;
+  }
+  function renderLove(ws) {
+    const card = document.getElementById('st-love-card');
+    const host = document.getElementById('st-love');
+    if (!card || !host) return;
+    const genres = (ws && Array.isArray(ws.genres) ? ws.genres : []).filter((g) => g && g.count > 0);
+    const devices = (ws && Array.isArray(ws.devices) ? ws.devices : []).filter((d) => d && d.app);
+    if (!genres.length && !devices.length) { card.hidden = true; host.innerHTML = ''; return; }
+    const max = genres.reduce((a, g) => Math.max(a, g.count), 0) || 1;
+    let h = '';
+    if (genres.length) {
+      h += '<p class="eyebrow" style="margin-top:2px">By genre</p><div class="sc-nums st-love-num">' +
+        genres.map((g) => '<div class="sc-num"><span class="sc-nl">' + esc(g.name) + '</span><span class="sc-nv">' + Number(g.count).toLocaleString() + '</span><span class="sc-nb"><i style="width:' + Math.max(4, Math.round((g.count / max) * 100)) + '%;background:var(--v)"></i></span></div>').join('') +
+        '</div>';
+    }
+    if (devices.length) {
+      h += '<p class="eyebrow" style="margin-top:20px">Where it plays</p><div class="st-devices">' +
+        devices.map((d) => '<span class="st-device"><b>' + esc(d.app) + '</b>' + (d.last ? '<small>' + esc(d.last) + '</small>' : '') + '</span>').join('') +
+        '</div>';
+    }
+    host.innerHTML = h;
+    card.hidden = false;
+  }
   async function loadStats(force) {
     if (statsLoading || (statsLoaded && !force)) return;
     statsLoading = true;
@@ -3034,6 +3083,11 @@ function guideDetailHtml(key) {
     renderStats(mergeStats(d));
     st2Render(d);
     growthFetch(!!force).then(renderGrowth).catch(() => renderGrowth(null));
+    watchStatsFetch(!!force).then((ws) => { renderLove(ws); }).catch(() => {});
+    // Top titles share the most-played fetch with the Media tab (one upstream query)
+    fetch('/api/media/mostplayed').then((r) => (r.ok ? r.json() : null)).then((mp) => {
+      renderTopTitles(mp && mp.items);
+    }).catch(() => {});
     statsLoaded = true;
     statsLoading = false;
   }
@@ -4612,6 +4666,20 @@ function relFuture(v) {
 .dash-footer .footer-status{font-family:'JetBrains Mono',ui-monospace,'Cascadia Mono','Courier New',monospace;
   font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);gap:9px}
 .dash-footer .footer-status .status-dot{width:7px;height:7px}
+/* ===== STATS TAB v2 (mockup-18 grammar): top-titles rail + what-you-love ===== */
+.st-top-rail{display:grid;grid-auto-flow:column;grid-auto-columns:132px;gap:12px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin}
+.st-top-rail .hm-pcard{position:relative;width:auto}
+.st-top-count{position:absolute;top:8px;left:8px;z-index:5;background:rgba(8,9,15,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid var(--border);border-radius:8px;padding:3px 8px;font-size:.68rem;letter-spacing:.04em;color:var(--text-dim)}
+.st-top-count b{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+.st-love-num{display:grid;gap:10px}
+.st-love-num .sc-num{grid-template-columns:110px 56px 1fr}
+.st-love-num .sc-num .sc-nl{text-align:right}
+.st-devices{display:flex;flex-wrap:wrap;gap:10px}
+.st-device{display:inline-flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:10px;padding:10px 14px;background:linear-gradient(160deg,rgba(139,126,246,.06),transparent 60%)}
+.st-device b{font-size:.82rem;font-weight:600;color:var(--text)}
+.st-device small{font-size:.66rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
+@media(max-width:760px){.st-love-num .sc-num{grid-template-columns:84px 48px 1fr}}
+@media(prefers-reduced-motion:reduce){.st-top-rail .hm-pcard,.st-device{transition:none}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */

@@ -1185,6 +1185,42 @@ export default {
         });
         return json(JSON.parse(payload));
       }
+      if (path === '/api/media/watchstats') {
+        // Stats tab "what you love": genre counts (per-genre TotalRecordCount —
+        // /Genres ItemCount is null on Jellyfin 10.11) + device-app list
+        // (/Devices, real past devices w/ app names). NO per-day watch history:
+        // /Sessions/History is 404 on this server, PlaybackReporting has no HTTP
+        // route, and admin-scoped IsPlayed covers only admin plays (3 items).
+        // Honest-degrade: no fabricated bars.
+        const payload = await swrJson(ctx, env, 'cache:media-watchstats', 900000, async () => {
+          const UA = { 'x-emby-token': env.JELLYFIN_API_KEY, 'user-agent': SEERR_UA };
+          const GENRE_NAMES = ['Action', 'Adventure', 'Animation', 'Anime', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western'];
+          const [genreCounts, devices] = await Promise.all([
+            (async () => {
+              try {
+                const lists = await Promise.all(GENRE_NAMES.map((g) =>
+                  fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&Recursive=true&Genres=' + encodeURIComponent(g) + '&Limit=1&IncludeItemTypes=Movie,Series', { headers: UA })
+                    .then((r) => (r.ok ? r.json() as any : null)).catch(() => null)));
+                return GENRE_NAMES.map((g, i) => ({ name: g, count: lists[i] && typeof lists[i].TotalRecordCount === 'number' ? lists[i].TotalRecordCount : 0 }))
+                  .filter((x) => x.count > 0).sort((a, b) => b.count - a.count).slice(0, 6);
+              } catch { return []; }
+            })(),
+            (async () => {
+              try {
+                const r = await fetch(env.JELLYFIN_URL + '/Devices', { headers: UA });
+                if (!r.ok) return [];
+                const d = await r.json() as any;
+                return ((d.Items ?? []) as any[]).map((x) => ({
+                  app: typeof x.AppName === 'string' ? x.AppName : 'Unknown',
+                  last: typeof x.DateLastActivity === 'string' ? x.DateLastActivity.slice(0, 10) : null,
+                })).slice(0, 24);
+              } catch { return []; }
+            })(),
+          ]);
+          return JSON.stringify({ genres: genreCounts, devices });
+        });
+        return json(JSON.parse(payload));
+      }
       if (path === '/api/media/trending') {
         // Home 'Trending now' rail: highest CommunityRating across movies+series,
         // then PlayCount as tiebreak. Reads as 'the best of the library right now'
