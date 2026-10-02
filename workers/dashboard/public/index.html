@@ -1398,6 +1398,47 @@ a.hm-req{text-decoration:none;color:var(--text)}
  dialog#sg-dialog .sgf-submit{width:100%}
  .sv-ghostbtn{order:5}
 }
+
+/* ===== SERVICES POLISH (post-bento refinement pass) ===== */
+/* 1. spotlight: real proportion — icon anchored left, text block reads as one unit */
+#sv-spot{gap:26px;padding:26px 30px}
+#sv-spot .sv-spot-ico{align-self:center}
+/* 2. category labels: cap-free, half-alpha, less shouty on desktop cards */
+#panel-services .sv-card .sv-cat{max-width:none;opacity:.85}
+/* 3. uptime % sits with the LIVE chip as one reading unit; category drifts right alone */
+#panel-services .sv-card .meta{gap:8px}
+#panel-services .sv-card .sv-uppill{opacity:.9}
+/* 4. glance: label groups read as sections */
+#panel-services .sv-glance .sv-glbl{margin-bottom:2px}
+/* 5. filter chips + sort: consistent heights */
+#panel-services .sv-glance .sv-toolbar{gap:8px}
+/* mobile */
+@media (max-width:768px){
+ /* 6. header: pill + button on ONE row under the title — kills the stacked 3-row cascade */
+ #panel-services .svhead{row-gap:8px}
+ #panel-services .svhead .sv-upsum{order:3}
+ #panel-services .svhead .sv-ghostbtn{order:4}
+ /* 7. spotlight mobile: icon left of text (compact), not a 90px column */
+ .sv-spot#sv-spot{flex-direction:row;flex-wrap:wrap;align-items:center;gap:16px;padding:20px}
+ #sv-spot .sv-spot-ico{width:58px;height:58px;border-radius:17px;align-self:flex-start}
+ #sv-spot .sv-spot-main{flex:1 1 calc(100% - 74px);display:flex;flex-direction:column}
+ #sv-spot .sv-dots{order:5}
+ #sv-spot .btn{order:6;width:100%;justify-content:center;align-self:auto;margin-top:2px}
+ #sv-spot .sv-refresh{top:12px;right:12px}
+ /* 8. glance orbs on mobile: row scroll, not wrapped stacks */
+ #panel-services .sv-glance .sv-orbs{flex-wrap:nowrap;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+ #panel-services .sv-glance .sv-orb{width:54px;height:54px;flex:0 0 54px;display:flex;align-items:center;justify-content:center}
+ #panel-services .sv-glance .sv-orb img{width:32px;height:32px}
+ #panel-services .sv-glance .sv-orbs::-webkit-scrollbar{display:none}
+ /* 9. mobile tile: blurb clamps to 1 line neatly below name; live row breathes */
+ #panel-services .sv-card{padding:30px 12px 10px}
+ #panel-services .sv-card .top{gap:9px}
+ #panel-services .sv-card .meta{padding-top:9px;margin-top:2px}
+ /* 10. filter row mobile: single-line scroll like glance orbs */
+ #panel-services .sv-glance .sv-toolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+ #panel-services .sv-glance .sv-toolbar::-webkit-scrollbar{display:none}
+ #panel-services .sv-glance .sv-fchip{flex:none}
+}
 </style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
