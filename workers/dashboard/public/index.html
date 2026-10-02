@@ -3302,7 +3302,7 @@ function guideDetailHtml(key) {
         const moodChips = MOODS.filter(m2 => have.has(m2[1]));
         const genreUrl = (name) => 'https://media.mysweetpea.cc/web/index.html#!/movies?genre=' + encodeURIComponent(name);
         const genreRow = '<div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div>';
-        if (moodChips.length) out += '<section class="card"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
+        if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
         else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
       }
       host.innerHTML = out;
@@ -5007,6 +5007,11 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
   #sec-media-m{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
   #sec-media-m .card{height:100%}
   #sec-media-m .card{margin-bottom:0;min-width:0;max-width:100%;overflow:hidden}
+  /* Browse card: center the chip block vertically so the stretched height reads naturally */
+  #sec-media-m .card.md-browse{display:flex;flex-direction:column;justify-content:center;gap:14px}
+  #sec-media-m .card.md-browse .m-genre-row{gap:12px}
+  #sec-media-m .card.md-browse .m-genre{padding:11px 18px;font-size:.82rem}
+
   .md-hero{height:240px;margin-bottom:16px}
 }
 @media(max-width:980px){.md-hero{height:240px}}
