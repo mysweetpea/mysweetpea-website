@@ -1572,6 +1572,52 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #panel-services .sv-fchip.sv-sort .sv-sort-val{flex:1}
 }
 </style>
+<style id="hm-polish-css">
+/* ===== HOME POLISH (post-A2 refinement pass) ===== */
+/* 1. section rhythm: rows breathe as one column */
+#panel-home{gap:26px}
+#panel-home .hm-sec .hm-head{margin-bottom:4px}
+#panel-home .hm-head .hm-h2{letter-spacing:.01em}
+/* 2. services rail: density tune — tiles align to a consistent 2-col rhythm w/ hover presence */
+#panel-home #sec-apps .hm-rail{gap:10px}
+#panel-home #sec-apps .hm-svcrow{transition:transform .25s cubic-bezier(.16,1,.3,1),border-color .2s,box-shadow .25s}
+#panel-home #sec-apps .hm-svcrow:hover{transform:translateY(-2px);box-shadow:var(--e2)}
+/* 3. rails: edge fade hint so cut-off cards read as scrollable */
+#panel-home .hm-rail{-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent 100%);mask-image:linear-gradient(90deg,#000 92%,transparent 100%)}
+#panel-home .hm-rail::-webkit-scrollbar{height:4px}
+#panel-home .hm-rail::-webkit-scrollbar-thumb{background:rgba(151,146,255,.18);border-radius:99px}
+/* 4. poster cards: hover lift + art zoom + title brighten (desktop) */
+#panel-home .hm-pcard{transition:transform .3s cubic-bezier(.16,1,.3,1)}
+#panel-home .hm-pcard .hm-poster img{transition:transform .45s cubic-bezier(.16,1,.3,1)}
+#panel-home .hm-pcard:hover{transform:translateY(-4px)}
+#panel-home .hm-pcard:hover .hm-poster img{transform:scale(1.06)}
+#panel-home .hm-pcard:hover .mtitle{color:var(--primary-bright)}
+#panel-home .hm-pcard .mtitle{transition:color .2s}
+/* 5. keep-watching wide cards: same lift grammar */
+#panel-home .hm-card.hm-wide{transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s}
+#panel-home .hm-card.hm-wide:hover{transform:translateY(-3px);box-shadow:var(--e2)}
+#panel-home .hm-wide .hm-wide-art{transition:transform .5s cubic-bezier(.16,1,.3,1)}
+#panel-home .hm-card.hm-wide:hover .hm-wide-art{transform:scale(1.04)}
+/* 6. NEW/rating badges: consistent position + backdrop blur for legibility over art */
+#panel-home .hm-pbadge{backdrop-filter:blur(6px)}
+/* 7. Trending now: rank numeral whisper (premium editorial touch) */
+#panel-home #hm-because .hm-pcard::before{counter-increment:hmrank;content:counter(hmrank,decimal-leading-zero);position:absolute;top:8px;left:8px;font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;color:rgba(238,240,251,.85);background:rgba(8,9,15,.55);backdrop-filter:blur(6px);border-radius:7px;padding:2px 7px;z-index:2}
+#panel-home #hm-because .hm-rail{counter-reset:hmrank}
+/* 8. get-started card: quieter border, buttons consistent */
+#panel-home .card{transition:border-color .2s}
+/* 9. mobile: rails full-bleed scroll with less dead margin */
+@media (max-width:768px){
+ #panel-home{gap:22px}
+ #panel-home .hm-rail{scroll-padding-left:2px}
+ #panel-home .hm-pcard:hover{transform:none}
+ #panel-home .hm-card.hm-wide:hover{transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+ #panel-home .hm-pcard,#panel-home .hm-card.hm-wide,#panel-home .hm-pcard .hm-poster img,#panel-home .hm-wide .hm-wide-art{transition:none}
+ #panel-home .hm-pcard:hover,#panel-home .hm-card.hm-wide:hover{transform:none}
+ #panel-home .hm-pcard:hover .hm-poster img,#panel-home .hm-card.hm-wide:hover .hm-wide-art{transform:none}
+}
+</style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
@@ -2087,7 +2133,8 @@ const GUIDES = {
     plain: 'Watch movies and shows together with friends in real-time — everyone sees the same scene.',
     steps: [
       { title: 'Install the extension', text: 'KoalaSync is a browser extension. Add it to Chrome (or any Chromium browser) or Firefox. Firefox users: https://addons.mozilla.org/en-US/firefox/addon/koalasync/', url: 'https://chromewebstore.google.com/detail/koalasync/obbnmkmlaaddodakcbdljknjpagklifc', btn: 'Add to Chrome' },
-      { title: 'Create & share a room', text: 'Open the KoalaSync popup and click + Create New Room, then share the invite link with friends. They click it and join instantly — no accounts, no IPs to exchange.', url: '', btn: '' },
+      { title: 'Point it at our server', text: 'In the KoalaSync popup, open Settings and set the server URL to https://sync.mysweetpea.cc — this keeps your watch parties on our relay instead of the public one.', url: '', btn: '' },
+      { title: 'Create & share a room', text: 'Open the KoalaSync popup and click + Create New Room, then share the invite link with friends. They open it and sign in with their MySweetPea account to join.', url: '', btn: '' },
       { title: 'Select your video tab', text: 'In the popup, switch to the Sync section and select the tab playing your video. KoalaSync links everyone\'s playhead automatically. Works with Netflix, YouTube, Disney+, Prime Video, Twitch, Jellyfin and almost any site with HTML5 video.', url: '', btn: '' },
       { title: 'Press play together', text: 'Hit play. Pauses, seeks and playback changes are shared with everyone in the room. Tip: enable the audio compressor under Settings → Audio Processing to level quiet dialogue and loud explosions.', url: '', btn: '' },
     ],
@@ -2556,7 +2603,7 @@ function guideDetailHtml(key) {
     '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
-    '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Because you watched<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
+    '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Trending now<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
     obHtml +
     '<div id="stats" hidden></div>' +
     '<section class="card" id="sec-status" hidden><p class="eyebrow">Service status</p><h3>Service status</h3><div class="skel"></div></section>' +
@@ -3675,8 +3722,8 @@ function guideDetailHtml(key) {
     const un = latest;
     const unSec = document.getElementById('hm-upnext'), unRail = document.getElementById('hm-un-rail');
     if (unSec && unRail) {
-      // merged 'Up next / Recently added' rail: wide cards first, poster cards after
-      if (un.length) { unRail.innerHTML = un.slice(0, 6).map(hmUnCard).join('') + un.slice(6).map(hmPosterCard).join(''); unSec.hidden = false; }
+      // user verdict: uniform POSTER rail (the mixed wide+poster grid read as two different image types)
+      if (un.length) { unRail.innerHTML = un.slice(0, 12).map(hmPosterCard).join(''); unSec.hidden = false; }
       else unSec.hidden = true;
     }
   }
@@ -3692,18 +3739,20 @@ function guideDetailHtml(key) {
     try { hmLoadBecause(); } catch (e) {}
   }
   async function hmLoadBecause() {
+    /* renamed per user: 'Trending now' — library's highest-rated titles right now
+       (was 'Because you watched X' similarity row; endpoint swap only, render identical) */
     const sec = document.getElementById('hm-because');
     const rail = document.getElementById('hm-because-rail');
     const seedEl = document.getElementById('hm-because-seed');
     if (!sec || !rail) return;
     try {
-      const r = await fetch('/api/media/recommend');
+      const r = await fetch('/api/media/trending');
       if (!r.ok) return;
       const d = await r.json();
       const items = (d && d.items) || [];
       if (!items.length) return;
-      if (seedEl && d.seed) { seedEl.textContent = d.seed; seedEl.hidden = false; }
-      rail.innerHTML = items.map(hmPosterCard).join('');
+      if (seedEl) seedEl.hidden = true;
+      rail.innerHTML = items.map((it, i) => hmPosterCard(it, i)).join('');
       sec.hidden = false;
     } catch (e) { /* row stays hidden */ }
   }
