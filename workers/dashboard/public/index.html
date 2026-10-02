@@ -2102,96 +2102,91 @@ const GUIDES = {
   vaultwarden: {
     name: 'Vaultwarden',
     url: 'https://vault.mysweetpea.cc',
-    plain: 'A safe place to store all your passwords — like a locked drawer for your digital life.',
+    plain: 'Your password manager — one safe place for every login.',
     steps: [
-      { title: 'Download the app', text: 'Install the official Bitwarden app for your device (iPhone, Android, Mac, Windows). Open it and enter your email address, then select self-hosted at the bottom of the login screen.', url: 'https://bitwarden.com/download/', btn: 'Get the app' },
-      { title: 'Point to our server', text: 'When asked for the server URL, enter https://vault.mysweetpea.cc and tap Save.', url: 'https://vault.mysweetpea.cc', btn: 'Open Vaultwarden' },
-      { title: 'Log in with your MySweetPea account', text: 'On the web vault, click Use single sign-on and sign in with your MySweetPea account. Your master password unlocks the vault after sign-in and cannot be reset by us — make it strong and memorable.', url: '', btn: '' },
-      { title: 'Two quick upgrades (recommended)', text: 'Turn on 2FA in Settings → Security, and switch your KDF algorithm to Argon2id (Settings → Security → Keys). Both take under a minute and make your vault much harder to crack.', url: '', btn: '' },
+      { title: 'Get the app', text: 'Install Bitwarden (iPhone, Android, Mac, Windows). On the login screen, tap the gear icon and set server to https://vault.mysweetpea.cc', url: 'https://bitwarden.com/download/', btn: 'Get the app' },
+      { title: 'Sign in', text: 'Tap "Use single sign-on" and log in with your MySweetPea account.', url: 'https://vault.mysweetpea.cc', btn: 'Open Vaultwarden' },
+      { title: 'Set your master password', text: 'You will be asked to create one. It unlocks your vault and cannot be reset — make it strong and memorable.' },
+      { title: 'Harden it (1 minute)', text: 'Settings → Security: turn on two-step login, and set KDF to Argon2id.' },
     ],
   },
   matrix: {
     name: 'Matrix / Element',
     url: 'https://chat.mysweetpea.cc',
-    plain: 'A private chat app for messaging friends — nobody else can read your messages.',
+    plain: 'Private chat — only you and the people you invite can read it.',
     steps: [
       { title: 'Open Element', text: 'Go to chat.mysweetpea.cc and click "Continue with Authentik".', url: 'https://chat.mysweetpea.cc', btn: 'Open chat' },
-      { title: 'Sign in with Authentik', text: 'Log in with your MySweetPea account — you will be redirected back to Element.', url: 'https://auth.mysweetpea.cc', btn: 'Go to sign-in' },
-      { title: 'Click Continue', text: 'Element will ask you to confirm — click "Continue" and you are in.', url: '', btn: '' },
-      { title: 'Add the app (optional)', text: 'Install the Element app and enter your chat server address to chat on your phone.', url: 'https://element.io/download', btn: 'Get the app' },
+      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in Element.' },
+      { title: 'Get the app (optional)', text: 'Install Element on your phone and sign in the same way.', url: 'https://element.io/download', btn: 'Get the app' },
     ],
   },
   affine: {
     name: 'AFFiNE',
     url: 'https://notes.mysweetpea.cc',
-    plain: 'A place to write notes, build wikis, and sketch ideas — all kept private.',
+    plain: 'Notes, docs and whiteboards — kept private.',
     steps: [
-      { title: 'Open AFFiNE', text: 'Go to notes.mysweetpea.cc and click "Continue with OIDC" (the sign-in button) — do not click "Sign In".', url: 'https://notes.mysweetpea.cc', btn: 'Open notes' },
-      { title: 'Sign in with Authentik', text: 'Log in with your MySweetPea account — you will be redirected back to AFFiNE.', url: 'https://auth.mysweetpea.cc', btn: 'Go to sign-in' },
-      { title: 'Start writing', text: 'Your workspace is ready. Create a document or whiteboard and go.', url: '', btn: '' },
+      { title: 'Open AFFiNE', text: 'Go to notes.mysweetpea.cc and click "Continue with OIDC" (not "Sign In").', url: 'https://notes.mysweetpea.cc', btn: 'Open notes' },
+      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in AFFiNE.' },
+      { title: 'Start writing', text: 'Create a document or whiteboard and go.' },
     ],
   },
   koalasync: {
     name: 'KoalaSync',
     url: 'https://sync.mysweetpea.cc',
-    plain: 'Watch movies and shows together with friends in real-time — everyone sees the same scene.',
+    plain: 'Watch together in sync — everyone sees the same scene.',
     steps: [
-      { title: 'Install the extension', text: 'KoalaSync is a browser extension. Add it to Chrome (or any Chromium browser) or Firefox. Firefox users: https://addons.mozilla.org/en-US/firefox/addon/koalasync/', url: 'https://chromewebstore.google.com/detail/koalasync/obbnmkmlaaddodakcbdljknjpagklifc', btn: 'Add to Chrome' },
-      { title: 'Point it at our server', text: 'In the KoalaSync popup, open Settings and set the server URL to https://sync.mysweetpea.cc — this keeps your watch parties on our relay instead of the public one.', url: '', btn: '' },
-      { title: 'Create & share a room', text: 'Open the KoalaSync popup and click + Create New Room, then share the invite link with friends. They open it and sign in with their MySweetPea account to join.', url: '', btn: '' },
-      { title: 'Select your video tab', text: 'In the popup, switch to the Sync section and select the tab playing your video. KoalaSync links everyone\'s playhead automatically. Works with Netflix, YouTube, Disney+, Prime Video, Twitch, Jellyfin and almost any site with HTML5 video.', url: '', btn: '' },
-      { title: 'Press play together', text: 'Hit play. Pauses, seeks and playback changes are shared with everyone in the room. Tip: enable the audio compressor under Settings → Audio Processing to level quiet dialogue and loud explosions.', url: '', btn: '' },
+      { title: 'Add the extension', text: 'Works in Chrome and Firefox.', url: 'https://chromewebstore.google.com/detail/koalasync/obbnmkmlaaddodakcbdljknjpagklifc', btn: 'Add to Chrome' },
+      { title: 'Set the server', text: 'Extension popup → Settings → server URL: https://sync.mysweetpea.cc', url: 'https://addons.mozilla.org/en-US/firefox/addon/koalasync/', btn: 'Firefox version' },
+      { title: 'Create a room', text: 'Popup → + Create New Room → share the link. Friends sign in with their MySweetPea account.' },
+      { title: 'Pick your video tab', text: 'Popup → Sync → select the tab playing your video. Works with Netflix, YouTube, Disney+, Prime Video, Twitch, Jellyfin and most sites.' },
+      { title: 'Press play', text: 'Pauses and seeks sync for everyone. Tip: Settings → Audio Processing → compressor levels quiet dialogue.' },
     ],
   },
   jellyfin: {
     name: 'Jellyfin / Moonfin',
     url: 'https://media.mysweetpea.cc/Moonfin/Web/',
-    plain: 'Your own private movie and TV library — stream it on any device.',
+    plain: 'Your private movie and TV library — on any device.',
     steps: [
-      { title: 'Open your library', text: 'Go to media.mysweetpea.cc and sign in with your MySweetPea account — the web app works in any browser.', url: 'https://media.mysweetpea.cc', btn: 'Open Jellyfin' },
-      { title: 'Pick an app below', text: 'Choose where you will watch — every platform below signs in to the same server with the same account, and your progress stays in sync.', url: '', btn: '' },
+      { title: 'Open your library', text: 'Go to media.mysweetpea.cc and sign in — works in any browser.', url: 'https://media.mysweetpea.cc', btn: 'Open Jellyfin' },
+      { title: 'Pick a device below', text: 'Every platform signs in to the same server — your progress stays in sync.' },
     ],
   },
   seerr: {
     name: 'Seerr',
     url: 'https://request.mysweetpea.cc',
-    plain: 'A wish list for movies and shows — request anything you want to watch.',
+    plain: 'Request movies and shows — they appear in Jellyfin automatically.',
     steps: [
-      { title: 'Open Seerr', text: 'Go to request.mysweetpea.cc and sign in with your Jellyfin login.', url: 'https://request.mysweetpea.cc', btn: 'Open requests' },
-      { title: 'Sign in with Jellyfin', text: 'Use the same Jellyfin account you use for Moonfin.', url: 'https://media.mysweetpea.cc', btn: 'Go to media' },
-      { title: 'Request something', text: 'Find a movie or show and click "Request" — it appears in Jellyfin automatically.', url: '', btn: '' },
+      { title: 'Open requests', text: 'Go to request.mysweetpea.cc, or tap the Requests tab inside Moonfin.', url: 'https://request.mysweetpea.cc', btn: 'Open requests' },
+      { title: 'Request', text: 'Search a title and click "Request". That is it.' },
     ],
   },
   nextcloud: {
     name: 'Nextcloud',
     url: 'https://cloud.mysweetpea.cc',
-    plain: 'Your private place for files, calendar, and contacts — like a personal Google Workspace.',
+    plain: 'Your files, calendar and contacts — like a private Google Workspace.',
     steps: [
       { title: 'Open Nextcloud', text: 'Go to cloud.mysweetpea.cc and click "Continue with Authentik".', url: 'https://cloud.mysweetpea.cc', btn: 'Open files' },
-      { title: 'Sign in with Authentik', text: 'Log in with your MySweetPea account — you will be redirected back to Nextcloud.', url: 'https://auth.mysweetpea.cc', btn: 'Go to sign-in' },
-      { title: 'Start using it', text: 'Your files, calendar, and contacts are ready.', url: '', btn: '' },
-      { title: 'Add the app (optional)', text: 'Install the Nextcloud app and enter your address to sync files on your phone.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
+      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in Nextcloud.' },
+      { title: 'Get the app (optional)', text: 'Install the Nextcloud app to sync files on your phone.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
     ],
   },
   immich: {
     name: 'Immich',
     url: 'https://photos.mysweetpea.cc',
-    plain: 'Back up your photos and videos privately — search them and keep them safe.',
+    plain: 'Private photo backup — searchable and safe.',
     steps: [
       { title: 'Open Immich', text: 'Go to photos.mysweetpea.cc and click "Continue with OAuth".', url: 'https://photos.mysweetpea.cc', btn: 'Open photos' },
-      { title: 'Sign in with Authentik', text: 'Log in with your MySweetPea account — you will be redirected back to Immich.', url: 'https://auth.mysweetpea.cc', btn: 'Go to sign-in' },
-      { title: 'Start backing up', text: 'Your photo library is ready.', url: '', btn: '' },
-      { title: 'Add the app', text: 'Install the Immich app, point it at your address, and turn on auto-backup.', url: 'https://immich.app/', btn: 'Get the app' },
+      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in Immich.' },
+      { title: 'Back up your phone', text: 'Install the Immich app, sign in, and turn on backup.', url: 'https://immich.app/', btn: 'Get the app' },
     ],
   },
   openwebui: {
     name: 'Open WebUI',
     url: 'https://ai.mysweetpea.cc',
-    plain: 'A private AI chat assistant — your conversations stay on our servers.',
+    plain: 'A private AI chat — your conversations stay on our servers.',
     steps: [
-      { title: 'Open Open WebUI', text: 'Go to ai.mysweetpea.cc and click "Continue with OIDC".', url: 'https://ai.mysweetpea.cc', btn: 'Open chat' },
-      { title: 'Sign in with Authentik', text: 'Log in with your MySweetPea account — you will be redirected back to Open WebUI.', url: 'https://auth.mysweetpea.cc', btn: 'Go to sign-in' },
-      { title: 'Start chatting', text: 'Your conversations are private and stay on our servers.', url: '', btn: '' },
+      { title: 'Open the chat', text: 'Go to ai.mysweetpea.cc and click "Continue with OIDC".', url: 'https://ai.mysweetpea.cc', btn: 'Open chat' },
+      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in the chat.' },
     ],
   },
 };
@@ -2212,74 +2207,73 @@ const guideBrandSel = {};
 // Each brand has its own platform list with complete per-platform steps.
 const PLATFORMS_JF_MOONFIN = [
   { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
-    { title: 'Open Moonfin', text: 'Go to media.mysweetpea.cc — Moonfin is our custom-tuned web app, with the Netflix-style home, request integration and watch-party built in.', url: 'https://media.mysweetpea.cc', btn: 'Open Moonfin' },
+    { title: 'Open Moonfin', text: 'Go to media.mysweetpea.cc — our tuned web app with the Netflix-style home and requests built in.', url: 'https://media.mysweetpea.cc', btn: 'Open Moonfin' },
     { title: 'Sign in', text: 'Use your MySweetPea account — your resume points, favorites and requests stay in sync everywhere.', url: '', btn: '' },
   ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
-    { title: 'Get Moonfin from the App Store', text: 'Install Moonfin — our recommended iOS client with downloads for offline viewing.', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
+    { title: 'Get Moonfin from the App Store', text: 'Install Moonfin from the App Store.', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
-    { title: 'Get Moonfin from the Play Store', text: 'Install Moonfin on your Android phone or tablet — it is the same app as Android TV, one install covers both.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
+    { title: 'Get Moonfin from the Play Store', text: 'One app covers phones, tablets and Android TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
-    { title: 'Install Moonfin on your TV', text: 'Find Moonfin in the Play Store on your Android TV or Google TV. One install covers both.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
+    { title: 'Install Moonfin on your TV', text: 'Find Moonfin in the Play Store on your TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
-    { title: 'Pick your favorites', text: 'On first launch choose the libraries you watch — the home screen fills with rows you actually use.', url: '', btn: '' },
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
-    { title: 'Get Moonfin on Apple TV', text: 'Install Moonfin from the tvOS App Store (requires tvOS 17+).', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
+    { title: 'Get Moonfin on Apple TV', text: 'Install Moonfin from the App Store on your Apple TV (tvOS 17+).', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
-    { title: 'Side-load Moonfin', text: 'Moonfin for Roku is a developer install for now: grab the package from the releases page and install it from roku.com/developer — it is not in the Roku Channel Store yet.', url: 'https://github.com/Moonfin-Client/Roku/releases/latest', btn: 'Get Moonfin' },
+    { title: 'Side-load Moonfin', text: 'Not in the Roku Channel Store yet — install the package from the releases page via roku.com/developer.', url: 'https://github.com/Moonfin-Client/Roku/releases/latest', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung / LG TV', glyph: 'tv', platformSteps: [
-    { title: 'Get Moonfin for Smart TV', text: 'Moonfin runs on Samsung TVs (Tizen 2016+) and LG TVs (webOS 3.0+). Install the package from the releases page onto your TV.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
+    { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+) and LG (webOS 3.0+) — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
-    { title: 'Get the Moonfin desktop app', text: 'Native apps for Windows (x64 & ARM64), macOS and Linux (Wayland).', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
+    { title: 'Get the Moonfin desktop app', text: 'Native app for Windows, macOS and Linux.', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
 ];
 const PLATFORMS_JF_OFFICIAL = [
   { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
-    { title: 'Open Jellyfin Web', text: 'Go to media.mysweetpea.cc/web — the classic Jellyfin interface, in any browser, nothing to install.', url: 'https://media.mysweetpea.cc/web/', btn: 'Open Jellyfin Web' },
+    { title: 'Open Jellyfin Web', text: 'Go to media.mysweetpea.cc/web — nothing to install.', url: 'https://media.mysweetpea.cc/web/', btn: 'Open Jellyfin Web' },
     { title: 'Sign in', text: 'Use your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
-    { title: 'Get the official Jellyfin app', text: 'Install Jellyfin Mobile from the App Store — the free, official iOS client.', url: 'https://apps.apple.com/us/app/jellyfin-mobile/id1480192618', btn: 'Get Jellyfin' },
+    { title: 'Get the official Jellyfin app', text: 'Install Jellyfin Mobile from the App Store.', url: 'https://apps.apple.com/us/app/jellyfin-mobile/id1480192618', btn: 'Get Jellyfin' },
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
-    { title: 'Get the official Jellyfin app', text: 'Install Jellyfin from the Play Store — also on F-Droid and the Amazon Appstore.', url: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', btn: 'Get Jellyfin' },
+    { title: 'Get the official Jellyfin app', text: 'Install Jellyfin from the Play Store.', url: 'https://play.google.com/store/apps/details?id=org.jellyfin.mobile', btn: 'Get Jellyfin' },
     { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
-    { title: 'Get Jellyfin for Android TV', text: 'The official app is in the Play Store — one install covers Android TV and Google TV.', url: 'https://play.google.com/store/apps/details?id=org.jellyfin.androidtv', btn: 'Get Jellyfin' },
+    { title: 'Get Jellyfin for Android TV', text: 'One install covers Android TV and Google TV.', url: 'https://play.google.com/store/apps/details?id=org.jellyfin.androidtv', btn: 'Get Jellyfin' },
     { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'firetv', label: 'Fire TV', glyph: 'tv', platformSteps: [
-    { title: 'Get it from the Amazon Appstore', text: 'Jellyfin for Android TV also runs on Fire TV — install it from the Amazon Appstore on your device.', url: 'https://www.amazon.com/gp/product/B08KH15LVN', btn: 'Get Jellyfin' },
+    { title: 'Get it from the Amazon Appstore', text: 'Install Jellyfin from the Amazon Appstore on your Fire TV.', url: 'https://www.amazon.com/gp/product/B08KH15LVN', btn: 'Get Jellyfin' },
     { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
-    { title: 'Add the official Jellyfin channel', text: 'Jellyfin for Roku IS in the Roku Channel Store — search "Jellyfin" on your device and add the channel.', url: 'https://channelstore.roku.com/search/jellyfin', btn: 'Open Channel Store' },
+    { title: 'Add the official Jellyfin channel', text: 'Search "Jellyfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/search/jellyfin', btn: 'Open Channel Store' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung TV', glyph: 'tv', platformSteps: [
-    { title: 'Get the official Jellyfin app', text: 'The official Jellyfin app is in the Samsung TV app catalog (Tizen TVs). Search "Jellyfin" and install.', url: 'https://jellyfin.org/downloads/', btn: 'Get Jellyfin' },
+    { title: 'Get the official Jellyfin app', text: 'Search "Jellyfin" in the Samsung TV app catalog and install.', url: 'https://jellyfin.org/downloads/', btn: 'Get Jellyfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
-    { title: 'Get Jellyfin Media Player', text: 'The official desktop client for Windows, macOS and Linux.', url: 'https://github.com/jellyfin/jellyfin-media-player/releases/latest', btn: 'Get Jellyfin' },
+    { title: 'Get Jellyfin Media Player', text: 'Official client for Windows, macOS and Linux.', url: 'https://github.com/jellyfin/jellyfin-media-player/releases/latest', btn: 'Get Jellyfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'kodi', label: 'Kodi', glyph: 'tv', platformSteps: [
-    { title: 'Add the Jellyfin Kodi add-on', text: 'Two official options: Jellyfin for Kodi (full library sync into Kodi) or JellyCon (lightweight browse-and-play). Both from the official Jellyfin repository.', url: 'https://jellyfin.org/docs/general/clients/kodi/', btn: 'Setup guide' },
+    { title: 'Add the Jellyfin Kodi add-on', text: 'Jellyfin for Kodi (full sync) or JellyCon (lightweight). Both official.', url: 'https://jellyfin.org/docs/general/clients/kodi/', btn: 'Setup guide' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
 ];
@@ -2288,24 +2282,24 @@ const PLATFORMS = {
   seerr: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
     { p: 'moonfin', label: 'Moonfin app', glyph: 'moon', platformSteps: [
-      { title: 'Requests live inside Moonfin', text: 'There is no separate Seerr app to install — open Moonfin and tap the Requests tab. No app needed.', url: 'https://media.mysweetpea.cc/Moonfin/Web/', btn: 'Open Moonfin' },
-      { title: 'Request something', text: 'Sign in with your MySweetPea account, find a movie or show and request it — it appears in Jellyfin automatically.', url: '', btn: '' },
+      { title: 'Requests live inside Moonfin', text: 'No separate app — open Moonfin and tap the Requests tab.', url: 'https://media.mysweetpea.cc/Moonfin/Web/', btn: 'Open Moonfin' },
+      { title: 'Request something', text: 'Find a title and request it — it appears in Jellyfin automatically.', url: '', btn: '' },
     ] },
   ],
   nextcloud: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
     { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
-      { title: 'Get the desktop app', text: 'The official Nextcloud client keeps a folder on your computer in sync automatically.', url: 'https://nextcloud.com/install/', btn: 'Download' },
+      { title: 'Get the desktop app', text: 'Keeps one folder on your computer in sync automatically.', url: 'https://nextcloud.com/install/', btn: 'Download' },
       { title: 'Add your account', text: 'Server: cloud.mysweetpea.cc — sign in with your MySweetPea account.', url: '', btn: '' },
     ] },
     { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
       { title: 'Get the Nextcloud app', text: 'Install Nextcloud from the App Store.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
-      { title: 'Add your account', text: 'Server: cloud.mysweetpea.cc — files sync automatically; Calendar and Contacts sync over CalDAV.', url: '', btn: '' },
+      { title: 'Add your account', text: 'Server: cloud.mysweetpea.cc — files sync automatically.', url: '', btn: '' },
     ] },
     { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
       { title: 'Get the Nextcloud app', text: 'Install Nextcloud from the Play Store.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
       { title: 'Add your account', text: 'Server: cloud.mysweetpea.cc — turn on auto-upload for your camera roll in Settings.', url: '', btn: '' },
-      { title: 'Calendar & contacts (optional)', text: 'Android has no built-in CalDAV: install the DAVx⁵ app and tap "Sync calendars & contacts" inside the Nextcloud app to set it up.', url: 'https://f-droid.org/packages/at.bitfire.davdroid/', btn: 'Get DAVx⁵' },
+      { title: 'Calendar & contacts (optional)', text: 'For calendar/contacts on Android: install DAVx⁵, then tap "Sync calendars & contacts" in the Nextcloud app.', url: 'https://f-droid.org/packages/at.bitfire.davdroid/', btn: 'Get DAVx⁵' },
     ] },
   ],
   immich: [
@@ -2313,12 +2307,12 @@ const PLATFORMS = {
     { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
       { title: 'Get the Immich app', text: 'Install Immich from the App Store.', url: 'https://immich.app/', btn: 'Get the app' },
       { title: 'Point it at your server', text: 'Server: photos.mysweetpea.cc — sign in with your MySweetPea account.', url: '', btn: '' },
-      { title: 'Turn on backup', text: 'Enable background backup so every photo lands safely at home, automatically.', url: '', btn: '' },
+      { title: 'Turn on backup', text: 'Turn on backup — every photo lands at home automatically.', url: '', btn: '' },
     ] },
     { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
       { title: 'Get the Immich app', text: 'Install Immich from the Play Store.', url: 'https://immich.app/', btn: 'Get the app' },
       { title: 'Point it at your server', text: 'Server: photos.mysweetpea.cc — sign in with your MySweetPea account.', url: '', btn: '' },
-      { title: 'Turn on backup', text: 'Enable backup for your camera folder — done.', url: '', btn: '' },
+      { title: 'Turn on backup', text: 'Turn on backup for your camera roll — done.', url: '', btn: '' },
     ] },
   ],
   vaultwarden: [
@@ -2375,7 +2369,7 @@ const PLATFORMS = {
   openwebui: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
     { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
-      { title: 'Get the desktop app', text: 'Open WebUI now has an official desktop app for Windows, macOS and Linux — it wraps your ai.mysweetpea.cc account in a native window. Prefer the browser? The site also installs as a PWA from your address bar.', url: 'https://github.com/open-webui/desktop', btn: 'Get the app' },
+      { title: 'Get the desktop app', text: 'Official desktop app for Windows, macOS and Linux. Prefer the browser? The site installs as a PWA from your address bar.', url: 'https://github.com/open-webui/desktop', btn: 'Get the app' },
       { title: 'Point it at your server', text: 'Server: ai.mysweetpea.cc — sign in with Continue with OIDC and your MySweetPea account.', url: '', btn: '' },
     ] },
   ],
