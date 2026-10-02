@@ -181,9 +181,9 @@ img.svc-ico{object-fit:contain;padding:3px}
 /* ---- phase 5: media rows ---- */
 .media-sec{grid-column:1/-1;display:flex;flex-direction:column;gap:18px}
 .media-sec:empty{display:none}
-.media-row{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.media-row{display:flex;gap:12px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(139,126,246,.45) transparent;padding-bottom:8px}
 @media(min-width:761px){.media-row{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 30px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 30px),transparent 100%)}}
-.media-row::-webkit-scrollbar{display:none}
+
 .mitem{position:relative;flex:none;width:138px;display:block;text-decoration:none;color:var(--text);transition:transform var(--t-fast)}
 .mitem:hover{transform:translateY(-3px)}
 .mitem:hover{transform:translateY(-2px)}
@@ -430,7 +430,7 @@ a.btn{min-height:40px;display:inline-flex;align-items:center;justify-content:cen
 .svc-ico{width:28px;height:28px}
 .svc-blurb{font-size:.72rem}
 .hm-rail,.sv-orbs,.media-row{-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.hm-rail::-webkit-scrollbar,.sv-orbs::-webkit-scrollbar,.media-row::-webkit-scrollbar{display:none}
+.hm-rail::-webkit-scrollbar,.sv-orbs::-webkit-scrollbar,
 .mitem{width:150px}
 .mposter{width:150px}
 .mcard{width:min(440px,calc(100% - 24px));max-height:86vh;max-height:86dvh;overflow-y:auto;padding:24px 20px}
@@ -5022,6 +5022,11 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .lib-leg i{width:10px;height:10px;border-radius:3px;flex:none}
 .lib-leg b{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.84rem;color:var(--text);font-variant-numeric:tabular-nums}
 @media(max-width:640px){.lib-graph{gap:18px}.lib-graph svg{width:140px;height:140px}}
+
+.media-row::-webkit-scrollbar{height:8px}
+.media-row::-webkit-scrollbar-track{background:rgba(139,126,246,.06);border-radius:99px}
+.media-row::-webkit-scrollbar-thumb{background:rgba(139,126,246,.4);border-radius:99px}
+.media-row::-webkit-scrollbar-thumb:hover{background:rgba(139,126,246,.6)}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
