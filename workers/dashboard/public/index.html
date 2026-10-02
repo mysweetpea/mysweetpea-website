@@ -4470,8 +4470,18 @@ function relFuture(v) {
   function libHtml(s) {
     const rows = [['Movies', s.movies], ['Episodes', s.episodes], ['Series', s.series], ['Songs', s.songs], ['Boxsets', s.boxsets]].filter((x) => x[1] != null);
     if (!rows.length) return '<p class="dim">No library data yet.</p>';
-    const max = Math.max.apply(null, rows.map((x) => x[1]).concat([1]));
-    return rows.map((x) => '<div class="lib-row"><span class="lib-l">' + esc(x[0]) + '</span><span class="lib-bar"><i style="width:' + Math.max(2, Math.round(x[1] / max * 100)) + '%"></i></span><span class="lib-n">' + x[1].toLocaleString() + '</span></div>').join('');
+    const total = rows.reduce((a, x) => a + x[1], 0);
+    const COLS = ['var(--primary)', 'var(--sage)', '#D9A86C', '#5B9DF6', '#B48CF6'];
+    const R = 60, C = 2 * Math.PI * R;
+    let off = 0, segs = '';
+    rows.forEach((x, i) => {
+      const frac = total ? x[1] / total : 0;
+      const len = Math.max(frac * C - 2, 0.5);
+      segs += '<circle class="lib-seg" r="' + R + '" cx="80" cy="80" fill="none" stroke="' + COLS[i % COLS.length] + '" stroke-width="26" stroke-dasharray="' + len.toFixed(1) + ' ' + (C - len).toFixed(1) + '" stroke-dashoffset="' + (-off).toFixed(1) + '" transform="rotate(-90 80 80)"><title>' + esc(x[0]) + ': ' + x[1].toLocaleString() + '</title></circle>';
+      off += frac * C;
+    });
+    const legend = rows.map((x, i) => '<span class="lib-leg"><i style="background:' + COLS[i % COLS.length] + '"></i>' + esc(x[0]) + '<b>' + x[1].toLocaleString() + '</b></span>').join('');
+    return '<div class="lib-graph"><svg viewBox="0 0 160 160" role="img" aria-label="Library composition">' + segs + '<text x="80" y="76" text-anchor="middle" class="lib-total">' + total.toLocaleString() + '</text><text x="80" y="94" text-anchor="middle" class="lib-total-l">items</text></svg><div class="lib-legs">' + legend + '</div></div>';
   }
   (async () => {
     const el = await waitFor('#stats');
@@ -4993,6 +5003,18 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 }
 @media(max-width:980px){.md-hero{height:240px}}
 .md-browse-or{color:var(--text-faint);font-weight:400}
+
+/* ===== LIBRARY DONUT ===== */
+.lib-graph{display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding:6px 0}
+.lib-graph svg{width:170px;height:170px;flex:none;filter:drop-shadow(0 4px 18px rgba(139,126,246,.25))}
+.lib-seg{transition:stroke-dasharray .6s ease}
+.lib-total{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;fill:var(--text)}
+.lib-total-l{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.16em;text-transform:uppercase;fill:var(--text-faint)}
+.lib-legs{display:flex;flex-direction:column;gap:9px;min-width:150px;flex:1;max-width:420px}
+.lib-leg{display:flex;align-items:center;gap:9px;font-size:.86rem;color:var(--text-dim)}
+.lib-leg i{width:10px;height:10px;border-radius:3px;flex:none}
+.lib-leg b{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.84rem;color:var(--text);font-variant-numeric:tabular-nums}
+@media(max-width:640px){.lib-graph{gap:18px}.lib-graph svg{width:140px;height:140px}}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
