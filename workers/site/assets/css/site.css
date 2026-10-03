@@ -1685,7 +1685,8 @@ body[data-page='suggest'] .guidelines-note {
     border-radius: var(--radius-sm);
 }
 body[data-page='suggest'] .view-switcher { max-width: 720px; margin: 0 auto; }
-body[data-page='suggest'] .view-panel .container { padding: 0; }
+body[data-page='suggest'] .view-panel[data-view='suggest'] .container { padding: 0; }
+body[data-page='suggest'] .view-panel[data-view='guidelines'] .container { padding: 20px; }
 body[data-page='suggest'] .card {
     box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.07),
@@ -9051,7 +9052,7 @@ body[data-page='pricing'] .hiw-selective{ margin-top:8px; }
 .footer-grid {
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
     gap: clamp(24px, 3.8vw, 40px);
-    max-width: clamp(680px, 76vw, 1100px);
+    max-width: min(100%, clamp(680px, 76vw, 1100px));
 }
 @media (max-width: 768px) {
     .top-nav { padding: 12px clamp(16px, 4vw, 22px); }
