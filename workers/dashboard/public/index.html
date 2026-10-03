@@ -5150,6 +5150,23 @@ span.st-row-art{display:grid;place-items:center;font-family:'Instrument Serif',G
 .gr-dot{fill:var(--primary-bright);stroke:#0A0B14;stroke-width:1.5;animation:grPulse 2.4s ease infinite;transform-box:fill-box;transform-origin:center}
 @keyframes grPulse{0%,100%{opacity:1}50%{opacity:.55}}
 @media(prefers-reduced-motion:reduce){.gr-dot{animation:none}.gr-col:hover .gr-bar{transform:none}}
+
+/* ===== MOBILE POLISH (WebKit 390 audit) ===== */
+@media(max-width:768px){
+  /* service names: don't break mid-word — ellipsize instead (Nextclou/d, Vaultwar/den) */
+  .sv-card .nm{overflow-wrap:normal;white-space:normal;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all}
+  @supports(-webkit-line-clamp:2){.sv-card .nm{-webkit-line-clamp:2;line-clamp:2}}
+  .sv-card .bl{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* home account tiles: 2x2 already; ensure labels never wrap awkwardly */
+  .hm-tile-lbl,.hm-tile-sub{overflow-wrap:normal}
+  /* growth stat row: 2-up is enough on phones, no orphan 5th */
+  .gr-stat{flex:1 1 44%}
+  /* ledger donut + legend stack with breathing room */
+  .lib-graph{gap:20px}
+  /* request cards: keep header pills from crowding */
+  .rq-head{flex-wrap:wrap}
+  .rq-when{margin-left:auto}
+}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
