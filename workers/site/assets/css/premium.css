@@ -1336,6 +1336,12 @@
 @media (max-width: 900px) {
     .footer-inner { padding: 0 22px 26px; }
     .page-footer .footer-grid { grid-template-columns: 1fr 1fr; gap: 30px 0; }
+    /* phones (<=480px): two 50% tracks cramped the Community column — 'COMMUNITY'/'Get Access'
+       clipped at ~84px of usable width. Single column restores readable rows; the height penalty
+       the old comment feared mattered at 768-900px, not at 390px. */
+}
+@media (max-width: 480px) {
+    .page-footer .footer-grid { grid-template-columns: 1fr; }
     /* tablets are still touch: keep rows >=44px through this range too
        (they were 32px before this redesign) */
     .page-footer .footer-col a { min-height: 44px; display: flex; align-items: center; padding: 0; }
@@ -1356,7 +1362,7 @@
        lands at ~965px -- effectively parity with the old footer -- while
        keeping the 44px tap rows the old one lacked (they were 32px).
        Explore + Community sit side by side; Support falls to a second row. */
-    .page-footer .footer-grid { grid-template-columns: 1fr 1fr; gap: 22px 18px; }
+    .page-footer .footer-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 22px 18px; }
     .page-footer .footer-brand { grid-column: 1 / -1; padding-right: 0; }
     .page-footer .footer-col {
         border-left: 0;
