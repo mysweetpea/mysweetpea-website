@@ -3951,8 +3951,21 @@ function guideDetailHtml(key) {
         const lab = document.getElementById('m-guide-sum-t');
         if (lab && GUIDES[guideSel]) lab.textContent = GUIDES[guideSel].name;
         dd.open = true;
+        dd.dataset.origin = guideSel; // remember which chip to return to
         try { dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
       }
+    });
+    // summary tap = "take me back": collapse AND return to the tapped service chip
+    const mSum = document.querySelector('.m-guide-sum');
+    if (mSum) mSum.addEventListener('click', () => {
+      const dd = document.getElementById('m-guide-dd');
+      if (!dd) return;
+      requestAnimationFrame(() => {
+        if (!dd.open && dd.dataset.origin) {
+          const chip = guideNav.querySelector('.svc-guide-chip[data-guide="' + dd.dataset.origin + '"]');
+          if (chip) { try { chip.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {} }
+        }
+      });
     });
     // phase 3b-3: platform pill switching — re-render the steps for the chosen platform
     guideBody.addEventListener('click', (e) => {
@@ -5197,6 +5210,10 @@ span.st-row-art{display:grid;place-items:center;font-family:'Instrument Serif',G
   .m-guide-dd,.m-guide-sum{display:contents}
   .m-guide-sum{display:none !important}
 }
+
+/* guide dd summary: arrow points right closed, up when open = "back to list" */
+.m-guide-dd[open] .m-guide-chev{transform:rotate(-90deg)}
+.m-guide-dd[open] .m-guide-sum-t::after{content:' — tap to go back';font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-left:8px}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
