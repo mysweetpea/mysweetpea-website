@@ -49,6 +49,7 @@ export interface Env {
   OPENWEBUI_URL?: string;       // internal URL reachable from the worker is NOT possible;
   OPENWEBUI_STATS_B64?: string; // so webui.db snapshot, base64 (users+chats only)
   GOTIFY_REFERRAL_TOKEN?: string; // referral pings -> Gotify app 14 'Referrals'
+  GOTIFY_BUG_TOKEN?: string; // user bug reports -> Gotify 'Bugs' app (PC alert-poller -> Paperclip)
   GITHUB_TOKEN?: string; // optional — homelab-k8s is public; token only lifts the 60/hr anon limit
   GH_COMMITS_REPO?: string; // optional — commits source repo 'owner/name' (default: mysweetpea/mysweetpea-homelab)
   MAIN_SITE_URL?: string;   // optional — marketing site origin (default: https://mysweetpea.cc)
@@ -1492,6 +1493,32 @@ export default {
       if (path === '/api/referral' && request.method === 'GET') {
         const mine = await listReferrals(env, sess.sub);
         return json({ referrals: mine });
+      }
+
+      // POST /api/bug — user bug report: store + Gotify ping (PC poller relays to Paperclip)
+      if (path === '/api/bug' && request.method === 'POST') {
+        let b: any = {};
+        try { b = await request.json(); } catch { /* handled below */ }
+        const where = String(b.where || '').slice(0, 80).trim();
+        const what = String(b.what || '').slice(0, 2000).trim();
+        if (!what) return json({ error: 'Describe the bug first' }, 400);
+        const id = 'bug-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        const rec = { id, user: sess.username, name: sess.name, where, what, at: Date.now(), status: 'open' };
+        await env.SESSIONS.put('bug:' + id, JSON.stringify(rec));
+        if (env.GOTIFY_BUG_TOKEN) {
+          try {
+            await fetch('https://gotify.mysweetpea.cc/message?token=' + env.GOTIFY_BUG_TOKEN, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0' },
+              body: JSON.stringify({
+                title: 'BUG: ' + (where || 'dashboard') + ' — ' + sess.username,
+                message: what,
+                priority: 7,
+              }),
+            });
+          } catch { /* stored regardless */ }
+        }
+        return json({ ok: true, id });
       }
 
       // DELETE endpoints

@@ -2571,7 +2571,7 @@ function guideDetailHtml(key) {
     '<div class="tab-pill" id="tab-pill" aria-hidden="true"></div>' + TABS.map((t) => '<button type="button" class="tab" id="tab-' + t + '" data-tab="' + t + '" role="tab" aria-controls="panel-' + t + '" aria-selected="false">' + TAB_LABELS[t] + (t === 'security' ? '<span class="tab-dot" aria-hidden="true"></span>' : '') + '</button>').join('') +
     '</div>' +
     '<div class="nav-id">' +
-    '<a class="site-back" data-msp-site="/" href="https://mysweetpea.cc" title="Return to mysweetpea.cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 13v6H5V6h6"/></svg><span class="sb-txt">Return to Website</span></a>' +
+    '' +
     '<button class="nav-search" id="pal-open" title="Search (Ctrl+K)" aria-label="Search (Ctrl+K)"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>' +
     '<button type="button" class="nav-search upd-bell" id="upd-bell" title="Service updates" aria-label="Service updates" aria-haspopup="true" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="bell-dot" id="bell-dot" hidden></span></button>' +
     '<div class="bell-menu" id="bell-menu"><div class="acct-pop" id="upd-pop" role="menu" aria-label="Service updates" hidden><div class="upd-pop-head"><b>Service updates</b><span id="upd-pop-sub"></span></div><div id="upd-pop-list"></div></div></div>' +
@@ -2584,6 +2584,7 @@ function guideDetailHtml(key) {
         '<div class="acct-pop-head"><span class="nav-avatar sm" id="pop-avatar">' + avatarInner() + '</span><div><b id="pop-name"></b><span class="dim" id="pop-email"></span><span class="tier-pill" id="pop-tier" hidden></span></div></div>' +
         '<a role="menuitem" href="#security" data-goto="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/></svg>Security settings</a>' +
         '<a role="menuitem" href="#account" data-goto="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Account profile</a>' +
+        '<a role="menuitem" href="#" id="mi-bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l3 3"/><path d="M20 12h3"/><path d="M19 17l3-3"/><path d="M5 7 2 10"/><path d="M4 12H1"/><path d="M5 17l-3 3"/><path d="M12 2v3"/><path d="M7 5l1.5 1.5"/><path d="M17 5l-1.5 1.5"/></svg>Report a bug</a>' +
         '<a role="menuitem" href="#contact" data-goto="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>Contact us</a>' +
         '<a role="menuitem" data-msp-site="/" href="https://mysweetpea.cc" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Back to site</a>' +
         '<hr/>' +
@@ -2736,6 +2737,13 @@ function guideDetailHtml(key) {
     '<div class="full"><label class="sgf-lbl" for="rf-service">What should they get? <span class="req">REQUIRED</span></label><input id="rf-service" name="service" type="text" maxlength="40" required autocomplete="off" placeholder="e.g. Full access, just Jellyfin, files & photos"/></div>' +
     '<div class="full"><label class="sgf-lbl" for="rf-note">Why they fit <span class="opt">OPTIONAL</span></label><textarea id="rf-note" name="note" rows="3" maxlength="200" placeholder="How do you know them? Anything we should know?"></textarea></div>' +
     '<div class="full sgf-actions"><button type="submit" class="sgf-submit" id="rf-submit">Send recommendation</button></div>' +
+    '</form></dialog></div>' +
+    '<dialog id="bug-dialog"><div class="dlg-h"><h3>Report a bug</h3><button type="button" class="dlg-x" id="bug-close" aria-label="Close">&#10005;</button></div>' +
+    '<p class="dim sgf-note">Something broken? Tell me what happened — it lands straight on my desk.</p>' +
+    '<form id="bug-form" class="sgf">' +
+    '<div><label for="bug-where">Where did it happen?<span class="req">required</span></label><input type="text" id="bug-where" name="where" maxlength="80" placeholder="e.g. Media tab, search box"/></div>' +
+    '<div><label for="bug-what">What went wrong?<span class="req">required</span></label><textarea id="bug-what" name="what" rows="5" maxlength="2000" placeholder="What you did, what you expected, what happened instead"></textarea></div>' +
+    '<div class="rf-actions"><button type="submit" class="sgf-submit" id="bug-send" disabled>Send report</button></div>' +
     '</form></dialog></div>';
   /* config adoption re-run: the shell (footer site links, emails, gate logo)
      was just injected — mspApplyConfig ran before it existed */
@@ -4041,6 +4049,48 @@ function guideDetailHtml(key) {
       else toast('Could not copy — the address is ' + email, { err: true });
     }
   });
+  // ===== BUG REPORT: account menu -> /api/bug (KV + Gotify -> Paperclip) =====
+  (function initBug() {
+    const form = document.getElementById('bug-form');
+    if (!form) return;
+    const what = document.getElementById('bug-what');
+    const where = document.getElementById('bug-where');
+    const send = document.getElementById('bug-send');
+    if (!what || !send) return;
+    const sync = () => { send.disabled = what.value.trim().length < 4; };
+    what.addEventListener('input', sync);
+    where.addEventListener('input', sync);
+    const dlg = document.getElementById('bug-dialog');
+    const closeX = document.getElementById('bug-close');
+    if (closeX) closeX.addEventListener('click', () => { try { dlg.close(); } catch (e) {} });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (send.disabled) return;
+      send.disabled = true;
+      const label = send.textContent;
+      send.textContent = 'Sending…';
+      try {
+        const r = await fetch('/api/bug', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ where: where.value.trim(), what: what.value.trim() }),
+        });
+        if (r.ok) {
+          toast('Bug reported — thank you', { ok: true });
+          form.reset();
+          sync();
+          try { dlg.close(); } catch (e2) {}
+        } else {
+          const d = await r.json().catch(() => ({}));
+          toast(d.error || 'Could not send — try again', { err: true });
+        }
+      } catch (err) {
+        toast('Could not send — try again', { err: true });
+      }
+      send.textContent = label;
+      sync();
+    });
+  })();
   // ===== PHASE 12: SUGGEST A SERVICE (same webhook + payload as site suggest.html) =====
   (function initSuggest() {
     const form = document.getElementById('sgf');
@@ -4630,6 +4680,15 @@ function relFuture(v) {
       const t = item.getAttribute('data-goto');
       if (typeof window.setTab === 'function') window.setTab(t); else location.hash = t;
       close();
+    });
+    // Report a bug: open the bug dialog from the account menu
+    document.addEventListener('click', (e) => {
+      const item = e.target && e.target.closest ? e.target.closest('#acct-pop #mi-bug') : null;
+      if (!item) return;
+      e.preventDefault();
+      close();
+      const dlg = document.getElementById('bug-dialog');
+      if (dlg && !dlg.open) dlg.showModal();
     });
     // tab switches should also close it
     window.addEventListener('hashchange', close);
