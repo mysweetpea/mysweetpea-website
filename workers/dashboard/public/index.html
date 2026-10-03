@@ -405,7 +405,7 @@ body{-webkit-tap-highlight-color:transparent}
 .nav-id{gap:6px;flex:none}
 #who-tier{display:none}
 .out{display:none}
-#pal-open{display:none}
+#pal-open{width:38px;height:38px}
 .nav-toggle{display:flex}
 .nav-tabs{position:absolute;top:calc(100% + 8px);left:12px;right:12px;flex-direction:column;align-items:stretch;gap:2px;background:#10121e;backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--border);border-radius:var(--radius);padding:8px;display:none;box-shadow:var(--e3);z-index:60;max-height:calc(100vh - 96px);max-height:calc(100dvh - 96px);overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.35) transparent}
 .top-nav.nav-open .nav-tabs{display:flex}
@@ -2696,6 +2696,7 @@ function guideDetailHtml(key) {
     '<p class="dim ct3-note">The more detail, the faster the reply.</p>' +
     '</div></section>' +
     '</div>' +
+    '</div>' +
     '<div class="tabpanel" id="panel-security" role="tabpanel" aria-labelledby="tab-security">' +
     '<section class="card" id="sec-security"><p class="eyebrow">Security</p><h3>Security</h3><div class="skel"></div></section>' +
     '<section class="card" id="sec-sessions"><p class="eyebrow">Sessions</p><h3>Your sessions</h3><div class="skel"></div></section>' +
@@ -3172,10 +3173,11 @@ function guideDetailHtml(key) {
   let initialTab = 'home';
   try {
     const h = (location.hash || '').replace(/^#/, '');
-    if (TABS.indexOf(h) >= 0) initialTab = h;
+    const ALL_TABS = TABS.concat(EXTRA_TABS);
+    if (ALL_TABS.indexOf(h) >= 0) initialTab = h;
     else {
       const saved = localStorage.getItem('msp-tab');
-      if (saved && TABS.indexOf(saved) >= 0) initialTab = saved;
+      if (saved && ALL_TABS.indexOf(saved) >= 0) initialTab = saved;
     }
   } catch (e) {}
   setTab(initialTab, { fromHash: true });
@@ -3467,9 +3469,28 @@ function guideDetailHtml(key) {
       return '<a class="sv-card' + (svIsUp(s.name) ? '' : ' isdown') + '" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' +
         svStar(s.name, pinned) +
         '<div class="top">' + svIcon(s, 'svc-ico') + '<div><div class="nm">' + esc(s.name) + '</div><div class="bl">' + esc(s.blurb) + '</div></div></div>' +
-        '<div class="meta"><span class="sv-live' + (svIsUp(s.name) ? '' : ' down') + '"><span class="sv-livedot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' + (svIsUp(s.name) ? 'LIVE' : 'DEGRADED') + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + '</span>' : '') + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div></a>';
+        '<div class="meta"><span class="sv-live' + (svIsUp(s.name) ? '' : ' down') + '"><span class="sv-livedot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' + (svIsUp(s.name) ? 'LIVE' : 'DEGRADED') + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + '</span>' : '') + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div>' +
+        (GUIDES[s.key] ? '<div class="sv-guide-cta"><span class="sv-guide-btn" role="button" tabindex="0" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</span></div>' : '') + '</a>';
     }).join('');
   };
+  if (!window.__svGuideWire) {
+    window.__svGuideWire = true;
+    document.addEventListener('click', (e) => {
+      const b = e.target && e.target.closest ? e.target.closest('.sv-guide-btn') : null;
+      if (!b) return;
+      e.preventDefault(); e.stopPropagation();
+      const k = b.dataset.gguide;
+      if (typeof window.setTab === 'function') window.setTab('guides');
+      try { const c = document.querySelector('.svc-guide-chip[data-guide="' + k + '"]'); if (c) c.click(); } catch (err) {}
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const b = e.target && e.target.closest ? e.target.closest('.sv-guide-btn') : null;
+      if (!b) return;
+      e.preventDefault(); e.stopPropagation();
+      b.click();
+    });
+  }
   window.svSetFilter = function (f, ev) {
     svState.filter = f;
     document.querySelectorAll('.sv-fchip').forEach((b) => b.classList.toggle('on', b.dataset.f === f));
@@ -4716,8 +4737,9 @@ function relFuture(v) {
       let start = 'home';
       try {
         const h = (location.hash || '').replace(/^#/, '');
-        if (TABS.indexOf(h) >= 0) start = h;
-        else { const s = localStorage.getItem('msp-tab'); if (s && TABS.indexOf(s) >= 0) start = s; }
+        const ALL = TABS.concat(EXTRA_TABS);
+        if (ALL.indexOf(h) >= 0) start = h;
+        else { const s = localStorage.getItem('msp-tab'); if (s && ALL.indexOf(s) >= 0) start = s; }
       } catch (e) {}
       setTab(start, { fromHash: true });
       moveTabPill(false);
@@ -5307,6 +5329,28 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 @media(prefers-reduced-motion:reduce){.gate-logo{animation:none}.gate-dot{animation:none;opacity:.7}.gate-cta{transition:none}}
 @media(max-width:480px){#gate{padding:34px 24px 30px;margin:0 14px}h1.gate-h{font-size:1.75rem}}
 
+
+/* ===== BUG dialog theming (matches rf/sg scoped styles) ===== */
+#bug-dialog{border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(160deg,rgba(139,126,246,.06),transparent 40%),var(--card-solid,#12142A);color:var(--text);padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:0 24px 64px rgba(0,0,0,.45)}
+#bug-dialog::backdrop{background:rgba(8,9,15,.72);backdrop-filter:blur(4px)}
+#bug-dialog .sgf{display:flex;flex-direction:column;gap:14px;padding:18px 24px 24px;text-align:left}
+#bug-dialog .sgf label{font-size:.8rem;font-weight:600;margin-bottom:7px;display:flex;align-items:baseline;gap:8px}
+#bug-dialog .sgf .req{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(217,168,108,.4);padding:2px 7px;border-radius:99px}
+#bug-dialog .sgf input,#bug-dialog .sgf textarea{width:100%;background:rgba(10,12,22,.55);border:1px solid rgba(151,146,255,.15);border-radius:12px;padding:12px 14px;font:inherit;font-size:.92rem;color:var(--text);outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+#bug-dialog .sgf input:hover,#bug-dialog .sgf textarea:hover{border-color:rgba(151,146,255,.3)}
+#bug-dialog .sgf input:focus,#bug-dialog .sgf textarea:focus{border-color:var(--primary);background:rgba(10,12,22,.75);box-shadow:0 0 0 3px rgba(139,126,246,.16)}
+#bug-dialog .sgf textarea{min-height:110px;resize:vertical;line-height:1.5}
+#bug-dialog .rf-actions{margin-top:4px}
+#bug-dialog .sgf-submit{width:100%;border:none;border-radius:12px;background:linear-gradient(135deg,var(--primary),#5B9DF6);color:#0C1316;font-weight:700;font-size:.92rem;padding:13px 18px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease}
+#bug-dialog .sgf-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 28px rgba(139,126,246,.4)}
+#bug-dialog .sgf-submit:disabled{opacity:.45;cursor:default}
+
+/* ===== SERVICES guide CTA ===== */
+.sv-guide-cta{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.sv-guide-btn{display:inline-flex;align-items:center;gap:7px;font-size:.76rem;font-weight:600;color:var(--primary-bright);cursor:pointer;padding:6px 12px;border-radius:9px;border:1px solid rgba(139,126,246,.25);background:rgba(139,126,246,.07);transition:all .2s ease}
+.sv-guide-btn svg{width:14px;height:14px}
+.sv-guide-btn:hover{background:rgba(139,126,246,.16);border-color:rgba(139,126,246,.5)}
+.sv-guide-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
