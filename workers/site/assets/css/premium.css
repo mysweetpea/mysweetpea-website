@@ -3152,7 +3152,7 @@ body[data-page='services'] .tier-pill-soon { color: var(--sage);
 }
 /* Redeem: where's-my-code helper. */
 .rc-code-help {
-    margin: 10px 2px 0;
+    margin: 10px 2px 18px;
     font-size: .76rem;
     color: var(--text-faint);
 }

@@ -2537,8 +2537,11 @@ h2.glass-text:not(.section-title), body[data-page] h2.glass-text:not(.section-ti
    edge-to-edge. Scale it down on small screens (shadow layer must own this —
    font-size literals in site.css are dead here). */
 @media (max-width: 480px) {
-    body[data-page='contact'] .contact-email {
-        font-size: 0.98rem;
+    body[data-page='contact'] .contact-email,
+    body[data-page='contact'] .coH-mail .contact-email a {
+        /* email row is full-width on mobile (button stacks below); 22ch mono
+           needs ≤0.95rem to fit one line inside 390px chrome */
+        font-size: 0.95rem !important;
     }
     body[data-page='contact'] .copy-email-btn {
         font-size: 0.82rem;
