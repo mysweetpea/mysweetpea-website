@@ -2585,6 +2585,7 @@ function guideDetailHtml(key) {
         '<a role="menuitem" href="#security" data-goto="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/></svg>Security settings</a>' +
         '<a role="menuitem" href="#account" data-goto="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Account profile</a>' +
         '<a role="menuitem" href="#" id="mi-bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l3 3"/><path d="M20 12h3"/><path d="M19 17l3-3"/><path d="M5 7 2 10"/><path d="M4 12H1"/><path d="M5 17l-3 3"/><path d="M12 2v3"/><path d="M7 5l1.5 1.5"/><path d="M17 5l-1.5 1.5"/></svg>Report a bug</a>' +
+        (me && me.tier === 'sweetpea' ? '<a role="menuitem" href="#" id="mi-bugreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><path d="M8 12h8"/></svg>Bug reports</a>' : '') +
         '<a role="menuitem" href="#contact" data-goto="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>Contact us</a>' +
         '<a role="menuitem" data-msp-site="/" href="https://mysweetpea.cc" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Back to site</a>' +
         '<hr/>' +
@@ -2744,7 +2745,9 @@ function guideDetailHtml(key) {
     '<div><label for="bug-where">Where did it happen?<span class="req">required</span></label><input type="text" id="bug-where" name="where" maxlength="80" placeholder="e.g. Media tab, search box"/></div>' +
     '<div><label for="bug-what">What went wrong?<span class="req">required</span></label><textarea id="bug-what" name="what" rows="5" maxlength="2000" placeholder="What you did, what you expected, what happened instead"></textarea></div>' +
     '<div class="rf-actions"><button type="submit" class="sgf-submit" id="bug-send" disabled>Send report</button></div>' +
-    '</form></dialog></div>';
+    '</form></dialog>' +
+    '<dialog id="bugrev-dialog"><div class="dlg-h"><h3>Bug reports</h3><button type="button" class="dlg-x" id="bugrev-close" aria-label="Close">&#10005;</button></div>' +
+    '<div id="bugrev-list" class="bugrev-list"><p class="dim">Loading…</p></div></dialog></div>';
   /* config adoption re-run: the shell (footer site links, emails, gate logo)
      was just injected — mspApplyConfig ran before it existed */
   if (typeof mspApplyConfig === 'function') mspApplyConfig();
@@ -4091,6 +4094,61 @@ function guideDetailHtml(key) {
       sync();
     });
   })();
+  // ===== BUG REVIEW (sweetpea): approve fires Paperclip via Gotify p7 =====
+  (function initBugReview() {
+    const item = document.getElementById('mi-bugreview');
+    const dlg = document.getElementById('bugrev-dialog');
+    if (!item || !dlg) return;
+    const listHost = document.getElementById('bugrev-list');
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    item.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const pop = document.getElementById('acct-pop');
+      if (pop) pop.hidden = true;
+      if (!dlg.open) dlg.showModal();
+      listHost.innerHTML = '<p class="dim">Loading…</p>';
+      try {
+        const r = await fetch('/api/bug/review');
+        if (!r.ok) { listHost.innerHTML = '<p class="dim">Not available.</p>'; return; }
+        const d = await r.json();
+        const bugs = d.bugs || [];
+        if (!bugs.length) { listHost.innerHTML = '<p class="dim">No bug reports yet.</p>'; return; }
+        listHost.innerHTML = bugs.map((b) => {
+          const st = b.status === 'approved' ? '<span class="bugrev-st ok">approved → paperclip</span>'
+            : b.status === 'dismissed' ? '<span class="bugrev-st dim2">dismissed</span>'
+            : '<span class="bugrev-st">open</span>';
+          const acts = b.status === 'open'
+            ? '<span class="bugrev-acts"><button type="button" class="bugrev-btn ap" data-bugap="' + esc(b.id) + '">Approve &amp; fix</button>' +
+              '<button type="button" class="bugrev-btn dis" data-bugdis="' + esc(b.id) + '">Dismiss</button></span>'
+            : '';
+          return '<div class="bugrev-item" data-bugid="' + esc(b.id) + '">' +
+            '<div class="bugrev-head"><b>' + esc(b.where || 'dashboard') + '</b>' + st +
+            '<span class="bugrev-meta">' + esc(b.user || '?') + ' · ' + new Date(b.at || 0).toLocaleDateString() + '</span></div>' +
+            '<p class="bugrev-what">' + esc(b.what) + '</p>' + acts + '</div>';
+        }).join('');
+      } catch (e) { listHost.innerHTML = '<p class="dim">Could not load.</p>'; }
+    });
+    const closeX = document.getElementById('bugrev-close');
+    if (closeX) closeX.addEventListener('click', () => { try { dlg.close(); } catch (e) {} });
+    listHost.addEventListener('click', async (e) => {
+      const ap = e.target && e.target.closest ? e.target.closest('[data-bugap]') : null;
+      const dis = e.target && e.target.closest ? e.target.closest('[data-bugdis]') : null;
+      if (!ap && !dis) return;
+      const btn = ap || dis;
+      const id = btn.getAttribute(ap ? 'data-bugap' : 'data-bugdis');
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/bug/' + (ap ? 'approve' : 'dismiss'), {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ id }),
+        });
+        if (r.ok) {
+          if (ap) toast('Approved — Paperclip is on it', { ok: true });
+          item.click(); // refresh list
+        } else { toast('Failed', { err: true }); btn.disabled = false; }
+      } catch (e2) { toast('Failed', { err: true }); btn.disabled = false; }
+    });
+  })();
   // ===== PHASE 12: SUGGEST A SERVICE (same webhook + payload as site suggest.html) =====
   (function initSuggest() {
     const form = document.getElementById('sgf');
@@ -5306,6 +5364,23 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 @keyframes gatePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(.8)}}
 @media(prefers-reduced-motion:reduce){.gate-logo{animation:none}.gate-dot{animation:none;opacity:.7}.gate-cta{transition:none}}
 @media(max-width:480px){#gate{padding:34px 24px 30px;margin:0 14px}h1.gate-h{font-size:1.75rem}}
+
+/* ===== BUG REVIEW list ===== */
+.bugrev-list{display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto;padding:4px 2px}
+.bugrev-item{border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:rgba(139,126,246,.04)}
+.bugrev-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.bugrev-head b{font-size:.9rem}
+.bugrev-st{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);border:1px solid var(--border);padding:2px 8px;border-radius:99px}
+.bugrev-st.ok{color:var(--up);border-color:rgba(74,222,156,.4)}
+.bugrev-st.dim2{opacity:.6}
+.bugrev-meta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text-faint)}
+.bugrev-what{font-size:.86rem;color:var(--text-dim);line-height:1.55;margin:0 0 10px;white-space:pre-wrap}
+.bugrev-acts{display:flex;gap:8px}
+.bugrev-btn{border:1px solid var(--border-primary);background:transparent;color:var(--primary-bright);font-size:.78rem;font-weight:600;padding:7px 14px;border-radius:9px;cursor:pointer;transition:all .2s ease}
+.bugrev-btn:hover{background:rgba(139,126,246,.12)}
+.bugrev-btn.dis{color:var(--text-dim);border-color:var(--border)}
+.bugrev-btn.dis:hover{background:rgba(255,255,255,.05)}
+.bugrev-btn:disabled{opacity:.5;cursor:default}
 </style>
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */

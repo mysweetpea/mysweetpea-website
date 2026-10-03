@@ -1511,13 +1511,68 @@ export default {
               method: 'POST',
               headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0' },
               body: JSON.stringify({
-                title: 'BUG: ' + (where || 'dashboard') + ' — ' + sess.username,
-                message: what,
-                priority: 7,
+                // priority 5: notify-only — the PC poller auto-fires Paperclip at p>=7,
+                // and nothing fires until the owner approves (see /api/bug/approve)
+                title: 'Bug report (review): ' + (where || 'dashboard') + ' — ' + sess.username,
+                message: what + '\n\nReview & approve in dashboard: account menu → Bug reports',
+                priority: 5,
               }),
             });
           } catch { /* stored regardless */ }
         }
+        return json({ ok: true, id });
+      }
+      // sweetpea-only bug review queue
+      if (path === '/api/bug/review' && request.method === 'GET') {
+        if (sess.tier !== 'sweetpea') return json({ error: 'forbidden' }, 403);
+        const list: any[] = [];
+        // KV list prefix bug: — page through (small volume; 50 cap is plenty)
+        const kv = await env.SESSIONS.list({ prefix: 'bug:' });
+        for (const k of kv.keys) {
+          try {
+            const rec = JSON.parse((await env.SESSIONS.get(k.name)) || 'null');
+            if (rec) list.push(rec);
+          } catch { /* skip bad record */ }
+        }
+        list.sort((a, b) => (b.at || 0) - (a.at || 0));
+        return json({ bugs: list });
+      }
+      if (path === '/api/bug/approve' && request.method === 'POST') {
+        if (sess.tier !== 'sweetpea') return json({ error: 'forbidden' }, 403);
+        const b: any = await request.json().catch(() => ({}));
+        const id = String(b.id || '');
+        const raw = id ? await env.SESSIONS.get('bug:' + id) : null;
+        if (!raw) return json({ error: 'not found' }, 404);
+        const rec = JSON.parse(raw);
+        if (rec.status === 'approved') return json({ ok: true, id, already: true });
+        rec.status = 'approved';
+        rec.approvedAt = Date.now();
+        await env.SESSIONS.put('bug:' + id, JSON.stringify(rec));
+        if (env.GOTIFY_BUG_TOKEN) {
+          try {
+            await fetch('https://gotify.mysweetpea.cc/message?token=' + env.GOTIFY_BUG_TOKEN, {
+              method: 'POST',
+              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0' },
+              body: JSON.stringify({
+                // priority 7 = the PC poller's auto-fire lane → Paperclip Groundskeeper
+                title: 'BUG-APPROVED: ' + (rec.where || 'dashboard') + ' — ' + rec.user,
+                message: rec.what,
+                priority: 7,
+              }),
+            });
+          } catch { /* approved regardless */ }
+        }
+        return json({ ok: true, id });
+      }
+      if (path === '/api/bug/dismiss' && request.method === 'POST') {
+        if (sess.tier !== 'sweetpea') return json({ error: 'forbidden' }, 403);
+        const b: any = await request.json().catch(() => ({}));
+        const id = String(b.id || '');
+        const raw = id ? await env.SESSIONS.get('bug:' + id) : null;
+        if (!raw) return json({ error: 'not found' }, 404);
+        const rec = JSON.parse(raw);
+        rec.status = 'dismissed';
+        await env.SESSIONS.put('bug:' + id, JSON.stringify(rec));
         return json({ ok: true, id });
       }
 
