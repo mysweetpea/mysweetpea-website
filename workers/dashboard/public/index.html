@@ -3937,8 +3937,11 @@ function guideDetailHtml(key) {
   if (guideNav && guideBody) {
     guideNav.innerHTML = GUIDE_ORDER.map((k) => guideChipHtml(k, guideSel)).join('');
     guideBody.innerHTML = guideDetailHtml(guideSel);
+    const mDD0 = document.getElementById('m-guide-dd');
     const mLab0 = document.getElementById('m-guide-sum-t');
     if (mLab0 && GUIDES[guideSel]) mLab0.textContent = GUIDES[guideSel].name;
+    // desktop shows the detail permanently (summary hidden => can't be closed); mobile keeps it closed
+    if (mDD0 && window.matchMedia('(min-width: 761px)').matches) mDD0.open = true;
     guideNav.addEventListener('click', (e) => {
       const chip = e.target && e.target.closest ? e.target.closest('.svc-guide-chip') : null;
       if (!chip) return;
