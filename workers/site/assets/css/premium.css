@@ -2823,8 +2823,9 @@ body[data-page='form'] .tier-form-panel .form-submit.loading::after {
 }
 /* 9. Mobile — rail tucks in, rows go single-column; arch never clips the bloom. */
 @media (max-width: 640px) {
-    body[data-page='form'] .tier-form-panel .form-card { padding: 0 22px 28px 60px; }
-    body[data-page='form'] .tier-form-panel .rail { left: 38px; }
+    body[data-page='form'] .tier-form-panel .form-card { padding: 0 18px 28px 40px; }
+    body[data-page='form'] .tier-form-panel .rail { left: 12px; }
+    body[data-page='form'] .tier-form-panel .rail .vine { left: 10px; }
     body[data-page='form'] .tier-form-panel .rail .node { width: 22px; height: 22px; }
     body[data-page='form'] .tier-form-panel .srow { grid-template-columns: 1fr; gap: 2px; padding: 14px 0 16px; }
     body[data-page='form'] .tier-form-panel .slabel { padding-bottom: 8px; }
