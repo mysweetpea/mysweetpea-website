@@ -3945,13 +3945,19 @@ function guideDetailHtml(key) {
       guideSel = chip.dataset.guide;
       guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === guideSel ? 'true' : 'false'));
       guideBody.innerHTML = guideDetailHtml(guideSel);
-      // mobile accordion: tapping a service drops the guide open beneath the chips
+      // mobile accordion: move the shared detail INLINE under the tapped chip
       const dd = document.getElementById('m-guide-dd');
       if (dd) {
         const lab = document.getElementById('m-guide-sum-t');
         if (lab && GUIDES[guideSel]) lab.textContent = GUIDES[guideSel].name;
-        dd.open = true;
-        try { dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+        // re-tap same chip = collapse; else expand right under that chip
+        if (dd.open && dd.dataset.sel === guideSel) { dd.open = false; dd.dataset.sel = ''; }
+        else {
+          dd.dataset.sel = guideSel;
+          dd.open = true;
+          chip.after(dd);
+          try { dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+        }
       }
     });
     // phase 3b-3: platform pill switching — re-render the steps for the chosen platform
@@ -5182,16 +5188,13 @@ span.st-row-art{display:grid;place-items:center;font-family:'Instrument Serif',G
 /* ===== GUIDES mobile accordion ===== */
 .m-guide-dd{display:none}
 @media(max-width:760px){
-  .m-guide-dd{display:block;margin-top:14px;border:1px solid var(--border);border-radius:14px;background:rgba(139,126,246,.04);overflow:hidden}
-  .m-guide-dd[open]{border-color:rgba(139,126,246,.4);box-shadow:0 10px 30px rgba(0,0,0,.3)}
-  .m-guide-sum{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;list-style:none;user-select:none}
-  .m-guide-sum::-webkit-details-marker{display:none}
-  .m-guide-sum-t{font-weight:600;font-size:.95rem;color:var(--text)}
-  .m-guide-chev{color:var(--primary-bright);transition:transform .25s ease}
-  .m-guide-dd[open] .m-guide-chev{transform:rotate(90deg)}
-  .m-guide-dd[open] .svc-guide-detail{padding:4px 16px 16px;border-top:1px solid var(--border);animation:mGuidIn .3s ease}
+  .m-guide-dd{display:contents}
+  /* when moved inside the chip grid: full-width cell directly under the tapped chip */
+  .svc-guide-nav .m-guide-dd{grid-column:1/-1;display:block;margin:0 0 6px;border:1px solid rgba(139,126,246,.4);border-radius:14px;background:rgba(139,126,246,.05);box-shadow:0 10px 30px rgba(0,0,0,.3);overflow:hidden;animation:mGuidIn .3s ease}
+  .m-guide-sum{display:none}
+  .svc-guide-nav .m-guide-dd[open] .svc-guide-detail{display:block;animation:mGuidIn .3s ease}
   @keyframes mGuidIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
-  @media(prefers-reduced-motion:reduce){.m-guide-dd[open] .svc-guide-detail{animation:none}}
+  @media(prefers-reduced-motion:reduce){.svc-guide-nav .m-guide-dd{animation:none}}
 }
 @media(min-width:761px){
   .m-guide-dd,.m-guide-sum{display:contents}
