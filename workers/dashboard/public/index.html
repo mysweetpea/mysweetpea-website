@@ -2158,7 +2158,6 @@ const GUIDES = {
     plain: 'Request movies and shows — they appear in Jellyfin automatically.',
     steps: [
       { title: 'Open requests', text: 'Go to request.mysweetpea.cc, or tap the Requests tab inside Moonfin.', url: 'https://request.mysweetpea.cc', btn: 'Open requests' },
-      { title: 'Add it to your phone (no app needed)', text: 'Seerr has no app — the site itself is one. On iPhone: share → Add to Home Screen. On Android: tap the install icon in the address bar. It opens full-screen like an app.' },
       { title: 'Request', text: 'Search a title and click "Request". That is it.' },
     ],
   },
@@ -2188,7 +2187,6 @@ const GUIDES = {
     plain: 'A private AI chat — your conversations stay on our servers.',
     steps: [
       { title: 'Open the chat', text: 'Go to ai.mysweetpea.cc and click "Continue with OIDC".', url: 'https://ai.mysweetpea.cc', btn: 'Open chat' },
-      { title: 'Add it to your phone (no app needed)', text: 'Open WebUI has no app — the site itself is installable. On iPhone: share → Add to Home Screen. On Android: tap the install icon in the address bar. It opens full-screen like an app.' },
       { title: 'Sign in', text: 'Use your MySweetPea account — you land back in the chat.' },
     ],
   },
@@ -2288,6 +2286,11 @@ const PLATFORMS = {
       { title: 'Requests live inside Moonfin', text: 'No separate app — open Moonfin and tap the Requests tab.', url: 'https://media.mysweetpea.cc/Moonfin/Web/', btn: 'Open Moonfin' },
       { title: 'Request something', text: 'Find a title and request it — it appears in Jellyfin automatically.', url: '', btn: '' },
     ] },
+    { p: 'pwa', label: 'Phone / tablet · PWA', glyph: 'phone', platformSteps: [
+      { title: 'iPhone — Add to Home Screen', text: 'Open request.mysweetpea.cc in Safari, tap Share, then Add to Home Screen. It opens full-screen, like an app.', url: 'https://request.mysweetpea.cc', btn: 'Open Seerr' },
+      { title: 'Android — Install from the address bar', text: 'Open the site in Chrome and tap the install icon in the address bar. Same full-screen app experience.', url: '', btn: '' },
+      { title: 'Request something', text: 'Sign in with your MySweetPea account and request away — requests land in Jellyfin automatically.', url: '', btn: '' },
+    ] },
   ],
   nextcloud: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
@@ -2372,12 +2375,20 @@ const PLATFORMS = {
   openwebui: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
     { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
-      { title: 'Get the desktop app', text: 'Official desktop app for Windows, macOS and Linux. Prefer the browser? The site installs as a PWA from your address bar.', url: 'https://github.com/open-webui/desktop', btn: 'Get the app' },
+      { title: 'Get the desktop app', text: 'Official desktop app for Windows, macOS and Linux.', url: 'https://github.com/open-webui/desktop', btn: 'Get the app' },
       { title: 'Point it at your server', text: 'Server: ai.mysweetpea.cc — sign in with Continue with OIDC and your MySweetPea account.', url: '', btn: '' },
+    ] },
+    { p: 'pwa', label: 'Phone / tablet · PWA', glyph: 'phone', platformSteps: [
+      { title: 'iPhone — Add to Home Screen', text: 'Open ai.mysweetpea.cc in Safari, tap Share, then Add to Home Screen. It opens full-screen, like an app.', url: 'https://ai.mysweetpea.cc', btn: 'Open Open WebUI' },
+      { title: 'Android — Install from the address bar', text: 'Open the site in Chrome and tap the install icon in the address bar. Same full-screen app experience.', url: '', btn: '' },
+      { title: 'Chat anywhere', text: 'Sign in with Continue with OIDC — your conversations stay in sync with the web and desktop apps.', url: '', btn: '' },
     ] },
   ],
   koalasync: [
-    { p: 'web', label: 'Web browser', glyph: 'web' },
+    { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
+      { title: 'Joining a room', text: 'Open the share link a friend sent — the room loads right in your browser, no install needed. Watching along is free.', url: '', btn: '' },
+      { title: 'Heads up', text: "The website alone can't control playback — to create rooms and sync everyone, you'll want the Browser extension.", url: '', btn: '' },
+    ] },
     { p: 'extension', label: 'Browser extension', glyph: 'plug', platformSteps: [
       { title: 'Add the extension', text: 'KoalaSync is a browser extension for Chrome (and Chromium browsers) — it lets the room see your player tab.', url: 'https://chromewebstore.google.com/detail/koalasync/obbnmkmlaaddodakcbdljknjpagklifc', btn: 'Add to Chrome' },
       { title: 'On Firefox?', text: 'Get KoalaSync from Firefox Add-ons instead.', url: 'https://addons.mozilla.org/en-US/firefox/addon/koalasync/', btn: 'Add to Firefox' },
