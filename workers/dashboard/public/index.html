@@ -2660,7 +2660,8 @@ function guideDetailHtml(key) {
     '</div>' +
     '<div class="tabpanel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">' +
     '<section class="card" id="sec-guides"><p class="eyebrow">Setup guides</p><h3>Setup guides<span class="tier-echo" id="tier-echo-guides"></span></h3><pre class="ripple-strip" id="ripple-strip-guides" aria-hidden="true"></pre><p class="dim" style="margin:10px 0 16px">How to get started with each MySweetPea service — step by step.</p>' +
-    '<div class="svc-guide"><div class="svc-guide-nav" id="guide-nav" role="group" aria-label="Choose a service"></div><div class="svc-guide-detail" id="guide-body" aria-live="polite"></div></div></section>' +
+    '<div class="svc-guide"><div class="svc-guide-nav" id="guide-nav" role="group" aria-label="Choose a service"></div>' +
+    '<details class="m-guide-dd" id="m-guide-dd"><summary class="m-guide-sum"><span class="m-guide-sum-t" id="m-guide-sum-t">Guide</span><span class="m-guide-chev" aria-hidden="true">&rarr;</span></summary><div class="svc-guide-detail" id="guide-body" aria-live="polite"></div></details></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-contact" role="tabpanel" aria-labelledby="tab-contact">' +
     '<div class="ct3-wrap">' +
@@ -3936,12 +3937,22 @@ function guideDetailHtml(key) {
   if (guideNav && guideBody) {
     guideNav.innerHTML = GUIDE_ORDER.map((k) => guideChipHtml(k, guideSel)).join('');
     guideBody.innerHTML = guideDetailHtml(guideSel);
+    const mLab0 = document.getElementById('m-guide-sum-t');
+    if (mLab0 && GUIDES[guideSel]) mLab0.textContent = GUIDES[guideSel].name;
     guideNav.addEventListener('click', (e) => {
       const chip = e.target && e.target.closest ? e.target.closest('.svc-guide-chip') : null;
       if (!chip) return;
       guideSel = chip.dataset.guide;
       guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === guideSel ? 'true' : 'false'));
       guideBody.innerHTML = guideDetailHtml(guideSel);
+      // mobile accordion: tapping a service drops the guide open beneath the chips
+      const dd = document.getElementById('m-guide-dd');
+      if (dd) {
+        const lab = document.getElementById('m-guide-sum-t');
+        if (lab && GUIDES[guideSel]) lab.textContent = GUIDES[guideSel].name;
+        dd.open = true;
+        try { dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+      }
     });
     // phase 3b-3: platform pill switching — re-render the steps for the chosen platform
     guideBody.addEventListener('click', (e) => {
@@ -5166,6 +5177,25 @@ span.st-row-art{display:grid;place-items:center;font-family:'Instrument Serif',G
   /* request cards: keep header pills from crowding */
   .rq-head{flex-wrap:wrap}
   .rq-when{margin-left:auto}
+}
+
+/* ===== GUIDES mobile accordion ===== */
+.m-guide-dd{display:none}
+@media(max-width:760px){
+  .m-guide-dd{display:block;margin-top:14px;border:1px solid var(--border);border-radius:14px;background:rgba(139,126,246,.04);overflow:hidden}
+  .m-guide-dd[open]{border-color:rgba(139,126,246,.4);box-shadow:0 10px 30px rgba(0,0,0,.3)}
+  .m-guide-sum{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;cursor:pointer;list-style:none;user-select:none}
+  .m-guide-sum::-webkit-details-marker{display:none}
+  .m-guide-sum-t{font-weight:600;font-size:.95rem;color:var(--text)}
+  .m-guide-chev{color:var(--primary-bright);transition:transform .25s ease}
+  .m-guide-dd[open] .m-guide-chev{transform:rotate(90deg)}
+  .m-guide-dd[open] .svc-guide-detail{padding:4px 16px 16px;border-top:1px solid var(--border);animation:mGuidIn .3s ease}
+  @keyframes mGuidIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.m-guide-dd[open] .svc-guide-detail{animation:none}}
+}
+@media(min-width:761px){
+  .m-guide-dd,.m-guide-sum{display:contents}
+  .m-guide-sum{display:none !important}
 }
 </style>
 <script id="graft-hb-js">
