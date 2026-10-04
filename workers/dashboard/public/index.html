@@ -2584,7 +2584,7 @@ function guideDetailHtml(key) {
         '<div class="acct-pop-head"><span class="nav-avatar sm" id="pop-avatar">' + avatarInner() + '</span><div><b id="pop-name"></b><span class="dim" id="pop-email"></span><span class="tier-pill" id="pop-tier" hidden></span></div></div>' +
         '<a role="menuitem" href="#security" data-goto="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/></svg>Security settings</a>' +
         '<a role="menuitem" href="#account" data-goto="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Account profile</a>' +
-        '<a role="menuitem" href="#" id="mi-bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="8" y="6" width="8" height="14" rx="4"/><path d="M19 7l3 3"/><path d="M20 12h3"/><path d="M19 17l3-3"/><path d="M5 7 2 10"/><path d="M4 12H1"/><path d="M5 17l-3 3"/><path d="M12 2v3"/><path d="M7 5l1.5 1.5"/><path d="M17 5l-1.5 1.5"/></svg>Report a bug</a>' +
+        '<a role="menuitem" href="#" id="mi-bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>Report a bug</a>' +
         '<a role="menuitem" href="#contact" data-goto="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>Contact us</a>' +
         '<a role="menuitem" data-msp-site="/" href="https://mysweetpea.cc" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Back to site</a>' +
         '<hr/>' +
@@ -2945,7 +2945,7 @@ function guideDetailHtml(key) {
       const circles = don.map((x) => {
         const pct = (x[1] / donTotal) * 100;
         const off = 25 - acc; acc += pct;
-        return '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="5.5" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + off.toFixed(3) + '"></circle>';
+        return '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="5.5" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + off.toFixed(3) + '"><title>' + esc(x[0]) + ': ' + x[1].toLocaleString() + ' (' + pct.toFixed(1) + '%)</title></circle>';
       }).join('');
       donHtml = '<div class="sc-donut"><svg viewBox="0 0 42 42" role="img" aria-label="Movies, series and boxsets">' + circles + '</svg>' +
         '<div class="sc-donut-c"><span class="sc-donut-n">' + donTotal.toLocaleString() + '</span><span class="sc-donut-l">titles</span></div></div>' +
@@ -2995,7 +2995,7 @@ function guideDetailHtml(key) {
             ? '<i class="gr-seg gr-seg-' + x[0] + '" style="height:' + ((x[1] / total) * 100).toFixed(2) + '%"></i>'
             : '')).join('') + '</div>'
         : '<div class="gr-bar zero"></div>';
-      return '<div class="gr-col" title="' + esc(d.date) + ': ' + total.toLocaleString() + ' added">' +
+      return '<div class="gr-col" data-tip="' + esc(d.date) + '" data-m="' + m + '" data-s="' + s + '" data-e="' + e + '" data-t="' + total + '">' +
         (clamped ? '<span class="gr-over">' + total.toLocaleString() + '</span>' : '') + bar + '</div>';
     }).join('');
     // cumulative area line — running total normalized to the window final
@@ -3040,24 +3040,95 @@ function guideDetailHtml(key) {
       '<div class="gr-stat"><b>' + libAll + '</b><span>items total</span></div>' +
       '</div>' +
       '<div class="gr-legend">' +
-      '<span><i style="background:var(--v)"></i>movies</span>' +
-      '<span><i style="background:var(--c)"></i>series</span>' +
-      '<span><i style="background:var(--gold)"></i>episodes</span>' +
+      '<span data-k="m"><i style="background:var(--v)"></i>movies</span>' +
+      '<span data-k="s"><i style="background:var(--c)"></i>series</span>' +
+      '<span data-k="e"><i style="background:var(--gold)"></i>episodes</span>' +
       '<span class="gr-legend-note">' + (g.daily.length - active) + ' quiet days</span></div>' +
       '<div class="gr-bars-wrap"><div class="gr-gridlines" aria-hidden="true"><i></i><i></i><i></i></div>' +
-      '<div class="gr-bars" role="img" aria-label="Daily additions over the last 30 days">' + bars + '</div></div>' +
+      '<div class="gr-bars" id="gr-bars" role="img" aria-label="Daily additions over the last 30 days">' + bars + '</div></div>' +
       '<div class="gr-axis"><span>' + esc(fmtDay(firstDay)) + '</span><span>every bar is one day</span><span>' + esc(fmtDay(lastDay)) + '</span></div>' +
-      '<div class="gr-area-wrap"><svg class="gr-area" viewBox="0 0 800 100" preserveAspectRatio="none" role="img" aria-label="Cumulative library growth">' +
+      '<div class="gr-area-wrap"><svg class="gr-area" id="gr-area" viewBox="0 0 800 100" preserveAspectRatio="none" role="img" aria-label="Cumulative library growth">' +
       '<defs><linearGradient id="grFill" x1="0" y1="0" x2="0" y2="1">' +
       '<stop offset="0" style="stop-color:var(--v);stop-opacity:.5"/>' +
       '<stop offset="1" style="stop-color:var(--v);stop-opacity:0"/></linearGradient></defs>' +
       '<path d="' + line + ' L800,100 L0,100 Z" fill="url(#grFill)" stroke="none"></path>' +
       '<path d="' + line + '" fill="none" style="stroke:var(--v)" stroke-width="2" vector-effect="non-scaling-stroke"></path>' +
+      '<line class="gr-cursor" x1="0" x2="0" y1="0" y2="100"></line>' +
+      '<circle class="gr-dot-hl" r="3.2"></circle>' +
       '<circle class="gr-dot" cx="' + pts[pts.length - 1].split(',')[0] + '" cy="' + pts[pts.length - 1].split(',')[1] + '" r="3" vector-effect="non-scaling-stroke"></circle></svg>' +
       '<span class="gr-area-cap">' + libAll + ' items' + (g.partial ? ' (partial data)' : '') + ', still climbing</span></div>' +
       '<p class="gr-era">' + footer + '</p>';
     sec.hidden = false;
   }
+  // ===== chart interactivity: shared tooltip + legend highlight + area scrub.
+  // Delegated + re-render-proof (works over any innerHTML replace); stores the
+  // area's daily data on the host so the scrub needs no per-render state.
+  (function initChartTips() {
+    if (window.__grTips) return; window.__grTips = true;
+    let tip = null;
+    const show = (html, x, y) => {
+      if (!tip) { tip = document.createElement('div'); tip.id = 'gr-tip'; document.body.appendChild(tip); }
+      tip.innerHTML = html;
+      tip.classList.add('on');
+      const r = tip.getBoundingClientRect();
+      tip.style.left = Math.min(Math.max(8, x - r.width / 2), window.innerWidth - r.width - 8) + 'px';
+      tip.style.top = Math.max(8, y - r.height - 12) + 'px';
+    };
+    const hide = () => { if (tip) tip.classList.remove('on'); };
+    const KLS = { m: ['Movies', 'var(--v)'], s: ['Series', 'var(--c)'], e: ['Episodes', 'var(--gold)'] };
+    const rowsHtml = (d) => '<div class="gr-tip-rows">' + ['m', 's', 'e'].map((k) =>
+      (Number(d[k]) || 0) > 0 ? '<div><i style="background:' + KLS[k][1] + '"></i>' + KLS[k][0] + ': ' + Number(d[k]).toLocaleString() + '</div>' : '').join('') + '</div>';
+    // ONE mousemove reconciler: decide what the pointer is over, show OR hide.
+    // (Two competing handlers both firing on every move = bar tooltip instantly
+    // re-hidden by the area handler — the show/hide fight bug.)
+    document.addEventListener('mousemove', (ev) => {
+      const t = ev.target;
+      if (!t || !t.closest) { hide(); return; }
+      const col = t.closest('.gr-col[data-tip]');
+      const svg = t.closest('svg.gr-area');
+      if (!col && !svg) { hide(); return; }
+      if (svg) {
+        const data = svg.closest('.gr-area-wrap') ? svg.closest('.gr-area-wrap').__grData : null;
+        if (!data || !data.length) { hide(); return; }
+        const r = svg.getBoundingClientRect();
+        const fx = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
+        const i = Math.round(fx * (data.length - 1));
+        const d = data[i];
+        const run = data.slice(0, i + 1).reduce((a, x) => a + x.total, 0);
+        const y = 100 - (run / data.totalAll) * 100;
+        const cur = svg.querySelector('.gr-cursor'), dot = svg.querySelector('.gr-dot-hl');
+        const xc = (i / (data.length - 1) * 800).toFixed(1);
+        if (cur) { cur.setAttribute('x1', xc); cur.setAttribute('x2', xc); }
+        if (dot) { dot.setAttribute('cx', xc); dot.setAttribute('cy', Math.max(0, Math.min(100, y)).toFixed(1)); }
+        svg.classList.add('scrub');
+        show('<b>' + esc(d.date) + '</b><div class="gr-tip-rows"><div><i style="background:var(--v)"></i>cumulative: ' + Math.round(run).toLocaleString() + '</div><div>day: +' + Number(d.total).toLocaleString() + '</div></div>', ev.clientX, ev.clientY);
+        return;
+      }
+      const d = { m: col.dataset.m, s: col.dataset.s, e: col.dataset.e };
+      show('<b>' + esc(col.dataset.tip) + '</b>' + rowsHtml(d) + '<div class="gr-tip-rows"><div><b style="display:inline;margin:0">total ' + Number(col.dataset.t).toLocaleString() + '</b></div></div>', ev.clientX, ev.clientY);
+    });
+    document.addEventListener('mouseleave', hide, true);
+    document.addEventListener('scroll', hide, true);
+    // legend hover -> highlight matching bar segments
+    document.addEventListener('mouseover', (ev) => {
+      const leg = ev.target && ev.target.closest ? ev.target.closest('.gr-legend span[data-k]') : null;
+      const bars = document.getElementById('gr-bars');
+      if (!bars) return;
+      if (leg) bars.dataset.hl = leg.dataset.k;
+      else bars.removeAttribute('data-hl');
+    });
+    // (area scrub merged into the reconciler above)
+    // publish area data + donut tooltips (rich <title> already covers donuts)
+    const _rg = renderGrowth;
+    renderGrowth = function (g) {
+      _rg(g);
+      const wrap = document.querySelector('.gr-area-wrap');
+      if (wrap && g && Array.isArray(g.daily) && g.daily.length && g.totals) {
+        wrap.__grData = g.daily.map((d) => ({ date: d.date, total: Number(d.total) || 0 }));
+        wrap.__grData.totalAll = Math.max(1, Number(g.totals.all) || 1);
+      }
+    };
+  })();
   // ===== AURORA P3B2: stats wrapped hero (reads the same /api/stats payload as renderStats) =====
   function st2Render(s) {
     const num = document.getElementById('st2-num');
@@ -5331,19 +5402,36 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 
 
 /* ===== BUG dialog theming (matches rf/sg scoped styles) ===== */
-#bug-dialog{border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(160deg,rgba(139,126,246,.06),transparent 40%),var(--card-solid,#12142A);color:var(--text);padding:0;max-width:520px;width:calc(100% - 32px);box-shadow:0 24px 64px rgba(0,0,0,.45)}
+#bug-dialog{margin:auto;border:1px solid var(--border-primary);border-radius:var(--radius);background:linear-gradient(150deg,var(--v-soft) 0%,transparent 45%),#12142A;color:var(--text);padding:0;max-width:520px;width:calc(100vw - 40px);box-shadow:0 24px 80px rgba(0,0,0,.55);overflow:hidden}
+#bug-dialog::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:var(--card-edge);z-index:1}
+#bug-dialog::after{content:'';position:absolute;inset:0;background:radial-gradient(420px 200px at 85% -10%,var(--v-soft),transparent 60%),radial-gradient(320px 180px at -10% 110%,var(--c-soft),transparent 55%);pointer-events:none}
+#bug-dialog > *{position:relative;z-index:1}
 #bug-dialog::backdrop{background:rgba(8,9,15,.72);backdrop-filter:blur(4px)}
-#bug-dialog .sgf{display:flex;flex-direction:column;gap:14px;padding:18px 24px 24px;text-align:left}
+#bug-dialog[open]{animation:sgDlgIn .32s cubic-bezier(.16,1,.3,1)}
+#bug-dialog .dlg-h{padding:24px 28px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+#bug-dialog .dlg-h h3{margin:0;font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:1.75rem;line-height:1}
+#bug-dialog .dlg-h h3::after{content:'';display:block;width:44px;height:2px;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage));margin-top:8px}
+#bug-dialog .dlg-x{width:36px;height:36px;flex:none;border-radius:11px;border:1px solid var(--border);background:transparent;color:var(--text-dim);font-size:.85rem;cursor:pointer;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .2s,color .2s}
+#bug-dialog .dlg-x:hover{transform:rotate(90deg);color:var(--text);border-color:var(--border-primary)}
+#bug-dialog .sgf-note{padding:14px 28px 0;margin:0;font-size:.82rem;line-height:1.55}
+#bug-dialog .sgf{display:flex;flex-direction:column;gap:16px;padding:16px 28px 24px;text-align:left}
 #bug-dialog .sgf label{font-size:.8rem;font-weight:600;margin-bottom:7px;display:flex;align-items:baseline;gap:8px}
-#bug-dialog .sgf .req{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(217,168,108,.4);padding:2px 7px;border-radius:99px}
-#bug-dialog .sgf input,#bug-dialog .sgf textarea{width:100%;background:rgba(10,12,22,.55);border:1px solid rgba(151,146,255,.15);border-radius:12px;padding:12px 14px;font:inherit;font-size:.92rem;color:var(--text);outline:none;transition:border-color .2s ease,box-shadow .2s ease}
+#bug-dialog .sgf .req{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:rgba(217,168,108,.1);border:1px solid rgba(217,168,108,.25);padding:2px 8px;border-radius:99px}
+#bug-dialog .sgf input,#bug-dialog .sgf textarea{width:100%;background:rgba(10,12,22,.55);border:1px solid rgba(151,146,255,.15);border-radius:12px;padding:12px 14px;font:inherit;font-size:.92rem;color:var(--text);outline:none;box-shadow:inset 0 1px 0 rgba(197,213,216,.05);transition:border-color .22s,box-shadow .22s,background .22s}
 #bug-dialog .sgf input:hover,#bug-dialog .sgf textarea:hover{border-color:rgba(151,146,255,.3)}
-#bug-dialog .sgf input:focus,#bug-dialog .sgf textarea:focus{border-color:var(--primary);background:rgba(10,12,22,.75);box-shadow:0 0 0 3px rgba(139,126,246,.16)}
+#bug-dialog .sgf input:focus,#bug-dialog .sgf textarea:focus{border-color:var(--primary);background:rgba(10,12,22,.75);box-shadow:0 0 0 3px rgba(139,126,246,.16),inset 0 1px 0 rgba(197,213,216,.05)}
 #bug-dialog .sgf textarea{min-height:110px;resize:vertical;line-height:1.5}
-#bug-dialog .rf-actions{margin-top:4px}
-#bug-dialog .sgf-submit{width:100%;border:none;border-radius:12px;background:linear-gradient(135deg,var(--primary),#5B9DF6);color:#0C1316;font-weight:700;font-size:.92rem;padding:13px 18px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,opacity .2s ease}
-#bug-dialog .sgf-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 28px rgba(139,126,246,.4)}
-#bug-dialog .sgf-submit:disabled{opacity:.45;cursor:default}
+#bug-dialog .rf-actions{border-top:1px solid var(--border);margin-top:8px;padding-top:16px}
+#bug-dialog .sgf-submit{width:100%;border:none;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dim));color:#fff;font-weight:700;font-size:.92rem;padding:13px 18px;cursor:pointer;box-shadow:0 6px 22px rgba(139,126,246,.35);transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s,opacity .2s}
+#bug-dialog .sgf-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 28px rgba(139,126,246,.45)}
+#bug-dialog .sgf-submit:active:not(:disabled){transform:translateY(0) scale(.98)}
+#bug-dialog .sgf-submit:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
+@media(max-width:640px){
+ #bug-dialog{max-width:none;width:100vw;max-height:100dvh;height:100dvh;border-radius:0;border:0}
+ #bug-dialog .dlg-h,#bug-dialog .sgf{padding-left:18px;padding-right:18px}
+ #bug-dialog .sgf-note{padding-left:18px;padding-right:18px}
+ #bug-dialog .dlg-h h3{font-size:1.5rem}
+}
 
 /* ===== SERVICES guide CTA ===== */
 .sv-guide-cta{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
@@ -5351,7 +5439,62 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 .sv-guide-btn svg{width:14px;height:14px}
 .sv-guide-btn:hover{background:rgba(139,126,246,.16);border-color:rgba(139,126,246,.5)}
 .sv-guide-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+/* ===== SERVICES CARDS polish (desktop + mobile redesign, pure CSS over existing markup) ===== */
+#panel-services .sv-grid{grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px}
+#panel-services .sv-card{position:relative;overflow:hidden;gap:9px;padding:16px;border-radius:14px;background:linear-gradient(165deg,rgba(139,126,246,.05),transparent 42%),var(--card);transition:transform .2s cubic-bezier(.4,0,.2,1),border-color .2s,box-shadow .2s}
+#panel-services .sv-card::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:var(--card-edge)}
+#panel-services .sv-card .svc-ico{width:40px;height:40px;padding:8px;border-radius:12px;background:linear-gradient(145deg,rgba(139,126,246,.14),rgba(69,214,200,.07));border:1px solid var(--border);object-fit:contain;flex:none;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--primary-bright);transition:transform .25s cubic-bezier(.16,1,.3,1)}
+#panel-services .sv-card:hover .svc-ico{transform:scale(1.06)}
+#panel-services .sv-card .nm{font-size:.95rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#panel-services .sv-card:hover .nm{white-space:normal;overflow:visible;word-break:break-word}
+#panel-services .sv-card .bl{font-size:.78rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#panel-services .sv-card .meta{margin-top:auto}
+@media (max-width:768px){
+ #panel-services .sv-grid{grid-template-columns:1fr;gap:10px}
+ #panel-services .sv-card{padding:14px 16px 12px;gap:8px}
+ #panel-services .sv-card .svc-ico{width:44px;height:44px;padding:9px;border-radius:13px}
+ #panel-services .sv-card .nm{font-size:1rem}
+ #panel-services .sv-card .bl{font-size:.8rem;-webkit-line-clamp:2}
+ #panel-services .sv-card .top{align-items:center}
+ #panel-services .sv-card .meta{justify-content:flex-start;gap:8px;padding-top:2px}
+ #panel-services .sv-card .sv-uppill{display:inline-flex}
+ #panel-services .sv-card .sv-cat{display:inline;max-width:none;margin-left:auto}
+ #panel-services .sv-card .sv-pin{top:8px;right:8px;width:36px;height:36px}
+ #panel-services .sv-card .sv-guide-cta{margin-top:2px;padding-top:10px}
+ #panel-services .sv-card .sv-guide-btn{min-height:40px}
+}
+
+/* ===== CHART INTERACTIVITY (shared tooltip + scrubbable growth area + hovers) ===== */
+#gr-tip{position:fixed;z-index:9999;pointer-events:none;background:#12142A;border:1px solid var(--border-primary);border-radius:12px;padding:10px 13px;font-size:.78rem;color:var(--text);box-shadow:0 12px 32px rgba(0,0,0,.5);opacity:0;transform:translateY(4px);transition:opacity .15s ease,transform .15s ease;max-width:240px}
+#gr-tip.on{opacity:1;transform:none}
+#gr-tip b{display:block;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.gr-tip-rows{display:flex;flex-direction:column;gap:3px;font-size:.72rem;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.gr-tip-rows i{display:inline-block;width:8px;height:8px;border-radius:99px;margin-right:6px}
+/* donuts: segment hover grow + siblings dim (no :has — iOS) */
+.sc-donut circle,.lib-seg{transition:opacity .18s ease,stroke-width .18s ease;cursor:pointer}
+.sc-donut:hover circle{opacity:.4}
+.sc-donut circle:hover{opacity:1;stroke-width:6.6}
+.lib-graph:hover .lib-seg{opacity:.4}
+.lib-graph .lib-seg:hover{opacity:1;stroke-width:29}
+/* sc-bar segment + nums row hover */
+.sc-bar i{transition:filter .15s ease,opacity .15s ease}
+.sc-bar:hover i{opacity:.4}
+.sc-bar i:hover{opacity:1;filter:brightness(1.3)}
+.sc-num{transition:background .15s ease;border-radius:8px;padding:2px 6px;margin:0 -6px}
+.sc-num:hover{background:rgba(151,146,255,.07)}
+/* growth: legend chip hover highlights matching segments in bars */
+.gr-legend span[data-k]{cursor:pointer;transition:opacity .15s ease}
+.gr-legend span[data-k]:hover{color:var(--text)}
+.gr-bars[data-hl] .gr-seg{transition:opacity .15s ease}
+.gr-bars[data-hl="m"] .gr-seg:not(.gr-seg-m),.gr-bars[data-hl="s"] .gr-seg:not(.gr-seg-s),.gr-bars[data-hl="e"] .gr-seg:not(.gr-seg-e){opacity:.22}
+/* growth area scrub cursor */
+.gr-cursor{stroke:var(--text-faint);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .15s}
+.gr-dot-hl{fill:var(--v);stroke:#12142A;stroke-width:2;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .15s}
+.gr-area:hover .gr-cursor,.gr-area:hover .gr-dot-hl,.gr-area.scrub .gr-cursor,.gr-area.scrub .gr-dot-hl{opacity:1}
+@media (prefers-reduced-motion:reduce){#gr-tip,.sc-donut circle,.lib-seg,.sc-bar i,.sc-num,.gr-seg,.gr-cursor,.gr-dot-hl{transition:none}}
 </style>
+
 <script id="graft-hb-js">
 /* GRAFT 3 JS — inject uptime label rows into home rail orbs, fill from /api/status/extended */
 (function(){
