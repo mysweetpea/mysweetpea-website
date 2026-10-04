@@ -3268,6 +3268,9 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
     }
     .mn-menu.nav-open { opacity: 1; visibility: visible; }
     body.menu-open { overflow: hidden; }
+    /* never let flex children shrink (a shrunken child scrolls oddly and can
+       clip its own content); overflow scrolls instead */
+    .mn-menu > * { flex: none; }
 
     /* calm-spring stagger entrance */
     .mn-menu .mn-i {
@@ -3319,27 +3322,31 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
     }
     .mn-x:hover { border-color: var(--primary); }
 
-    /* Garden Gateway primaries */
-    .mn-primary { display: flex; flex-direction: column; gap: 18px; margin-top: 38px; }
+    /* Garden Gateway primaries — bordered glass cards so they read as
+       BUTTONS, not text (user feedback). Serif label + chevron + press state. */
+    .mn-primary { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
     .mn-link {
+        display: flex; align-items: center; justify-content: space-between; gap: 14px;
         font-family: 'Instrument Serif', 'Instrument Serif Fallback', Georgia, serif;
-        font-size: 2.15rem;
-        line-height: 1.05;
+        font-size: 1.72rem;
+        line-height: 1.1;
         color: var(--text);
         text-decoration: none;
-        width: max-content;
-        max-width: 100%;
-        position: relative;
+        padding: 15px 18px;
+        border: 1px solid var(--border-primary);
+        border-radius: 16px;
+        background: var(--card-bg);
+        transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.18s ease, box-shadow 0.25s ease;
     }
-    .mn-link::after {
-        content: "";
-        position: absolute; left: 0; bottom: -4px;
-        height: 2px; width: 0;
-        background: linear-gradient(90deg, var(--sage), transparent);
-        transition: width 0.35s ease;
+    .mn-link .mn-arw { color: var(--text-faint); transition: transform 0.2s ease, color 0.2s ease; }
+    .mn-link:hover {
+        background: var(--card-bg-hover);
+        border-color: var(--primary);
+        color: var(--primary-bright);
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
     }
-    .mn-link:hover::after, .mn-link:focus-visible::after { width: 100%; }
-    .mn-link:hover { color: var(--primary-bright); }
+    .mn-link:hover .mn-arw { color: var(--sage); transform: translateX(3px); }
+    .mn-link:active { transform: scale(0.975); box-shadow: none; }
 
     /* vine divider */
     .mn-vine {
@@ -3379,8 +3386,10 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
     }
     .mn-row:first-of-type { border-top: 0; }
     .mn-arw { margin-left: auto; color: var(--text-faint); flex: none; transition: transform 0.2s ease, color 0.2s ease; }
+    .mn-row { transition: background 0.22s ease, color 0.22s ease, transform 0.15s ease; border-radius: 10px; }
     .mn-row:hover .mn-arw { color: var(--sage); transform: translateX(3px); }
-    .mn-row:hover { color: var(--primary-bright); }
+    .mn-row:hover { color: var(--primary-bright); background: var(--primary-glow); }
+    .mn-row:active { transform: scale(0.985); }
 
     /* footer: theme + sign in + CTA */
     .mn-foot {
@@ -3429,6 +3438,6 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
     @media (prefers-reduced-motion: reduce) {
         .mn-menu .mn-i { transition: none; opacity: 1; transform: none; }
         .mn-menu { transition: opacity 0.12s ease, visibility 0.12s; }
-        .mn-link::after, .mn-arw, .mn-cta { transition: none; }
+        .mn-link, .mn-arw, .mn-cta, .mn-row { transition: none; }
     }
 }
