@@ -147,26 +147,36 @@
 
     /* === Mobile hamburger navigation === */
     var navToggle = document.querySelector('.nav-toggle');
-    var navLinks = document.getElementById('nav-links');
+    var navLinks = document.getElementById('mn-menu') || document.getElementById('nav-links');
+    /* Single open/close path: aria state + body scroll lock stay in sync. */
+    function setMenu(open) {
+        navLinks.classList.toggle('nav-open', open);
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.body.classList.toggle('menu-open', open);
+    }
     if (navToggle && navLinks) {
         navToggle.addEventListener('click', function () {
-            var open = navLinks.classList.toggle('nav-open');
-            navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            setMenu(!navLinks.classList.contains('nav-open'));
+        });
+
+        /* Close button inside the overlay */
+        var mnClose = navLinks.querySelector('.mn-x');
+        if (mnClose) mnClose.addEventListener('click', function () {
+            setMenu(false);
+            navToggle.focus();
         });
 
         /* Close menu when a link is chosen */
         navLinks.addEventListener('click', function (event) {
             if (event.target.closest('a')) {
-                navLinks.classList.remove('nav-open');
-                navToggle.setAttribute('aria-expanded', 'false');
+                setMenu(false);
             }
         });
 
         /* Close on Escape and return focus to the toggle */
         document.addEventListener('keydown', function (event) {
             if (event.key === 'Escape' && navLinks.classList.contains('nav-open')) {
-                navLinks.classList.remove('nav-open');
-                navToggle.setAttribute('aria-expanded', 'false');
+                setMenu(false);
                 navToggle.focus();
             }
         });
@@ -208,9 +218,8 @@
             if (!navLinks.classList.contains('nav-open')) return;
             var tgt = event.target;
             if (!tgt || typeof tgt.closest !== 'function') return;
-            if (tgt.closest('#nav-links') || tgt.closest('.nav-toggle')) return;
-            navLinks.classList.remove('nav-open');
-            navToggle.setAttribute('aria-expanded', 'false');
+            if (tgt.closest('#mn-menu') || tgt.closest('#nav-links') || tgt.closest('.nav-toggle')) return;
+            setMenu(false);
         });
 
         /* Reset state if resized back to desktop.
@@ -222,8 +231,7 @@
                 /* If keyboard focus was inside the menu it is about to become
                    display:none — park it on the toggle instead of <body>. */
                 var hadFocus = navLinks.contains(document.activeElement);
-                navLinks.classList.remove('nav-open');
-                navToggle.setAttribute('aria-expanded', 'false');
+                setMenu(false);
                 if (hadFocus) {
                     /* At desktop width the toggle is display:none and cannot
                        take focus — park keyboard focus on the first inline
@@ -427,7 +435,7 @@
     if (saved) root.setAttribute('data-theme', saved);
     else if (window.matchMedia('(prefers-color-scheme: light)').matches) root.setAttribute('data-theme', 'light');
 
-    document.querySelectorAll('.theme-toggle').forEach(function (btn) {
+    document.querySelectorAll('.theme-toggle, .mn-theme').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             root.setAttribute('data-theme', next);
@@ -778,8 +786,19 @@
 
 
     /* === Search trigger buttons open the palette === */
-    document.querySelectorAll('.nav-search').forEach(function (btn) {
-        btn.addEventListener('click', cmdkOpen);
+    document.querySelectorAll('.nav-search, .mn-search').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            /* If opened from the mobile overlay, close it first so the palette
+               is the only overlay in the top layer. */
+            var mn = document.getElementById('mn-menu');
+            if (mn && mn.classList.contains('nav-open')) {
+                mn.classList.remove('nav-open');
+                document.body.classList.remove('menu-open');
+                var tg = document.querySelector('.nav-toggle');
+                if (tg) tg.setAttribute('aria-expanded', 'false');
+            }
+            cmdkOpen();
+        });
     });
 
     backdrop.addEventListener('click', function (e) {
