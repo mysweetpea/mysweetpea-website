@@ -1670,6 +1670,8 @@ function mspApplyConfig() {
     document.querySelectorAll('[data-msp-site-img]').forEach((img) => {
       img.src = MSP_CFG.mainSite + (img.getAttribute('data-msp-site-img') || '/logo.svg');
     });
+    document.querySelectorAll('a[data-msp-media]').forEach((a) => { a.href = MSP_CFG.media; });
+    document.querySelectorAll('a[data-msp-request]').forEach((a) => { a.href = MSP_CFG.request; });
     document.querySelectorAll('a[data-msp-email]').forEach((a) => {
       a.href = 'mailto:' + MSP_CFG.supportEmail;
       if (/^[^\s]+@[^\s]+$/.test((a.textContent || '').trim())) a.textContent = MSP_CFG.supportEmail;
@@ -2612,8 +2614,8 @@ function guideDetailHtml(key) {
     '<a class="hm-hero" id="hm-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
-    '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
-    '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
+    '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" data-msp-request="1" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
+    '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
     '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Trending now<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
     obHtml +
@@ -2729,7 +2731,7 @@ function guideDetailHtml(key) {
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
-    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; 2026 MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
+    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; <span id="foot-year">2026</span> MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
     '<div class="dlg-h"><h3>Recommend a friend</h3><button type="button" class="dlg-x" id="rf-close" aria-label="Close">✕</button></div>' +
     '<p class="dim sgf-note">Vouch for someone to get garden access. We will reach out to them after we review — you will see the status here.</p>' +
     '<div id="rf-list" class="rf-list" hidden></div>' +
@@ -2753,6 +2755,7 @@ function guideDetailHtml(key) {
   // NEVER let a profile-render hiccup abort the rest of boot (tab wiring below).
   try { window.applyProfile(); } catch (e) { }
   try { if (typeof window.updateFooterStatus === 'function') window.updateFooterStatus(); } catch (e) { }
+  try { const fy = document.getElementById('foot-year'); if (fy) fy.textContent = new Date().getFullYear(); } catch (e) { }
   // ===== PHASE 13: vine dividers (site v37 SVG, verbatim) =====
   (function injectVines() {
     const vineSvg = '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -3168,7 +3171,8 @@ function guideDetailHtml(key) {
     const host = document.getElementById('st-top');
     if (!card || !host) return;
     const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0).slice(0, 9);
-    if (!list.length) { card.hidden = true; host.innerHTML = ''; return; }
+    if (!list.length) { card.hidden = true; host.innerHTML = ''; try { document.body.classList.add('st-top-absent'); } catch (e0) {} return; }
+    try { document.body.classList.remove('st-top-absent'); } catch (e0) {}
     const max = Number(list[0].playCount) || 1;
     const total = list.reduce((a, x) => a + (Number(x.playCount) || 0), 0);
     const JF_ITEM_URL = (window.MSP_CFG && window.MSP_CFG.media) || 'https://media.mysweetpea.cc';
@@ -3393,7 +3397,7 @@ function guideDetailHtml(key) {
   })();
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
   (async () => {
-    const JF_ITEM = 'https://media.mysweetpea.cc/web/index.html#!/item?id=';
+    const JF_ITEM = ((window.MSP_CFG && window.MSP_CFG.media) || 'https://media.mysweetpea.cc') + '/web/index.html#!/item?id=';
     const grab = (u) => fetch(u).then(r => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] }));
     let cont = { items: [] }, latest = { items: [] };
   try { const r = await Promise.all([grab('/api/media/continue'), grab('/api/media/latest')]); cont = r[0] || cont; latest = r[1] || latest; } catch (e) {}
@@ -3431,7 +3435,7 @@ function guideDetailHtml(key) {
         const MOODS = [['Mind-bending', 'Sci-Fi'], ['Edge of seat', 'Thriller'], ['True story', 'Documentary'], ['Visually stunning', 'Fantasy'], ['Make me laugh', 'Comedy'], ['Keep me up tonight', 'Horror'], ['Based on a book', 'Drama']];
         const have = new Set(ge.genres.map(g => g.name));
         const moodChips = MOODS.filter(m2 => have.has(m2[1]));
-        const genreUrl = (name) => 'https://media.mysweetpea.cc/web/index.html#!/movies?genre=' + encodeURIComponent(name);
+        const genreUrl = (name) => ((window.MSP_CFG && window.MSP_CFG.media) || 'https://media.mysweetpea.cc') + '/web/index.html#!/movies?genre=' + encodeURIComponent(name);
         const genreRow = '<div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div>';
         if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
         else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
@@ -5439,6 +5443,21 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 .sv-guide-btn svg{width:14px;height:14px}
 .sv-guide-btn:hover{background:rgba(139,126,246,.16);border-color:rgba(139,126,246,.5)}
 .sv-guide-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+
+/* ===== DEEP POLISH (dynamic-audit round) ===== */
+/* 1. stats hero: when Top-titles card is hidden the hero sits alone at 5/12 width —
+      let it take the full row so the layout never strands half a grid */
+.st3-grid:has(> #st-top-card[hidden]) .st3-hero{grid-column:1/-1}
+/* :has() unsupported (iOS <15) -> fallback via body class set in JS */
+body.st-top-absent .st3-hero{grid-column:1/-1}
+/* 2. decorative ASCII wave: hide on narrow screens (reads as noise at 390px) */
+@media(max-width:640px){.ripple-strip{display:none}}
+/* 3. media hero side badge clipped at right edge */
+.hm-hero .hm-hero-side{padding:0 22px 0 0}
+/* 4. mobile services toolbar: chips row above sort pill (visual hierarchy) */
+@media(max-width:768px){
+ #panel-services .sv-glance .sv-toolbar .sv-sort{order:-1;width:100%;margin-left:0}
+}
 
 /* ===== SERVICES CARDS polish (desktop + mobile redesign, pure CSS over existing markup) ===== */
 #panel-services .sv-grid{grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px}
