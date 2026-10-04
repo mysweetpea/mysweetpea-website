@@ -1618,6 +1618,51 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #panel-home .hm-pcard:hover .hm-poster img,#panel-home .hm-card.hm-wide:hover .hm-wide-art{transform:none}
 }
 </style>
+<style id="dh-menu-css">
+/* ===== MOBILE MENU DRAWER (dh-*) - Split Glass x App Sheet hybrid ===== */
+#dh-menu{display:none}
+@media(max-width:760px){
+  /* old nav-tabs dropdown retired at mobile - the drawer is the menu */
+  .top-nav .nav-tabs{display:none!important}
+  #dh-menu{display:block;position:fixed;inset:0;z-index:120;pointer-events:none}
+  #dh-menu.dh-open{pointer-events:auto}
+  .dh-scrim{position:absolute;inset:0;background:rgba(4,5,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .3s ease}
+  #dh-menu.dh-open .dh-scrim{opacity:1}
+  body.dh-lock{overflow:hidden}
+  .dh-panel{position:absolute;top:0;right:0;bottom:0;width:min(344px,88vw);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.35) transparent;padding:calc(14px + env(safe-area-inset-top)) 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(168deg,rgba(30,26,60,.94),rgba(13,14,26,.96));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:1px solid rgba(151,146,255,.22);transform:translateX(102%);opacity:.6;visibility:hidden;transition:transform .42s cubic-bezier(.22,1,.36,1),opacity .3s ease,visibility .42s}
+  #dh-menu.dh-open .dh-panel{transform:none;opacity:1;visibility:visible}
+  /* panel children must never flex-shrink (they were compressing the hero
+     into its own overflow:hidden clip); overflow scrolls instead */
+  .dh-panel>*{flex:none}
+  .dh-i{opacity:0;transform:translateY(12px);transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1);transition-delay:calc(var(--i,0)*30ms)}
+  #dh-menu.dh-open .dh-i{opacity:1;transform:none}
+  #dh-menu:not(.dh-open) .dh-i{transition-delay:0ms;transition-duration:.18s}
+  .dh-hero{position:relative;overflow:hidden;padding:14px 20px 8px}
+  .dh-hero::before{content:'';position:absolute;inset:-40% -20% auto -20%;height:190px;background:radial-gradient(closest-side,rgba(139,126,246,.32),transparent);pointer-events:none}
+  .dh-av{width:54px;height:54px;font-size:1.05rem;position:relative;box-shadow:0 0 0 3px rgba(139,126,246,.35),0 12px 34px rgba(139,126,246,.35)}
+  .dh-av img{width:54px;height:54px;border-radius:50%;object-fit:cover}
+  .dh-hello{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:1.35rem;line-height:1.15;margin:6px 0 0;position:relative}
+  .dh-tier{display:inline-flex;margin-top:8px;position:relative}
+  .dh-chips{display:flex;gap:8px;padding:2px 20px 6px}
+  .dh-chip{flex:1;height:48px;border-radius:14px;border:1px solid rgba(151,146,255,.2);background:rgba(139,126,246,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:.72rem;color:#C9C2FF;cursor:pointer;transition:background .22s ease,transform .15s ease}
+  .dh-chip:hover{background:rgba(139,126,246,.18)}
+  .dh-chip:active{transform:scale(.96)}
+  .dh-chip svg{width:16px;height:16px}
+  .dh-grp{padding:2px 0 0}
+  .dh-gl{display:flex;justify-content:space-between;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-faint);padding:7px 20px 5px}
+  .dh-row{display:flex;align-items:center;gap:13px;min-height:44px;padding:0 20px;color:var(--text);text-decoration:none;font-size:.93rem;cursor:pointer;background:none;border:0;width:100%;text-align:left;font-family:inherit;transition:background .2s ease,color .2s ease,transform .15s ease}
+  .dh-row:hover{background:rgba(139,126,246,.1)}
+  .dh-row:active{transform:scale(.985)}
+  .dh-row svg{width:16px;height:16px;color:var(--text-dim);flex:none}
+  .dh-row.on{background:rgba(139,126,246,.16);color:var(--primary-bright)}
+  .dh-row.on svg{color:var(--primary)}
+  .dh-badge{margin-left:auto;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.7rem;background:rgba(217,168,108,.18);color:var(--gold);border-radius:999px;padding:2px 9px}
+  .dh-foot{margin-top:auto;padding-top:6px;border-top:1px solid rgba(151,146,255,.12)}
+  .dh-out{color:var(--gold)}
+  .dh-out svg{color:var(--gold)}
+  @media (prefers-reduced-motion: reduce){#dh-menu .dh-i,#dh-menu .dh-panel,.dh-scrim{transition:none!important}#dh-menu .dh-i{opacity:1;transform:none}}
+}
+</style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
@@ -2512,6 +2557,8 @@ function guideDetailHtml(key) {
     });
     const nav = document.getElementById('nav-avatar');
     if (nav) nav.innerHTML = avatarInner();
+    const dh = document.getElementById('dh-avatar');
+    if (dh) dh.innerHTML = avatarInner();
   };
   const TIER_COPY = {
     sweetpea: 'Full garden access — every service, all features.',
@@ -2549,6 +2596,8 @@ function guideDetailHtml(key) {
     const nn = document.getElementById('acct-name-nav'); if (nn) nn.textContent = String(me.name || me.username || '').split(' ')[0];
     const at = document.getElementById('acct-tier'); if (at) at.innerHTML = tierBadge(me.tier, false);
     const pt = document.getElementById('pop-tier'); if (pt) { pt.innerHTML = tierBadge(me.tier, false); pt.hidden = false; }
+    const dn = document.getElementById('dh-name'); if (dn) dn.textContent = me.name || me.username || 'friend';
+    const dt = document.getElementById('dh-tier'); if (dt) dt.innerHTML = tierBadge(me.tier, false);
     window.setAvatars && window.setAvatars();
   };
   // ===== PHASE 12: GET STARTED onboarding (dismissible, localStorage msp_onboarded) =====
@@ -2595,6 +2644,34 @@ function guideDetailHtml(key) {
     '</div>' +
     '<button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="tabs" aria-label="Toggle navigation menu"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button>' +
     '</div></nav>' +
+    '<div class="dh-menu" id="dh-menu" aria-label="Menu">' +
+    '<div class="dh-scrim" id="dh-scrim"></div>' +
+    '<div class="dh-panel" role="dialog" aria-modal="true" aria-label="Dashboard menu">' +
+    '<div class="dh-hero dh-i" style="--i:0"><span class="nav-avatar dh-av" id="dh-avatar"></span><h3 class="dh-hello">Welcome back,<br><span id="dh-name">friend</span>.</h3><span class="dh-tier" id="dh-tier"></span></div>' +
+    '<div class="dh-chips dh-i" style="--i:1">' +
+    '<button type="button" class="dh-chip" data-dh-act="refer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg>Refer</button>' +
+    '<button type="button" class="dh-chip" data-dh-act="bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/></svg>Bug</button>' +
+    '<button type="button" class="dh-chip" data-dh-act="suggest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Suggest</button>' +
+    '</div>' +
+    '<div class="dh-grp"><div class="dh-gl dh-i" style="--i:2"><span>Navigate</span><span>6</span></div>' +
+    '<a class="dh-row dh-i" style="--i:3" href="#home" data-dh-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Home</span></a>' +
+    '<a class="dh-row dh-i" style="--i:4" href="#media" data-dh-tab="media"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5"/></svg><span>Media</span></a>' +
+    '<a class="dh-row dh-i" style="--i:5" href="#services" data-dh-tab="services"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Services</span></a>' +
+    '<a class="dh-row dh-i" style="--i:6" href="#stats" data-dh-tab="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Statistics</span></a>' +
+    '<a class="dh-row dh-i" style="--i:7" href="#guides" data-dh-tab="guides"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Guides</span></a>' +
+    '<a class="dh-row dh-i" style="--i:8" href="#contact" data-dh-tab="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg><span>Contact</span></a>' +
+    '</div>' +
+    '<div class="dh-grp"><div class="dh-gl dh-i" style="--i:9"><span>Your account</span><span>4</span></div>' +
+    '<a class="dh-row dh-i" style="--i:10" href="#security" data-dh-tab="security"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/></svg><span>Security settings</span></a>' +
+    '<a class="dh-row dh-i" style="--i:10" href="#account" data-dh-tab="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5"/></svg><span>Account profile</span></a>' +
+    '<a class="dh-row dh-i" style="--i:10" href="#" data-dh-act="bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/></svg><span>Report a bug</span></a>' +
+    '<a class="dh-row dh-i" style="--i:10" data-msp-site="/" href="https://mysweetpea.cc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg><span>Back to site</span></a>' +
+    '</div>' +
+    '<div class="dh-foot dh-i" style="--i:11">' +
+    '<button type="button" class="dh-row" data-dh-act="updates"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span>Service updates</span><span class="dh-badge" id="dh-badge" hidden></span></button>' +
+    '<a class="dh-row dh-out" href="/auth/logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg><span>Sign out</span></a>' +
+    '</div>' +
+    '</div></div>' +
     '<main class="grid">' +
     '<div class="tabpanel" id="panel-home" role="tabpanel" aria-labelledby="tab-home">' +
     '<div class="hm-banner" style="--i:0"><div class="hm-banner-row">' +
@@ -2864,18 +2941,63 @@ function guideDetailHtml(key) {
     }
     const tg = document.getElementById('nav-toggle');
     const links = document.getElementById('tabs');
-    if (!nav || !tg || !links) return;
-    const close = () => { nav.classList.remove('nav-open'); tg.setAttribute('aria-expanded', 'false'); };
+    const drawer = document.getElementById('dh-menu');
+    if (!nav || !tg || (!links && !drawer)) return;
+    const close = () => {
+      nav.classList.remove('nav-open'); tg.setAttribute('aria-expanded', 'false');
+      if (drawer) { drawer.classList.remove('dh-open'); document.body.classList.remove('dh-lock'); }
+    };
+    /* Drawer open-time sync: active tab rows + updates badge mirror the bell. */
+    const syncDrawer = () => {
+      if (!drawer) return;
+      const cur = window.currentTab || 'home';
+      drawer.querySelectorAll('.dh-row[data-dh-tab]').forEach((r) => r.classList.toggle('on', r.getAttribute('data-dh-tab') === cur));
+      const bd = document.getElementById('bell-dot'), db = document.getElementById('dh-badge');
+      if (bd && db) { db.hidden = bd.hidden; db.textContent = bd.textContent; }
+    };
     tg.addEventListener('click', (e) => {
       e.stopPropagation();
-      const open = nav.classList.toggle('nav-open');
+      const open = !nav.classList.contains('nav-open');
+      nav.classList.toggle('nav-open', open);
       tg.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (drawer) {
+        drawer.classList.toggle('dh-open', open);
+        document.body.classList.toggle('dh-lock', open);
+        if (open) syncDrawer();
+      }
     });
     document.addEventListener('click', (e) => {
-      if (nav.classList.contains('nav-open') && !links.contains(e.target) && !tg.contains(e.target)) close();
+      if (!nav.classList.contains('nav-open')) return;
+      const inDrawer = drawer && drawer.contains(e.target);
+      if ((!links || !links.contains(e.target)) && !tg.contains(e.target) && !inDrawer) close();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-    links.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('.tab')) close(); });
+    if (links) links.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('.tab')) close(); });
+    if (drawer) drawer.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'dh-scrim') { close(); return; }
+      const find = (sel) => (e.target && e.target.closest) ? e.target.closest(sel) : null;
+      const tab = find('[data-dh-tab]');
+      const act = find('[data-dh-act]');
+      if (tab) {
+        e.preventDefault();
+        const t = tab.getAttribute('data-dh-tab');
+        close();
+        try { if (typeof setTab === 'function') setTab(t); else location.hash = '#' + t; } catch (err) { location.hash = '#' + t; }
+      } else if (act) {
+        e.preventDefault();
+        const a = act.getAttribute('data-dh-act');
+        close();
+        try {
+          if (a === 'refer' && window.openReferralDialog) window.openReferralDialog();
+          else if (a === 'suggest' && window.openSuggestDialog) window.openSuggestDialog();
+          else if (a === 'bug') { const d = document.getElementById('bug-dialog'); if (d && !d.open) d.showModal(); }
+          else if (a === 'updates') setTimeout(() => { const b = document.getElementById('upd-bell'); if (b) b.click(); }, 160);
+        } catch (err) {}
+      } else {
+        const a = find('a[href]');
+        if (a) close();  /* real navigation (back to site / sign out): just close */
+      }
+    });
     window.addEventListener('resize', () => { if (window.innerWidth > 760) close(); });
   })();
   // ===== PHASE 14: STATISTICS TAB (poll once per open + manual refresh) =====
