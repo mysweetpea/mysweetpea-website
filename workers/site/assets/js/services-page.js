@@ -74,6 +74,7 @@
             var btn = el.closest('.filter-btn');
             if (!btn) return;
             if (btn.getAttribute('data-filter') === 'all') el.textContent = String(nAll);
+            else if (btn.getAttribute('data-filter') === 'coming-soon') el.textContent = String(document.querySelectorAll('.coming-soon-card:not([hidden])').length);
         });
     }).catch(function () { /* static grid stands */ });
 })();

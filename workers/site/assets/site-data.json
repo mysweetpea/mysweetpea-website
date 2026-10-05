@@ -258,6 +258,14 @@
       "iconAlt": "Minecraft",
       "blurb": "Self-hosted Minecraft server for friends and family.",
       "keywords": "game server gaming play minecraft world multiplayer"
+    },
+    {
+      "key": "pingvin",
+      "name": "Pingvin Share",
+      "icon": "/assets/icons/pingvin.svg",
+      "iconAlt": "Pingvin Share",
+      "blurb": "Private file sharing — send big photos and videos without accounts or size limits.",
+      "keywords": "file share upload transfer wetransfer drop send files photos videos"
     }
   ],
   "suggestCategories": [
