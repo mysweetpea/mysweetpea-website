@@ -20,3 +20,4 @@ wrangler.jsonc
 # Scratch font test pages (underscore-prefixed); keep them unpublished.
 _fntest*.html
 ocr-work/           # OCR review copies — never publish
+mockups-p1
