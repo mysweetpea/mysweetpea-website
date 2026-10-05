@@ -266,6 +266,14 @@
       "iconAlt": "Pingvin Share",
       "blurb": "Private file sharing — send big photos and videos without accounts or size limits.",
       "keywords": "file share upload transfer wetransfer drop send files photos videos"
+    },
+    {
+      "key": "kavita",
+      "name": "Kavita",
+      "icon": "/assets/icons/kavita.svg",
+      "iconAlt": "Kavita",
+      "blurb": "Family library for books, comics, and manga — progress synced on every device.",
+      "keywords": "books reading comics manga epub pdf cbz library reader kindle"
     }
   ],
   "suggestCategories": [
