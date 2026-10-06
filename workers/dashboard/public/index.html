@@ -2675,7 +2675,7 @@ function guideDetailHtml(key) {
     '<main class="grid">' +
     '<div class="tabpanel" id="panel-home" role="tabpanel" aria-labelledby="tab-home">' +
     '<div class="hm-banner" style="--i:0"><div class="hm-banner-row">' +
-    '<div class="hm-avatar" id="hero-avatar" onclick="openAvatarModal()" title="Change profile picture">' + avatarInner() + CAM + '</div>' +
+    '<div class="hm-avatar" id="hero-avatar" role="button" tabindex="0" aria-label="Change profile picture" onclick="openAvatarModal()" title="Change profile picture">' + avatarInner() + CAM + '</div>' +
     '<div class="hm-id"><h2 class="hm-greet"><span id="hm-greet-word"></span><span id="hero-name">' + esc(me.name || me.username) + '</span></h2>' +
     '<div class="hm-sub" id="hero-sub">' + esc(me.email) + ' &middot; @' + esc(me.username) + '</div>' +
     '<div class="hm-date" id="hm-date"></div>' +
@@ -2785,7 +2785,7 @@ function guideDetailHtml(key) {
     '<div class="tabpanel" id="panel-account" role="tabpanel" aria-labelledby="tab-account">' +
     '<section class="card" id="sec-account"><p class="eyebrow">Your account</p><h3>Account</h3>' +
     '<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">' +
-    '<div class="avatar" id="acct-avatar" onclick="openAvatarModal()" title="Change profile picture">' + avatarInner() + CAM + '</div>' +
+    '<div class="avatar" id="acct-avatar" role="button" tabindex="0" aria-label="Change profile picture" onclick="openAvatarModal()" title="Change profile picture">' + avatarInner() + CAM + '</div>' +
     '<div style="flex:1;min-width:220px">' +
     '<div class="row"><div class="left"><b>Display name</b><span id="acct-name">' + esc(me.name || me.username) + '</span></div></div>' +
     '<div class="row"><div class="left"><b>Email</b><span id="acct-email">' + esc(me.email) + '</span></div></div>' +
@@ -3387,6 +3387,7 @@ function guideDetailHtml(key) {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveTabPill(false)).catch(() => {});
   [50, 220, 600].forEach((ms) => setTimeout(() => moveTabPill(false), ms));
   // ===== PHASE 8: AVATAR MODAL (upload / remove / preview) =====
+  ['acct-avatar','hero-avatar'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();window.openAvatarModal();}});});
   window.openAvatarModal = async () => {
     let meta = { has: false, mime: '', bytes: 0, updated: 0 };
     try { const r = await fetch('/api/avatar/meta'); if (r.ok) meta = await r.json(); } catch (e) {}
@@ -3394,7 +3395,7 @@ function guideDetailHtml(key) {
     modal('<h3>Profile picture</h3>' +
       '<p class="sub">PNG, JPEG or WebP &middot; up to 512KB. Shown next to your name across MySweetPea.</p>' +
       '<div style="display:flex;justify-content:center;margin-bottom:14px"><div class="avatar noact" style="width:96px;height:96px;font-size:1.9rem" id="av-prev">' + (meta.has && meta.updated ? '<img src="/api/avatar?v=' + meta.updated + '" alt=""/>' : esc(initialsOf(me.name, me.username))) + '</div></div>' +
-      '<input type="file" id="av-file" accept="image/png,image/jpeg,image/webp,image/*" style="padding:9px 0"/>' +
+      '<input type="file" id="av-file" accept="image/png,image/jpeg,image/webp,image/*" style="padding:9px 0" aria-label="Profile picture file"/>' +
       '<div class="merr" id="av-err"></div>' +
       '<div class="mrow">' + (meta.has ? '<button class="b-cancel" id="av-remove">Remove avatar</button>' : '') + '<button class="b-go" id="av-upload" disabled>Upload</button></div>');
     const prev = $('#av-prev'), file = $('#av-file'), up = $('#av-upload'), err = $('#av-err');
