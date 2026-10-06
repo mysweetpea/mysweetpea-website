@@ -1127,7 +1127,7 @@ export default {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
                   let hours = 0;
-                  for (const it of items) hours += (it && it.UserData && typeof it.UserData.PlaybackPositionTicks === 'number' ? it.UserData.PlaybackPositionTicks : 0) / 3.6e9;
+                  for (const it of items) hours += (it && it.UserData && typeof it.UserData.PlaybackPositionTicks === 'number' ? it.UserData.PlaybackPositionTicks : 0) / 3.6e10; // .NET ticks are 100ns: 1e7/s * 3600s
                   out.jf_watch_hours = Math.round(hours * 10) / 10;
                   out.jf_resume_titles = items.length;
                   out.jf_top_title = (items[0] && typeof items[0].Name === 'string' && items[0].Name) || null;
@@ -1477,9 +1477,9 @@ export default {
         // Gotify ping (best-effort — the referral is already stored)
         if (env.GOTIFY_REFERRAL_TOKEN) {
           try {
-            await fetch('https://gotify.mysweetpea.cc/message?token=' + env.GOTIFY_REFERRAL_TOKEN, {
+            await fetch('https://gotify.mysweetpea.cc/message', {
               method: 'POST',
-              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0' },
+              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0', 'X-gotify-Key': env.GOTIFY_REFERRAL_TOKEN },
               body: JSON.stringify({
                 title: 'Referral: ' + name,
                 message: sess.name + ' recommends ' + name + ' for ' + service + (note ? ' — "' + note + '"' : ''),
@@ -1507,9 +1507,9 @@ export default {
         await env.SESSIONS.put('bug:' + id, JSON.stringify(rec));
         if (env.GOTIFY_BUG_TOKEN) {
           try {
-            await fetch('https://gotify.mysweetpea.cc/message?token=' + env.GOTIFY_BUG_TOKEN, {
+            await fetch('https://gotify.mysweetpea.cc/message', {
               method: 'POST',
-              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0' },
+              headers: { 'content-type': 'application/json', 'user-agent': 'Mozilla/5.0', 'X-gotify-Key': env.GOTIFY_BUG_TOKEN },
               body: JSON.stringify({
                 // priority 5: notify-only — the PC poller creates an UNASSIGNED issue on
                 // the Paperclip board; nothing auto-fires until the owner assigns
@@ -1544,18 +1544,6 @@ export default {
           const id = path.split('/')[3];
           const r = await authentikFetch(env, sess.at, `/api/v3/core/user_consent/${id}/`, { method: 'DELETE' });
           await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'consent_revoked', target: id }));
-          return json({ ok: r.ok }, r.status);
-        }
-        if (path.startsWith('/api/devices/totp/')) {
-          const id = path.split('/')[4];
-          const r = await authentikFetch(env, sess.at, `/api/v3/authenticators/totp/${id}/`, { method: 'DELETE' });
-          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'totp_removed', target: id }));
-          return json({ ok: r.ok }, r.status);
-        }
-        if (path.startsWith('/api/devices/webauthn/')) {
-          const id = path.split('/')[4];
-          const r = await authentikFetch(env, sess.at, `/api/v3/authenticators/webauthn/${id}/`, { method: 'DELETE' });
-          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'passkey_removed', target: id }));
           return json({ ok: r.ok }, r.status);
         }
       }

@@ -1254,7 +1254,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #hm-un-rail{align-items:flex-start}
 .hm-pair>.hm-sec{min-width:0}
 .hm-pair .hm-rail{min-width:0}
-.hm-pair @media(min-width:761px){#hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}}
+@media(min-width:761px){#hm-svc-rail{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 34px),transparent 100%)}}
 .hm-pair #hm-updates .hm-rail{display:grid;grid-template-columns:1fr;gap:6px;overflow:visible;padding:2px 2px 4px;align-content:start}
 .hm-pair #hm-updates .hm-rail::-webkit-scrollbar{display:none}
 .hm-pair #hm-updates .upd-card{padding:10px 13px;gap:10px}
@@ -1780,12 +1780,12 @@ $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeM
   try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   if (reduce) return; // static/hidden under reduced motion
   let petals = [];
-  let width = 0, height = 0, dpr = 1, rafId = null, resizeTimer = null, lastViewportWidth = 0;
+  let width = 0, height = 0, dpr = 1, rafId = null, resizeTimer = null, lastViewportWidth = 0, lastViewportHeight = 0;
   const PETAL_COUNT = 22;
   function resize(force) {
     const nextWidth = window.innerWidth, nextHeight = window.innerHeight;
     if (!force && nextWidth === lastViewportWidth) return;
-    width = nextWidth; height = nextHeight; lastViewportWidth = nextWidth;
+    width = nextWidth; height = nextHeight; lastViewportWidth = nextWidth; lastViewportHeight = nextHeight;
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
@@ -1864,7 +1864,7 @@ $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeM
   }
   window.addEventListener('resize', function () {
     window.clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(function () { if (window.innerWidth !== lastViewportWidth) resize(false); }, 150);
+    resizeTimer = window.setTimeout(function () { if (window.innerWidth !== lastViewportWidth || window.innerHeight !== lastViewportHeight) resize(false); }, 150);
   }, { passive: true });
   document.addEventListener('visibilitychange', function () { document.hidden ? stop() : start(); });
   start();
@@ -1880,6 +1880,7 @@ async function revokeAll() {
 function ceremony(flowSlug, label) {
   const url = '/auth/ceremony?f=' + encodeURIComponent(flowSlug);
   const w = window.open(url, 'msp-ceremony', 'width=480,height=680');
+  if (!w) { location.href = url; return; } // popup blocker: same-tab fallback
   const timer = setInterval(() => {
     if (w.closed) { clearInterval(timer); location.reload(); }
   }, 700);
@@ -2582,7 +2583,7 @@ function guideDetailHtml(key) {
     const ht = document.getElementById('hero-tier');
     if (ht) ht.innerHTML = tierBadge(me.tier, true) + '<span class="tier-copy">' + esc(TIER_COPY[(me.tier === 'sweetpea') ? 'sweetpea' : 'seedling']) + '</span>';
     const hs = $('#hero-sub'); if (hs) hs.innerHTML = esc(me.email) + ' &middot; @' + esc(me.username);
-    const wt = document.getElementById('who-tier'); if (wt) wt.remove(); if (wt) wt.innerHTML = tierBadge(me.tier);
+    const wt = document.getElementById('who-tier'); if (wt) wt.remove();
     const es = document.getElementById('tier-echo-services'); if (es) es.innerHTML = tierBadge(me.tier);
     const eg = document.getElementById('tier-echo-guides'); if (eg) eg.innerHTML = tierBadge(me.tier);
     const an = $('#acct-name'); if (an) an.textContent = me.name || me.username;
@@ -3267,11 +3268,12 @@ function guideDetailHtml(key) {
       sub.hidden = true;
       return;
     }
-    const h = Math.floor(hours);
-    const m = Math.round((hours - h) * 60);
+    let h = Math.floor(hours);
+    let m = Math.round((hours - h) * 60);
+    if (m === 60) { h += 1; m = 0; }
     num.innerHTML = '<span class="st2v">' + h + '</span><small> hrs </small><span class="st2v">' + m + '</span><small> min</small>';
     num.hidden = false;
-    num.querySelectorAll('.st2v').forEach((v) => { const t = parseInt(v.textContent, 10) || 0; if (t > 1) { v.textContent = '0'; animateCount(v); } });
+    num.querySelectorAll('.st2v').forEach(animateCount);
     empty.hidden = true;
     const titles = (s.jf_resume_titles != null && s.jf_resume_titles > 0) ? Number(s.jf_resume_titles).toLocaleString() : '&mdash;';
     const devices = (s.jf_devices != null && s.jf_devices > 0) ? Number(s.jf_devices).toLocaleString() : '&mdash;';
