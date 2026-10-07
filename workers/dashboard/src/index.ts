@@ -248,7 +248,24 @@ async function requireSession(request: Request, env: Env): Promise<{ sess: Sessi
 async function resolveUpk(env: Env, sess: SessionData): Promise<number> {
   let upk = parseInt((await env.SESSIONS.get(`upk:${sess.sub}`)) || '', 10);
   if (upk) return upk;
-  const lookup = await authentikFetch(env, env.AUTHENTIK_ADMIN_TOKEN, `/api/v3/core/users/?uuid=${sess.sub}`);
+  /* sub is whatever the OIDC provider's sub_mode emits — uuid, numeric pk,
+     username, or a hashed id. Only the uuid can be queried directly; numeric
+     pk IS the answer; everything else resolves through the username that
+     lives in the session doc. (Broken when the provider stopped emitting
+     uuids: ?uuid=4 -> 'Enter a valid UUID' -> upk 0 -> 502 on every
+     profile/password write.) */
+  const sub = String(sess.sub);
+  let path = '';
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sub)) {
+    path = `/api/v3/core/users/?uuid=${sub}`;
+  } else if (/^\d+$/.test(sub)) {
+    upk = parseInt(sub, 10);
+    await env.SESSIONS.put(`upk:${sess.sub}`, String(upk), { expirationTtl: 86400 * 30 });
+    return upk;
+  } else {
+    path = `/api/v3/core/users/?username=${encodeURIComponent(sess.username)}`;
+  }
+  const lookup = await authentikFetch(env, env.AUTHENTIK_ADMIN_TOKEN, path);
   if (!lookup.ok) return 0;
   const arr = (await lookup.json() as { results?: { pk?: number }[] }).results || [];
   if (arr[0]?.pk) {
