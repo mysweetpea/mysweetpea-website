@@ -369,6 +369,16 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .pwf label{display:block;font-size:.85rem;font-weight:600;margin-bottom:5px}
 .pwf input{width:100%;background:var(--bg);border:1px solid rgba(151,146,255,.2);border-radius:10px;color:var(--text);padding:10px 13px;font:inherit;font-size:.92rem;outline:none;transition:border-color .25s}
 .pwf input:focus{border-color:var(--primary)}
+.pw-wrap{position:relative;display:block}
+.pw-wrap input{padding-right:40px}
+.pw-eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--text-faint);cursor:pointer;padding:6px;display:grid;place-items:center;border-radius:8px;transition:color .2s}
+.pw-eye:hover{color:var(--text)}
+.pw-eye.on{color:var(--c)}
+.pw-req{display:block;margin-top:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.62rem;letter-spacing:.06em;color:var(--text-faint);transition:color .25s}
+.pw-req.met{color:var(--sage)}
+.pw-ok{display:flex;align-items:center;gap:8px;color:var(--sage);font-size:.86rem;margin-top:8px}
+.pw-ok[hidden]{display:none}
+.sgf-submit.loading{opacity:.75;cursor:progress}
 .pwf-actions{display:flex;justify-content:flex-end;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
 .pwf-adv{font-size:.82rem;color:var(--text-dim);text-decoration:underline;text-underline-offset:3px}
 .pwf-adv:hover{color:var(--gold)}
@@ -2797,11 +2807,12 @@ function guideDetailHtml(key) {
     '<section class="card" id="sec-password" style="--i:1"><p class="eyebrow">Password</p><h3>Change password</h3>' +
     '<p class="dim" style="margin-bottom:14px">At least 12 characters. This updates your sign-in password for every MySweetPea service.</p>' +
     '<form id="pwf" class="pwf" novalidate>' +
-    '<div><label for="pw-current">Current password</label><input type="password" id="pw-current" autocomplete="current-password"/></div>' +
-    '<div><label for="pw-new">New password</label><input type="password" id="pw-new" autocomplete="new-password" minlength="12"/></div>' +
-    '<div><label for="pw-confirm">Confirm new password</label><input type="password" id="pw-confirm" autocomplete="new-password"/></div>' +
+    '<div><label for="pw-current">Current password</label><span class="pw-wrap"><input type="password" id="pw-current" autocomplete="current-password"/><button type="button" class="pw-eye" data-eye="pw-current" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>' +
+    '<div><label for="pw-new">New password</label><span class="pw-wrap"><input type="password" id="pw-new" autocomplete="new-password" minlength="12"/><button type="button" class="pw-eye" data-eye="pw-new" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pw-req" id="pw-req" aria-live="polite">At least 12 characters</span></div>' +
+    '<div><label for="pw-confirm">Confirm new password</label><span class="pw-wrap"><input type="password" id="pw-confirm" autocomplete="new-password"/><button type="button" class="pw-eye" data-eye="pw-confirm" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pw-req" id="pw-match" aria-live="polite">Must match the new password</span></div>' +
     '</form>' +
     '<div class="merr" id="pw-err" aria-live="polite" style="margin-top:8px"></div>' +
+    '<div class="pw-ok" id="pw-ok" aria-live="polite" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Password updated &mdash; use it next time you sign in.</div>' +
     '<div class="pwf-actions"><a class="pwf-adv" href="#" onclick="ceremony(\'password\',\'Password change\');return false">Advanced options</a>' +
     '<button type="button" class="sgf-submit" id="pw-save" disabled>Update password</button></div></section>' +
     '<section class="card" id="sec-spirit" style="--i:2"><p class="eyebrow">Behind the garden</p><h3>The spirit of MySweetPea</h3>' +
@@ -3492,32 +3503,63 @@ function guideDetailHtml(key) {
     const btn = document.getElementById('pw-save');
     const err = document.getElementById('pw-err');
     if (!cur || !nw || !cf || !btn) return;
+    const req = document.getElementById('pw-req');
+    const match = document.getElementById('pw-match');
+    const okMsg = document.getElementById('pw-ok');
+    let posting = false;
     const validate = () => {
       const okLen = nw.value.length >= 12;
       const okMatch = cf.value.length > 0 && cf.value === nw.value;
-      btn.disabled = !(cur.value.length > 0 && okLen && okMatch);
+      btn.disabled = posting || !(cur.value.length > 0 && okLen && okMatch);
+      // live requirement chips (flip to sage + check as each rule is met)
+      if (req) { req.classList.toggle('met', okLen); req.textContent = okLen ? '12+ characters \u2713' : 'At least 12 characters'; }
+      if (match) { match.classList.toggle('met', okMatch); match.textContent = okMatch ? 'Matches \u2713' : 'Must match the new password'; }
       return okLen && okMatch;
     };
-    [cur, nw, cf].forEach((el) => el.addEventListener('input', validate));
+    [cur, nw, cf].forEach((el) => el.addEventListener('input', () => { okMsg.hidden = true; validate(); }));
+    // eye toggles: unhide any of the three fields
+    document.querySelectorAll('.pw-eye[data-eye]').forEach((b) => b.addEventListener('click', () => {
+      const inp = document.getElementById(b.dataset.eye);
+      if (!inp) return;
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      b.classList.toggle('on', show);
+      b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    }));
     btn.addEventListener('click', async () => {
+      if (posting) return;
       err.textContent = '';
+      okMsg.hidden = true;
       if (!validate()) {
         err.textContent = nw.value.length < 12 ? 'New password must be at least 12 characters.' : 'Passwords do not match.';
         return;
       }
+      posting = true;
       btn.disabled = true;
+      btn.classList.add('loading');
+      btn.textContent = 'Updating\u2026';
       try {
         const r = await fetch('/api/password/change', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ currentPassword: cur.value, newPassword: nw.value }) });
         const d = await r.json().catch(() => ({}));
+        posting = false;
+        btn.classList.remove('loading');
+        btn.textContent = 'Update password';
         if (r.ok && d.ok) {
           cur.value = ''; nw.value = ''; cf.value = '';
           validate();
+          okMsg.hidden = false; // inline success right under the form
           toast('Password updated — use it everywhere you sign in.', { ok: true });
         } else {
           err.textContent = d.error || 'Password change failed.';
           btn.disabled = false;
         }
-      } catch (e) { err.textContent = 'Password change failed.'; btn.disabled = false; }
+      } catch (e) {
+        posting = false;
+        btn.classList.remove('loading');
+        btn.textContent = 'Update password';
+        err.textContent = 'Password change failed.';
+        btn.disabled = false;
+      }
     });
   })();
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
