@@ -378,6 +378,12 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .pw-req.met{color:var(--sage)}
 .pw-ok{display:flex;align-items:center;gap:8px;color:var(--sage);font-size:.86rem;margin-top:8px}
 .pw-ok[hidden]{display:none}
+.pf-bad{border-color:var(--error)!important}
+.pf-pass-wrap{margin-top:2px}
+.gate-links{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;font-size:.82rem;flex-wrap:wrap}
+.gate-alt{color:var(--text-dim);text-decoration:underline;text-underline-offset:3px;transition:color .2s}
+.gate-alt:hover{color:var(--gold)}
+.b-go.loading{opacity:.75;cursor:progress}
 .sgf-submit.loading{opacity:.75;cursor:progress}
 .pwf-actions{display:flex;justify-content:flex-end;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
 .pwf-adv{font-size:.82rem;color:var(--text-dim);text-decoration:underline;text-underline-offset:3px}
@@ -2555,7 +2561,7 @@ function guideDetailHtml(key) {
     if (typeof me.tier !== 'string') me.tier = 'seedling';
   }
   if (!me) {
-    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><p class="gate-foot">Members only &middot; invites via recommendation</p>';
+    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
     return;
   }
   const initialsOf = (n, u) => (n || u || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
@@ -2808,7 +2814,7 @@ function guideDetailHtml(key) {
     '<p class="dim" style="margin-bottom:14px">At least 12 characters. This updates your sign-in password for every MySweetPea service.</p>' +
     '<form id="pwf" class="pwf" novalidate>' +
     '<div><label for="pw-current">Current password</label><span class="pw-wrap"><input type="password" id="pw-current" autocomplete="current-password"/><button type="button" class="pw-eye" data-eye="pw-current" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>' +
-    '<div><label for="pw-new">New password</label><span class="pw-wrap"><input type="password" id="pw-new" autocomplete="new-password" minlength="12"/><button type="button" class="pw-eye" data-eye="pw-new" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pw-req" id="pw-req" aria-live="polite">At least 12 characters</span></div>' +
+    '<div><label for="pw-new">New password</label><span class="pw-wrap"><input type="password" id="pw-new" autocomplete="new-password" minlength="12"/><button type="button" class="pw-eye" data-eye="pw-new" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pw-req" id="pw-req" aria-live="polite">At least 12 characters</span><span class="pw-meter" aria-hidden="true"><i id="pw-meter-bar"></i></span></div>' +
     '<div><label for="pw-confirm">Confirm new password</label><span class="pw-wrap"><input type="password" id="pw-confirm" autocomplete="new-password"/><button type="button" class="pw-eye" data-eye="pw-confirm" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pw-req" id="pw-match" aria-live="polite">Must match the new password</span></div>' +
     '</form>' +
     '<div class="merr" id="pw-err" aria-live="polite" style="margin-top:8px"></div>' +
@@ -3464,24 +3470,45 @@ function guideDetailHtml(key) {
       '<p class="sub">Your name and email are used by every MySweetPea service. Changing them here updates your account everywhere (media, files, photos, sign-in). Your password is required.</p>' +
       '<label for="pf-name" style="display:none">Display name</label><input id="pf-name" type="text" maxlength="80" placeholder="Display name" value="' + esc(me.name || '') + '"/>' +
       '<label for="pf-email" style="display:none">Email address</label><input id="pf-email" type="email" maxlength="254" placeholder="Email address" value="' + esc(me.email || '') + '"/>' +
-      '<label for="pf-pass" style="display:none">Current password</label><input id="pf-pass" type="password" placeholder="Current password" autocomplete="current-password"/>' +
+      '<label for="pf-pass" style="display:none">Current password</label><span class="pw-wrap pf-pass-wrap"><input id="pf-pass" type="password" placeholder="Current password" autocomplete="current-password"/>' + '<button type="button" class="pw-eye" data-eye="pf-pass" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>' +  + '</span>' +
       '<p class="sub" style="margin:-2px 0 10px">Want a new password instead? <a href="#" onclick="closeModal();ceremony(\'password\',\'Password change\');return false" style="color:var(--gold)">Change password instead</a></p>' +
-      '<div class="merr" id="pf-err"></div>' +
-      '<div class="mrow"><button class="b-cancel" onclick="closeModal()">Cancel</button><button class="b-go" id="pf-save">Save changes</button></div>');
+      '<div class="merr" id="pf-err" aria-live="polite"></div>' +
+      '<div class="mrow"><button class="b-cancel" onclick="closeModal()">Cancel</button><button class="b-go" id="pf-save" disabled>Save changes</button></div>');
     const err = $('#pf-err');
-    $('#pf-save').onclick = async () => {
-      const btn = $('#pf-save');
-      const name = $('#pf-name').value.trim();
-      const email = $('#pf-email').value.trim();
-      const password = $('#pf-pass').value;
+    const btn = $('#pf-save');
+    const nm = $('#pf-name'), em = $('#pf-email'), pw = $('#pf-pass');
+    const orig = { name: (me.name || ''), email: (me.email || '') };
+    let posting = false;
+    const validate = () => {
+      const name = nm.value.trim(), email = em.value.trim();
+      const nameOk = name.length >= 1 && name.length <= 80;
+      const emailOk = email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      const dirty = name !== orig.name || email !== orig.email;
+      nm.classList.toggle('pf-bad', nm.value.length > 0 && !nameOk);
+      em.classList.toggle('pf-bad', em.value.length > 0 && !emailOk);
       err.textContent = '';
+      btn.disabled = posting || !(dirty && nameOk && emailOk && pw.value.length > 0);
+      return dirty && nameOk && emailOk;
+    };
+    [nm, em, pw].forEach((el) => el.addEventListener('input', validate));
+    const eb = document.querySelector('.pw-eye[data-eye="pf-pass"]');
+    if (eb) eb.addEventListener('click', () => {
+      const inp = document.getElementById('pf-pass');
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      eb.classList.toggle('on', show);
+      eb.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+    btn.onclick = async () => {
+      if (posting) return;
+      const name = nm.value.trim(), email = em.value.trim(), password = pw.value;
+      if (!validate()) return;
       if (!password) { err.textContent = 'Your password is required to save changes.'; return; }
-      if (name.length < 1 || name.length > 80) { err.textContent = 'Name must be 1-80 characters.'; return; }
-      if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Enter a valid email address.'; return; }
-      btn.disabled = true;
+      posting = true; btn.disabled = true; btn.classList.add('loading'); btn.textContent = 'Saving\u2026';
       try {
         const r = await fetch('/api/profile/update', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name, email: email, password: password }) });
         const d = await r.json().catch(() => ({}));
+        posting = false; btn.classList.remove('loading'); btn.textContent = 'Save changes';
         if (r.ok && d.ok) {
           me.name = d.name || name;
           me.email = d.email || email;
@@ -3492,7 +3519,10 @@ function guideDetailHtml(key) {
           btn.disabled = false;
           err.textContent = d.error || 'Update failed.';
         }
-      } catch (e) { btn.disabled = false; err.textContent = 'Update failed.'; }
+      } catch (e) {
+        posting = false; btn.classList.remove('loading'); btn.textContent = 'Save changes';
+        btn.disabled = false; err.textContent = 'Update failed.';
+      }
     };
   };
   // ===== PHASE 14: INLINE PASSWORD CHANGE (writes through to authentik) =====
@@ -3507,13 +3537,31 @@ function guideDetailHtml(key) {
     const match = document.getElementById('pw-match');
     const okMsg = document.getElementById('pw-ok');
     let posting = false;
-    const validate = () => {
+    const meterBar = document.getElementById('pw-meter-bar');
+    const scorePw = (v) => {
+              if (!v) return 0;
+              let sc = 0;
+              if (v.length >= 12) sc++;
+              if (v.length >= 16) sc++;
+              if (/[a-z]/.test(v) && /[A-Z]/.test(v)) sc++;
+              if (/\d/.test(v)) sc++;
+              if (/[^A-Za-z0-9]/.test(v)) sc++;
+              return Math.min(sc, 5);
+            };
+      const validate = () => {
       const okLen = nw.value.length >= 12;
       const okMatch = cf.value.length > 0 && cf.value === nw.value;
       btn.disabled = posting || !(cur.value.length > 0 && okLen && okMatch);
       // live requirement chips (flip to sage + check as each rule is met)
       if (req) { req.classList.toggle('met', okLen); req.textContent = okLen ? '12+ characters \u2713' : 'At least 12 characters'; }
       if (match) { match.classList.toggle('met', okMatch); match.textContent = okMatch ? 'Matches \u2713' : 'Must match the new password'; }
+      // strength meter: width + hue by score (error -> gold -> sage)
+      if (meterBar) {
+        const v = nw.value || '';
+        const sc = scorePw(v);
+        meterBar.style.width = okLen ? (20 * sc) + '%' : (v.length ? Math.min(18, v.length * 1.5) + '%' : '0%');
+        meterBar.style.background = sc < 2 ? 'var(--error)' : sc < 4 ? 'var(--gold)' : 'var(--sage)';
+      }
       return okLen && okMatch;
     };
     [cur, nw, cf].forEach((el) => el.addEventListener('input', () => { okMsg.hidden = true; validate(); }));

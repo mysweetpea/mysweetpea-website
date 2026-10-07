@@ -758,6 +758,12 @@ export default {
       // Serve a tiny client-side redirector instead of a Location header so
       // the raw JSON fragment survives without URL-encoding questions.
       const f = url.searchParams.get('f') || 'mfa';
+      /* recovery is a FLOW, not a settings page — route straight to authentik's
+         recovery flow (email-verified identity + new password) */
+      if (/recovery/.test(f)) {
+        const html = `<!doctype html><meta charset="utf-8"><title>Password reset…</title><meta http-equiv="refresh" content="0;url=${env.AUTH_BASE}/if/flow/default-recovery-flow/">`;
+        return new Response(html, { headers: { 'content-type': 'text/html;charset=utf-8', 'cache-control': 'no-store' } });
+      }
       const page = /password/.test(f) ? 'page-details'
                  : /session/.test(f) ? 'page-sessions'
                  : 'page-credentials';
