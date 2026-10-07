@@ -5644,8 +5644,15 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
 (function(){
   /* derived from the MAIN block's catalog (window.SERVICES); hardcoded
      fragment lists removed — one source of truth */
-  var MATCH = {};
-  (window.SERVICES || []).forEach(function (s) { MATCH[s.name] = s.mon || []; });
+  /* MATCH must be derived AT FILL TIME, not at this script's parse time:
+     window.SERVICES is assigned by the SPA main block AFTER /api/me resolves
+     (app.innerHTML boot). At parse time it is undefined — a boot-time MATCH
+     froze empty and uptime pills never filled. */
+  function matchMap() {
+    var MATCH = {};
+    (window.SERVICES || []).forEach(function (s) { MATCH[s.name] = s.mon || []; });
+    return MATCH;
+  }
   function ensureStrips(){
     document.querySelectorAll('.hm-orb').forEach(function(card){
       if (card.querySelector('.hm-orb-hb-row')) return;
@@ -5664,6 +5671,7 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
     });
   }
   function fill(mons){
+    var MATCH = matchMap();
     document.querySelectorAll('.hm-orb-up[data-hm-hb]').forEach(function(upEl){
       var name = upEl.getAttribute('data-hm-hb');
       var keys = MATCH[name];
@@ -5683,11 +5691,16 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
   var LAST = null;
   var ticks = 0;
   var iv = setInterval(function(){
-    var rows = document.querySelectorAll('.hm-orb .hm-orb-hb-row, .hm-svcrow .hm-orb-up').length;
-    var orbs = document.querySelectorAll('.hm-orb, .hm-svcrow').length;
-    if (!orbs || (rows >= orbs && LAST)) { if (++ticks > 300) clearInterval(iv); return; }
-    ensureStrips();
-    if (LAST) fill(LAST);
+    /* done = every uptime pill slot EXISTS and is filled (text present).
+       The old row-count check (rows >= orbs) was permanently true for
+       svcrow markup — hmSvcOrb always renders its .hm-orb-up slot — so the
+       watchdog early-returned before fill() ever ran and pills stayed empty. */
+    var pills = document.querySelectorAll('.hm-orb-up[data-hm-hb]');
+    var empty = 0;
+    pills.forEach(function (p) { if (!p.textContent) empty++; });
+    var done = pills.length && empty === 0;
+    if (done && LAST) { if (++ticks > 300) clearInterval(iv); return; }
+    if (LAST) { ensureStrips(); fill(LAST); }
     if (++ticks > 300) clearInterval(iv);
   }, 1200);
   fetch('/api/status/extended').then(function(r){ return r.ok ? r.json() : null; })
