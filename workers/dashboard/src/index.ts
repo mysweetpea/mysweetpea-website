@@ -154,8 +154,12 @@ async function verifyPassword(env: Env, username: string, password: string): Pro
     let data: any = null;
     try { data = await pr.json(); } catch { return false; }
     if (!data || typeof data !== 'object') return false;
+    /* authentik 2026.8 emits snake_case response_errors (object keyed by field:
+       {password: [{string, code}]}); the old camelCase check never matched.
+       Wrong passwords still fell through to `return false` (component stays
+       ak-stage-password with no `to`), so this is defense-in-depth, not a hole. */
     const errs = !!(Array.isArray(data.non_field_errors) && data.non_field_errors.length) ||
-      !!data.responseErrors || !!(Array.isArray(data.messages) && data.messages.length);
+      !!data.responseErrors || !!data.response_errors || !!(Array.isArray(data.messages) && data.messages.length);
     // wrong password: executor re-renders the password stage with errors
     if (data.component === 'ak-stage-password' && errs) return false;
     // flow completed -> redirect target present
