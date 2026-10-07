@@ -2116,9 +2116,9 @@ const DL_PLATFORMS = {
     { p: 'macos', url: 'https://jellyfin.org/downloads' },
     { p: 'linux', url: 'https://jellyfin.org/downloads' },
     { p: 'firetv', url: 'https://moonfin.io/#clients' },
-    { p: 'roku', url: 'https://github.com/Moonfin-Client/Roku/releases/latest' },
+    { p: 'roku', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin' },
     { p: 'androidtv', url: 'https://moonfin.io/#clients' },
-    { p: 'appletv', url: 'https://moonfin.io/#clients' },
+    { p: 'appletv', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728' },
     { p: 'smarttv', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest' },
     { p: 'kodi', url: 'https://jellyfin.org/downloads' },
     { p: 'web', url: 'https://media.mysweetpea.cc' },
@@ -2256,7 +2256,7 @@ const guideBrandSel = {};
 // Each brand has its own platform list with complete per-platform steps.
 const PLATFORMS_JF_MOONFIN = [
   { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
-    { title: 'Open Moonfin', text: 'Go to media.mysweetpea.cc — our tuned web app with the Netflix-style home and requests built in.', url: 'https://media.mysweetpea.cc', btn: 'Open Moonfin' },
+    { title: 'Open Moonfin', text: 'Go to media.mysweetpea.cc — our tuned web app with the Netflix-style home and requests built in.', url: 'https://media.mysweetpea.cc/Moonfin/Web/', btn: 'Open Moonfin' },
     { title: 'Sign in', text: 'Use your MySweetPea account — your resume points, favorites and requests stay in sync everywhere.', url: '', btn: '' },
   ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
@@ -2272,15 +2272,15 @@ const PLATFORMS_JF_MOONFIN = [
     { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
-    { title: 'Get Moonfin on Apple TV', text: 'Install Moonfin from the App Store on your Apple TV (tvOS 17+).', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
+    { title: 'Use Swiftfin on Apple TV', text: 'Moonfin has no Apple TV app yet — Swiftfin is the official Jellyfin client for Apple TV. Install it from the App Store.', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728', btn: 'Get Swiftfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
-    { title: 'Side-load Moonfin', text: 'Not in the Roku Channel Store yet — install the package from the releases page via roku.com/developer.', url: 'https://github.com/Moonfin-Client/Roku/releases/latest', btn: 'Get Moonfin' },
+    { title: 'Add Moonfin from the Channel Store', text: 'Search "Moonfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
-  { p: 'smarttv', label: 'Samsung / LG TV', glyph: 'tv', platformSteps: [
-    { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+) and LG (webOS 3.0+) — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
+  { p: 'smarttv', label: 'Samsung / LG / Fire TV', glyph: 'tv', platformSteps: [
+    { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+), LG (webOS 3.0+) and Fire TV sticks (Vega OS). Not in the TV stores — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
@@ -2306,7 +2306,7 @@ const PLATFORMS_JF_OFFICIAL = [
     { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'firetv', label: 'Fire TV', glyph: 'tv', platformSteps: [
-    { title: 'Get it from the Amazon Appstore', text: 'Install Jellyfin from the Amazon Appstore on your Fire TV.', url: 'https://www.amazon.com/gp/product/B08KH15LVN', btn: 'Get Jellyfin' },
+    { title: 'Get it from the Amazon Appstore', text: 'Install Jellyfin from the Amazon Appstore on your Fire TV.', url: 'https://www.amazon.com/gp/aw/d/B07TX7Z725', btn: 'Get Jellyfin' },
     { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
@@ -2314,7 +2314,7 @@ const PLATFORMS_JF_OFFICIAL = [
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung TV', glyph: 'tv', platformSteps: [
-    { title: 'Get the official Jellyfin app', text: 'Search "Jellyfin" in the Samsung TV app catalog and install.', url: 'https://jellyfin.org/downloads/', btn: 'Get Jellyfin' },
+    { title: 'Install the official Jellyfin app', text: 'Not in the Samsung catalog — download the Tizen package and follow the install guide.', url: 'https://github.com/jellyfin/jellyfin-tizen', btn: 'Get Jellyfin' },
     { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
