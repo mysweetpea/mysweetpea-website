@@ -222,20 +222,20 @@
                     });
                 }
                 window.UPTIME_WIN = uptimeWin;
-                var upCount = 0, total = 0;
+                var upCount = 0, total = 0, unknownCount = 0;
                 var uptimeSum = 0, uptimeCount = 0;
                 /* Iterate OUR 9 monitor ids (not payload keys): a monitor
                    missing/empty from the payload must count as NOT REPORTING,
                    never silently vanish from the denominator. */
                 Object.keys(MONITORS).forEach(function (k) {
                     var key = k, id = String(MONITORS[k]);
-                    var row = document.querySelector('.status-line[data-service-key="' + key + '"]');
+                    var row = document.querySelector('.status-line[data-service-key="' + (window.CSS && CSS.escape ? CSS.escape(key) : key) + '"]');
                     if (!row) return;
                     var list = (hb[id] || []).filter(function (b) { return b && typeof b.time === 'string'; });
                     if (!list.length) {
                         /* Not in payload / no beats: unknown, not operational. */
                         setRow(row, false, uptimePct[id] != null ? uptimePct[id] : null, [], true);
-                        total++;
+                        total++; unknownCount++;
                         return;
                     }
                     /* Sort once by time; newest = max timestamp. Order-proof
@@ -251,28 +251,27 @@
                     if (pct != null) { uptimeSum += pct; uptimeCount++; }
                     setRow(row, up, pct, list);
                 });
-                var downCount = total - upCount;
+                /* unknown (no beats) is NOT 'down' — count it separately so
+                   the headline never calls an unreporting monitor an outage */
+                var downCount = total - upCount - unknownCount;
                 /* Banner class tells the truth: green ONLY when every one of
                    the 9 monitored services reported up. */
                 if (summary) {
                     summary.classList.remove('status-all-online', 'status-degraded');
                     /* zero evaluated rows = nothing verified: degraded, never green */
-                    summary.classList.add(downCount === 0 && total > 0 ? 'status-all-online' : 'status-degraded');
+                    summary.classList.add(downCount === 0 && unknownCount === 0 && total > 0 ? 'status-all-online' : 'status-degraded');
                 }
                 if (summaryText) {
                     /* textContent shows entities literally — use a real
                        middle dot. */
                     /* both branches derived from the actual denominator — a
                        missing row can never fabricate an all-green count */
-                    summaryText.textContent = downCount === 0
-                        ? (total + ' of ' + total + ' operational')
-                        : (upCount + ' of ' + total + ' operational \u00B7 ' + downCount + ' down');
-                }
-                /* denominator chip in the summary strong follows the
-                   resolved monitor count (markup ships a static 9) */
-                var sumDenom = summary ? summary.querySelector('strong') : null;
-                if (sumDenom && sumDenom.textContent.indexOf('monitored') !== -1) {
-                    sumDenom.textContent = '— of ' + Object.keys(MONITORS).length + ' monitored';
+                    var bits = [];
+                    if (downCount) bits.push(downCount + (downCount === 1 ? ' down' : ' down'));
+                    if (unknownCount) bits.push(unknownCount + (unknownCount === 1 ? ' not reporting' : ' not reporting'));
+                    summaryText.textContent = bits.length
+                        ? (upCount + ' of ' + total + ' operational \u00B7 ' + bits.join(' \u00B7 '))
+                        : (total + ' of ' + total + ' operational');
                 }
                 if (summaryTime) {
                     var now = new Date();

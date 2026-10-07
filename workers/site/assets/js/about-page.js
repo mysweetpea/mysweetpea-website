@@ -168,15 +168,29 @@
                 // not fired yet: aim the count-up at the real number
                 pctEl.setAttribute('data-count', s);
             }
+            /* Current status from the LATEST beat: the 24h average alone
+               cannot license 'ALL SYSTEMS OPERATIONAL' — a monitor that is
+               down NOW must say so. */
+            var hbNow = data.heartbeatList || {}, downNow = 0, sawBeat = false;
+            Object.keys(MONITOR_IDS).forEach(function (name) {
+                var beats = hbNow[String(MONITOR_IDS[name])] || [], last = null;
+                beats.forEach(function (b) {
+                    if (b && typeof b.status === 'number' && (!last || String(b.time) >= String(last.time))) last = b;
+                });
+                if (last) { sawBeat = true; if (last.status === 0) downNow++; }
+            });
+            /* success path lives INSIDE the success handler: the old trailing
+               .then ran after .catch too, painting the LIVE badge on a FAILED
+               fetch (catch-resolves-chain bug) */
+            markVerified();
+            if (tickerEl && tickerEl.textContent.indexOf('CHECKING') !== -1) {
+                tickerEl.textContent = sawBeat
+                    ? (downNow === 0 ? 'ALL SYSTEMS OPERATIONAL · LIVE'
+                        : downNow + (downNow === 1 ? ' SERVICE DOWN · LIVE' : ' SERVICES DOWN · LIVE'))
+                    : 'STATUS UNAVAILABLE';
+            }
         })
         .catch(function (err) {
             console.warn('[msp] about uptime fetch failed:', err && err.message ? err.message : err);
             markUnreachable();
-        })
-        /* success path: verified — flip the live badge + ticker */
-        .then(function () {
-            markVerified();
-            if (tickerEl && tickerEl.textContent.indexOf('CHECKING') !== -1) {
-                tickerEl.textContent = 'ALL SYSTEMS OPERATIONAL · LIVE';
-            }
         }); })();

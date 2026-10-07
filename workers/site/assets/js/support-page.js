@@ -107,7 +107,7 @@
            unavailable (aria-disabled) so selection can never imply an address
            exists. The static "Soon" chips in the HTML stay as-is. */
         var opt = t.closest('.crypto-option');
-        var card = document.getElementById('dn-crypto-card');
+        var card = document.getElementById('dn-panel-crypto');
         if (opt && card && card.contains(opt)) {
             opt.classList.add('unavailable');
             opt.setAttribute('aria-disabled', 'true');
