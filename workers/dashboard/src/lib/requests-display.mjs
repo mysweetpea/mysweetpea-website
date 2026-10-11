@@ -5,19 +5,27 @@
 // what actually ships (same pattern as updates-pipeline.mjs). Plain ES module,
 // dependency-free, no network — pure functions over captured API shapes.
 //
-// Seerr facts encoded here (verified against live captures, 2026-09-17):
+// Seerr facts encoded here (verified against live captures, 2026-09-17 +
+// 2026-10-11 re-probe):
 //   - This fork's real API is /api/v1/* — /api/v3/* 307-redirects to /login.
 //   - Server-side fetches MUST send a browser User-Agent: Cloudflare Bot Fight
 //     Mode 403s everything else (library-default UAs killed every fetch).
 //   - Users are matched by jellyfinUsername == authentik username (the admin
 //     Seerr account has an EMPTY email, so email alone never matched; it is
 //     only a fallback).
+//   - media.mediaUrl exists (both list and detail) and points at the INTERNAL
+//     jellyfin.private.svc address — buildCard rewrites it to the public base
+//     (watchUrl) or drops it. The tv detail has NO nextEpisodeToAir field
+//     (fork), so no "next airs" line can be built without extra subrequests.
 
 /** Browser UA required by Cloudflare BFM in front of Seerr (verified passing). */
 export const SEERR_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36';
 
 /** TMDB poster base — w300 verified live: no auth, hotlinkable. */
 export const TMDB_POSTER_BASE = 'https://image.tmdb.org/t/p/w300';
+
+/** Internal Jellyfin prefix Seerr stores inside media.mediaUrl. */
+export const JELLYFIN_INTERNAL_PREFIX = 'http://jellyfin.private.svc.cluster.local:8096';
 
 // Non-empty, case-insensitive equality (empty session values must never match
 // empty Seerr fields — the admin user's email is literally '').
@@ -130,13 +138,26 @@ export function pctFromDownload(dl) {
  * Build the display card for one Seerr request (+ its detail, when fetched).
  * A failed/missing detail falls back to list data (title 'Request #<id>',
  * state from the list media blob, seasons from the list entry).
+ *
+ * Label refinement (2026-10-11): bare 'Processing' is the vague state users
+ * complain about ("is it actually working?"). With the seasons numbers known,
+ * buildCard refines it: nothing in the library yet -> 'Searching — nothing
+ * found yet'; some content present -> 'Filling in'. Keys stay 'processing'
+ * so existing consumers/tests keep working.
+ *
+ * watchUrl: Seerr stores media.mediaUrl pointing at the internal cluster
+ * address; rewrite it to the public Jellyfin base (jellyfinUrl param, e.g.
+ * https://media.mysweetpea.cc) so 'Ready' cards can deep-link straight to
+ * playback. Internal/non-https leftovers are dropped (never leak a cluster
+ * address into the browser).
+ *
  * @returns {{id:number|null, tmdbId:number|null, type:'tv'|'movie', title:string,
- *   posterUrl:string|null, link:string|null,
+ *   posterUrl:string|null, link:string|null, watchUrl:string|null,
  *   state:{key:string,label:string,tone:string}, etaText:string|null,
  *   pct:number|null, seasonsTotal:number|null, seasonsAvailable:number|null,
  *   requestedAt:string|null, updatedAt:string|null}}
  */
-export function buildCard(request, detail, seerrBase) {
+export function buildCard(request, detail, seerrBase, jellyfinUrl) {
   const rq = request || {};
   const listMedia = rq.media || {};
   const mi = (detail && detail.mediaInfo) || listMedia;
@@ -152,6 +173,29 @@ export function buildCard(request, detail, seerrBase) {
   else if (Array.isArray(rq.seasons)) seasonsSrc = rq.seasons;
   const name = detail ? (type === 'tv' ? detail.name : detail.title) : null;
   const base = String(seerrBase || '').replace(/\/+$/, '');
+  // Season.status uses the SAME MediaStatus enum as media (verified in Seerr's
+  // entity/Season.js). "In library" = the season has SOME content: 4=PARTIALLY
+  // and 5=AVAILABLE count; 6=BLOCKLISTED and 7=DELETED must NOT (the old >=4
+  // test reported 24/24 for Family Guy whose seasons were all deleted(7)).
+  const seasonsAvailable = type === 'tv'
+    ? seasonsSrc.filter((s) => { const v = Number(s && s.status); return v === 4 || v === 5; }).length
+    : null;
+  // Refine the vague 'Processing' label with what we actually know.
+  let label = state.label;
+  if (state.key === 'processing') {
+    label = seasonsAvailable > 0 ? 'Filling in' : 'Searching — nothing found yet';
+  }
+  // Public watch deep-link (detail first, list fallback; rewrite internal base).
+  const rawMediaUrl = (typeof mi.mediaUrl === 'string' && mi.mediaUrl)
+    || (typeof listMedia.mediaUrl === 'string' && listMedia.mediaUrl) || null;
+  let watchUrl = null;
+  if (rawMediaUrl && rawMediaUrl.indexOf('://') > 0) {
+    const pub = String(jellyfinUrl || '').replace(/\/+$/, '');
+    watchUrl = rawMediaUrl.indexOf(JELLYFIN_INTERNAL_PREFIX) === 0
+      ? (pub ? pub + rawMediaUrl.slice(JELLYFIN_INTERNAL_PREFIX.length) : null)
+      : rawMediaUrl;
+    if (watchUrl && !/^https:\/\//.test(watchUrl)) watchUrl = null; // never leak http/cluster addresses
+  }
   return {
     id: rq.id != null ? rq.id : null,
     tmdbId,
@@ -161,17 +205,12 @@ export function buildCard(request, detail, seerrBase) {
       ? TMDB_POSTER_BASE + detail.posterPath
       : null,
     link: tmdbId != null ? (base + '/' + type + '/' + tmdbId) : (base || null),
-    state,
+    watchUrl,
+    state: { key: state.key, label, tone: state.tone },
     etaText: downloading ? etaTextFromDownload(dl) : null,
     pct: downloading ? pctFromDownload(dl) : null,
     seasonsTotal: type === 'tv' ? seasonsSrc.length : null,
-    // Season.status uses the SAME MediaStatus enum as media (verified in Seerr's
-    // entity/Season.js). "In library" = the season has SOME content: 4=PARTIALLY
-    // and 5=AVAILABLE count; 6=BLOCKLISTED and 7=DELETED must NOT (the old >=4
-    // test reported 24/24 for Family Guy whose seasons were all deleted(7)).
-    seasonsAvailable: type === 'tv'
-      ? seasonsSrc.filter((s) => { const v = Number(s && s.status); return v === 4 || v === 5; }).length
-      : null,
+    seasonsAvailable,
     requestedAt: rq.createdAt != null ? rq.createdAt : null,
     updatedAt: rq.updatedAt != null ? rq.updatedAt : null,
   };

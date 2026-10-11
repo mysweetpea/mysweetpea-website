@@ -109,5 +109,19 @@ check('movie card has null seasons', (() => {
   return m.type === 'movie' && m.seasonsTotal === null && m.seasonsAvailable === null && m.state.key === 'available' && m.title === 'Avatar Aang: The Last Airbender';
 })());
 
+// ---------- 10: label refinement + watch deep-link (2026-10-11) ----------
+const procNoLib = buildCard({ id: 20, status: 2, type: 'tv', media: { tmdbId: 999, status: 3, downloadStatus: [] } },
+  { name: 'Tracker', mediaInfo: { status: 3, downloadStatus: [], seasons: [{ seasonNumber: 1, status: 1 }, { seasonNumber: 2, status: 1 }] } }, BASE);
+check('processing + nothing in library -> searching label', procNoLib.state.key === 'processing' && procNoLib.state.label === 'Searching — nothing found yet', JSON.stringify(procNoLib.state));
+const procSome = buildCard({ id: 21, status: 2, type: 'tv', media: { tmdbId: 998, status: 3, downloadStatus: [] } },
+  { name: 'Filling Show', mediaInfo: { status: 3, downloadStatus: [], seasons: [{ seasonNumber: 1, status: 4 }, { seasonNumber: 2, status: 1 }] } }, BASE);
+check('processing + some in library -> filling-in label', procSome.state.key === 'processing' && procSome.state.label === 'Filling in', JSON.stringify(procSome.state));
+const wl = buildCard({ id: 22, status: 2, type: 'movie', media: { tmdbId: 997, status: 5, mediaUrl: 'http://jellyfin.private.svc.cluster.local:8096/web/index.html#!/details?id=abc123' } }, null, BASE, 'https://media.mysweetpea.cc');
+check('watchUrl rewritten to public base', wl.watchUrl === 'https://media.mysweetpea.cc/web/index.html#!/details?id=abc123', String(wl.watchUrl));
+const noPub = buildCard({ id: 23, status: 2, type: 'movie', media: { tmdbId: 996, status: 5, mediaUrl: 'http://jellyfin.private.svc.cluster.local:8096/x' } }, null, BASE);
+check('internal mediaUrl without public base -> watchUrl null (no cluster leak)', noPub.watchUrl === null, String(noPub.watchUrl));
+const pubDirect = buildCard({ id: 24, status: 2, type: 'movie', media: { tmdbId: 995, status: 5, mediaUrl: 'https://media.mysweetpea.cc/web/index.html#!/details?id=zzz' } }, null, BASE, 'https://media.mysweetpea.cc');
+check('already-public mediaUrl passes through', pubDirect.watchUrl === 'https://media.mysweetpea.cc/web/index.html#!/details?id=zzz', String(pubDirect.watchUrl));
+
 if (failures) { console.error(failures + ' FAILURES'); process.exit(1); }
 console.log('ALL CHECKS PASSED');

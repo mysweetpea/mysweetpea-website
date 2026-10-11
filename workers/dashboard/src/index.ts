@@ -1433,7 +1433,7 @@ export default {
               .catch(() => null);
           }));
           const cards = reqs.map((rq, i) =>
-            buildCard(rq, details[i].status === 'fulfilled' ? details[i].value : null, env.SEERR_URL));
+            buildCard(rq, details[i].status === 'fulfilled' ? details[i].value : null, env.SEERR_URL, env.JELLYFIN_URL));
           return JSON.stringify({ requests: cards, linked: true, seerrBase: env.SEERR_URL });
         });
         return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
