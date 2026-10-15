@@ -1189,30 +1189,6 @@ export default {
                 if (s.ok) { const d = await s.json() as any; out.sessions = (d.results ?? []).length; }
               } catch {}
             })(),
-            (async () => {
-              try {
-                // /api/v1 ONLY: this Seerr fork 307s /api/v3 to /login. Browser
-                // UA required (Cloudflare BFM 403s server UAs).
-                const r = await fetch(env.SEERR_URL + '/api/v1/request/count', { headers: { 'user-agent': SEERR_UA, 'X-Api-Key': env.SEERR_API_KEY } });
-                if (r.ok) {
-                  const d = await r.json() as any;
-                  out.seerr_total = typeof d.total === 'number' ? d.total : null;
-                  out.seerr_pending = typeof d.pending === 'number' ? d.pending : null;
-                  out.seerr_approved = typeof d.approved === 'number' ? d.approved : null;
-                  out.seerr_available = typeof d.available === 'number' ? d.available : null;
-                }
-              } catch {}
-            })(),
-            (async () => {
-              try {
-                const r = await fetch(env.SEERR_URL + '/api/v1/media?take=1', { headers: { 'user-agent': SEERR_UA, 'X-Api-Key': env.SEERR_API_KEY } });
-                if (r.ok) {
-                  const d = await r.json() as any;
-                  const total = d && d.pageInfo && (d.pageInfo.results ?? d.pageInfo.resultsTotal);
-                  out.seerr_media = typeof total === 'number' ? total : null;
-                }
-              } catch {}
-            })(),
           ]);
           return JSON.stringify(out);
         });
@@ -1395,6 +1371,9 @@ export default {
         return json(JSON.parse(payload));
       }
       if (path === '/api/requests') {
+        // Seerr retired 2026-10-15 (old media stack gone). Keep the route as an
+        // empty payload for stale clients; the SPA no longer renders requests.
+        return json({ requests: [], linked: false });
         // Home "Your requests" rail (default take 12) + Media tab full list
         // (?scope=all, take 24). Seerr user resolved by jellyfinUsername ==
         // authentik username (email fallback — the admin Seerr account has an

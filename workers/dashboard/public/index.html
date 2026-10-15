@@ -2096,7 +2096,7 @@ function beatStrip(beats) {
 }
 // ===== PHASE 10: SETUP GUIDES — data from main site services.html + pure render helpers =====
 const GUIDE_ICONS = { jellyfin: '/icons/jellyfin.svg', seerr: '/icons/seerr.svg', nextcloud: '/icons/nextcloud.svg', immich: '/icons/immich.svg', vaultwarden: '/icons/vaultwarden.svg', matrix: '/icons/matrix.svg', koalasync: '/icons/koalasync.svg', openwebui: '/icons/openwebui.svg', affine: '/icons/affine.svg' };
-const GUIDE_ORDER = ['jellyfin', 'seerr', 'nextcloud', 'immich', 'vaultwarden', 'matrix', 'affine', 'openwebui', 'koalasync'];
+const GUIDE_ORDER = ['jellyfin', 'nextcloud', 'immich', 'vaultwarden', 'matrix', 'affine', 'openwebui', 'koalasync'];
 const GUIDE_COLORS = [
   { fg: 'var(--primary-bright)', bg: 'var(--v-soft)' },
   { fg: 'var(--sage)',           bg: 'rgba(163,201,182,.15)' },
@@ -2220,15 +2220,6 @@ const GUIDES = {
       { title: 'Pick a device below', text: 'Every platform signs in to the same server — your progress stays in sync.' },
     ],
   },
-  seerr: {
-    name: 'Seerr',
-    url: 'https://request.mysweetpea.cc',
-    plain: 'Request movies and shows — they appear in Jellyfin automatically.',
-    steps: [
-      { title: 'Open requests', text: 'Go to request.mysweetpea.cc, or tap the Requests tab inside Moonfin.', url: 'https://request.mysweetpea.cc', btn: 'Open requests' },
-      { title: 'Request', text: 'Search a title and click "Request". That is it.' },
-    ],
-  },
   nextcloud: {
     name: 'Nextcloud',
     url: 'https://cloud.mysweetpea.cc',
@@ -2348,18 +2339,6 @@ const PLATFORMS_JF_OFFICIAL = [
 ];
 const PLATFORMS = {
   jellyfin: PLATFORMS_JF_MOONFIN,
-  seerr: [
-    { p: 'web', label: 'Web browser', glyph: 'web' },
-    { p: 'moonfin', label: 'Moonfin app', glyph: 'moon', platformSteps: [
-      { title: 'Requests live inside Moonfin', text: 'No separate app — open Moonfin and tap the Requests tab.', url: 'https://media.mysweetpea.cc/Moonfin/Web/', btn: 'Open Moonfin' },
-      { title: 'Request something', text: 'Find a title and request it — it appears in Jellyfin automatically.', url: '', btn: '' },
-    ] },
-    { p: 'pwa', label: 'Phone / tablet · PWA', glyph: 'phone', platformSteps: [
-      { title: 'iPhone — Add to Home Screen', text: 'Open request.mysweetpea.cc in Safari, tap Share, then Add to Home Screen. It opens full-screen, like an app.', url: 'https://request.mysweetpea.cc', btn: 'Open Seerr' },
-      { title: 'Android — Install from the address bar', text: 'Open the site in Chrome and tap the install icon in the address bar. Same full-screen app experience.', url: '', btn: '' },
-      { title: 'Request something', text: 'Sign in with your MySweetPea account and request away — requests land in Jellyfin automatically.', url: '', btn: '' },
-    ] },
-  ],
   nextcloud: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
     { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
@@ -2494,7 +2473,7 @@ function mspCfgUrl(u) {
   if (!u) return u;
   const cfg = (typeof window.MSP_CFG === 'object' && window.MSP_CFG) || null;
   if (!cfg || !cfg.loaded) return u;
-  const ORIGINS = [['https://media.mysweetpea.cc', cfg.media], ['https://request.mysweetpea.cc', cfg.request]];
+  const ORIGINS = [['https://media.mysweetpea.cc', cfg.media]];
   for (let i = 0; i < ORIGINS.length; i++) {
     if (u.indexOf(ORIGINS[i][0]) === 0) return ORIGINS[i][1] + u.slice(ORIGINS[i][0].length);
   }
@@ -2712,7 +2691,6 @@ function guideDetailHtml(key) {
     '<a class="hm-hero" id="hm-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
-    '<section class="hm-sec" id="hm-requests" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your requests</h2><a class="hm-more" data-msp-request="1" href="https://request.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Seerr &rarr;</a></div><div class="hm-rail" id="hm-req-rail"></div></section>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
     '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Trending now<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
@@ -2742,7 +2720,6 @@ function guideDetailHtml(key) {
     '<div class="md-head"><p class="eyebrow">Media</p><h2 class="md-title">Tonight&rsquo;s picks<span class="md-dot">.</span></h2></div>' +
     '<a class="hm-hero md-hero" id="md-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
-    '<section class="card" id="sec-requests"><p class="eyebrow">Requests</p><h3>Your requests</h3><div id="rq-full"><div class="skel"></div></div></section>' +
     '<section class="card" id="sec-library"><p class="eyebrow">Your library</p><h3>Library</h3><div id="lib-body"><div class="skel"></div></div><p class="dim lib-cap">Library totals — live from Jellyfin</p></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-services" role="tabpanel" aria-labelledby="tab-services">' +
@@ -3057,9 +3034,6 @@ function guideDetailHtml(key) {
     let h = '';
     h += statSection('Jellyfin', [['Movies', s.movies], ['Series', s.series], ['Episodes', s.episodes], ['Boxsets', s.boxsets], ['Songs', s.songs], ['Resume queue', s.jf_resume]]);
     h += statSection('Immich', [['Photos', s.photos], ['Videos', s.videos], ['Storage', s.usage_mb == null ? null : fmtStorage(s.usage_mb)]]);
-    const seerrTiles = [['Requests', s.seerr_total], ['Pending', s.seerr_pending], ['Approved', s.seerr_approved], ['Available', s.seerr_available]];
-    if (s.seerr_media != null) seerrTiles.push(['Titles tracked', s.seerr_media]);
-    h += statSection('Seerr', seerrTiles);
     h += statSection('Accounts', [['Members', s.users], ['Active sessions', s.sessions]]);
     // In-cluster services (KV snapshots pushed by the cluster; absent = '—')
     h += statSection('Nextcloud', [['Files', s.nc_files], ['Shares', s.nc_shares], ['Activity (30d)', s.nc_activity]]);
@@ -3672,7 +3646,6 @@ function guideDetailHtml(key) {
      duplicate subsets of this by display name; they are DERIVED below. ===== */
   const SERVICES = [
     { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Movies & TV', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin', 'moonfin'] },
-    { key: 'seerr',       name: 'Seerr',       url: 'https://request.mysweetpea.cc', blurb: 'Request media', icon: '/icons/seerr.svg', cat: 'media', mon: ['seerr', 'request', 'jellyseerr'] },
     { key: 'nextcloud',   name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg', cat: 'cloud', mon: ['nextcloud', 'cloud'] },
     { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'] },
     { key: 'vaultwarden', name: 'Vaultwarden', url: 'https://vault.mysweetpea.cc',   blurb: 'Passwords', icon: '/icons/vaultwarden.svg', cat: 'cloud', mon: ['vaultwarden', 'vault'] },
@@ -4783,7 +4756,6 @@ function relFuture(v) {
      a new common name; the palette reads it, nothing else changes. */
   var MSP_SVC_KW = {
     'Jellyfin':    'netflix media server movies tv shows streaming plex watch',
-    'Seerr':       'request requests new media ask add content overseerr',
     'Nextcloud':   'google drive files storage documents calendar contacts sync dropbox',
     'Immich':      'google photos photos pictures videos backup library memories',
     'Vaultwarden': '1password lastpass passwords vault credentials bitwarden',
@@ -4794,7 +4766,6 @@ function relFuture(v) {
   };
   var MSP_GUIDE_KW = {
     'jellyfin':    'apps install download moonfin client setup tv phone',
-    'seerr':       'request media app setup',
     'nextcloud':   'files app sync client setup davx5',
     'immich':      'photos app mobile upload setup',
     'vaultwarden': 'bitwarden app extension setup passwords',
@@ -4822,7 +4793,7 @@ function relFuture(v) {
   /* Per-tab descriptions (restores the info the old hardcoded list had) */
   var MSP_TAB_DESC = {
     home: 'Overview, updates & quick actions',
-    media: 'Jellyfin library & requests',
+    media: 'Jellyfin library',
     services: 'Service launcher & status',
     stats: 'Watch time & library growth',
     guides: 'Step-by-step setup guides',
