@@ -80,17 +80,29 @@
       title: 'Check before you click',
       body: 'These show whether each service is running. Green means go.' },
 
+    { target: '.sv-guide-cta',
+      title: 'Every service has a setup guide',
+      body: 'See this on a service card? It takes you straight to step-by-step instructions for that service — what to install, how to sign in, and what to do first.' },
+
+    { target: '.sv-foot-note',
+      title: 'Missing something? Ask for it',
+      body: 'If a service you want is not listed, suggest it right here. Members can request services and a human reviews every one.' },
+
     { tab: 'guides',
       title: 'Guides — your help desk',
       body: 'This is the one to remember. If you are ever stuck on a service, the answer is almost always here.' },
 
     { target: '#guide-nav',
       title: 'Pick a service',
-      body: 'Choose any service here and we walk you through setting it up, step by step.' },
+      body: 'Choose any service here and the guide beside it updates to match.' },
 
-    { target: '#guide-body',
-      title: 'Step-by-step instructions',
-      body: 'Plain language, one step at a time — with the buttons you need right there in the guide.' },
+    { target: '.svc-guide-step',
+      title: 'Follow the steps, use the buttons',
+      body: 'Every guide is numbered steps in plain language. Where a step needs an action, the button sits right there — open the app, copy a server address, download the app.' },
+
+    { target: '.jbrand-row',
+      title: 'Some services let you choose your app',
+      body: 'Where a service has more than one app, these buttons switch between them — and the steps below change to match the one you pick.' },
 
     { tab: 'stats',
       title: 'Stats — how things are doing',
@@ -138,17 +150,29 @@
       title: 'Check before you click',
       body: 'These show whether each service is running. Green means go.' },
 
+    { target: '.sv-guide-cta',
+      title: 'Every service has a setup guide',
+      body: 'See this on a service card? It takes you straight to step-by-step instructions for that service — what to install, how to sign in, and what to do first.' },
+
+    { target: '.sv-foot-note',
+      title: 'Missing something? Ask for it',
+      body: 'If a service you want is not listed, suggest it right here. Members can request services and a human reviews every one.' },
+
     { tab: 'guides',
       title: 'Guides — your help desk',
       body: 'This is the one to remember. If you are ever stuck on a service, the answer is almost always here.' },
 
     { target: '#guide-nav',
       title: 'Pick a service',
-      body: 'Choose any service here and we walk you through setting it up, step by step.' },
+      body: 'Choose any service here and the guide beside it updates to match.' },
 
-    { target: '#guide-body',
-      title: 'Step-by-step instructions',
-      body: 'Plain language, one step at a time — with the buttons you need right there in the guide.' },
+    { target: '.svc-guide-step',
+      title: 'Follow the steps, use the buttons',
+      body: 'Every guide is numbered steps in plain language. Where a step needs an action, the button sits right there — open the app, copy a server address, download the app.' },
+
+    { target: '.jbrand-row',
+      title: 'Some services let you choose your app',
+      body: 'Where a service has more than one app, these buttons switch between them — and the steps below change to match the one you pick.' },
 
     { tab: 'stats',
       title: 'Stats — how things are doing',
@@ -174,6 +198,10 @@
   var rafId = null;
   var escHandler = null, resizeHandler = null;
   var seq = 0;        // guards against a stale async step finishing late
+  // Tab state is STICKY: a step without `tab` inherits the previous step's tab.
+  // Without this, stepping BACKWARD from a tab-switching step left the app on
+  // the wrong panel, so the next target was hidden and the tour looked broken.
+  var curTab = 'home', appliedTab = null;
 
   function isMobile() { return window.matchMedia(MOBILE_MQ).matches; }
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
@@ -253,11 +281,17 @@
   function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
   function lerp(a, b, t) { return a + (b - a) * t; }
 
-  // full-screen rect + rounded cutout as ONE evenodd path (driver.js geometry)
+  // full-screen rect + rounded cutout as ONE evenodd path (driver.js geometry).
+  // ⚠️ Every number is finite-checked. If we ever emit `d="MNaN,…"` the SVG
+  // becomes invalid and browsers KEEP THE PREVIOUS `d` — which is exactly how a
+  // stale spotlight box survives into a step that should have none.
   function stagePath(s) {
     var W = window.innerWidth, H = window.innerHeight;
     var outer = 'M' + W + ',0L0,0L0,' + H + 'L' + W + ',' + H + 'L' + W + ',0Z';
-    if (!s || s.w <= 1 || s.h <= 1) return outer;
+    if (!s) return outer;
+    var v = [s.x, s.y, s.w, s.h];
+    for (var i = 0; i < 4; i++) if (!isFinite(v[i])) return outer;
+    if (s.w <= 1 || s.h <= 1) return outer;
     var rad = Math.floor(Math.max(Math.min(RADIUS, s.w / 2, s.h / 2), 0));
     var bw = Math.max(s.w - rad * 2, 0);
     var bh = Math.max(s.h - rad * 2, 0);
@@ -278,8 +312,17 @@
   // elapsed-time tween — this is what makes the movement read as smooth
   function tweenTo(to, dur) {
     cancelAnimationFrame(rafId);
-    if (!stage || reduceMotion() || !dur) { stage = to; paintStage(stage); return; }
-    var from = stage, t0 = performance.now();
+    var from = stage;
+    // A centred step has no target. Collapse the hole into its own centre
+    // rather than interpolating toward `null` (which produced NaN and left the
+    // old box on screen).
+    if (!to) {
+      to = from
+        ? { x: from.x + from.w / 2, y: from.y + from.h / 2, w: 0, h: 0 }
+        : null;
+    }
+    if (!from || !to || reduceMotion() || !dur) { stage = to; paintStage(stage); return; }
+    var t0 = performance.now();
     rafId = requestAnimationFrame(function frame(now) {
       var t = Math.min((now - t0) / dur, 1);
       var k = easeInOutQuad(t);
@@ -289,6 +332,7 @@
       };
       paintStage(stage);
       if (t < 1) rafId = requestAnimationFrame(frame);
+      else stage = to; // land exactly on the target
     });
   }
 
@@ -396,8 +440,13 @@
     if (st.closeAcct) setAcct(false);
     block.hidden = !!st.doIt;
 
-    var needsTab = st.tab && typeof window.setTab === 'function';
-    if (needsTab) { try { window.setTab(st.tab); } catch (e) {} }
+    var needsTab = false;
+    if (st.tab) curTab = st.tab;
+    if (curTab && curTab !== appliedTab && typeof window.setTab === 'function') {
+      try { window.setTab(curTab); } catch (e) {}
+      appliedTab = curTab;
+      needsTab = true;
+    }
 
     var el = st.target ? document.querySelector(st.target) : null;
 
@@ -428,6 +477,7 @@
     if (!force && seen()) return;
     steps = isMobile() ? MOBILE_STEPS : DESKTOP_STEPS;
     idx = 0; stage = null; seq++;
+    curTab = 'home'; appliedTab = null; // always start from a known tab
     root.hidden = false;
     document.body.classList.add('dh-lock');
     paintStage(null);
