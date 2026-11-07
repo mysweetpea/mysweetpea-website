@@ -100,9 +100,9 @@
       title: 'Follow the steps, use the buttons',
       body: 'Every guide is numbered steps in plain language. Where a step needs an action, the button sits right there — open the app, copy a server address, download the app.' },
 
-    { target: '.jbrand-row',
-      title: 'Some services let you choose your app',
-      body: 'Where a service has more than one app, these buttons switch between them — and the steps below change to match the one you pick.' },
+    { target: '.gp-picker',
+      title: 'Tell it where you will use it',
+      body: 'Most guides ask this first. Pick your device — phone, tablet, web, TV — and the steps below change to match exactly what you need to do.' },
 
     { tab: 'stats',
       title: 'Stats — how things are doing',
@@ -170,9 +170,9 @@
       title: 'Follow the steps, use the buttons',
       body: 'Every guide is numbered steps in plain language. Where a step needs an action, the button sits right there — open the app, copy a server address, download the app.' },
 
-    { target: '.jbrand-row',
-      title: 'Some services let you choose your app',
-      body: 'Where a service has more than one app, these buttons switch between them — and the steps below change to match the one you pick.' },
+    { target: '.gp-picker',
+      title: 'Tell it where you will use it',
+      body: 'Most guides ask this first. Pick your device — phone, tablet, web, TV — and the steps below change to match exactly what you need to do.' },
 
     { tab: 'stats',
       title: 'Stats — how things are doing',
@@ -193,7 +193,7 @@
 
   /* ── state ─────────────────────────────────────────────────────────── */
   var steps = [], idx = 0;
-  var root = null, svg = null, dim = null, block = null, card = null;
+  var root = null, svg = null, dim = null, block = null, card = null, toast = null;
   var stage = null;   // {x,y,w,h} of the cutout right now
   var rafId = null;
   var escHandler = null, resizeHandler = null;
@@ -236,6 +236,13 @@
       '.mst-btn.ghost{border-color:transparent;background:none;color:#8f8bb0;padding:9px 10px}',
       '.mst-btn.ghost:hover{color:#e8e6f5;background:rgba(151,146,255,.1)}',
       '.mst-skip{position:absolute;top:8px;right:10px;z-index:4;pointer-events:auto}',
+      // tab-change indicator: the mobile tabs live in a closed drawer, so a
+      // toast is the only thing that reads on both surfaces
+      '.mst-toast{position:absolute;top:76px;left:50%;z-index:4;pointer-events:none;',
+      '  padding:9px 18px;border-radius:999px;font-size:.83rem;font-weight:700;letter-spacing:.2px;',
+      '  background:linear-gradient(135deg,rgba(139,126,246,.97),rgba(69,214,200,.92));color:#08090f;',
+      '  box-shadow:0 12px 34px rgba(0,0,0,.5);white-space:nowrap}',
+      '@media (max-width:768px){.mst-toast{top:auto;bottom:calc(100% + 14px)}}',
       // mobile: card becomes a bottom sheet — thumb reachable, no clamping math
       '@media (max-width:768px){',
       '  .mst-card{left:0!important;right:0;bottom:0;top:auto!important;max-width:none;',
@@ -271,10 +278,42 @@
     card = document.createElement('div');
     card.className = 'mst-card';
 
+    toast = document.createElement('div');
+    toast.className = 'mst-toast';
+    toast.hidden = true;
+
     root.appendChild(svg);
     root.appendChild(block);
     root.appendChild(card);
+    root.appendChild(toast);
     document.body.appendChild(root);
+  }
+
+  // "Switched to the X tab" pill. Shown whenever the tour changes tab so the
+  // jump is unmistakable, then fades itself out.
+  var toastTimer = null;
+  function showToast(label) {
+    if (!toast) return;
+    clearTimeout(toastTimer);
+    toast.textContent = label;
+    toast.hidden = false;
+    toast.style.transform = 'translateX(-50%)';
+    if (!reduceMotion() && toast.animate) {
+      toast.animate(
+        [{ opacity: 0, transform: 'translateX(-50%) translateY(-8px)' },
+         { opacity: 1, transform: 'translateX(-50%) translateY(0)' }],
+        { duration: 220, easing: 'cubic-bezier(.22,1,.36,1)' }
+      );
+    }
+    toastTimer = setTimeout(function () {
+      if (!toast.animate || reduceMotion()) { toast.hidden = true; return; }
+      var a = toast.animate(
+        [{ opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+         { opacity: 0, transform: 'translateX(-50%) translateY(-8px)' }],
+        { duration: 260, easing: 'ease-in', fill: 'forwards' }
+      );
+      a.onfinish = function () { toast.hidden = true; toast.style.opacity = ''; };
+    }, 1500);
   }
 
   /* ── geometry ──────────────────────────────────────────────────────── */
@@ -423,11 +462,35 @@
           (last ? 'Done' : esc(st.nextLabel || 'Next')) +
         '</button>' +
       '</div>';
-    placeCard(st.target ? document.querySelector(st.target) : null);
     animateCard();
   }
 
   /* ── step flow ─────────────────────────────────────────────────────── */
+  // Scroll the target into view ONLY if it is not already there, and do it
+  // INSTANTLY. driver.js does the same: smooth scrolling leaves the cutout
+  // parked while the page glides, which reads as a lag after pressing Next.
+  // The cutout's own tween is the motion the eye follows.
+  function inView(el) {
+    var r = el.getBoundingClientRect();
+    return r.top >= 8 && r.bottom <= (window.innerHeight - 8);
+  }
+  function revealTarget(el) {
+    if (!el || inView(el)) return;
+    try { el.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (e) {}
+  }
+
+  var TAB_LABELS = {
+    home: 'Home', media: 'Media', services: 'Services',
+    stats: 'Stats', guides: 'Guides', contact: 'Contact',
+  };
+
+  function arrive(st, el, my) {
+    if (my !== seq) return;
+    tweenTo(cutoutFor(el), TWEEN_MS);
+    placeCard(el);
+    if (st.doIt && el) el.addEventListener('click', onDoIt, { once: true });
+  }
+
   function paint() {
     var st = steps[idx];
     if (!st) return finish();
@@ -443,23 +506,34 @@
     var needsTab = false;
     if (st.tab) curTab = st.tab;
     if (curTab && curTab !== appliedTab && typeof window.setTab === 'function') {
-      try { window.setTab(curTab); } catch (e) {}
       appliedTab = curTab;
       needsTab = true;
     }
 
     var el = st.target ? document.querySelector(st.target) : null;
 
+    // The card text updates IMMEDIATELY either way — the user should never
+    // press Next and see nothing happen.
+    renderCard();
+
+    if (!needsTab) {
+      // FAST PATH: no panel change, so the cutout can move on the next frame.
+      revealTarget(el);
+      requestAnimationFrame(function () { arrive(st, el, my); });
+      return;
+    }
+
+    // SLOW PATH: the app is swapping panels and running an entrance cascade.
+    // Collapse the hole now so the wait reads as deliberate choreography
+    // rather than a frozen box, announce the tab, then expand on the target.
+    tweenTo(null, 200);
+    showToast(TAB_LABELS[curTab] || curTab);
+    try { window.setTab(curTab); } catch (e) {}
     setTimeout(function () {
-      if (my !== seq) return; // a newer step took over
-      if (el) { try { el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); } catch (e) {} }
-      settle(el, function () {
-        if (my !== seq) return;
-        tweenTo(cutoutFor(el), TWEEN_MS);
-        renderCard();
-        if (st.doIt && el) el.addEventListener('click', onDoIt, { once: true });
-      });
-    }, needsTab ? TAB_SETTLE : 60);
+      if (my !== seq) return;
+      revealTarget(el);
+      settle(el, function () { arrive(st, el, my); }, 900);
+    }, TAB_SETTLE);
   }
 
   function onDoIt() { next(); }
