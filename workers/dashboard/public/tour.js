@@ -2,25 +2,42 @@
  *
  * Self-contained: injects its own CSS, no dependencies, no build step.
  * Drives the EXISTING UI rather than reimplementing it:
- *   - window.setTab()            (already global) to switch sections
- *   - #nav-toggle / .dh-open / body.dh-lock for the mobile drawer
- *   - stable ids already in index.html (#tabs, #acct-trigger, #hm-*)
+ *   - window.setTab()                          to move between sections
+ *   - #nav-toggle / .dh-open / body.dh-lock    for the mobile drawer
+ *   - #acct-trigger / #acct-pop                for the account menu
  *
- * ponytail: box-shadow does the spotlight (no clip-path / SVG mask math);
- * mobile card is a bottom sheet (no tooltip-position clamping). If the tour
- * ever needs element-anchored arrows or collision detection beyond this,
- * that is the point to vendor driver.js instead of growing this file.
+ * Motion technique (the same one driver.js uses — it is the reference for how
+ * a tour should feel):
+ *   1. The dim is ONE svg <path> with fill-rule:evenodd — a full-screen rect
+ *      plus a rounded cutout. A single layer, so the dim can never double up
+ *      or flicker the way two overlapping spotlights would.
+ *   2. The cutout is tweened by requestAnimationFrame with easeInOutQuad, NOT
+ *      a CSS transition. Transitions on geometry retrigger mid-flight and
+ *      stretch the box into odd shapes; an elapsed-time tween is stable and
+ *      eases properly at both ends.
+ *   3. The card animates via the Web Animations API (native, no class juggling,
+ *      no transition-retrigger bugs).
+ *   4. We wait for the target to STOP MOVING before tweening, so the cutout
+ *      never chases a layout that is still settling.
+ *
+ * ponytail: still no library — driver.js is ~40KB for what is ~130 lines here,
+ * and it ships a design language we would fight. Revisit only if this ever
+ * needs collision-aware popover placement or arrows.
  */
 (function () {
   'use strict';
-  if (window.mspTour) return; // idempotent — safe to include twice
+  if (window.mspTour) return; // idempotent
 
-  var KEY = 'msp_tour_v1';           // localStorage: seen flag
+  var KEY = 'msp_tour_v1';
   var MOBILE_MQ = '(max-width: 768px)';
+  var TWEEN_MS = 380;   // cutout travel
+  var PAD = 8;          // cutout padding around the target
+  var RADIUS = 14;      // cutout corner radius
+  var TAB_SETTLE = 380; // setTab runs an entrance cascade; let it start first
 
   /* ── copy ─────────────────────────────────────────────────────────────
-   * Written for non-technical users: short sentences, no jargon.
-   * Edit freely — this array is the only place the words live.
+   * Written for non-technical users. This is the ONLY place the words live.
+   * Edit here and nothing else needs to change.
    */
   var MOBILE_STEPS = [
     { center: true,
@@ -39,21 +56,53 @@
       title: 'Your account and shortcuts',
       body: 'Your invite link for friends, plus quick ways to ask for help or report something broken.' },
 
-    { center: true, drawer: false,
+    { target: '#hm-hero', drawer: false, tab: 'home',
       title: 'This is Home',
       body: 'Your services, what is new, and what you have been watching — all in one place.' },
 
-    { target: '#hm-services-sec', drawer: false,
+    { target: '#hm-services-sec',
       title: 'Your services',
       body: 'Tap any card to open that service. Think of this as your shortcut shelf.' },
 
-    { target: '#hm-upnext', drawer: false,
-      title: 'Something to watch',
-      body: 'New picks land here. The Media tab has the full library when you want to browse.' },
+    { tab: 'media',
+      title: 'Media — where you watch',
+      body: 'Everything you can watch lives here. Let me show you how it works.' },
 
-    { center: true, drawer: false,
+    { target: '#sec-library',
+      title: 'Browse or search',
+      body: 'Pick a category, or search for something specific. Tap any poster to start watching.' },
+
+    { tab: 'services',
+      title: 'Services — your shortcuts',
+      body: 'Every service you have access to, all in one place.' },
+
+    { target: '#sv-orbs',
+      title: 'Check before you click',
+      body: 'These show whether each service is running. Green means go.' },
+
+    { tab: 'guides',
+      title: 'Guides — your help desk',
+      body: 'This is the one to remember. If you are ever stuck on a service, the answer is almost always here.' },
+
+    { target: '#guide-nav',
+      title: 'Pick a service',
+      body: 'Choose any service here and we walk you through setting it up, step by step.' },
+
+    { target: '#guide-body',
+      title: 'Step-by-step instructions',
+      body: 'Plain language, one step at a time — with the buttons you need right there in the guide.' },
+
+    { tab: 'stats',
+      title: 'Stats — how things are doing',
+      body: 'A live look at your services and what has been happening.' },
+
+    { tab: 'contact',
+      title: 'Contact — talk to us',
+      body: 'Stuck, or something broken? Send us a message here and we will get back to you.' },
+
+    { tab: 'home', center: true,
       title: 'You are all set',
-      body: 'Replay this whenever you like — tap the ? at the top of the screen.' },
+      body: 'That is the whole dashboard. Replay this whenever you like — tap the ? at the top of the screen.' },
   ];
 
   var DESKTOP_STEPS = [
@@ -65,7 +114,7 @@
       title: 'Your sections',
       body: 'Home, Media, Services, Stats, Guides and Contact. Click any one to jump straight there.' },
 
-    { center: true,
+    { target: '#hm-hero', tab: 'home',
       title: 'This is Home',
       body: 'Your services, what is new, and what you have been watching — all in one place.' },
 
@@ -73,28 +122,58 @@
       title: 'Your services',
       body: 'Click any card to open that service. Think of this as your shortcut shelf.' },
 
-    { target: '#hm-upnext',
-      title: 'Something to watch',
-      body: 'New picks land here. The Media tab has the full library when you want to browse.' },
+    { tab: 'media',
+      title: 'Media — where you watch',
+      body: 'Everything you can watch lives here. Let me show you how it works.' },
 
-    { target: '#acct-trigger', openAcct: true,
+    { target: '#sec-library',
+      title: 'Browse or search',
+      body: 'Pick a category, or search for something specific. Click any poster to start watching.' },
+
+    { tab: 'services',
+      title: 'Services — your shortcuts',
+      body: 'Every service you have access to, all in one place.' },
+
+    { target: '#sv-orbs',
+      title: 'Check before you click',
+      body: 'These show whether each service is running. Green means go.' },
+
+    { tab: 'guides',
+      title: 'Guides — your help desk',
+      body: 'This is the one to remember. If you are ever stuck on a service, the answer is almost always here.' },
+
+    { target: '#guide-nav',
+      title: 'Pick a service',
+      body: 'Choose any service here and we walk you through setting it up, step by step.' },
+
+    { target: '#guide-body',
+      title: 'Step-by-step instructions',
+      body: 'Plain language, one step at a time — with the buttons you need right there in the guide.' },
+
+    { tab: 'stats',
+      title: 'Stats — how things are doing',
+      body: 'A live look at your services and what has been happening.' },
+
+    { tab: 'contact',
+      title: 'Contact — talk to us',
+      body: 'Stuck, or something broken? Send us a message here and we will get back to you.' },
+
+    { target: '#acct-trigger', openAcct: true, tab: 'home',
       title: 'Your account',
       body: 'Password, sessions, your vault, and this tour again — it all lives behind your name up here.' },
 
-    { center: true, closeAcct: true,
+    { closeAcct: true, center: true,
       title: 'You are all set',
-      body: 'Replay this whenever you like — from your account menu, or the ? at the top of the screen.' },
+      body: 'That is the whole dashboard. Replay this whenever you like — from your account menu, or the ? up top.' },
   ];
 
   /* ── state ─────────────────────────────────────────────────────────── */
-  var steps = [];
-  var idx = 0;
-  var root = null;
-  var spot = null;
-  var block = null;
-  var card = null;
-  var escHandler = null;
-  var resizeHandler = null;
+  var steps = [], idx = 0;
+  var root = null, svg = null, dim = null, block = null, card = null;
+  var stage = null;   // {x,y,w,h} of the cutout right now
+  var rafId = null;
+  var escHandler = null, resizeHandler = null;
+  var seq = 0;        // guards against a stale async step finishing late
 
   function isMobile() { return window.matchMedia(MOBILE_MQ).matches; }
   function reduceMotion() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
@@ -107,19 +186,15 @@
     s.textContent = [
       '.mst-root{position:fixed;inset:0;z-index:9999;pointer-events:none}',
       '.mst-root[hidden]{display:none}',
-      // the spotlight: transparent box whose huge outer shadow dims everything else
-      '.mst-spot{position:absolute;border-radius:14px;box-shadow:0 0 0 9999px rgba(6,7,13,.76);transition:all .28s cubic-bezier(.22,1,.36,1);z-index:1}',
-      '.mst-spot.no-anim{transition:none}',
-      // click blocker for non-interactive steps (hidden on do-it steps)
+      '.mst-svg{position:absolute;inset:0;width:100%;height:100%;display:block}',
+      '.mst-dim{fill:rgba(6,7,13,.78)}',
       '.mst-block{position:absolute;inset:0;pointer-events:auto;z-index:2}',
       '.mst-block[hidden]{display:none}',
       '.mst-card{position:absolute;z-index:3;pointer-events:auto;box-sizing:border-box;',
-      '  max-width:340px;padding:18px 18px 14px;border-radius:16px;',
-      '  background:linear-gradient(165deg,rgba(30,26,60,.98),rgba(13,14,26,.99));',
-      '  border:1px solid rgba(151,146,255,.28);box-shadow:0 24px 60px rgba(0,0,0,.55);',
-      '  color:#e8e6f5;font-size:.92rem;line-height:1.5;',
-      '  transition:top .28s cubic-bezier(.22,1,.36,1),left .28s cubic-bezier(.22,1,.36,1)}',
-      '.mst-card.no-anim{transition:none}',
+      '  max-width:352px;padding:18px 18px 14px;border-radius:16px;',
+      '  background:linear-gradient(165deg,rgba(30,26,60,.985),rgba(13,14,26,.995));',
+      '  border:1px solid rgba(151,146,255,.30);box-shadow:0 24px 64px rgba(0,0,0,.58);',
+      '  color:#e8e6f5;font-size:.92rem;line-height:1.5;will-change:transform,opacity}',
       '.mst-card h3{margin:0 0 6px;font-size:1.02rem;font-weight:600;color:#fff;letter-spacing:.1px}',
       '.mst-card p{margin:0 0 14px;color:#b9b6d0}',
       '.mst-row{display:flex;align-items:center;gap:8px}',
@@ -136,11 +211,9 @@
       // mobile: card becomes a bottom sheet — thumb reachable, no clamping math
       '@media (max-width:768px){',
       '  .mst-card{left:0!important;right:0;bottom:0;top:auto!important;max-width:none;',
-      '    border-radius:18px 18px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom));',
-      '    transition:none}',
+      '    border-radius:18px 18px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom))}',
       '  .mst-skip{top:auto;bottom:calc(100% + 8px);right:14px}',
       '}',
-      '@media (prefers-reduced-motion: reduce){.mst-spot,.mst-card{transition:none!important}}',
     ].join('');
     document.head.appendChild(s);
   }
@@ -156,8 +229,13 @@
     root.setAttribute('aria-label', 'Dashboard tour');
     root.hidden = true;
 
-    spot = document.createElement('div');
-    spot.className = 'mst-spot';
+    svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'mst-svg');
+    svg.setAttribute('aria-hidden', 'true');
+    dim = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    dim.setAttribute('class', 'mst-dim');
+    dim.setAttribute('fill-rule', 'evenodd');
+    svg.appendChild(dim);
 
     block = document.createElement('div');
     block.className = 'mst-block';
@@ -165,13 +243,78 @@
     card = document.createElement('div');
     card.className = 'mst-card';
 
-    root.appendChild(spot);
+    root.appendChild(svg);
     root.appendChild(block);
     root.appendChild(card);
     document.body.appendChild(root);
   }
 
-  /* ── drawer + account-menu helpers (reuse existing UI) ─────────────── */
+  /* ── geometry ──────────────────────────────────────────────────────── */
+  function easeInOutQuad(t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  // full-screen rect + rounded cutout as ONE evenodd path (driver.js geometry)
+  function stagePath(s) {
+    var W = window.innerWidth, H = window.innerHeight;
+    var outer = 'M' + W + ',0L0,0L0,' + H + 'L' + W + ',' + H + 'L' + W + ',0Z';
+    if (!s || s.w <= 1 || s.h <= 1) return outer;
+    var rad = Math.floor(Math.max(Math.min(RADIUS, s.w / 2, s.h / 2), 0));
+    var bw = Math.max(s.w - rad * 2, 0);
+    var bh = Math.max(s.h - rad * 2, 0);
+    var bx = s.x + rad, by = s.y;
+    return outer +
+      'M' + bx + ',' + by + 'h' + bw +
+      'a' + rad + ',' + rad + ' 0 0 1 ' + rad + ',' + rad +
+      'v' + bh +
+      'a' + rad + ',' + rad + ' 0 0 1 -' + rad + ',' + rad +
+      'h-' + bw +
+      'a' + rad + ',' + rad + ' 0 0 1 -' + rad + ',-' + rad +
+      'v-' + bh +
+      'a' + rad + ',' + rad + ' 0 0 1 ' + rad + ',-' + rad + 'z';
+  }
+
+  function paintStage(s) { dim.setAttribute('d', stagePath(s)); }
+
+  // elapsed-time tween — this is what makes the movement read as smooth
+  function tweenTo(to, dur) {
+    cancelAnimationFrame(rafId);
+    if (!stage || reduceMotion() || !dur) { stage = to; paintStage(stage); return; }
+    var from = stage, t0 = performance.now();
+    rafId = requestAnimationFrame(function frame(now) {
+      var t = Math.min((now - t0) / dur, 1);
+      var k = easeInOutQuad(t);
+      stage = {
+        x: lerp(from.x, to.x, k), y: lerp(from.y, to.y, k),
+        w: lerp(from.w, to.w, k), h: lerp(from.h, to.h, k),
+      };
+      paintStage(stage);
+      if (t < 1) rafId = requestAnimationFrame(frame);
+    });
+  }
+
+  function cutoutFor(el) {
+    if (!el) return null;
+    var r = el.getBoundingClientRect();
+    if (r.width <= 1 || r.height <= 1) return null;
+    return { x: r.left - PAD, y: r.top - PAD, w: r.width + PAD * 2, h: r.height + PAD * 2 };
+  }
+
+  // wait until the target stops moving before tweening to it
+  function settle(el, cb, maxMs) {
+    var last = null, stable = 0, t0 = performance.now();
+    (function loop() {
+      var r = el ? el.getBoundingClientRect() : null;
+      var key = r
+        ? [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)].join(',')
+        : 'none';
+      if (key === last) { if (++stable >= 2) return cb(); }
+      else { stable = 0; last = key; }
+      if (performance.now() - t0 > (maxMs || 1100)) return cb();
+      requestAnimationFrame(loop);
+    })();
+  }
+
+  /* ── drawer + account helpers (reuse existing UI) ──────────────────── */
   function setDrawer(open) {
     var d = document.getElementById('dh-menu');
     if (!d) return;
@@ -182,46 +325,49 @@
   }
 
   function setAcct(open) {
-    var pop = document.getElementById('acct-pop');
-    var trg = document.getElementById('acct-trigger');
+    var pop = document.getElementById('acct-pop'), trg = document.getElementById('acct-trigger');
     if (!pop || !trg) return;
     pop.hidden = !open;
     trg.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
 
-  /* ── painting ──────────────────────────────────────────────────────── */
-  function visible(el) {
-    if (!el) return false;
-    var r = el.getBoundingClientRect();
-    return r.width > 0 && r.height > 0;
+  /* ── card ──────────────────────────────────────────────────────────── */
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
   }
 
-  function paint() {
+  function animateCard() {
+    if (reduceMotion() || !card.animate) return;
+    card.animate(
+      [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }],
+      { duration: 260, easing: 'cubic-bezier(.22,1,.36,1)' }
+    );
+  }
+
+  function placeCard(el) {
+    if (isMobile()) return; // bottom sheet positions itself
+    var vw = window.innerWidth, vh = window.innerHeight, pad = 12;
+    var cw = Math.min(352, vw - pad * 2);
+    var ch = card.offsetHeight || 170;
+    var left = vw / 2 - cw / 2, top = vh / 2 - ch / 2;
+
+    if (el) {
+      var r = el.getBoundingClientRect();
+      if (r.width > 1 && r.height > 1) {
+        left = r.left + r.width / 2 - cw / 2;
+        top = r.bottom + 16;
+        if (top + ch > vh - pad) top = r.top - ch - 16; // flip above
+      }
+    }
+    card.style.left = Math.max(pad, Math.min(left, vw - cw - pad)) + 'px';
+    card.style.top = Math.max(pad, Math.min(top, vh - ch - pad)) + 'px';
+  }
+
+  function renderCard() {
     var st = steps[idx];
-    if (!st) return finish();
-
-    // apply side effects for this step
-    if (st.drawer === true) setDrawer(true);
-    else if (st.drawer === false) setDrawer(false);
-    if (st.openAcct) setAcct(true);
-    if (st.closeAcct) setAcct(false);
-
-    var noAnim = reduceMotion();
-    spot.classList.toggle('no-anim', noAnim);
-    card.classList.toggle('no-anim', noAnim);
-
-    // click blocker only when the user is NOT meant to interact with the page
-    block.hidden = !!st.doIt;
-
-    var el = st.target ? document.querySelector(st.target) : null;
-    if (el) el.scrollIntoView({ block: 'center', behavior: noAnim ? 'auto' : 'smooth' });
-
-    // wait a beat for scroll/drawer transitions, then position
-    setTimeout(function () { position(el); }, noAnim ? 0 : (el ? 320 : 60));
-
-    // content
-    var last = idx === steps.length - 1;
-    var first = idx === 0;
+    var last = idx === steps.length - 1, first = idx === 0;
     card.innerHTML =
       '<button type="button" class="mst-btn ghost mst-skip" data-tour="skip">Skip</button>' +
       '<h3>' + esc(st.title) + '</h3>' +
@@ -233,82 +379,81 @@
           (last ? 'Done' : esc(st.nextLabel || 'Next')) +
         '</button>' +
       '</div>';
+    placeCard(st.target ? document.querySelector(st.target) : null);
+    animateCard();
+  }
 
-    // do-it steps: advance when the user actually taps the target
-    if (st.doIt && el) {
-      el.addEventListener('click', onDoIt, { once: true });
-    }
+  /* ── step flow ─────────────────────────────────────────────────────── */
+  function paint() {
+    var st = steps[idx];
+    if (!st) return finish();
+    var my = ++seq; // any earlier async work is now stale
+
+    // side effects first, so the layout we measure is the layout we keep
+    if (st.drawer === true) setDrawer(true);
+    else if (st.drawer === false) setDrawer(false);
+    if (st.openAcct) setAcct(true);
+    if (st.closeAcct) setAcct(false);
+    block.hidden = !!st.doIt;
+
+    var needsTab = st.tab && typeof window.setTab === 'function';
+    if (needsTab) { try { window.setTab(st.tab); } catch (e) {} }
+
+    var el = st.target ? document.querySelector(st.target) : null;
+
+    setTimeout(function () {
+      if (my !== seq) return; // a newer step took over
+      if (el) { try { el.scrollIntoView({ block: 'center', behavior: reduceMotion() ? 'auto' : 'smooth' }); } catch (e) {} }
+      settle(el, function () {
+        if (my !== seq) return;
+        tweenTo(cutoutFor(el), TWEEN_MS);
+        renderCard();
+        if (st.doIt && el) el.addEventListener('click', onDoIt, { once: true });
+      });
+    }, needsTab ? TAB_SETTLE : 60);
   }
 
   function onDoIt() { next(); }
 
-  function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  function position(el) {
-    var vw = window.innerWidth, vh = window.innerHeight, pad = 12;
-
-    if (!el || !visible(el)) {
-      // nothing to point at — dim uniformly and centre the card
-      spot.style.width = '0px';
-      spot.style.height = '0px';
-      spot.style.left = '-9999px';
-      spot.style.top = '-9999px';
-      spot.style.boxShadow = '0 0 0 9999px rgba(6,7,13,.76)';
-      card.style.left = Math.max(pad, (vw - Math.min(340, vw - pad * 2)) / 2) + 'px';
-      card.style.top = Math.max(pad, (vh - card.offsetHeight) / 2) + 'px';
-      return;
-    }
-
-    var r = el.getBoundingClientRect();
-    var m = 6;
-    spot.style.boxShadow = '0 0 0 9999px rgba(6,7,13,.76)';
-    spot.style.left = (r.left - m) + 'px';
-    spot.style.top = (r.top - m) + 'px';
-    spot.style.width = (r.width + m * 2) + 'px';
-    spot.style.height = (r.height + m * 2) + 'px';
-
-    if (isMobile()) return; // bottom sheet handles itself
-
-    var cw = Math.min(340, vw - pad * 2);
-    var ch = card.offsetHeight || 160;
-    var left = r.left + r.width / 2 - cw / 2;
-    left = Math.max(pad, Math.min(left, vw - cw - pad));
-    var top = r.bottom + 14;
-    if (top + ch > vh - pad) top = Math.max(pad, r.top - ch - 14); // flip above
-    card.style.left = left + 'px';
-    card.style.top = top + 'px';
-  }
-
-  /* ── flow ──────────────────────────────────────────────────────────── */
   function go(i) {
     idx = Math.max(0, Math.min(i, steps.length - 1));
     paint();
   }
-  function next() { idx >= steps.length - 1 ? finish() : go(idx + 1); }
-  function back() { go(idx - 1); }
+  function next() { if (idx >= steps.length - 1) finish(); else go(idx + 1); }
+  function back() { if (idx > 0) go(idx - 1); }
 
+  /* ── lifecycle ─────────────────────────────────────────────────────── */
   function start(force) {
     build();
     if (!force && seen()) return;
     steps = isMobile() ? MOBILE_STEPS : DESKTOP_STEPS;
-    idx = 0;
+    idx = 0; stage = null; seq++;
     root.hidden = false;
     document.body.classList.add('dh-lock');
+    paintStage(null);
+    if (!reduceMotion() && root.animate) {
+      root.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
+    }
     escHandler = function (e) { if (e.key === 'Escape') finish(); };
     document.addEventListener('keydown', escHandler);
-    resizeHandler = function () { paint(); };
+    resizeHandler = function () {
+      var st = steps[idx];
+      var el = st && st.target ? document.querySelector(st.target) : null;
+      cancelAnimationFrame(rafId);
+      stage = cutoutFor(el);
+      paintStage(stage);
+      placeCard(el);
+    };
     window.addEventListener('resize', resizeHandler);
     paint();
   }
 
   function finish() {
     if (!root) return;
+    seq++;
+    cancelAnimationFrame(rafId);
     root.hidden = true;
-    spot.style.boxShadow = '0 0 0 0 transparent';
+    stage = null;
     setDrawer(false);
     setAcct(false);
     document.body.classList.remove('dh-lock');
@@ -318,13 +463,11 @@
     escHandler = resizeHandler = null;
   }
 
-  function seen() {
-    try { return localStorage.getItem(KEY) === '1'; } catch (e) { return true; }
-  }
+  function seen() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return true; } }
 
   /* ── wiring ────────────────────────────────────────────────────────── */
   document.addEventListener('click', function (e) {
-    var t = e.target.closest ? e.target.closest('[data-tour]') : null;
+    var t = e.target && e.target.closest ? e.target.closest('[data-tour]') : null;
     if (!t) return;
     e.preventDefault();
     var act = t.getAttribute('data-tour');
