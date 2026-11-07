@@ -286,6 +286,10 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 @media(max-width:760px){.svc-guide{grid-template-columns:minmax(0,1fr)}.svc-guide-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-width:100%}.svc-guide-chip{width:100%;min-width:0;padding:8px 10px;font-size:.8rem;white-space:nowrap;overflow:hidden}.svc-guide-chip span:not(.gp-count){overflow:hidden;text-overflow:ellipsis}.svc-guide-chip .svc-guide-ico{width:20px;height:20px;flex:none}.svc-guide-chip .gp-count{font-size:.6rem;padding:0 5px;flex:none}.svc-guide-detail,.svc-guide>*{min-width:0;max-width:100%}.svc-guide .card,.svc-guide #guide-body,.svc-guide .gp-steps,.svc-guide .jbrand{min-width:0;max-width:100%}.svc-guide pre,.svc-guide .ripple-strip{max-width:100%;overflow-x:clip}}
 /* ---- phase 12: get-started onboarding + suggest a service ---- */
 .ob-card{border-color:rgba(217,168,108,.20);background:linear-gradient(160deg,rgba(217,168,108,.05),transparent 45%),var(--card)}
+.ob-tour{display:flex;flex-direction:column;gap:7px;align-items:flex-start;padding:14px;margin:12px 0 4px;border-radius:12px;border:1px solid rgba(151,146,255,.22);background:linear-gradient(150deg,rgba(139,126,246,.10),rgba(69,214,200,.05))}
+.ob-tour-sub{font-size:.78rem;color:var(--text-dim);line-height:1.45;max-width:44ch}
+.ob-btn-primary{background:linear-gradient(135deg,#8b7ef6,#45d6c8);border-color:transparent;color:#08090f;font-weight:600;min-height:44px;padding:0 18px}
+.ob-btn-primary:hover{filter:brightness(1.07)}
 .ob-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .ob-head h3{font-size:1.32rem}
 .ob-x{background:transparent;border:0;color:var(--text-dim);font:inherit;font-size:1rem;line-height:1;cursor:pointer;padding:6px 8px;border-radius:8px;transition:.35s cubic-bezier(.4,0,.2,1)}
@@ -1696,6 +1700,10 @@ a.hm-req{text-decoration:none;color:var(--text)}
     <div class="pal-list" id="pal-list"></div>
   </div>
 </div>
+<!-- Dashboard tour. Loaded BEFORE the app script so window.mspTour exists when
+     the app's wiring runs (the app is an async IIFE that awaits /api/me, so a
+     deferred/end-of-body tag would race it). -->
+<script src="/tour.js"></script>
 <script>
 'use strict';
 /* ===== Deployment config adoption (/api/config) ============================
@@ -2606,8 +2614,9 @@ function guideDetailHtml(key) {
   try {
     if (localStorage.getItem('msp_onboarded') !== '1') obHtml =
       '<section class="card ob-card" id="ob-card" style="--i:0">' +
-      '<div class="ob-head"><div><h3 style="margin-bottom:2px">Get started</h3><p class="dim" style="margin:0">Three quick steps to make yourself at home.</p></div>' +
+      '<div class="ob-head"><div><h3 style="margin-bottom:2px">Get started</h3><p class="dim" style="margin:0">New here? Take the one-minute tour, or jump straight in.</p></div>' +
       '<button type="button" class="ob-x" id="ob-dismiss" aria-label="Dismiss getting started">&#10005;</button></div>' +
+      '<div class="ob-tour"><button type="button" class="ob-btn ob-btn-primary" id="ob-tour">Take the 1-minute tour</button><span class="ob-tour-sub">It walks you through everything, one step at a time &mdash; and you can stop whenever you like.</span></div>' +
       '<div class="ob-steps">' +
       '<div class="ob-step"><span class="ob-num">1</span><b>Sign in</b><p>You&rsquo;re already in &mdash; this dashboard is your home base.</p></div>' +
       '<div class="ob-step"><span class="ob-num">2</span><b>Set up your vault</b><p>Vaultwarden stores your passwords. Open Guides &rarr; Vaultwarden.</p><button type="button" class="ob-btn" id="ob-vault">Open the guide</button></div>' +
@@ -2625,6 +2634,7 @@ function guideDetailHtml(key) {
     '<div class="nav-id">' +
     '' +
     '<button class="nav-search" id="pal-open" title="Search (Ctrl+K)" aria-label="Search (Ctrl+K)"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>' +
+    '<button type="button" class="nav-search" id="tour-open" title="Take the tour" aria-label="Take the dashboard tour"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.6 2.6 0 1 1 3.3 2.6c-.6.2-.9.7-.9 1.3v.5"/><path d="M12 17h.01"/></svg></button>' +
     '<button type="button" class="nav-search upd-bell" id="upd-bell" title="Service updates" aria-label="Service updates" aria-haspopup="true" aria-expanded="false"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="bell-dot" id="bell-dot" hidden></span></button>' +
     '<div class="bell-menu" id="bell-menu"><div class="acct-pop" id="upd-pop" role="menu" aria-label="Service updates" hidden><div class="upd-pop-head"><b>Service updates</b><span id="upd-pop-sub"></span></div><div id="upd-pop-list"></div></div></div>' +
     '<div class="acct-menu" id="acct-menu">' +
@@ -2638,6 +2648,7 @@ function guideDetailHtml(key) {
         '<a role="menuitem" href="#account" data-goto="account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6"/></svg>Account profile</a>' +
         '<a role="menuitem" href="#" id="mi-bug"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M6 13H2"/><path d="M3 21c0-2.1 1.7-3.9 3.8-4"/><path d="M20.97 5c0 2.1-1.6 3.8-3.5 4"/><path d="M22 13h-4"/><path d="M17.2 17c2.1.1 3.8 1.9 3.8 4"/></svg>Report a bug</a>' +
         '<a role="menuitem" href="#contact" data-goto="contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m2 7 10 6L22 7"/></svg>Contact us</a>' +
+        '<a role="menuitem" href="#" id="mi-tour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.6 2.6 0 1 1 3.3 2.6c-.6.2-.9.7-.9 1.3v.5"/><path d="M12 17h.01"/></svg>Replay the tour</a>' +
         '<a role="menuitem" data-msp-site="/" href="https://mysweetpea.cc" ><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Back to site</a>' +
         '<hr/>' +
         '<a role="menuitem" href="/auth/logout" class="danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>' +
@@ -4314,6 +4325,18 @@ function guideDetailHtml(key) {
       const chip = document.querySelector('.svc-guide-chip[data-guide="vaultwarden"]');
       if (chip) chip.click();
     });
+  }
+  // ===== TOUR wiring (tour.js): nav "?", account menu item, Get started card =====
+  if (window.mspTour) {
+    const tourOpen = document.getElementById('tour-open');
+    if (tourOpen) tourOpen.addEventListener('click', () => window.mspTour.start());
+    const miTour = document.getElementById('mi-tour');
+    if (miTour) miTour.addEventListener('click', (e) => { e.preventDefault(); window.mspTour.start(); });
+    const obTour = document.getElementById('ob-tour');
+    if (obTour) obTour.addEventListener('click', () => window.mspTour.start());
+    // First run only. Delayed so the home rails have painted — otherwise the
+    // spotlight lands on an empty section. auto() self-checks the seen flag.
+    setTimeout(() => { try { window.mspTour.auto(); } catch (e) {} }, 1400);
   }
   const obContact = document.getElementById('ob-contact');
   if (obContact) obContact.addEventListener('click', () => setTab('contact'));
