@@ -1687,6 +1687,26 @@ a.hm-req{text-decoration:none;color:var(--text)}
   @media (prefers-reduced-motion: reduce){#dh-menu .dh-i,#dh-menu .dh-panel,.dh-scrim{transition:none!important}#dh-menu .dh-i{opacity:1;transform:none}}
 }
 </style>
+<style id="mp-pin-css">
+/* Moonfin PIN card (media tab). Members get their media PIN here instead of
+   hunting for it in the welcome email. */
+.mp-pin{font-family:var(--mono,'JetBrains Mono',monospace);font-size:2.1rem;font-weight:700;
+  letter-spacing:.2em;margin:.35rem 0 .1rem;color:var(--fg,#EAF2F4)}
+.mp-sub{font-size:.86rem;opacity:.72;margin:0 0 .9rem}
+.mp-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.5rem 0}
+.mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.8rem;
+  word-break:break-all;flex:1 1 240px;min-width:0;opacity:.9;
+  background:rgba(255,255,255,.05);padding:.5rem .7rem;border-radius:8px}
+.mp-btn{font:inherit;font-size:.86rem;font-weight:600;cursor:pointer;
+  padding:.55rem 1.05rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.07);color:inherit}
+.mp-btn:hover{background:rgba(255,255,255,.13)}
+.mp-btn-primary{border-color:transparent;color:#08090F;
+  background:linear-gradient(135deg,#8B7EF6,#45D6C8)}
+.mp-steps{margin:.85rem 0 0;padding-left:1.15rem;font-size:.88rem;line-height:1.65}
+.mp-steps li{margin:.25rem 0}
+.mp-ok{font-size:.8rem;font-weight:600;color:#45D6C8;margin:.5rem 0 0}
+</style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
@@ -1985,7 +2005,10 @@ function setTab(name, opts) {
   if (prev !== name) {
     // Deferred requests-grid load (review fix): scope=all is fetched on FIRST
     // Media-tab visit instead of at boot, halving Seerr load for home-only visits.
-    if (name === 'media') { try { if (typeof window.rqLoadFull === 'function') window.rqLoadFull(); } catch (e) {} }
+    if (name === 'media') {
+      try { if (typeof window.rqLoadFull === 'function') window.rqLoadFull(); } catch (e) {}
+      try { if (typeof window.mpLoadPin === 'function') window.mpLoadPin(); } catch (e) {}
+    }
     // BLINK FIX (Sep 15): the moment a switch happens, retire the boot entrance
     // animation so that when .tp-enter is removed 750ms later, control can never
     // fall back to `main section{animation:msp-in}` — which RESTARTED from
@@ -2730,6 +2753,7 @@ function guideDetailHtml(key) {
     '</div>' +
     '<div class="tabpanel" id="panel-media" role="tabpanel" aria-labelledby="tab-media">' +
     '<div class="md-head"><p class="eyebrow">Media</p><h2 class="md-title">Tonight&rsquo;s picks<span class="md-dot">.</span></h2></div>' +
+    '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin PIN</h3><div id="pin-body"><div class="skel"></div></div></section>' +
     '<a class="hm-hero md-hero" id="md-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
     '<section class="card" id="sec-library"><p class="eyebrow">Your library</p><h3>Library</h3><div id="lib-body"><div class="skel"></div></div><p class="dim lib-cap">Library totals — live from Jellyfin</p></section>' +
@@ -4208,6 +4232,59 @@ function guideDetailHtml(key) {
       fetch('/api/status').then((r) => (r.ok ? r.json() : { monitors: [] })).then((d) => hmApplyDots((d && d.monitors) || [])).catch(() => {});
     } catch (e) {}
   }
+  /* ── Moonfin PIN card ────────────────────────────────────────────────
+     Members press a button to get their media PIN instead of hunting for it
+     in the welcome email. /api/media/pin is IDEMPOTENT — the shim hands back
+     the same PIN it already issued — so this is safe to call on every visit
+     and never invalidates a login the member already has. */
+  let mpPinLoaded = false;
+
+  function mpPinRender(body, d) {
+    body.innerHTML =
+      '<p class="mp-pin">' + esc(d.pin) + '</p>' +
+      '<p class="mp-sub">This is your personal PIN. It stays the same every time you look here.</p>' +
+      '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code>' +
+      '<button type="button" class="mp-btn" id="mp-copy">Copy address</button></div>' +
+      '<ol class="mp-steps">' +
+      '<li>Open <strong>Moonfin</strong> on your device.</li>' +
+      '<li>Choose <strong>Add server</strong> and paste the address above.</li>' +
+      '<li>Sign in with your name <strong>' + esc(d.username || '') + '</strong> and the PIN.</li>' +
+      '</ol>';
+    const cp = document.getElementById('mp-copy');
+    if (cp) cp.addEventListener('click', async () => {
+      const t = document.getElementById('mp-server');
+      try { await navigator.clipboard.writeText(t ? t.textContent : ''); cp.textContent = 'Copied'; }
+      catch (e) { cp.textContent = 'Select and copy'; }
+      setTimeout(() => { cp.textContent = 'Copy address'; }, 1800);
+    });
+  }
+
+  window.mpLoadPin = async function (force) {
+    const body = document.getElementById('pin-body');
+    if (!body || (mpPinLoaded && !force)) return;
+    mpPinLoaded = true;
+    body.innerHTML = '<div class="skel"></div>';
+    let d = {};
+    try {
+      const r = await fetch('/api/media/pin', {
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+      });
+      d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || 'Could not reach the media service.');
+      if (d.ok === false) {
+        body.innerHTML = '<p class="mp-sub">' + esc(d.message || 'Media access is not part of your tier.') + '</p>';
+        return;
+      }
+      mpPinRender(body, d);
+    } catch (e) {
+      mpPinLoaded = false; // allow a retry
+      body.innerHTML = '<p class="mp-sub">' + esc(e.message || 'Something went wrong.') +
+        '</p><button type="button" class="mp-btn" id="mp-retry">Try again</button>';
+      const b = document.getElementById('mp-retry');
+      if (b) b.addEventListener('click', () => window.mpLoadPin(true));
+    }
+  };
+
   async function hmLoadMedia() {
     let cont = [], latest = [];
     try { const r = await fetch('/api/media/continue'); if (r.ok) { const d = await r.json(); cont = (d && d.items) || []; } } catch (e) {}

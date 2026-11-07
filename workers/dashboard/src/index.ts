@@ -50,6 +50,13 @@ export interface Env {
   OPENWEBUI_STATS_B64?: string; // so webui.db snapshot, base64 (users+chats only)
   GOTIFY_REFERRAL_TOKEN?: string; // referral pings -> Gotify app 14 'Referrals'
   GOTIFY_BUG_TOKEN?: string; // user bug reports -> Gotify 'Bugs' app (PC alert-poller -> Paperclip)
+  // Media access ("generate pin"): the dashboard provisions the member's
+  // Moonfin persona on demand instead of the redeem workflow emailing a PIN.
+  // MOONBASE_MOUNT is the full picker URL the member pastes into Moonfin
+  // (https://<host>/jellyfin/<config-uuid>/<encpw>) — PIN sign-in only works
+  // on the mount path, never on the bare /jellyfin address.
+  MOONBASE_ADMIN_TOKEN?: string;
+  MOONBASE_MOUNT?: string;
   GITHUB_TOKEN?: string; // optional — homelab-k8s is public; token only lifts the 60/hr anon limit
   GH_COMMITS_REPO?: string; // optional — commits source repo 'owner/name' (default: mysweetpea/mysweetpea-homelab)
   MAIN_SITE_URL?: string;   // optional — marketing site origin (default: https://mysweetpea.cc)
@@ -1528,6 +1535,57 @@ export default {
           } catch { /* stored regardless */ }
         }
         return json({ ok: true, id });
+      }
+
+      // ── media access: the member's Moonfin PIN ────────────────────────
+      // Members press "Generate PIN" in the dashboard instead of hunting for
+      // it in the welcome email. Idempotent by design — the shim returns the
+      // SAME pin on repeat calls, so this can be called on every tab open
+      // without ever invalidating a login the member already has.
+      if (path === '/api/media/pin' && request.method === 'POST') {
+        if (!env.MOONBASE_ADMIN_TOKEN || !env.MOONBASE_MOUNT) {
+          return json({ error: 'media access is not configured yet' }, 503);
+        }
+        // The tier gate lives on the shim, but we must send the member's REAL
+        // tier — never a hardcoded one — or a seedling could self-provision
+        // sweetpea media access. Groups come from authentik, not the session.
+        let tier = '';
+        try {
+          const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
+          const d = await r.json() as any;
+          const u = d && d.user ? d.user : d;
+          const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
+          tier = names.includes('sweetpea') ? 'sweetpea' : names.includes('seedling') ? 'seedling' : '';
+        } catch { /* fall through to the no-tier error below */ }
+        if (!tier) return json({ error: 'could not verify your account tier' }, 502);
+
+        const username = String(sess.username || '').toLowerCase();
+        if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) {
+          return json({ error: 'your username cannot be used for media access' }, 400);
+        }
+
+        let r: Response;
+        try {
+          r = await fetch('https://aiostreams.mysweetpea.cc/Moonfin/Admin/Provision', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
+              'user-agent': 'msp-dashboard/1.0',
+            },
+            body: JSON.stringify({ username, name: sess.name || username, tier }),
+          });
+        } catch {
+          return json({ error: 'media service is unreachable right now' }, 502);
+        }
+        if (!r.ok) return json({ error: 'media setup failed' }, 502);
+        const d: any = await r.json().catch(() => ({}));
+        if (d && d.skipped === 'tier') {
+          return json({ ok: false, reason: 'tier', message: 'Media access is not part of your tier.' });
+        }
+        const pin = d && d.pin ? String(d.pin) : '';
+        if (!pin) return json({ error: 'no pin came back — try again in a moment' }, 502);
+        return json({ ok: true, pin, username, mount: env.MOONBASE_MOUNT });
       }
 
       // DELETE endpoints
