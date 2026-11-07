@@ -3441,3 +3441,33 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
         .mn-link, .mn-arw, .mn-cta, .mn-row { transition: none; }
     }
 }
+
+/* ==== Services: "In development" badge (Nov 2026) ====
+   Marks the services that are still being tested and are not open to
+   members yet. Deliberately NOT gold: gold is reserved for the Sweet Pea
+   tier pill, so this uses the neutral ice/sage tint at reduced weight. */
+body[data-page='services'] .dev-pill {
+    display: inline-flex; align-items: center;
+    padding: 3px 9px; border-radius: 999px;
+    background: rgba(143, 175, 181, 0.10);
+    border: 1px solid rgba(143, 175, 181, 0.26);
+    color: var(--text-faint);
+    font-family: var(--t-font-mono);
+    font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.10em; text-transform: uppercase;
+    white-space: nowrap; flex: none; line-height: 1.6;
+}
+body[data-page='services'] .service-card:hover .dev-pill {
+    border-color: rgba(143, 175, 181, 0.40);
+}
+[data-theme='light'] body[data-page='services'] .dev-pill,
+[data-theme='light'] .dev-pill {
+    background: rgba(47, 107, 78, 0.07);
+    border-color: rgba(47, 107, 78, 0.26);
+    color: #4A635B;
+}
+/* Narrow cards: the footer already carries the tier pill + uptime, so drop
+   the badge below 420px rather than letting it wrap the footer. */
+@media (max-width: 420px) {
+    body[data-page='services'] .dev-pill { display: none; }
+}
