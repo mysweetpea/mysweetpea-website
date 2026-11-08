@@ -30,15 +30,24 @@
       #root {
         position: relative; width: 1080px; height: 1080px; overflow: hidden;
         background:
-          radial-gradient(720px 460px at 18% 4%, rgba(139, 126, 246, 0.14), transparent 70%),
-          radial-gradient(620px 420px at 90% 96%, rgba(79, 227, 208, 0.1), transparent 72%),
+          radial-gradient(760px 480px at 16% 2%, rgba(139, 126, 246, 0.16), transparent 70%),
+          radial-gradient(660px 440px at 92% 98%, rgba(79, 227, 208, 0.1), transparent 72%),
           var(--ground);
       }
       .scene { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-      .inner { width: 900px; }
+      .inner { width: 900px; transform-origin: 50% 50%; }
 
-      .logo { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 34px; }
-      .logo .word { font-family: var(--serif); font-size: 46px; letter-spacing: 0.01em; color: #dfe3ee; }
+      /* ---- brand ---- */
+      .brand { text-align: center; }
+      .brand .lock { display: flex; align-items: center; justify-content: center; gap: 22px; line-height: 1.3; }
+      .brand .lock svg { width: 96px; height: 96px; display: block; }
+      .brand .word { font-family: var(--serif); font-size: 74px; line-height: 1.3; color: #e7eaf4; letter-spacing: 0.005em; }
+      .brand .tag { margin-top: 44px; font-size: 27px; color: #c9cee2; letter-spacing: 0.01em; }
+
+      .logo { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 30px; }
+      .logo svg { width: 52px; height: 52px; display: block; }
+      .logo .word { font-family: var(--serif); font-size: 46px; color: #dfe3ee; }
+
       .modal {
         background: var(--panel); border: 1px solid var(--line); border-radius: 26px;
         padding: 34px 34px 30px; box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
@@ -59,6 +68,7 @@
       .row {
         display: flex; align-items: center; gap: 18px; padding: 20px 22px;
         border-radius: 18px; border: 1px solid rgba(140, 160, 190, 0.12); background: var(--panel-2);
+        position: relative;
       }
       .row.on { border: 2px solid var(--cyan); background: rgba(79, 227, 208, 0.1); }
       .ico { width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
@@ -75,46 +85,37 @@
       }
       .row.on .arrow { background: var(--cyan); color: var(--cyan-ink); }
 
-      .fieldwrap { position: relative; margin-top: 26px; }
       .field {
         position: relative; display: flex; align-items: center; gap: 14px; padding: 18px 18px 18px 20px;
-        border-radius: 16px; border: 2px solid var(--cyan); background: #0e1016;
+        border-radius: 16px; border: 2px solid var(--cyan); background: #0e1016; margin-top: 26px;
       }
       .field .ph { position: absolute; left: 58px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 25px; color: var(--faint); }
-      .field .val { flex: 1; min-width: 0; font-family: var(--mono); font-size: 19px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; clip-path: inset(0 100% 0 0); }
-      .btn-cyan {
-        background: var(--cyan); color: var(--cyan-ink); font-weight: 700; font-size: 25px;
-        padding: 14px 26px; border-radius: 12px; flex: none;
-      }
+      .field .val { flex: 1; min-width: 0; font-family: var(--mono); font-size: 17px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; clip-path: inset(0 100% 0 0); }
+      .btn-cyan { background: var(--cyan); color: var(--cyan-ink); font-weight: 700; font-size: 25px; padding: 14px 26px; border-radius: 12px; flex: none; }
       .hint { margin-top: 16px; font-size: 23px; color: var(--faint); line-height: 1.45; }
 
-      .check {
-        width: 62px; height: 62px; border-radius: 50%; background: rgba(111, 208, 140, 0.18);
-        display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
-      }
-      .found {
-        margin-top: 24px; display: flex; align-items: center; gap: 18px; padding: 20px;
-        border-radius: 18px; border: 1px solid var(--line); background: var(--panel-2);
-      }
+      .check { width: 62px; height: 62px; border-radius: 50%; background: rgba(111, 208, 140, 0.18); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+      .found { margin-top: 24px; display: flex; align-items: center; gap: 18px; padding: 20px; border-radius: 18px; border: 1px solid var(--line); background: var(--panel-2); }
       .found .sico { width: 58px; height: 58px; border-radius: 14px; background: rgba(139, 126, 246, 0.22); display: flex; align-items: center; justify-content: center; flex: none; }
       .pill { font-size: 21px; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--line); color: var(--dim); }
       .url { margin-top: 8px; font-family: var(--mono); font-size: 22px; color: var(--faint); }
       .acts { display: flex; gap: 14px; margin-top: 26px; }
       .ghost { flex: 1; text-align: center; padding: 18px; border-radius: 14px; background: #23262f; color: var(--dim); font-size: 25px; font-weight: 600; }
       .primary { flex: 1; text-align: center; padding: 18px; border-radius: 14px; background: var(--cyan); color: var(--cyan-ink); font-size: 25px; font-weight: 700; }
+      .tick { display: inline-block; margin-left: 10px; opacity: 0; }
+      .btn-cyan .tick { margin-left: 8px; }
 
       .tabs { display: flex; gap: 10px; margin: 24px 0 22px; }
       .tab { flex: 1; text-align: center; padding: 14px; border-radius: 99px; border: 1px solid var(--line); color: var(--dim); font-size: 25px; font-weight: 600; }
       .tab.on { background: var(--cyan); border-color: var(--cyan); color: #05231f; }
       .ins { display: flex; flex-direction: column; gap: 14px; }
-      .in { position: relative; display: grid; padding: 22px 24px; border-radius: 14px; border: 1px solid var(--line); background: #0e1016; font-size: 28px; color: var(--ink); }
+      .in { position: relative; display: grid; padding: 22px 24px; border-radius: 14px; border: 1px solid var(--line); background: #0e1016; font-size: 28px; color: var(--ink); padding-right: 215px; }
       .in > span { grid-area: 1 / 1; }
       .in .ph { color: var(--faint); }
       .in .fx { clip-path: inset(0 100% 0 0); }
-      .in.filled { color: var(--ink); }
       #d-pass-fx { letter-spacing: 7px; font-size: 30px; }
-      .in { padding-right: 215px; }
-      .tag {
+      /* scoped: a bare .tag rule was also painting the brand frame's <p class="tag"> */
+      .in .tag {
         position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
         font-size: 24px; font-weight: 700; color: var(--cyan-ink); background: var(--cyan);
         padding: 6px 12px; border-radius: 8px; opacity: 0; letter-spacing: 0;
@@ -124,37 +125,58 @@
       .cap h2 { font-size: 50px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
       .cap h2 em { font-style: normal; color: var(--cyan); }
       .cap p { margin-top: 18px; font-size: 28px; color: var(--dim); line-height: 1.45; }
+
+      /* ---- the pointer, so every tap is visible ---- */
+      .cursor {
+        position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%;
+        background: rgba(242, 244, 250, 0.92); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+        left: 0; top: 0; visibility: hidden; opacity: 0; pointer-events: none; z-index: 40;
+      }
+      .cursor::after {
+        content: ''; position: absolute; inset: 14px; border-radius: 50%; background: var(--cyan-ink); opacity: 0.35;
+      }
+      .ring {
+        position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%;
+        border: 3px solid var(--cyan); left: 0; top: 0; visibility: hidden; opacity: 0; pointer-events: none; z-index: 39;
+      }
+      /* the press itself: a brief scale-down of whatever is under the cursor */
+      .pressed { animation: none; }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="12.8" data-width="1080" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="19.9" data-width="1080" data-height="1080">
 
-      <!-- A · Add Server -->
-      <div id="sA" class="clip scene" data-start="0" data-duration="2.3" data-track-index="0">
-        <div class="inner" id="a-in">
+      <!-- A · brand -->
+      <div id="sA" class="clip scene" data-start="0" data-duration="2.9" data-track-index="0">
+        <div class="inner brand" id="a-in" data-layout-allow-overlap>
+          <div class="lock">
+            <svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772"><stop offset="0.1" stop-color="#AA5CC3"/><stop offset="0.2029" stop-color="#9C62C5"/><stop offset="0.3988" stop-color="#7672CB"/><stop offset="0.6646" stop-color="#3A8CD4"/><stop offset="0.8944" stop-color="#00A4DC"/></linearGradient></defs><path fill="url(#mfg)" d="M747.5737,517.5444c-27.9146,89.6334-100.9925,151.2944-212.3987,151.2944-86.9795,0-158.3005-43.2526-193.2185-98.5122-11.0539-17.479-17.4022-37.2333-17.4022-58.4728,0-14.6352,2.8917-28.5896,8.1116-41.3039,16.0775-39.1607,54.3585-66.8622,99.2043-66.8622,3.2396,0,6.4542.1443,9.6317.4264,66.1099,5.8658,118.3107,61.6547,118.3107,129.7736,0,27.121-8.2863,52.2595-22.3988,72.9451,72.1813-20.8043,124.2656-80.3934,137.9887-151.2944,2.5114-12.9728,3.8289-26.3668,3.8289-40.0711,0-115.9794-94.0206-210-210-210S261.0617,199.5206,261.0617,315.5c0,6.1451.2637,12.2283.7836,18.2379,1.2205,14.1217-9.7037,26.4872-23.8718,26.4872-12.1379,0-22.2763-9.0617-23.5969-21.1286-.7001-6.1831-1.0615-12.4565-1.0615-18.7899C213.3149,170.4057,329.7206,54,473.6211,54S733.9272,170.4057,733.9272,314.3062c0,16.1885-1.4015,32.0455-4.0896,47.4713-.1584.8997-.3186,1.7988-.4816,2.6974l-.0014.0078c-.0399.2199-.0803.4397-.1209.6594l18.34-.1883c.0023,0,.0046-.0001.0069-.0001.0002,0,.0004,0,.0006,0Z"/></svg>
+            <span class="word">Moonfin</span>
+          </div>
+          <p class="tag">Your library, on every screen — set up once</p>
+        </div>
+      </div>
+
+      <!-- B · Add Server -->
+      <div id="sB" class="clip scene" data-start="2.9" data-duration="3.6" data-track-index="0">
+        <div class="inner" id="b-in">
           <div class="modal">
             <div class="x">×</div>
             <div class="ttl">Add Server</div>
             <div class="sub">Choose how you'd like to connect.</div>
             <div class="rows">
-              <div class="row on" id="r1">
-                <div class="ico c">
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4fe3d0" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
-                </div>
+              <div class="row" id="r1">
+                <div class="ico c"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4fe3d0" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg></div>
                 <div class="txt"><div class="n">Server Address</div><div class="d">Jellyfin or Emby on your network or online</div></div>
                 <div class="arrow">›</div>
               </div>
               <div class="row" id="r2">
-                <div class="ico sq a">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f0b457" stroke-width="2"><path d="M4 5l14 7-14 7z"/></svg>
-                </div>
+                <div class="ico sq a"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#f0b457" stroke-width="2"><path d="M4 5l14 7-14 7z"/></svg></div>
                 <div class="txt"><div class="n">Sign in with Plex</div><div class="d">Use your Plex account to find its servers</div></div>
                 <div class="arrow">›</div>
               </div>
               <div class="row" id="r3">
-                <div class="ico sq g">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6fd08c" stroke-width="2"><path d="M12 3l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/></svg>
-                </div>
+                <div class="ico sq g"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6fd08c" stroke-width="2"><path d="M12 3l3 6 6 3-6 3-3 6-3-6-6-3 6-3z"/></svg></div>
                 <div class="txt"><div class="n">Emby Connect</div><div class="d">Sign in with your Emby Connect account</div></div>
                 <div class="arrow">›</div>
               </div>
@@ -163,39 +185,33 @@
         </div>
       </div>
 
-      <!-- B · Connect to Server -->
-      <div id="sB" class="clip scene" data-start="2.3" data-duration="2.2" data-track-index="0">
-        <div class="inner" id="b-in">
+      <!-- C · Connect to Server -->
+      <div id="sC" class="clip scene" data-start="6.5" data-duration="3.9" data-track-index="0">
+        <div class="inner" id="c-in">
           <div class="modal hasnav">
             <div class="back">‹</div>
             <div class="x">×</div>
             <div class="ttl">Connect to Server</div>
             <div class="sub">The same address you'd open in a browser, including the port.</div>
-            <div class="fieldwrap">
-              <div class="field" data-layout-allow-overlap>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4fe3d0" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
-                <div class="ph" id="b-ph">https://your-server.example.com</div>
-                <div class="val" id="b-val">https://aiostreams.mysweetpea.cc/jellyfin/9f3c2a71-4b1e-4d2c-9a07-3f6e2b8c5d19/q7Lm2Xc9Rt4Vw8Yz1Kp3Nb6Hd5Gf0Js2Qe7Ta1Up4Ri8Wo3En6Kd</div>
-                <div class="btn-cyan" id="b-btn">Connect</div>
-              </div>
-              <div class="hint">Works with Jellyfin and Emby. A Plex address opens the Plex sign-in.</div>
+            <div class="field" data-layout-allow-overlap>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4fe3d0" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
+              <div class="ph" id="c-ph">https://your-server.example.com</div>
+              <div class="val" id="c-val">https://aiostreams.mysweetpea.cc/jellyfin/9f3c2a71-4b</div>
+              <div class="btn-cyan" id="c-btn">Connect<span class="tick">✓</span></div>
             </div>
+            <div class="hint">Works with Jellyfin and Emby. A Plex address opens the Plex sign-in.</div>
           </div>
         </div>
       </div>
 
-      <!-- C · Server found -->
-      <div id="sC" class="clip scene" data-start="4.5" data-duration="1.9" data-track-index="0">
-        <div class="inner" id="c-in">
+      <!-- D · Server found -->
+      <div id="sD" class="clip scene" data-start="10.8" data-duration="3.4" data-track-index="0">
+        <div class="inner" id="d-in">
           <div class="modal">
-            <div class="check">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6fd08c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
-            </div>
+            <div class="check"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6fd08c" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
             <div class="ttl">Server found.</div>
             <div class="found">
-              <div class="sico">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8b7ef6" stroke-width="2"><path d="M12 4l8 15H4z"/></svg>
-              </div>
+              <div class="sico"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8b7ef6" stroke-width="2"><path d="M12 4l8 15H4z"/></svg></div>
               <div>
                 <div style="font-size:31px;font-weight:650">MySweetPea</div>
                 <div style="display:flex;gap:8px;margin-top:8px"><span class="pill">Jellyfin</span><span class="pill">Version 12.0.0</span></div>
@@ -205,17 +221,17 @@
             <div class="sub" style="margin-top:20px">Continue to choose who's signing in.</div>
             <div class="acts">
               <div class="ghost">Use a different address</div>
-              <div class="primary" id="c-go">Continue</div>
+              <div class="primary" id="d-go">Continue<span class="tick">✓</span></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- D · Sign In -->
-      <div id="sD" class="clip scene" data-start="6.4" data-duration="3.2" data-track-index="0">
-        <div class="inner" id="d-in">
+      <!-- E · Sign In -->
+      <div id="sE" class="clip scene" data-start="14.0" data-duration="4.9" data-track-index="0">
+        <div class="inner" id="e-in">
           <div class="logo">
-            <svg width="52" height="52" viewBox="0 0 100 100"><defs><linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b7ef6"/><stop offset="1" stop-color="#4fe3d0"/></linearGradient></defs><path d="M14 68c14 0 18-26 34-26s18 26 34 26c-10 8-24 12-34 12s-24-4-34-12z" fill="url(#mg)"/><circle cx="64" cy="26" r="9" fill="url(#mg)"/></svg>
+            <svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg2" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772"><stop offset="0.1" stop-color="#AA5CC3"/><stop offset="0.2029" stop-color="#9C62C5"/><stop offset="0.3988" stop-color="#7672CB"/><stop offset="0.6646" stop-color="#3A8CD4"/><stop offset="0.8944" stop-color="#00A4DC"/></linearGradient></defs><path fill="url(#mfg2)" d="M747.5737,517.5444c-27.9146,89.6334-100.9925,151.2944-212.3987,151.2944-86.9795,0-158.3005-43.2526-193.2185-98.5122-11.0539-17.479-17.4022-37.2333-17.4022-58.4728,0-14.6352,2.8917-28.5896,8.1116-41.3039,16.0775-39.1607,54.3585-66.8622,99.2043-66.8622,3.2396,0,6.4542.1443,9.6317.4264,66.1099,5.8658,118.3107,61.6547,118.3107,129.7736,0,27.121-8.2863,52.2595-22.3988,72.9451,72.1813-20.8043,124.2656-80.3934,137.9887-151.2944,2.5114-12.9728,3.8289-26.3668,3.8289-40.0711,0-115.9794-94.0206-210-210-210S261.0617,199.5206,261.0617,315.5c0,6.1451.2637,12.2283.7836,18.2379,1.2205,14.1217-9.7037,26.4872-23.8718,26.4872-12.1379,0-22.2763-9.0617-23.5969-21.1286-.7001-6.1831-1.0615-12.4565-1.0615-18.7899C213.3149,170.4057,329.7206,54,473.6211,54S733.9272,170.4057,733.9272,314.3062c0,16.1885-1.4015,32.0455-4.0896,47.4713-.1584.8997-.3186,1.7988-.4816,2.6974l-.0014.0078c-.0399.2199-.0803.4397-.1209.6594l18.34-.1883c.0023,0,.0046-.0001.0069-.0001.0002,0,.0004,0,.0006,0Z"/></svg>
             <span class="word">Moonfin</span>
           </div>
           <div class="modal">
@@ -228,68 +244,99 @@
               <div class="tab on">Password</div>
             </div>
             <div class="ins">
-              <div class="in" id="d-user"><span class="ph">Username</span><span class="fx" id="d-user-fx">alex</span><span class="tag" id="d-co1">your name</span></div>
-              <div class="in" id="d-pass"><span class="ph">Password</span><span class="fx" id="d-pass-fx">••••••</span><span class="tag" id="d-co2">your PIN</span></div>
+              <div class="in" id="e-user"><span class="ph">Username</span><span class="fx" id="e-user-fx">alex</span><span class="tag" id="e-t1">your name</span></div>
+              <div class="in" id="e-pass"><span class="ph">Password</span><span class="fx" id="e-pass-fx">••••••</span><span class="tag" id="e-t2">your PIN</span></div>
             </div>
             <div class="acts">
               <div class="ghost">Back</div>
-              <div class="primary" id="d-go">Sign In</div>
+              <div class="primary" id="e-go">Sign In<span class="tick">✓</span></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- E · caption -->
-      <div id="sE" class="clip scene" data-start="9.6" data-duration="2.4" data-track-index="0">
+      <!-- F · caption -->
+      <div id="sF" class="clip scene" data-start="18.85" data-duration="1.1" data-track-index="0">
         <div class="inner cap">
           <h2>Name in the first box.<br /><em>PIN</em> in the second.</h2>
-          <p>Both are on your dashboard's Media tab.<br />One-time setup — Moonfin remembers the server.</p>
+          <p>Both are on your dashboard's Media tab.</p>
         </div>
       </div>
+
+      <div class="cursor" id="cur"></div>
+      <div class="ring" id="ring"></div>
     </div>
 
     <script>
       const tl = gsap.timeline({ paused: true });
       const E = 'power3.out';
+      const cur = '#cur', ring = '#ring';
 
-      // A — rows settle in, first row tapped
-      tl.fromTo('#a-in', { opacity: 1, y: 0 }, { opacity: 1, y: 0, duration: 0.01 }, 0);
-      tl.fromTo('#r1, #r2, #r3', { opacity: 1, y: 0 }, { opacity: 1, y: 0, duration: 0.45, ease: E, stagger: 0.09 }, 0.18);
-      tl.fromTo('#r1 .arrow', { scale: 1 }, { scale: 0.88, duration: 0.1, ease: 'power1.in' }, 1.72);
-      tl.to('#r1 .arrow', { scale: 1, duration: 0.22, ease: 'back.out(2.2)' }, 1.82);
-      tl.to('#a-in', { opacity: 0, y: -14, duration: 0.32, ease: 'power2.in' }, 2.0);
+      // A helper for one visible tap: the pointer travels, presses, a ring pulses.
+      function tap(x, y, at, target, press) {
+        tl.fromTo(cur, { x: x - 220, y: y - 120, autoAlpha: 0 },
+          { x: x, y: y, autoAlpha: 1, duration: 0.55, ease: 'power2.out' }, at);
+        tl.set(ring, { x: x, y: y, scale: 0.5, autoAlpha: 0 }, at + 0.5);
+        tl.to(ring, { autoAlpha: 0.95, scale: 1, duration: 0.14, ease: 'power1.out' }, at + 0.55);
+        tl.to(ring, { autoAlpha: 0, scale: 1.55, duration: 0.5, ease: 'power2.out' }, at + 0.72);
+        if (press) {
+          tl.to(press, { scale: 0.975, filter: 'brightness(1.18)', duration: 0.12, ease: 'power1.in' }, at + 0.58);
+          tl.to(press, { scale: 1, filter: 'brightness(1)', duration: 0.34, ease: 'back.out(2)' }, at + 0.7);
+        }
+        if (target) {
+          tl.fromTo(target, { opacity: 0.35 }, { opacity: 1, duration: 0.3, ease: E }, at + 0.62);
+        }
+        tl.to(cur, { autoAlpha: 0, duration: 0.3 }, at + 1.5);
+      }
 
-      // B — address pasted, Connect pressed
-      tl.fromTo('#b-in', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 2.35);
-      tl.to('#b-ph', { autoAlpha: 0, duration: 0.2, ease: 'power1.out' }, 3.05);
-      tl.fromTo('#b-val', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.0, ease: 'steps(16)' }, 3.3);
-      tl.fromTo('#b-btn', { scale: 1 }, { scale: 0.9, duration: 0.1, ease: 'power1.in' }, 3.78);
-      tl.to('#b-btn', { scale: 1, duration: 0.22, ease: 'back.out(2.2)' }, 3.88);
-      tl.to('#b-in', { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in' }, 4.15);
+      // A — brand
+      tl.fromTo('#a-in .lock svg', { scale: 0.82, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, ease: 'back.out(1.6)' }, 0.1);
+      tl.fromTo('#a-in .word', { opacity: 0, x: -14 }, { opacity: 1, x: 0, duration: 0.7, ease: E }, 0.45);
+      tl.fromTo('#a-in .tag', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.7, ease: E }, 0.85);
+      tl.to('#a-in', { opacity: 0, y: -16, duration: 0.5, ease: 'power2.in' }, 2.4);
 
-      // C — found, then Continue
-      tl.fromTo('#c-in', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 4.55);
-      tl.fromTo('.check', { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(2.2)' }, 4.62);
-      tl.fromTo('.found', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: E }, 4.85);
-      tl.fromTo('#c-go', { scale: 1 }, { scale: 0.9, duration: 0.1, ease: 'power1.in' }, 5.9);
-      tl.to('#c-go', { scale: 1, duration: 0.2, ease: 'back.out(2.2)' }, 6.0);
-      tl.to('#c-in', { opacity: 0, y: -14, duration: 0.28, ease: 'power2.in' }, 6.12);
+      // B — Add Server: the first row is the one to press
+      tl.fromTo('#b-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 2.95);
+      tl.fromTo('#r1, #r2, #r3', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55, ease: E, stagger: 0.14 }, 3.3);
+      tap(540, 521, 4.35, null, '#r1');
+      tl.set('#r1', { className: 'row on' }, 4.95);
+      tl.to('#r2, #r3', { opacity: 0.45, duration: 0.35, ease: 'power1.out' }, 4.95);
+      tl.fromTo('#r1 .arrow', { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2.4)' }, 5.0);
+      tl.to('#b-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 6.1);
 
-      // D — both boxes fill, callouts name them
-      tl.fromTo('#d-in', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 6.45);
-            tl.to('#d-user .ph', { opacity: 0, duration: 0.12 }, 6.98);
-      tl.fromTo('#d-user-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.45, ease: 'steps(4)' }, 6.98);
-      tl.fromTo('#d-co1', { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.3, ease: E }, 7.05);
-            tl.to('#d-pass .ph', { opacity: 0, duration: 0.12 }, 7.6);
-      tl.fromTo('#d-pass-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.75, ease: 'steps(6)' }, 7.6);
-      tl.fromTo('#d-co2', { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.3, ease: E }, 7.6);
-      tl.fromTo('#d-go', { scale: 1 }, { scale: 0.9, duration: 0.1, ease: 'power1.in' }, 8.95);
-      tl.to('#d-go', { scale: 1, duration: 0.2, ease: 'back.out(2.2)' }, 9.05);
-      tl.to('#d-in', { opacity: 0, y: -16, duration: 0.32, ease: 'power2.in' }, 9.55);
+      // C — the address arrives, then Connect
+      tl.fromTo('#c-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 6.6);
+      tl.to('#c-ph', { autoAlpha: 0, duration: 0.25, ease: 'power1.out' }, 7.35);
+      tl.fromTo('#c-val', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.15, ease: 'steps(18)' }, 7.6);
+      tap(863, 637, 9.15, null, '#c-btn');
+      tl.to('#c-btn', { backgroundColor: '#2fb9a8', scale: 0.97, duration: 0.2, ease: 'power1.out' }, 9.73);
+      tl.to('#c-btn .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 9.75);
+      tl.to('#c-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 10.35);
 
-      // E — caption
-      tl.fromTo('#sE .inner', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 9.8);
-      tl.to('#sE .inner', { y: -8, duration: 2.2, ease: 'sine.inOut' }, 10.6);
+      // D — found, then Continue
+      tl.fromTo('#d-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 10.8);
+      tl.fromTo('.check', { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(2.2)' }, 11.0);
+      tl.fromTo('.found', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.55, ease: E }, 11.3);
+      tap(755, 772, 12.3, null, '#d-go');
+      tl.to('#d-go .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 12.92);
+      tl.to('#d-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 13.55);
+
+      // E — sign in: the two boxes fill, each labelled as it does
+      tl.fromTo('#e-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 14.1);
+      tl.to('#e-user .ph', { autoAlpha: 0, duration: 0.2 }, 15.0);
+      tl.fromTo('#e-user-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.7, ease: 'steps(4)' }, 15.0);
+      tl.fromTo('#e-t1', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 15.75);
+      tl.to('#e-pass .ph', { autoAlpha: 0, duration: 0.2 }, 16.2);
+      tl.fromTo('#e-pass-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.0, ease: 'steps(6)' }, 16.2);
+      tl.fromTo('#e-t2', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 17.2);
+      tap(755, 816, 17.65, null, '#e-go');
+      tl.to('#e-go', { backgroundColor: '#2fb9a8', duration: 0.2, ease: 'power1.out' }, 18.22);
+      tl.to('#e-go .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 18.24);
+      tl.to('#e-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 18.75);
+
+      // F — caption
+      tl.fromTo('#sF .inner', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 18.9);
+      tl.to('#sF .inner', { y: -8, duration: 1.0, ease: 'sine.inOut' }, 19.2);
 
       window.__timelines['main'] = tl;
       tl.seek(0);
