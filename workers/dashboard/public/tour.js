@@ -210,6 +210,7 @@
   /* ── state ─────────────────────────────────────────────────────────── */
   var steps = [], idx = 0;
   var root = null, svg = null, dim = null, block = null, card = null, toast = null;
+  var toastFade = null;   // the in-flight fade-out, cancelled before a new toast
   var stage = null;   // {x,y,w,h} of the cutout right now
   var rafId = null;
   var escHandler = null, resizeHandler = null;
@@ -323,12 +324,13 @@
     }
     toastTimer = setTimeout(function () {
       if (!toast.animate || reduceMotion()) { toast.hidden = true; return; }
-      var a = toast.animate(
+      if (toastFade) { try { toastFade.cancel(); } catch (e) {} }
+      var a = toastFade = toast.animate(
         [{ opacity: 1, transform: 'translateX(-50%) translateY(0)' },
          { opacity: 0, transform: 'translateX(-50%) translateY(-8px)' }],
         { duration: 260, easing: 'ease-in', fill: 'forwards' }
       );
-      a.onfinish = function () { a.cancel(); toast.hidden = true; toast.style.opacity = ''; };
+      a.onfinish = function () { a.cancel(); toastFade = null; toast.hidden = true; toast.style.opacity = ''; };
     }, 1500);
   }
 
@@ -534,14 +536,13 @@
       needsTab = true;
     }
 
-    var el = st.target ? document.querySelector(st.target) : null;
-
     // The card text updates IMMEDIATELY either way — the user should never
     // press Next and see nothing happen.
     renderCard();
 
     if (!needsTab) {
       // FAST PATH: no panel change, so the cutout can move on the next frame.
+      var el = st.target ? document.querySelector(st.target) : null;
       revealTarget(el);
       requestAnimationFrame(function () { arrive(st, el, my); });
       return;
@@ -555,8 +556,10 @@
     try { window.setTab(curTab); } catch (e) {}
     setTimeout(function () {
       if (my !== seq) return;
-      revealTarget(el);
-      settle(el, function () { arrive(st, el, my); }, 900);
+      // look the target up only now: the panel has just been rendered
+      var el2 = st.target ? document.querySelector(st.target) : null;
+      revealTarget(el2);
+      settle(el2, function () { arrive(st, el2, my); }, 900);
     }, TAB_SETTLE);
   }
 
@@ -609,6 +612,7 @@
   function finish() {
     if (!root) return;
     seq++;
+    clearDoIt();
     cancelAnimationFrame(rafId);
     root.hidden = true;
     stage = null;
