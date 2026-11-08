@@ -2025,12 +2025,15 @@ function setTab(name, opts) {
     if (b) { b.classList.toggle('active', t === name); b.setAttribute('aria-selected', t === name ? 'true' : 'false'); }
     if (p) p.hidden = t !== name;
   });
+  // The PIN card loads on the first Media visit — deferred from boot so a
+  // home-only session never provisions anything. It sits OUTSIDE the change
+  // check below: a session that restores straight into Media (or a link that
+  // lands there) never fires a tab CHANGE, so the card sat on its skeleton
+  // forever. mpLoadPin guards itself, so calling it on every sync is free.
+  if (name === 'media') {
+    try { if (typeof window.mpLoadPin === 'function') window.mpLoadPin(); } catch (e) {}
+  }
   if (prev !== name) {
-    // First Media-tab visit is when the PIN card loads — deferred from boot so
-    // a home-only visit never provisions anything.
-    if (name === 'media') {
-      try { if (typeof window.mpLoadPin === 'function') window.mpLoadPin(); } catch (e) {}
-    }
     // BLINK FIX (Sep 15): the moment a switch happens, retire the boot entrance
     // animation so that when .tp-enter is removed 750ms later, control can never
     // fall back to `main section{animation:msp-in}` — which RESTARTED from
