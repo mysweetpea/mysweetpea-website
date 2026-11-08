@@ -81,7 +81,7 @@
         border-radius: 16px; border: 2px solid var(--cyan); background: #0e1016;
       }
       .field .ph { position: absolute; left: 58px; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 25px; color: var(--faint); }
-      .field .val { flex: 1; width: 0; font-family: var(--mono); font-size: 19px; color: var(--ink); white-space: nowrap; overflow: hidden; }
+      .field .val { flex: 1; min-width: 0; font-family: var(--mono); font-size: 19px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; clip-path: inset(0 100% 0 0); }
       .btn-cyan {
         background: var(--cyan); color: var(--cyan-ink); font-weight: 700; font-size: 25px;
         padding: 14px 26px; border-radius: 12px; flex: none;
@@ -110,7 +110,7 @@
       .in { position: relative; display: grid; padding: 22px 24px; border-radius: 14px; border: 1px solid var(--line); background: #0e1016; font-size: 28px; color: var(--ink); }
       .in > span { grid-area: 1 / 1; }
       .in .ph { color: var(--faint); }
-      .in .fx { opacity: 0; }
+      .in .fx { clip-path: inset(0 100% 0 0); }
       .in.filled { color: var(--ink); }
       #d-pass-fx { letter-spacing: 7px; font-size: 30px; }
       .in { padding-right: 215px; }
@@ -127,7 +127,7 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="12.5" data-width="1080" data-height="1080">
+    <div id="root" data-composition-id="main" data-start="0" data-duration="12.8" data-width="1080" data-height="1080">
 
       <!-- A · Add Server -->
       <div id="sA" class="clip scene" data-start="0" data-duration="2.3" data-track-index="0">
@@ -175,7 +175,7 @@
               <div class="field" data-layout-allow-overlap>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4fe3d0" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18"/></svg>
                 <div class="ph" id="b-ph">https://your-server.example.com</div>
-                <div class="val" id="b-val">https://aiostreams.mysweetpea.cc/jellyfin</div>
+                <div class="val" id="b-val">https://aiostreams.mysweetpea.cc/jellyfin/9f3c2a71-4b1e-4d2c-9a07-3f6e2b8c5d19/q7Lm2Xc9Rt4Vw8Yz1Kp3Nb6Hd5Gf0Js2Qe7Ta1Up4Ri8Wo3En6Kd</div>
                 <div class="btn-cyan" id="b-btn">Connect</div>
               </div>
               <div class="hint">Works with Jellyfin and Emby. A Plex address opens the Plex sign-in.</div>
@@ -262,7 +262,7 @@
       // B — address pasted, Connect pressed
       tl.fromTo('#b-in', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 2.35);
       tl.to('#b-ph', { autoAlpha: 0, duration: 0.2, ease: 'power1.out' }, 3.05);
-      tl.fromTo('#b-val', { width: 0 }, { width: '100%', duration: 0.55, ease: 'power2.inOut' }, 3.3);
+      tl.fromTo('#b-val', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.0, ease: 'steps(16)' }, 3.3);
       tl.fromTo('#b-btn', { scale: 1 }, { scale: 0.9, duration: 0.1, ease: 'power1.in' }, 3.78);
       tl.to('#b-btn', { scale: 1, duration: 0.22, ease: 'back.out(2.2)' }, 3.88);
       tl.to('#b-in', { opacity: 0, y: -14, duration: 0.3, ease: 'power2.in' }, 4.15);
@@ -277,19 +277,19 @@
 
       // D — both boxes fill, callouts name them
       tl.fromTo('#d-in', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 6.45);
-            tl.to('#d-user .ph', { opacity: 0, duration: 0.15 }, 7.0);
-      tl.fromTo('#d-user-fx', { opacity: 0 }, { opacity: 1, duration: 0.25, ease: E }, 7.0);
+            tl.to('#d-user .ph', { opacity: 0, duration: 0.12 }, 6.98);
+      tl.fromTo('#d-user-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.45, ease: 'steps(4)' }, 6.98);
       tl.fromTo('#d-co1', { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.3, ease: E }, 7.05);
-            tl.to('#d-pass .ph', { opacity: 0, duration: 0.15 }, 7.55);
-      tl.fromTo('#d-pass-fx', { opacity: 0 }, { opacity: 1, duration: 0.25, ease: E }, 7.55);
+            tl.to('#d-pass .ph', { opacity: 0, duration: 0.12 }, 7.6);
+      tl.fromTo('#d-pass-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.75, ease: 'steps(6)' }, 7.6);
       tl.fromTo('#d-co2', { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.3, ease: E }, 7.6);
-      tl.fromTo('#d-go', { scale: 1 }, { scale: 0.9, duration: 0.1, ease: 'power1.in' }, 8.6);
-      tl.to('#d-go', { scale: 1, duration: 0.2, ease: 'back.out(2.2)' }, 8.7);
-      tl.to('#d-in', { opacity: 0, y: -16, duration: 0.32, ease: 'power2.in' }, 9.26);
+      tl.fromTo('#d-go', { scale: 1 }, { scale: 0.9, duration: 0.1, ease: 'power1.in' }, 8.95);
+      tl.to('#d-go', { scale: 1, duration: 0.2, ease: 'back.out(2.2)' }, 9.05);
+      tl.to('#d-in', { opacity: 0, y: -16, duration: 0.32, ease: 'power2.in' }, 9.55);
 
       // E — caption
-      tl.fromTo('#sE .inner', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 9.5);
-      tl.to('#sE .inner', { y: -8, duration: 2.0, ease: 'sine.inOut' }, 10.4);
+      tl.fromTo('#sE .inner', { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 9.8);
+      tl.to('#sE .inner', { y: -8, duration: 2.2, ease: 'sine.inOut' }, 10.6);
 
       window.__timelines['main'] = tl;
       tl.seek(0);

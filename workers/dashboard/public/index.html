@@ -2298,12 +2298,13 @@ const GUIDES = {
       { title: 'Copy your address', text: 'Open the Media tab in this dashboard. The \u201cYour Moonfin PIN\u201d card at the top shows a long server address and your PIN — tap Copy address.' },
       { title: 'Watch in your browser', text: 'No install needed: this sign-in page works in any browser.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
       { title: 'Or install the app', text: 'Moonfin is also an app for your phone, tablet and TV. Pick your device below for the exact steps.' },
-      { title: 'Add the server', text: 'In Moonfin choose Add server. Server address is the long link you copied. Your name is what you sign in with here (not your email). PIN is the number from the card.' },
+      { title: 'Add the server', text: 'In Moonfin choose Add Server, then Server Address. Paste the long link you copied \u2014 do not type it, it carries your account key. Tap Connect and Moonfin finds MySweetPea.' },
+      { title: 'Sign in', text: 'Pick the Password tab: your name (not your email) in the first box, your PIN from the Media tab in the second.' },
       { title: 'That is it', text: 'Moonfin remembers the server, so this is a one-time setup. Your progress syncs on every device.' },
     ],
     video: {
-      src: '/media/moonfin-pin.mp4?v=2',
-      poster: '/media/moonfin-pin.jpg?v=2',
+      src: '/media/moonfin-pin.mp4?v=3',
+      poster: '/media/moonfin-pin.jpg?v=3',
       alt: 'Ten second loop showing the three fields of Moonfin\u2019s Add server screen being filled in.',
       cap: 'Paste the address, then sign in: your name in the first box, your PIN in the second.',
     },
@@ -2381,19 +2382,19 @@ const PLATFORMS_MOONFIN = [
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
     { title: 'Use Swiftfin on Apple TV', text: 'Moonfin has no Apple TV app yet — Swiftfin is the official Jellyfin client for Apple TV. Install it from the App Store.', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728', btn: 'Get Swiftfin' },
-    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab \u2014 it is long, so never retype it. On the sign-in screen pick Password: your name (not your email), then your PIN. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
     { title: 'Add Moonfin from the Channel Store', text: 'Search "Moonfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab \u2014 it is long, so never retype it. On the sign-in screen pick Password: your name (not your email), then your PIN. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung / LG / Fire TV', glyph: 'tv', platformSteps: [
     { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+), LG (webOS 3.0+) and Fire TV sticks (Vega OS). Not in the TV stores — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab \u2014 it is long, so never retype it. On the sign-in screen pick Password: your name (not your email), then your PIN. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
     { title: 'Get the Moonfin desktop app', text: 'Native app for Windows, macOS and Linux.', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab \u2014 it is long, so never retype it. On the sign-in screen pick Password: your name (not your email), then your PIN. One-time setup.', url: '', btn: '' },
   ] },
 ];
 const PLATFORMS_JELLYFIN = [
@@ -4051,12 +4052,14 @@ function mspSessionBanner() {
       'Brand-new accounts can take a minute to become available — if Moonfin says the password is wrong, wait a moment and try again.</p>' +
       '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code>' +
       '<button type="button" class="mp-btn" id="mp-copy">Copy address</button></div>' +
+      '<p class="mp-note">The address is long on purpose: it carries your account key, so the app knows which account to open. ' +
+      'Treat it like a password — tap <strong>Copy address</strong> and paste it, never type it by hand.</p>' +
       '<ol class="mp-steps">' +
-      '<li>Open <strong>Moonfin</strong> on your device.</li>' +
-      '<li>Choose <strong>Add server</strong> and paste the address above.</li>' +
-      '<li>Sign in with your name <strong>' + esc(d.name || d.username || '') + '</strong> and the PIN.</li>' +
+      '<li>Open <strong>Moonfin</strong> and choose <strong>Add Server</strong> \u2192 <strong>Server Address</strong>.</li>' +
+      '<li>Paste the address above into the field, then tap <strong>Connect</strong>.</li>' +
+      '<li>On the sign-in screen pick <strong>Password</strong>: your name <strong>' + esc(d.name || d.username || '') + '</strong> in the first box, this PIN in the second.</li>' +
       '</ol>' +
-      '<video class="mp-vid" src="/media/moonfin-pin.mp4?v=2" poster="/media/moonfin-pin.jpg?v=2" controls muted playsinline preload="none" ' +
+      '<video class="mp-vid" src="/media/moonfin-pin.mp4?v=3" poster="/media/moonfin-pin.jpg?v=3" controls muted playsinline preload="none" ' +
       'aria-label="Short loop of the Moonfin Add server screen being filled in"></video>';
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {
@@ -5194,6 +5197,8 @@ function relFuture(v) {
 .msp-sbar a{color:#F0C27B;font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .msp-sbar button{margin-left:auto;background:none;border:0;color:inherit;font-size:1.1rem;line-height:1;cursor:pointer;padding:2px 4px}
 @media(max-width:768px){.msp-sbar{top:auto;bottom:14px}}
+.mp-note{margin:12px 0 0;font-size:.82rem;line-height:1.5;color:var(--text-dim);max-width:64ch}
+.mp-note strong{color:var(--text)}
 .gp-vid,.mp-vid{margin:18px 0 0;padding:0;max-width:360px}
 .gp-vid video,.mp-vid{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--border);background:#0B0C15}
 .gp-vid figcaption{margin-top:8px;font-size:.74rem;color:var(--text-faint);line-height:1.45}
