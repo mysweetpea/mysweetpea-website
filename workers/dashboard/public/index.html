@@ -2043,7 +2043,7 @@ window.setTab = setTab;
   };
   window.updateFooterStatus();
 function goSection(id) {
-  const map = { 'sec-media': 'media', 'sec-media-m': 'media', 'sec-library': 'media', 'sec-services': 'services', 'sec-uptime': 'services', 'sec-security': 'security', 'sec-sessions': 'security', 'sec-apps': 'security', 'sec-account': 'account', 'sec-status': 'home', 'stats': 'stats', 'sec-spirit': 'account' };
+  const map = { 'sec-media': 'media', 'sec-media-m': 'media', 'sec-services': 'services', 'sec-uptime': 'services', 'sec-security': 'security', 'sec-sessions': 'security', 'sec-apps': 'security', 'sec-account': 'account', 'sec-status': 'home', 'stats': 'stats', 'sec-spirit': 'account' };
   if (map[id]) setTab(map[id]);
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -2728,8 +2728,6 @@ function guideDetailHtml(key) {
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
     '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Trending now<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
     obHtml +
-    '<div id="stats" hidden></div>' +
-    '<section class="card" id="sec-status" hidden><p class="eyebrow">Service status</p><h3>Service status</h3><div class="skel"></div></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-stats" role="tabpanel" aria-labelledby="tab-stats">' +
     '<div class="st3-grid">' +
@@ -3739,6 +3737,8 @@ function guideDetailHtml(key) {
   // ===== aurora services engine (sv*) =====
   const SV_CATS = {}; /* derived: display name -> cat (single source: SERVICES[].cat) */
   SERVICES.forEach((s) => { SV_CATS[s.name] = s.cat; });
+  const HM_DOT_MATCH = {}; /* derived: display name -> Kuma monitor fragments */
+  SERVICES.forEach((s) => { HM_DOT_MATCH[s.name] = s.mon; });
   const SV_CAT_LABELS = [['all','All'],['media','Media'],['cloud','Cloud & Files'],['tools','Tools'],['ai','AI']];
   window.svState = { filter: 'all', sort: 'default', featured: 0, upmap: {}, monmap: {}, updmap: {} };
   const svState = window.svState;
@@ -4161,9 +4161,65 @@ function guideDetailHtml(key) {
       else unSec.hidden = true;
     }
   }
+  function hmAcctTiles(cls) {
+    const go = '<svg class="hm-tile-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>';
+    const tile = (tab, tt, ico, lbl, sub) => '<button type="button" class="hm-card hm-tile' + (cls ? ' ' + cls : '') + '" onclick="setTab(\'' + tab + '\')">' +
+      '<span class="hm-tile-th"><span class="hm-tile-tt">' + tt + '</span>' + go + '</span>' +
+      '<span class="hm-tile-row"><span class="hm-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ico + '</svg></span>' +
+      '<span class="hm-tile-txt"><span class="hm-tile-lbl">' + lbl + '</span><span class="hm-tile-sub">' + sub + '</span></span></span></button>';
+    return '<button type="button" class="hm-card hm-tile hm-tile-banner" id="rf-open" onclick="openReferralDialog()">' +
+      '<span class="hm-tile-th"><span class="hm-tile-tt">Referrals</span>' + go + '</span>' +
+      '<span class="hm-tile-row"><span class="hm-tile-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg></span>' +
+      '<span class="hm-tile-txt"><span class="hm-tile-lbl">Recommend a friend</span><span class="hm-tile-sub">Vouch for someone &amp; track it</span></span></span></button>' +
+      tile('account', 'Your devices', '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>', 'Devices &amp; sessions', 'See where you are signed in') +
+      tile('security', 'Recent activity', '<circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/>', 'Recent activity', 'Your latest account events') +
+      tile('guides', 'Watch anywhere', '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>', 'Setup guides', 'Phone, TV &amp; browser how-tos');
+  }
+  function hmPosterCard(it, i) {
+    const initial = esc(String((it && it.name) || '?').trim().charAt(0).toUpperCase() || '?');
+    const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
+    const rating = (it && it.rating != null) ? Number(it.rating).toFixed(1) : null;
+    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + encodeURIComponent(String((it && it.id) == null ? '' : it.id)) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="hm-poster hm-g' + (i % 3) + '"><span class="hm-poster-init">' + initial + '</span>' +
+      ((it && it.img) ? '<img loading="lazy" alt="" src="' + esc(String(it.img)) + '" onerror="this.remove()">' : '') +
+      (rating ? '<span class="hm-pbadge hm-rate-badge">' + rating + '</span>' : '<span class="hm-pbadge">NEW</span>') + '</span>' +
+      '<span class="mtitle">' + esc((it && it.name) || '') + '</span>' +
+      (sub ? '<span class="msub">' + esc(sub) + '</span>' : '') + '</a>';
+  }
+
+  function hmApplyDots(monitors) {
+    Object.keys(HM_DOT_MATCH).forEach((svc) => {
+      const el = document.querySelector('.hm-orb-dot[data-hm-dot="' + svc.replace(/"/g, '&quot;') + '"]');
+      if (!el) return;
+      const keys = HM_DOT_MATCH[svc];
+      const m = (monitors || []).find((mo) => { const n = String((mo && mo.name) || '').toLowerCase(); return keys.some((k) => n.indexOf(k) >= 0); });
+      el.className = 'hm-orb-dot ' + (m ? ((m.current || (m.uptime24h != null && m.uptime24h > 50)) ? 'ok' : 'down') : 'unknown');
+    });
+  }
+
+  function hmSvcOrb(s) {
+    return '<a class="hm-card hm-svcrow" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' +
+      '<span class="hm-orb-plate"><img src="' + esc(s.icon) + '" alt="" width="30" height="30" loading="lazy"></span>' +
+      '<span class="hm-svcrow-main"><span class="hm-orb-nm">' + esc(s.name) + '<span class="hm-orb-dot unknown" data-hm-dot="' + esc(s.name) + '"></span></span>' +
+      '<span class="hm-orb-bl">' + esc(s.blurb) + '</span></span>' +
+      '<span class="hm-orb-up" data-hm-hb="' + esc(s.name) + '"></span></a>';
+  }
+
+  function hmWideCard(it) {
+    const pct = Math.max(0, Math.min(100, Number(it && it.progressPct) || 0));
+    const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
+    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + encodeURIComponent(String((it && it.id) == null ? '' : it.id)) + '" target="_blank" rel="noopener noreferrer">' +
+      '<img class="hm-wide-art" loading="lazy" alt="" src="' + esc(hmBackdrop(it && it.id, 480)) + '" onerror="this.style.display=\'none\'">' +
+      '<span class="hm-wide-glow"></span>' +
+      '<span class="hm-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>' +
+      '<span class="hm-wide-meta"><span class="hm-wide-t">' + esc((it && it.name) || '') + '</span>' +
+      (sub ? '<span class="hm-wide-e">' + esc(sub) + '</span>' : '') +
+      '<span class="hm-bar"><i style="width:' + pct + '%"></i></span></span></a>';
+  }
+
   function hmInit() {
     const acctRail = document.getElementById('hm-banner-acct');
-    if (acctRail) acctRail.innerHTML = hmAcctTiles('hm-tile-banner');
+    try { if (acctRail) acctRail.innerHTML = hmAcctTiles('hm-tile-banner'); } catch (e) {}
     try { hmLoadBanner(); } catch (e) {}
     try { hmLoadHero(); } catch (e) {}
     // (scope=all fetch deferred until the Media tab is first opened — wired in setTab)
@@ -4481,15 +4537,6 @@ function guideDetailHtml(key) {
     const r = await fetch('/api/devices/' + id, { method: 'DELETE' });
     if (r.ok) { toast('Device removed'); location.reload(); } else toast('Failed to remove');
   };
-  // ===== STATUS =====
-  fetch('/api/status').then(r => r.json()).then(d => {
-    const el = $('#sec-status'); const mons = (d && d.monitors) || [];
-    if (!mons.length) { el.innerHTML = '<p class="eyebrow">Service status</p><h3>Service status</h3><p class="dim">No status data.</p>'; return; }
-    el.innerHTML = '<p class="eyebrow">Service status</p><h3>Service status</h3>' + mons.slice(0, 8).map(m => {
-      const up = (m.uptime24h == null ? 100 : m.uptime24h) > 50;
-      return '<div class="row"><div class="left"><span><span class="dot ' + (up ? 'ok' : 'down') + '"></span>' + esc(m.name) + '</span></div><span class="dim">' + Math.round(m.uptime24h || 0) + '%</span></div>';
-    }).join('');
-  }).catch(() => { $('#sec-status').innerHTML = '<p class="eyebrow">Service status</p><h3>Service status</h3><p class="dim">Unavailable.</p>'; });
   // ===== RECENT ACTIVITY (audit feed — icons + verbs + relative time) =====
   const ACT_SVG =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
