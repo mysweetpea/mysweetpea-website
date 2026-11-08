@@ -123,6 +123,9 @@
       }
 
       .cap { text-align: center; }
+      .cap .endlock { justify-content: center; margin-bottom: 30px; }
+      .cap .endlock svg { width: 56px; height: 56px; }
+      .cap .endlock .word { font-size: 42px; }
       .cap h2 { font-size: 50px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
       .cap h2 em { font-style: normal; color: var(--cyan); }
       .cap p { margin-top: 18px; font-size: 28px; color: var(--dim); line-height: 1.45; }
@@ -151,13 +154,11 @@
       .pinmodal .acts { margin-top: 22px; }
       /* ---- the pointer, so every tap is visible ---- */
       .cursor {
-        position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%;
-        background: rgba(242, 244, 250, 0.92); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+        position: absolute; width: 26px; height: 34px; margin: -2px 0 0 -2px;
         left: 0; top: 0; visibility: hidden; opacity: 0; pointer-events: none; z-index: 40;
+        filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55));
       }
-      .cursor::after {
-        content: ''; position: absolute; inset: 14px; border-radius: 50%; background: var(--cyan-ink); opacity: 0.35;
-      }
+      .cursor svg { display: block; }
       .ring {
         position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%;
         border: 3px solid var(--cyan); left: 0; top: 0; visibility: hidden; opacity: 0; pointer-events: none; z-index: 39;
@@ -169,7 +170,8 @@
       .wbox { --faint: #99a1b7; }
       /* ---- two windows: the dashboard you copy from, Moonfin you paste into ---- */
       .wsplit { width: 940px; display: flex; flex-direction: column; gap: 20px; }
-      .wbox { border: 1px solid var(--line); border-radius: 18px; background: var(--panel); overflow: hidden; box-shadow: 0 26px 60px rgba(0, 0, 0, 0.55); }
+      .wbox { border: 1px solid rgba(150, 168, 200, 0.16); border-radius: 20px; background: var(--panel); overflow: hidden;
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6), 0 2px 0 rgba(255, 255, 255, 0.04) inset; }
       .wbar { display: flex; align-items: center; gap: 10px; padding: 11px 16px; background: #191c26; border-bottom: 1px solid var(--line); }
       .wbar i { width: 9px; height: 9px; border-radius: 50%; background: #3a3f4d; display: inline-block; }
       .wbar i + i { margin-left: 6px; }
@@ -319,13 +321,14 @@
       <!-- C · caption -->
       <div id="sC" class="clip scene" data-start="18.1" data-duration="1.5" data-track-index="0">
         <div class="inner cap">
+          <div class="lock endlock"><svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772" > <stop offset="0.1" style="stop-color:#AA5CC3" /> <stop offset="0.2029" style="stop-color:#9C62C5" /> <stop offset="0.3988" style="stop-color:#7672CB" /> <stop offset="0.6646" style="stop-color:#3A8CD4" /> <stop offset="0.8944" style="stop-color:#00A4DC" /> </linearGradient></defs><path style="fill:url(#mfg);" d="M580.593,137.312c0.236,1.437-1.764,1.397-2.792,1.682 c-9.692,2.687-20.11,4.17-29.967,7.043c-121.791,35.504-202.149,150.49-179.921,278.449 c12.427,71.54,55.048,119.207,132.449,97.079c88.146-25.199,99.429-101.063,147.839-164.161 c20.295-26.453,44.824-49.573,71.482-69.518c4.092-3.062,44.959-31.555,46.91-29.58 c-4.974,18.877-12.625,36.926-17.711,55.778c-17.376,64.396-23.167,162.393,67.715,164.225l-10.013,39.99 c-16.446-7.617-33.575-13.262-51.63-15.857c-31.725-4.561-68.255-0.546-99.549,6.166 c-81.083,17.391-149.924,71.416-231.798,89.202c-65.253,14.176-171.515,7.963-199.029-64.993 c-32.857-87.123-17.129-196.894,34.796-273.239C329.708,156.173,458.551,108.174,580.593,137.312z" /> <path style="fill:#00A4DC;" d="M796.599,546.311c-8.783,22.644-20.315,44.297-34.604,63.909 c-16.913-7.035-35.708-8.954-53.939-7.959c-101.271,5.523-183.793,95.852-288.454,89.052l14.808,4.677 c94.845,28.604,181.214-45.296,270.697-49.677c3.07-0.15,25.483-0.402,25.47,2.49 c-42.221,42.774-97.662,73.834-156.791,86.189c-120.75,25.23-242.358-26.603-312.177-126.206l0.484-1.478 c25.284,19.74,57.578,33.429,89.297,38.703c134.365,22.345,209.318-77.749,329.022-102.394 C719.682,535.531,757.934,534.758,796.599,546.311z" /></svg><span class="word">Moonfin</span></div>
           <h2>Copy the address.<br /><em>Paste</em> it in.</h2>
           <p>Nothing to type — both are on your dashboard.</p>
         </div>
       </div>
 
       <div class="ptag" id="ptag">✓ Pasted</div>
-      <div class="cursor" id="cur"></div>
+      <div class="cursor" id="cur"><svg viewBox="0 0 24 32" width="26" height="34"><path d="M3 2.5 20.5 13 12.6 14.4 16.3 24.5 13 25.8 9.2 15.7 3 21.2Z" fill="#ffffff" stroke="#0a0b10" stroke-width="1.3" stroke-linejoin="round"/></svg></div>
       <div class="ring" id="ring"></div>
     </div>
 
@@ -335,6 +338,16 @@
       const cur = '#cur', ring = '#ring';
       const REST = { x: 930, y: 1000 };
 
+      // The window in use holds full weight; the other steps back so the eye
+      // always knows which side the action is on.
+      function spot(which, at) {
+        const on = { opacity: 1, filter: 'brightness(1)', duration: 0.4, ease: 'power2.out' };
+        const off = { opacity: 0.66, filter: 'brightness(0.55)', duration: 0.4, ease: 'power2.out' };
+        tl.to('#wa', which === 'a' ? on : off, at);
+        tl.to('#wb', which === 'b' ? on : off, at);
+        tl.to(which === 'a' ? '#wa' : '#wb', { y: -3, duration: 0.4, ease: 'power2.out' }, at);
+        tl.to(which === 'a' ? '#wb' : '#wa', { y: 0, duration: 0.4, ease: 'power2.out' }, at);
+      }
       function move(x, y, at, dur) {
         tl.to(cur, { x: x, y: y, duration: dur || 0.55, ease: 'power2.inOut' }, at);
       }
@@ -375,31 +388,33 @@
       tl.fromTo('#wb', { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 3.12);
 
       // 1 — copy the address off the dashboard
+      spot('a', 3.7);
       move(866, 369, 3.8);
       press(866, 369, 4.45, '#cp-addr');
       tl.to('#cp-addr .copytick', { opacity: 1, duration: 0.2 }, 4.55);
       tl.set('#cp-addr', { attr: { class: 'copy done' } }, 4.55);
 
       // 2 — paste it into Moonfin
+      spot('b', 5.15);
       move(460, 722, 5.3, 0.65);
       press(460, 722, 5.95, '#c-val');
-      pasteInto('#c-val', '#c-ph', '#cp-addr', 6.35, 460, 722 - 46);
+      pasteInto('#c-val', '#c-ph', '#cp-addr', 6.35, 812, 486);
       move(835, 725, 7.2, 0.45);
       press(835, 725, 7.55, '#c-btn');
       tl.to('#c-btn', { backgroundColor: '#2fb9a8', duration: 0.2 }, 7.7);
       tl.to('#c-btn .tick', { opacity: 1, x: 0, duration: 0.25, ease: 'back.out(2)' }, 7.8);
 
       // 3 — found, continue
-      tl.to('#m1', { opacity: 0, duration: 0.35 }, 8.35);
-      tl.to('#m2', { opacity: 1, duration: 0.35 }, 8.4);
+      tl.to('#m1', { opacity: 0, y: -8, duration: 0.32, ease: 'power2.in' }, 8.35);
+      tl.fromTo('#m2', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.38, ease: 'power3.out' }, 8.4);
       tl.fromTo('#m2 .found', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, ease: E }, 8.5);
       move(723, 833, 9.1, 0.45);
       press(723, 833, 9.5, '#d-go');
       tl.to('#d-go .tick', { opacity: 1, x: 0, duration: 0.25, ease: 'back.out(2)' }, 9.62);
 
       // 4 — profiles
-      tl.to('#m2', { opacity: 0, duration: 0.35 }, 10.05);
-      tl.to('#m3', { opacity: 1, duration: 0.35 }, 10.1);
+      tl.to('#m2', { opacity: 0, y: -8, duration: 0.32, ease: 'power2.in' }, 10.05);
+      tl.fromTo('#m3', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.38, ease: 'power3.out' }, 10.1);
       tl.fromTo('#p1, #p2', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: E, stagger: 0.14 }, 10.2);
       move(421, 734, 10.9, 0.5);
       press(421, 734, 11.45, '#p1');
@@ -407,15 +422,17 @@
       tl.to('#p2', { opacity: 0.4, duration: 0.3 }, 11.56);
 
       // 5 — copy the PIN, paste it in
-      tl.to('#m3', { opacity: 0, duration: 0.35 }, 12.05);
-      tl.to('#m4', { opacity: 1, duration: 0.35 }, 12.1);
+      tl.to('#m3', { opacity: 0, y: -8, duration: 0.32, ease: 'power2.in' }, 12.05);
+      tl.fromTo('#m4', { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.38, ease: 'power3.out' }, 12.1);
+      spot('a', 12.45);
       move(364, 301, 12.5);
       press(364, 301, 13.0, '#cp-pin');
       tl.to('#cp-pin .copytick', { opacity: 1, duration: 0.2 }, 13.1);
       tl.set('#cp-pin', { attr: { class: 'copy done' } }, 13.1);
+      spot('b', 13.55);
       move(506, 703, 13.6, 0.5);
       press(506, 703, 14.0, '#f-val');
-      pasteInto('#f-val', '#f-ph', '#cp-pin', 14.35, 506, 703 - 46);
+      pasteInto('#f-val', '#f-ph', '#cp-pin', 14.35, 812, 486);
       tl.fromTo('#f-tag', { opacity: 0, x: 10 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 14.6);
       move(723, 772, 15.2, 0.45);
       press(723, 772, 15.55, '#f-go');
