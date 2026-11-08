@@ -1687,8 +1687,9 @@ a.hm-req{text-decoration:none;color:var(--text)}
 <style id="mp-pin-css">
 /* Moonfin PIN card (media tab). Members get their media PIN here instead of
    hunting for it in the welcome email. */
+.mp-pinrow{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin:.35rem 0 .1rem}
 .mp-pin{font-family:var(--mono,'JetBrains Mono',monospace);font-size:2.1rem;font-weight:700;
-  letter-spacing:.2em;margin:.35rem 0 .1rem;color:var(--text,#EAF2F4)}
+  letter-spacing:.2em;margin:0;color:var(--text,#EAF2F4)}
 .mp-sub{font-size:.86rem;opacity:.82;margin:0 0 .9rem}
 .mp-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.5rem 0}
 .mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.82rem;
@@ -2564,6 +2565,12 @@ const PLATFORMS = {
     ] },
   ],
 };
+/* A guide for a service that is still being built wears the same dashed,
+   dimmed treatment as its card on the Services tab — one truth, read from
+   SERVICES instead of a second hand-kept list. */
+function svcDev(key) {
+  try { return !!(SERVICES.find((x) => x.key === key) || {}).dev; } catch (e) { return false; }
+}
 function guideChipHtml(key, sel) {
   const g = GUIDES[key];
   if (!g) return '';
@@ -2573,7 +2580,9 @@ function guideChipHtml(key, sel) {
     ? '<img class="svc-guide-ico" src="' + esc(icon) + '" alt="" width="28" height="28" loading="lazy">'
     : '<span class="svc-guide-ico" style="color:' + c.fg + ';background:' + c.bg + '">' + esc(g.name[0].toUpperCase()) + '</span>';
   const gpCount = (PLATFORMS[key] && PLATFORMS[key].length) ? '<span class="gp-count" title="' + PLATFORMS[key].length + ' platforms">' + PLATFORMS[key].length + '</span>' : '';
-  return '<button type="button" class="svc-guide-chip" data-guide="' + esc(key) + '" aria-pressed="' + (key === sel ? 'true' : 'false') + '">' + inner + '<span>' + esc(g.name) + '</span>' + gpCount + '</button>';
+  const dev = svcDev(key);
+  return '<button type="button" class="svc-guide-chip' + (dev ? ' isdev' : '') + '" data-guide="' + esc(key) + '" aria-pressed="' + (key === sel ? 'true' : 'false') + '">' + inner +
+    '<span>' + esc(g.name) + '</span>' + (dev ? '<span class="gp-dev">Soon</span>' : '') + gpCount + '</button>';
 }
 function platChipHtml(entry) {
   const p = PLAT[entry.p];
@@ -2621,6 +2630,9 @@ function guideDetailHtml(key) {
   const g = GUIDES[key];
   if (!g) return '';
   let h = '<div class="svc-guide-title">' + esc(g.name) + '</div><p class="svc-guide-intro">' + esc(g.plain) + '</p>';
+  if (svcDev(key)) {
+    h += '<p class="gp-devnote"><span aria-hidden="true">\u25CB</span> Still being built — these steps are written down here, but the service is not open to every member yet.</p>';
+  }
   const plats = PLATFORMS[key];
   if (plats && plats.length) {
     if (!plats.some((x) => x.p === guidePlatSel[key])) guidePlatSel[key] = plats[0].p;
@@ -2892,7 +2904,8 @@ function mspSessionBanner() {
     '' +
     '</div>' +
     '<div class="tabpanel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">' +
-    '<section class="card" id="sec-guides"><p class="eyebrow">Setup guides</p><h3>Setup guides<span class="tier-echo" id="tier-echo-guides"></span></h3><p class="dim" style="margin:10px 0 16px">How to get started with each MySweetPea service — step by step.</p>' +
+    '<section class="card" id="sec-guides"><p class="eyebrow">Setup guides</p><h3>Setup guides<span class="tier-echo" id="tier-echo-guides"></span></h3><p class="dim" style="margin:10px 0 4px">How to get started with each MySweetPea service — step by step.</p>' +
+    '<p class="dim gp-key" style="margin:0 0 16px"><span class="gp-dev">Soon</span> means the service is still being built. The steps are here early so nothing is a surprise later.</p>' +
     '<div class="svc-guide"><div class="svc-guide-nav" id="guide-nav" role="group" aria-label="Choose a service"></div>' +
     '<details class="m-guide-dd" id="m-guide-dd"><summary class="m-guide-sum"><span class="m-guide-sum-t" id="m-guide-sum-t">Guide</span><span class="m-guide-chev" aria-hidden="true">&rarr;</span></summary><div class="svc-guide-detail" id="guide-body" aria-live="polite"></div></details></section>' +
     '</div>' +
@@ -3610,8 +3623,10 @@ function mspSessionBanner() {
       if (o.badge && it.type) h += '<span class="mtype">' + esc(it.type) + '</span>';
       h += '<span class="mposter-wrap"><span class="mposter-fb hm-g0" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/></span>';
-      h += '<div class="mtitle">' + esc(it.name || '') + '</div>';
-      if (it.seriesName) h += '<div class="msub">' + esc(it.seriesName) + '</div>';
+      /* Episodes are titled after their show everywhere in this dashboard —
+         the episode name is the sub-line, never the headline. */
+      h += '<div class="mtitle">' + esc(it.seriesName || it.name || '') + '</div>';
+      if (it.seriesName && it.name) h += '<div class="msub">' + esc(it.name) + '</div>';
       if (o.progress) h += '<div class="mprog"><i style="width:' + pct + '%"></i></div>';
       return h + '</a>';
     };
@@ -3625,7 +3640,7 @@ function mspSessionBanner() {
       const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '" target="_blank" rel="noopener">' +
         '<span class="mposter-wrap"><span class="mposter-fb hm-g' + ((i || 0) % 3) + '" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
-        '<div class="mtitle">' + esc(it.name || '') + '</div>' +
+        '<div class="mtitle">' + esc(it.seriesName || it.name || '') + '</div>' +
         '<div class="msub">' + esc([it.year, (it.rating != null ? '\u2605 ' + Number(it.rating).toFixed(1) : '')].filter(Boolean).join(' \u00b7 ')) + '</div></a>';
       const rateChip = (it) => (it.rating != null ? '<span class="mrate">' + Number(it.rating).toFixed(1) + '</span>' : '');
       const playsChip = (it) => (it.playCount ? '<span class="mplays">' + it.playCount + (it.playCount === 1 ? ' play' : ' plays') + '</span>' : '');
@@ -4069,7 +4084,8 @@ function mspSessionBanner() {
 
   function mpPinRender(body, d) {
     body.innerHTML =
-      '<p class="mp-pin">' + esc(d.pin) + '</p>' +
+      '<div class="mp-pinrow"><p class="mp-pin">' + esc(d.pin) + '</p>' +
+      '<button type="button" class="mp-btn" id="mp-copy-pin">Copy PIN</button></div>' +
       '<p class="mp-sub">This is your personal PIN. It stays the same every time you look here. ' +
       'Brand-new accounts can take a minute to become available — if Moonfin says the password is wrong, wait a moment and try again.</p>' +
       '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code>' +
@@ -4095,6 +4111,12 @@ function mspSessionBanner() {
     const pv = document.getElementById('mp-play');
     const mvid = document.getElementById('mp-video');
     if (pv && mvid) mvid.addEventListener('play', () => pv.remove(), { once: true });
+    const cpp = document.getElementById('mp-copy-pin');
+    if (cpp) cpp.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(String(d.pin || '')); cpp.textContent = 'Copied'; }
+      catch (e) { cpp.textContent = 'Select and copy'; }
+      setTimeout(() => { cpp.textContent = 'Copy PIN'; }, 1800);
+    });
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {
       const t = document.getElementById('mp-server');
@@ -5332,6 +5354,18 @@ function relFuture(v) {
 /* ===== GUIDES v2 premium polish ===== */
 /* service chip rail: softer cards, clearer active state */
 .svc-guide-nav{display:flex;flex-direction:column;gap:8px}
+.svc-guide-chip.isdev{border-style:dashed;background:rgba(19,21,36,.28)}
+.svc-guide-chip.isdev span:not(.gp-dev):not(.gp-count){color:var(--text-dim)}
+#guide-nav .svc-guide-chip.isdev .svc-guide-ico{filter:grayscale(1) opacity(.55)}
+.gp-dev{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--gold,#D9A86C);border:1px solid rgba(217,168,108,.45);background:rgba(217,168,108,.10);
+  border-radius:999px;padding:2px 8px;margin-left:3px;white-space:nowrap}
+.gp-key{display:flex;align-items:center;gap:8px;font-size:.8rem;line-height:1.5;flex-wrap:wrap}
+.gp-key .gp-dev{margin:0}
+.gp-devnote{display:flex;gap:.5rem;align-items:flex-start;margin:.2rem 0 1rem;padding:.7rem .85rem;
+  font-size:.82rem;line-height:1.5;color:var(--text-dim);background:rgba(19,21,36,.45);
+  border:1px dashed var(--border);border-radius:12px}
+.gp-devnote span{color:#F0B457;font-size:.7rem;line-height:1.7}
 .svc-guide-chip{border-radius:13px;padding:11px 14px;border:1px solid var(--border);background:linear-gradient(160deg,rgba(139,126,246,.04),transparent 65%);transition:border-color .22s ease,background .22s ease,transform .22s ease}
 .svc-guide-chip:hover{border-color:rgba(139,126,246,.4);transform:translateX(2px)}
 .svc-guide-chip[aria-pressed="true"]{border-color:rgba(139,126,246,.55);background:linear-gradient(135deg,rgba(139,126,246,.16),rgba(69,214,200,.08));box-shadow:0 0 16px rgba(139,126,246,.12),inset 0 1px 0 rgba(255,255,255,.05)}

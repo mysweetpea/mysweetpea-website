@@ -1314,7 +1314,7 @@ export default {
                 b.ticks += ticks; b.items += 1; if (key) b.titles.add(key);
               };
               try {
-                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=Movie,Episode&Fields=RunTimeTicks,SeriesId&SortBy=DatePlayed&SortOrder=Descending&Limit=500', H);
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=Movie,Episode&Fields=RunTimeTicks,SeriesId,SeriesName&SortBy=DatePlayed&SortOrder=Descending&Limit=500', H);
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
@@ -1370,7 +1370,8 @@ export default {
                   }
                   out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : items.length;
                   out.jf_resume_titles = items.length;
-                  out.jf_top_title = (items[0] && typeof items[0].Name === 'string' && items[0].Name) || null;
+                  const top = items[0];
+                  out.jf_top_title = top ? (String(top.SeriesName || top.Name || '').trim() || null) : null;
                 }
               } catch {}
               const hrs = (t: number) => (t > 0 ? Math.round((t / 3.6e10) * 10) / 10 : 0); // .NET ticks are 100ns
