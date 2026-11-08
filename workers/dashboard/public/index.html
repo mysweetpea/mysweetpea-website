@@ -4241,7 +4241,8 @@ function guideDetailHtml(key) {
   function mpPinRender(body, d) {
     body.innerHTML =
       '<p class="mp-pin">' + esc(d.pin) + '</p>' +
-      '<p class="mp-sub">This is your personal PIN. It stays the same every time you look here.</p>' +
+      '<p class="mp-sub">This is your personal PIN. It stays the same every time you look here. ' +
+      'Brand-new accounts can take a minute to become available — if Moonfin says the password is wrong, wait a moment and try again.</p>' +
       '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code>' +
       '<button type="button" class="mp-btn" id="mp-copy">Copy address</button></div>' +
       '<ol class="mp-steps">' +

@@ -455,6 +455,94 @@ async function aiosSrc(env: Env): Promise<{ base: string; auth: string }> {
   return { base: AIOS_HOST + '/jellyfin', auth: 'MediaBrowser Token="' + (await aiosToken(env)) + '"' };
 }
 
+/* ── per-member media identity ───────────────────────────────────────────
+   Resolve the member's Moonfin persona and PIN (create-or-get; the shim
+   returns the SAME pin on repeat calls, so this is safe to call on every
+   request). Shared by the PIN card and the per-user media rows so exactly
+   one place knows how a member's media identity is minted. */
+type MemberIdentity =
+  | { ok: true; pin: string; name: string }
+  | { ok: false; error: string; status: number };
+
+async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdentity> {
+  if (!env.MOONBASE_ADMIN_TOKEN || !env.MOONBASE_MOUNT) {
+    return { ok: false, error: 'media access is not configured yet', status: 503 };
+  }
+  // The tier gate lives on the shim, but we must send the member's REAL tier —
+  // never a hardcoded one — or a seedling could self-provision sweetpea media
+  // access. Groups come from authentik; SessionData has no groups field.
+  let tier = '';
+  try {
+    const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
+    const d = await r.json() as any;
+    const u = d && d.user ? d.user : d;
+    const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
+    tier = names.includes('sweetpea') ? 'sweetpea' : names.includes('seedling') ? 'seedling' : '';
+  } catch { /* fall through to the no-tier error below */ }
+  if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
+
+  const username = String(sess.username || '').toLowerCase();
+  if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) {
+    return { ok: false, error: 'your username cannot be used for media access', status: 400 };
+  }
+  let r: Response;
+  try {
+    r = await fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
+        'user-agent': 'msp-dashboard/1.0',
+      },
+      body: JSON.stringify({ username, name: sess.name || username, tier }),
+    });
+  } catch {
+    return { ok: false, error: 'media service is unreachable right now', status: 502 };
+  }
+  if (!r.ok) return { ok: false, error: 'media setup failed', status: 502 };
+  const d: any = await r.json().catch(() => ({}));
+  if (d && d.skipped === 'tier') {
+    return { ok: false, error: 'Media access is not part of your tier.', status: 200 };
+  }
+  const pin = d && d.pin ? String(d.pin) : '';
+  if (!pin) return { ok: false, error: 'no pin came back — try again in a moment', status: 502 };
+  // ⚠️ The sign-in NAME is the persona's name, NOT the authentik username.
+  // parseSignIn treats any non-uuid username on a mount as the persona name,
+  // and personaByName matches on `name`. We provision with sess.name.
+  return { ok: true, pin, name: String(sess.name || username).trim() };
+}
+
+/* Base URL + auth header scoped to ONE member, for per-user rows.
+   ⚠️ The media server scopes UserData by TOKEN, not by the uid in the path —
+   querying with the service token would return the OWNER's watch history.
+   Sign-in is on the MOUNT path (PIN sign-in does not work on the bare one),
+   with Username = the persona NAME and Pw = the PIN. Cached per member for
+   an hour so a page load costs at most one extra round-trip. */
+async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string; auth: string } | null> {
+  const key = 'cache:aios-utok:' + String(sess.username || '').toLowerCase();
+  const cached = await cacheGetJson(key);
+  if (cached) {
+    try { const t = JSON.parse(cached).t; if (typeof t === 'string' && t) return { base: AIOS_HOST + '/jellyfin', auth: 'MediaBrowser Token="' + t + '"' }; } catch { /* remint */ }
+  }
+  const who = await provisionMember(env, sess);
+  if (!who.ok) return null;
+  try {
+    const r = await fetch(env.MOONBASE_MOUNT + '/Users/AuthenticateByName', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-emby-authorization': AIOS_UA },
+      body: JSON.stringify({ Username: who.name, Pw: who.pin }),
+    });
+    if (!r.ok) return null;
+    const d = await r.json() as any;
+    const t = d && d.AccessToken;
+    if (!t) return null;
+    await cachePutJson(key, JSON.stringify({ t }), 3600);
+    return { base: AIOS_HOST + '/jellyfin', auth: 'MediaBrowser Token="' + t + '"' };
+  } catch {
+    return null;
+  }
+}
+
 // The dashboard's slow feel = blocking upstream fetches whenever a cache
 // entry expires (media rows, stats). With SWR the client ALWAYS gets an
 // answer in ~10ms when any cached copy exists (fresh OR stale); the refresh
@@ -1245,12 +1333,28 @@ export default {
       }
 
       if (path === '/api/media/continue') {
-        // ⚠️ HELD BACK: this row is PER-USER. The service token resolves to the
-        // owner's config account, so serving it here would show every member the
-        // owner's watch history. It needs the per-persona token lane (authenticate
-        // as the member's persona on the mount path). Returns empty until then —
-        // which is what it returned anyway once the Jellyfin library was emptied.
-        return json({ items: [] });
+        // Continue watching — the member's OWN progress. The media server scopes
+        // UserData by token, so this MUST use their persona token; the service
+        // token would return the owner's history.
+        const src = await aiosUserSrc(env, sess);
+        if (!src) return json({ items: [] });
+        const payload = await swrJson(ctx, env, 'cache:media-cont:' + sess.sub, 120000, async () => {
+          const r = await fetch(src.base + '/Items?userId=&Recursive=true&SortBy=DatePlayed&SortOrder=Descending' +
+            '&Filters=IsResumable&IncludeItemTypes=Movie,Episode&Limit=12&Fields=ProductionYear,SeriesName&EnableImages=true',
+            { headers: { authorization: src.auth } });
+          if (!r.ok) throw new Error('aios ' + r.status);
+          const d = await r.json() as any;
+          const items = ((d.Items ?? []) as any[]).map((it) => ({
+            id: it.Id,
+            name: it.Name,
+            seriesName: it.SeriesName ?? '',
+            type: it.Type,
+            progressPct: Math.round(it.UserData?.PlayedPercentage ?? 0),
+            img: src.base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items });
+        });
+        return json(JSON.parse(payload));
       }
 
       if (path === '/api/media/latest') {
@@ -1274,12 +1378,23 @@ export default {
       }
 
       if (path === '/api/media/mostplayed') {
-        // ⚠️ HELD BACK: this row is PER-USER. The service token resolves to the
-        // owner's config account, so serving it here would show every member the
-        // owner's watch history. It needs the per-persona token lane (authenticate
-        // as the member's persona on the mount path). Returns empty until then —
-        // which is what it returned anyway once the Jellyfin library was emptied.
-        return json({ items: [] });
+        // Most played — per member.
+        const src = await aiosUserSrc(env, sess);
+        if (!src) return json({ items: [] });
+        const payload = await swrJson(ctx, env, 'cache:media-mostplayed:' + sess.sub, 600000, async () => {
+          const r = await fetch(src.base + '/Items?userId=&SortBy=PlayCount&SortOrder=Descending&Recursive=true' +
+            '&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
+            { headers: { authorization: src.auth } });
+          if (!r.ok) throw new Error('aios ' + r.status);
+          const d = await r.json() as any;
+          const items = ((d.Items ?? []) as any[]).map((it) => ({
+            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
+            rating: it.CommunityRating ?? null, playCount: it.UserData?.PlayCount ?? 0,
+            img: src.base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items });
+        });
+        return json(JSON.parse(payload));
       }
 
       if (path === '/api/media/unplayed') {
@@ -1379,12 +1494,36 @@ export default {
       }
 
       if (path === '/api/media/recommend') {
-        // ⚠️ HELD BACK: this row is PER-USER. The service token resolves to the
-        // owner's config account, so serving it here would show every member the
-        // owner's watch history. It needs the per-persona token lane (authenticate
-        // as the member's persona on the mount path). Returns empty until then —
-        // which is what it returned anyway once the Jellyfin library was emptied.
-        return json({ items: [] });
+        // Because-you-watched: similar to this member's most-played title, with
+        // the resume item as the fallback seed. Per member, so the seed is THEIR
+        // taste and not the owner's.
+        const src = await aiosUserSrc(env, sess);
+        if (!src) return json({ items: [], seed: '' });
+        const payload = await swrJson(ctx, env, 'cache:media-recommend-v4:' + sess.sub, 1800000, async () => {
+          const H = { headers: { authorization: src.auth } };
+          let seedId = '', seedName = '';
+          for (const q of [
+            '/Items?userId=&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=1&IncludeItemTypes=Movie',
+            '/Items?userId=&Recursive=true&SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable&IncludeItemTypes=Movie,Series&Limit=1',
+          ]) {
+            if (seedId) break;
+            try {
+              const r = await fetch(src.base + q, H);
+              if (r.ok) { const d = await r.json() as any; const it = (d.Items ?? [])[0]; if (it) { seedId = it.Id; seedName = it.Name; } }
+            } catch { /* try the next seed source */ }
+          }
+          if (!seedId) return JSON.stringify({ items: [], seed: '' });
+          const r2 = await fetch(src.base + '/Items/' + seedId + '/Similar?userId=&Limit=12&Fields=ProductionYear,CommunityRating&EnableImages=true', H);
+          if (!r2.ok) throw new Error('aios similar ' + r2.status);
+          const d2 = await r2.json() as any;
+          const items = ((d2.Items ?? []) as any[]).filter((it) => it.Id !== seedId).slice(0, 12).map((it) => ({
+            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
+            rating: it.CommunityRating ?? null,
+            img: src.base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+          }));
+          return JSON.stringify({ items, seed: seedName });
+        });
+        return json(JSON.parse(payload));
       }
       if (path === '/api/requests') {
         // Seerr retired 2026-10-15 (old media stack gone). Keep the route as an
@@ -1552,54 +1691,21 @@ export default {
       // SAME pin on repeat calls, so this can be called on every tab open
       // without ever invalidating a login the member already has.
       if (path === '/api/media/pin' && request.method === 'POST') {
-        if (!env.MOONBASE_ADMIN_TOKEN || !env.MOONBASE_MOUNT) {
-          return json({ error: 'media access is not configured yet' }, 503);
+        const who = await provisionMember(env, sess);
+        if (!who.ok) {
+          // status 200 here is the "not your tier" case: the card renders it as
+          // a message, not an error
+          return who.status === 200
+            ? json({ ok: false, reason: 'tier', message: who.error })
+            : json({ error: who.error }, who.status);
         }
-        // The tier gate lives on the shim, but we must send the member's REAL
-        // tier — never a hardcoded one — or a seedling could self-provision
-        // sweetpea media access. Groups come from authentik, not the session.
-        let tier = '';
-        try {
-          const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
-          const d = await r.json() as any;
-          const u = d && d.user ? d.user : d;
-          const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
-          tier = names.includes('sweetpea') ? 'sweetpea' : names.includes('seedling') ? 'seedling' : '';
-        } catch { /* fall through to the no-tier error below */ }
-        if (!tier) return json({ error: 'could not verify your account tier' }, 502);
-
-        const username = String(sess.username || '').toLowerCase();
-        if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) {
-          return json({ error: 'your username cannot be used for media access' }, 400);
-        }
-
-        let r: Response;
-        try {
-          r = await fetch('https://aiostreams.mysweetpea.cc/Moonfin/Admin/Provision', {
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
-              'user-agent': 'msp-dashboard/1.0',
-            },
-            body: JSON.stringify({ username, name: sess.name || username, tier }),
-          });
-        } catch {
-          return json({ error: 'media service is unreachable right now' }, 502);
-        }
-        if (!r.ok) return json({ error: 'media setup failed' }, 502);
-        const d: any = await r.json().catch(() => ({}));
-        if (d && d.skipped === 'tier') {
-          return json({ ok: false, reason: 'tier', message: 'Media access is not part of your tier.' });
-        }
-        const pin = d && d.pin ? String(d.pin) : '';
-        if (!pin) return json({ error: 'no pin came back — try again in a moment' }, 502);
-        // ⚠️ The sign-in NAME is the persona's name, NOT the authentik username.
-        // parseSignIn treats any non-uuid username on a mount as the persona
-        // name, and personaByName matches on `name`. We provision the persona
-        // with sess.name, so that is what the member must type.
-        const signInName = String(sess.name || username).trim();
-        return json({ ok: true, pin, username, name: signInName, mount: env.MOONBASE_MOUNT });
+        return json({
+          ok: true,
+          pin: who.pin,
+          name: who.name,
+          username: String(sess.username || '').toLowerCase(),
+          mount: env.MOONBASE_MOUNT,
+        });
       }
 
       // DELETE endpoints
