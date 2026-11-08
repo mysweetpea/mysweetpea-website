@@ -2756,7 +2756,6 @@ function guideDetailHtml(key) {
     '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin PIN</h3><div id="pin-body"><div class="skel"></div></div></section>' +
     '<a class="hm-hero md-hero" id="md-hero" hidden href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
-    '<section class="card" id="sec-library"><p class="eyebrow">Your library</p><h3>Library</h3><div id="lib-body"><div class="skel"></div></div><p class="dim lib-cap">Library totals — live from Jellyfin</p></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-services" role="tabpanel" aria-labelledby="tab-services">' +
     '<section class="card" id="sec-services"><div class="svhead"><p class="eyebrow">Services</p><h3>Services<span class="tier-echo" id="tier-echo-services"></span></h3><span class="spacer"></span><span class="sv-upsum" id="sv-upsum" hidden><span class="sdot ok"></span><span id="sv-upsum-txt"></span></span><button type="button" class="sv-ghostbtn" onclick="window.openSuggestDialog()">+ Suggest a service</button></div>' +
@@ -4248,7 +4247,7 @@ function guideDetailHtml(key) {
       '<ol class="mp-steps">' +
       '<li>Open <strong>Moonfin</strong> on your device.</li>' +
       '<li>Choose <strong>Add server</strong> and paste the address above.</li>' +
-      '<li>Sign in with your name <strong>' + esc(d.username || '') + '</strong> and the PIN.</li>' +
+      '<li>Sign in with your name <strong>' + esc(d.name || d.username || '') + '</strong> and the PIN.</li>' +
       '</ol>';
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {

@@ -68,9 +68,9 @@
       title: 'Media — where you watch',
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
-    { target: '#sec-library',
+    { target: '#sec-media-m',
       title: 'Browse or search',
-      body: 'Pick a category, or search for something specific. Tap any poster to start watching.' },
+      body: 'Everything you can watch, in rows — new arrivals, top rated, and by genre. Tap any poster to start watching.' },
 
     { tab: 'services',
       title: 'Services — your shortcuts',
@@ -138,9 +138,9 @@
       title: 'Media — where you watch',
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
-    { target: '#sec-library',
+    { target: '#sec-media-m',
       title: 'Browse or search',
-      body: 'Pick a category, or search for something specific. Click any poster to start watching.' },
+      body: 'Everything you can watch, in rows — new arrivals, top rated, and by genre. Click any poster to start watching.' },
 
     { tab: 'services',
       title: 'Services — your shortcuts',

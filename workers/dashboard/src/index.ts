@@ -413,6 +413,48 @@ function accessTokenRefreshAt(token: string): number {
 }
 
 // Stale-while-revalidate JSON helper.
+/* ── AIOStreams media source ─────────────────────────────────────────────
+   Media lives on the AIOStreams server now. The old Jellyfin library server
+   is Live TV only since the Oct 2026 transformation and reports
+   MovieCount:0 / SeriesCount:0, so every media row built from it came back
+   empty. The API shapes are identical on the new host — only the base URL
+   and the token change.
+
+   The token is minted from the config credentials and cached for an hour:
+   one extra round-trip on a cold cache, none after. Deliberately NOT KV —
+   the Cache API is unmetered and this is a pure derived value.
+
+   Posters need NO token (verified: /jellyfin/Items/<id>/Images/Primary
+   returns 200 image/jpeg unauthenticated), which is what lets the browser
+   load them straight from this host. */
+const AIOS_HOST = 'https://aiostreams.mysweetpea.cc';
+const AIOS_UA = 'MediaBrowser Client="msp-dashboard", Device="worker", DeviceId="msp-dashboard", Version="1.0"';
+
+async function aiosToken(env: Env): Promise<string> {
+  const cached = await cacheGetJson('cache:aios-token');
+  if (cached) {
+    try { const t = JSON.parse(cached).t; if (typeof t === 'string' && t) return t; } catch { /* remint below */ }
+  }
+  if (!env.AIOS_UUID || !env.AIOS_PASSWORD) throw new Error('aios not configured');
+  const r = await fetch(AIOS_HOST + '/jellyfin/Users/AuthenticateByName', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-emby-authorization': AIOS_UA },
+    body: JSON.stringify({ Username: env.AIOS_UUID, Pw: env.AIOS_PASSWORD }),
+  });
+  if (!r.ok) throw new Error('aios auth ' + r.status);
+  const d = await r.json() as any;
+  const t = d && d.AccessToken;
+  if (!t) throw new Error('aios auth: no token in response');
+  await cachePutJson('cache:aios-token', JSON.stringify({ t }), 3600);
+  return t;
+}
+
+// Base URL + auth header for the AIOStreams media server. `base` is used for
+// BOTH the query and the poster URLs so they can never drift apart.
+async function aiosSrc(env: Env): Promise<{ base: string; auth: string }> {
+  return { base: AIOS_HOST + '/jellyfin', auth: 'MediaBrowser Token="' + (await aiosToken(env)) + '"' };
+}
+
 // The dashboard's slow feel = blocking upstream fetches whenever a cache
 // entry expires (media rows, stats). With SWR the client ALWAYS gets an
 // answer in ~10ms when any cached copy exists (fresh OR stale); the refresh
@@ -1201,32 +1243,22 @@ export default {
         });
         return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
       }
+
       if (path === '/api/media/continue') {
-        // SWR: instant from cache (fresh OR stale); refresh in background.
-        const payload = await swrJson(ctx, env, 'cache:media-cont', 120000, async () => {
-          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID +
-            '&Recursive=true&SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable' +
-            '&IncludeItemTypes=Movie,Episode&Limit=12&Fields=ProductionYear,SeriesName&EnableImages=true',
-            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
-          if (!r.ok) throw new Error('jellyfin ' + r.status);
-          const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => ({
-            id: it.Id,
-            name: it.Name,
-            seriesName: it.SeriesName ?? '',
-            type: it.Type,
-            progressPct: Math.round(it.UserData?.PlayedPercentage ?? 0),
-            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
-          return JSON.stringify({ items });
-        });
-        return json(JSON.parse(payload));
+        // ⚠️ HELD BACK: this row is PER-USER. The service token resolves to the
+        // owner's config account, so serving it here would show every member the
+        // owner's watch history. It needs the per-persona token lane (authenticate
+        // as the member's persona on the mount path). Returns empty until then —
+        // which is what it returned anyway once the Jellyfin library was emptied.
+        return json({ items: [] });
       }
+
       if (path === '/api/media/latest') {
         // SWR: instant from cache (fresh OR stale); refresh in background.
         const payload = await swrJson(ctx, env, 'cache:media-latest', 300000, async () => {
-          const r = await fetch(env.JELLYFIN_URL + '/Items/Latest?userId=' + env.JELLYFIN_USER_ID + '&Limit=12&EnableImages=true',
-            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
+          const { base, auth } = await aiosSrc(env);
+          const r = await fetch(base + '/Items/Latest?userId=&Limit=12&EnableImages=true',
+            { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((Array.isArray(d) ? d : []) as any[]).map((it) => ({
@@ -1234,49 +1266,46 @@ export default {
             name: it.Name,
             seriesName: it.SeriesName ?? '',
             type: it.Type,
-            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+            img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
           }));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
       }
+
       if (path === '/api/media/mostplayed') {
-        // Most-played movies+series (PlayCount desc). Deep Media tab — not on Home.
-        const payload = await swrJson(ctx, env, 'cache:media-mostplayed', 600000, async () => {
-          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
-            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
-          if (!r.ok) throw new Error('jellyfin ' + r.status);
-          const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => ({
-            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
-            rating: it.CommunityRating ?? null, playCount: it.UserData?.PlayCount ?? 0,
-            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
-          return JSON.stringify({ items });
-        });
-        return json(JSON.parse(payload));
+        // ⚠️ HELD BACK: this row is PER-USER. The service token resolves to the
+        // owner's config account, so serving it here would show every member the
+        // owner's watch history. It needs the per-persona token lane (authenticate
+        // as the member's persona on the mount path). Returns empty until then —
+        // which is what it returned anyway once the Jellyfin library was emptied.
+        return json({ items: [] });
       }
+
       if (path === '/api/media/unplayed') {
         // Fresh picks: highest-rated unwatched movies. Deep Media tab — not on Home.
         const payload = await swrJson(ctx, env, 'cache:media-unplayed', 600000, async () => {
-          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=CommunityRating&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie&Filters=IsUnplayed&Fields=ProductionYear,CommunityRating,Genres&EnableImages=true',
-            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
+          const { base, auth } = await aiosSrc(env);
+          const r = await fetch(base + '/Items?userId=' + '&SortBy=CommunityRating&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie&Filters=IsUnplayed&Fields=ProductionYear,CommunityRating,Genres&EnableImages=true',
+            { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((d.Items ?? []) as any[]).map((it) => ({
             id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
             rating: it.CommunityRating ?? null, genres: (it.Genres ?? []).slice(0, 2),
-            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+            img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
           }));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
       }
+
       if (path === '/api/media/genres') {
         // Top genres by item count (user-scoped). Deep Media tab — not on Home.
         const payload = await swrJson(ctx, env, 'cache:media-genres', 900000, async () => {
-          const r = await fetch(env.JELLYFIN_URL + '/Genres?userId=' + env.JELLYFIN_USER_ID + '&Limit=10&SortBy=ItemCount&SortOrder=Descending',
-            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
+          const { base, auth } = await aiosSrc(env);
+          const r = await fetch(base + '/Genres?userId=&Limit=10&SortBy=ItemCount&SortOrder=Descending',
+            { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const genres = ((d.Items ?? []) as any[]).map((g) => ({ name: g.Name }));
@@ -1284,6 +1313,7 @@ export default {
         });
         return json(JSON.parse(payload));
       }
+
       if (path === '/api/media/watchstats') {
         // Stats tab "what you love": genre counts (per-genre TotalRecordCount —
         // /Genres ItemCount is null on Jellyfin 10.11) + device-app list
@@ -1327,55 +1357,34 @@ export default {
         });
         return json(JSON.parse(payload));
       }
+
       if (path === '/api/media/trending') {
         // Home 'Trending now' rail: highest CommunityRating across movies+series,
         // then PlayCount as tiebreak. Reads as 'the best of the library right now'
         // without pretending to have global trending data (honest-degrade law).
         const payload = await swrJson(ctx, env, 'cache:media-trending', 1800000, async () => {
-          const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=CommunityRating,PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
-            { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
+          const { base, auth } = await aiosSrc(env);
+          const r = await fetch(base + '/Items?userId=' + '&SortBy=CommunityRating,PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
+            { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
           const items = ((d.Items ?? []) as any[]).map((it) => ({
             id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
             rating: it.CommunityRating ?? null,
-            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+            img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
           }));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
       }
+
       if (path === '/api/media/recommend') {
-        // Because-you-watched: Similar to the most-played movie (userId-scoped).
-        // 3-step: most-played id -> /Items/{id}/Similar?userId=... Falls back to
-        // resume-source if no play counts yet. 30-min cache (browsing shifts it).
-        const payload = await swrJson(ctx, env, 'cache:media-recommend-v3', 1800000, async () => {
-          const q = (extra: string) => env.JELLYFIN_URL + extra;
-          const H = { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } };
-          let seedId = '';
-          let seedName = '';
-          try {
-            const r = await fetch(q('/Items?userId=' + env.JELLYFIN_USER_ID + '&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=1&IncludeItemTypes=Movie'), H);
-            if (r.ok) { const d = await r.json() as any; const it = (d.Items ?? [])[0]; if (it) { seedId = it.Id; seedName = it.Name; } }
-          } catch {}
-          if (!seedId) {
-            try {
-              const r = await fetch(q('/Items?userId=' + env.JELLYFIN_USER_ID + '&Recursive=true&Filters=IsResumable&SortBy=DatePlayed&SortOrder=Descending&IncludeItemTypes=Movie,Episode&Limit=1'), H);
-              if (r.ok) { const d = await r.json() as any; const it = (d.Items ?? [])[0]; if (it) { seedId = it.Id; seedName = it.SeriesName || it.Name; } }
-            } catch {}
-          }
-          if (!seedId) return JSON.stringify({ items: [], seed: null });
-          const r2 = await fetch(q('/Items/' + seedId + '/Similar?userId=' + env.JELLYFIN_USER_ID + '&Limit=12&Fields=ProductionYear,CommunityRating'), H);
-          if (!r2.ok) return JSON.stringify({ items: [], seed: seedName });
-          const d2 = await r2.json() as any;
-          const items = ((d2.Items ?? []) as any[]).slice(0, 12).map((it) => ({
-            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
-            rating: it.CommunityRating ?? null,
-            img: env.JELLYFIN_URL + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
-          return JSON.stringify({ items, seed: seedName });
-        });
-        return json(JSON.parse(payload));
+        // ⚠️ HELD BACK: this row is PER-USER. The service token resolves to the
+        // owner's config account, so serving it here would show every member the
+        // owner's watch history. It needs the per-persona token lane (authenticate
+        // as the member's persona on the mount path). Returns empty until then —
+        // which is what it returned anyway once the Jellyfin library was emptied.
+        return json({ items: [] });
       }
       if (path === '/api/requests') {
         // Seerr retired 2026-10-15 (old media stack gone). Keep the route as an
@@ -1585,7 +1594,12 @@ export default {
         }
         const pin = d && d.pin ? String(d.pin) : '';
         if (!pin) return json({ error: 'no pin came back — try again in a moment' }, 502);
-        return json({ ok: true, pin, username, mount: env.MOONBASE_MOUNT });
+        // ⚠️ The sign-in NAME is the persona's name, NOT the authentik username.
+        // parseSignIn treats any non-uuid username on a mount as the persona
+        // name, and personaByName matches on `name`. We provision the persona
+        // with sess.name, so that is what the member must type.
+        const signInName = String(sess.name || username).trim();
+        return json({ ok: true, pin, username, name: signInName, mount: env.MOONBASE_MOUNT });
       }
 
       // DELETE endpoints
