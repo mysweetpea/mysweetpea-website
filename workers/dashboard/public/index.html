@@ -4073,11 +4073,19 @@ function mspSessionBanner() {
     });
   }
 
+  const MP_CACHE_KEY = 'msp_pin_v1';
+  function mpCacheRead() {
+    try { return JSON.parse(sessionStorage.getItem(MP_CACHE_KEY) || 'null'); } catch (e) { return null; }
+  }
   window.mpLoadPin = async function (force) {
     const body = document.getElementById('pin-body');
     if (!body || (mpPinLoaded && !force)) return;
     mpPinLoaded = true;
-    body.innerHTML = '<div class="skel"></div>';
+    // Paint the card from this session's last response before the network
+    // answers — the fetch stays authoritative and overwrites it a moment later.
+    const cached = mpCacheRead();
+    if (cached && cached.pin) mpPinRender(body, cached);
+    else body.innerHTML = '<div class="skel"></div>';
     let d = {};
     try {
       const r = await fetch('/api/media/pin', {
@@ -4090,6 +4098,11 @@ function mspSessionBanner() {
         return;
       }
       mpPinRender(body, d);
+      try {
+        sessionStorage.setItem(MP_CACHE_KEY, JSON.stringify({
+          ok: true, pin: d.pin, name: d.name, username: d.username, mount: d.mount,
+        }));
+      } catch (e) { /* private mode */ }
     } catch (e) {
       mpPinLoaded = false; // allow a retry
       body.innerHTML = '<p class="mp-sub">' + esc(e.message || 'Something went wrong.') +
@@ -4098,6 +4111,11 @@ function mspSessionBanner() {
       if (b) b.addEventListener('click', () => window.mpLoadPin(true));
     }
   };
+  // Warm the card while the browser is idle, so the first Media visit paints
+  // from memory instead of waiting on a round trip that mints the persona.
+  const mpWarm = () => { try { window.mpLoadPin(); } catch (e) {} };
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(mpWarm, { timeout: 3500 });
+  else setTimeout(mpWarm, 2200);
 
   /* ONE continue-watching fetch for the hero and the rail. Two independent
      calls could disagree (SWR hands the first caller a stale entry and
