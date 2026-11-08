@@ -1257,41 +1257,40 @@ export default {
           }
           await Promise.all([
             (async () => {
-              try {
-                const r = await fetch(env.JELLYFIN_URL + '/Items/Counts', { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
-                if (r.ok) {
+              // Media numbers come from the MEMBER's own persona, not the old
+              // Jellyfin library (zero movies/series since the Oct 2026
+              // transformation). The media server scopes UserData by token, so
+              // the service token would report the OWNER's watching instead.
+              const src = await aiosUserSrc(env, sess);
+              if (!src) return;   // no persona yet -> tiles stay '—' (honest)
+              const H = { headers: { authorization: src.auth } };
+              // how much they have watched — TotalRecordCount only, no fetch
+              const counted = async (type: string): Promise<number | null> => {
+                try {
+                  const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=' + type + '&Limit=0', H);
+                  if (!r.ok) return null;
                   const d = await r.json() as any;
-                  out.movies = d.MovieCount ?? null;
-                  out.series = d.SeriesCount ?? null;
-                  out.episodes = d.EpisodeCount ?? null;
-                  out.songs = d.SongCount ?? null;
-                  out.boxsets = d.BoxSetCount ?? null;
-                }
-              } catch {}
-            })(),
-            (async () => {
-              // resume/watching count — TotalRecordCount only, no item fetch
+                  return typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : null;
+                } catch { return null; }
+              };
+              const [mv, sr, ep] = await Promise.all([counted('Movie'), counted('Series'), counted('Episode')]);
+              out.movies = mv; out.series = sr; out.episodes = ep;
+              // in progress now
               try {
-                const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID +
-                  '&Recursive=true&Filters=IsResumable&Limit=1',
-                  { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Limit=1', H);
                 if (r.ok) {
                   const d = await r.json() as any;
                   out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : null;
                 }
               } catch {}
-            })(),
-            (async () => {
-              // wrapped hero: sum playback positions of resumable items -> watch hours
+              // watch hours + top title, summed from playback positions
               try {
-                const r = await fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID +
-                  '&Recursive=true&Filters=IsResumable&Fields=UserData,PlaybackPositionTicks&Limit=50',
-                  { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Fields=UserData,PlaybackPositionTicks&Limit=50', H);
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
                   let hours = 0;
-                  for (const it of items) hours += (it && it.UserData && typeof it.UserData.PlaybackPositionTicks === 'number' ? it.UserData.PlaybackPositionTicks : 0) / 3.6e10; // .NET ticks are 100ns: 1e7/s * 3600s
+                  for (const it of items) hours += (it && it.UserData && typeof it.UserData.PlaybackPositionTicks === 'number' ? it.UserData.PlaybackPositionTicks : 0) / 3.6e10; // .NET ticks are 100ns
                   out.jf_watch_hours = Math.round(hours * 10) / 10;
                   out.jf_resume_titles = items.length;
                   out.jf_top_title = (items[0] && typeof items[0].Name === 'string' && items[0].Name) || null;
@@ -1429,50 +1428,7 @@ export default {
         return json(JSON.parse(payload));
       }
 
-      if (path === '/api/media/watchstats') {
-        // Stats tab "what you love": genre counts (per-genre TotalRecordCount —
-        // /Genres ItemCount is null on Jellyfin 10.11) + device-app list
-        // (/Devices, real past devices w/ app names). NO per-day watch history:
-        // /Sessions/History is 404 on this server, PlaybackReporting has no HTTP
-        // route, and admin-scoped IsPlayed covers only admin plays (3 items).
-        // Honest-degrade: no fabricated bars.
-        const payload = await swrJson(ctx, env, 'cache:media-watchstats', 900000, async () => {
-          const UA = { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"`, 'user-agent': SEERR_UA };
-          const GENRE_NAMES = ['Action', 'Adventure', 'Animation', 'Anime', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western'];
-          const [genreCounts, devices] = await Promise.all([
-            (async () => {
-              try {
-                const lists = await Promise.all(GENRE_NAMES.map((g) =>
-                  fetch(env.JELLYFIN_URL + '/Items?userId=' + env.JELLYFIN_USER_ID + '&Recursive=true&Genres=' + encodeURIComponent(g) + '&Limit=1&IncludeItemTypes=Movie,Series', { headers: UA })
-                    .then((r) => (r.ok ? r.json() as any : null)).catch(() => null)));
-                return GENRE_NAMES.map((g, i) => ({ name: g, count: lists[i] && typeof lists[i].TotalRecordCount === 'number' ? lists[i].TotalRecordCount : 0 }))
-                  .filter((x) => x.count > 0).sort((a, b) => b.count - a.count).slice(0, 6);
-              } catch { return []; }
-            })(),
-            (async () => {
-              try {
-                const r = await fetch(env.JELLYFIN_URL + '/Devices', { headers: UA });
-                if (!r.ok) return [];
-                const d = await r.json() as any;
-                // Real client apps only: drop infra speakers (Seerr, curl, setup-script)
-                // + sort newest-activity first, cap 12
-                const INFRA = /^(seerr|curl|setup-script)$/i;
-                return ((d.Items ?? []) as any[])
-                  .filter((x) => !INFRA.test(String(x.AppName || '')))
-                  .map((x) => ({
-                    app: typeof x.AppName === 'string' ? x.AppName : 'Unknown',
-                    last: typeof x.DateLastActivity === 'string' ? x.DateLastActivity.slice(0, 10) : null,
-                  }))
-                  .sort((a, b) => (b.last || '').localeCompare(a.last || ''))
-                  .slice(0, 12);
-              } catch { return []; }
-            })(),
-          ]);
-          return JSON.stringify({ genres: genreCounts, devices });
-        });
-        return json(JSON.parse(payload));
-      }
-
+      
       if (path === '/api/media/trending') {
         // Home 'Trending now' rail: highest CommunityRating across movies+series,
         // then PlayCount as tiebreak. Reads as 'the best of the library right now'

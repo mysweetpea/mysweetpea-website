@@ -3070,8 +3070,8 @@ function guideDetailHtml(key) {
     const pvTotal = (s.photos == null && s.videos == null) ? null : ((s.photos || 0) + (s.videos || 0));
     if (kpi) {
       kpi.innerHTML =
-      kpiTile('Movies', s.movies, KPI_ICONS.film) +
-      kpiTile('Episodes', s.episodes, KPI_ICONS.tv) +
+      kpiTile('Movies watched', s.movies, KPI_ICONS.film) +
+      kpiTile('Episodes watched', s.episodes, KPI_ICONS.tv) +
       kpiTile('Photos & videos', pvTotal, KPI_ICONS.image) +
       kpiTile('Members', s.users, KPI_ICONS.users);
       kpi.querySelectorAll('.stat .n').forEach(animateCount);
@@ -3079,7 +3079,7 @@ function guideDetailHtml(key) {
     renderStatsCharts(s);
     if (!svc) return;
     let h = '';
-    h += statSection('Jellyfin', [['Movies', s.movies], ['Series', s.series], ['Episodes', s.episodes], ['Boxsets', s.boxsets], ['Songs', s.songs], ['Resume queue', s.jf_resume]]);
+    h += statSection('Your watching', [['Movies watched', s.movies], ['Series watched', s.series], ['Episodes watched', s.episodes], ['Resume queue', s.jf_resume]]);
     h += statSection('Immich', [['Photos', s.photos], ['Videos', s.videos], ['Storage', s.usage_mb == null ? null : fmtStorage(s.usage_mb)]]);
     h += statSection('Accounts', [['Members', s.users], ['Active sessions', s.sessions]]);
     // In-cluster services (KV snapshots pushed by the cluster; absent = '—')
@@ -3099,13 +3099,13 @@ function guideDetailHtml(key) {
     const series = pos(s && s.series), boxsets = pos(s && s.boxsets);
     if (movies == null && episodes == null && photos == null && series == null && boxsets == null) { sec.hidden = true; host.innerHTML = ''; return; }
     sec.hidden = false;
-    // 1. library composition — stacked bar (Movies / Series episodes / Photos)
+    // 1. what you have watched — stacked bar (Movies / Series episodes / Photos)
     const comp = [['Movies', movies, 'var(--v)'], ['Series episodes', episodes, 'var(--c)'], ['Photos', photos, 'var(--sage)']].filter((x) => x[1] != null);
     const compHtml = comp.length ?
-      '<div class="sc-bar" role="img" aria-label="Library composition">' + comp.map((x) => '<i style="flex:' + x[1] + ' 1 0;background:' + x[2] + '" title="' + esc(x[0]) + ': ' + x[1].toLocaleString() + '"></i>').join('') + '</div>' +
+      '<div class="sc-bar" role="img" aria-label="What you have watched">' + comp.map((x) => '<i style="flex:' + x[1] + ' 1 0;background:' + x[2] + '" title="' + esc(x[0]) + ': ' + x[1].toLocaleString() + '"></i>').join('') + '</div>' +
       '<div class="sc-legend">' + comp.map((x) => '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' &middot; ' + x[1].toLocaleString() + '</span>').join('') + '</div>' : '';
     // 2. donut — Movies vs Series vs Boxsets counts (SVG stroke-dasharray, hides null segments)
-    const don = [['Movies', movies, 'var(--v)'], ['Series', series, 'var(--gold)'], ['Boxsets', boxsets, 'var(--sage)']].filter((x) => x[1] != null);
+    const don = [['Movies', movies, 'var(--v)'], ['Series', series, 'var(--gold)']].filter((x) => x[1] != null);
     let donHtml = '';
     if (don.length) {
       const donTotal = don.reduce((a, x) => a + x[1], 0);
@@ -3115,12 +3115,12 @@ function guideDetailHtml(key) {
         const off = 25 - acc; acc += pct;
         return '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="5.5" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + off.toFixed(3) + '"><title>' + esc(x[0]) + ': ' + x[1].toLocaleString() + ' (' + pct.toFixed(1) + '%)</title></circle>';
       }).join('');
-      donHtml = '<div class="sc-donut"><svg viewBox="0 0 42 42" role="img" aria-label="Movies, series and boxsets">' + circles + '</svg>' +
-        '<div class="sc-donut-c"><span class="sc-donut-n">' + donTotal.toLocaleString() + '</span><span class="sc-donut-l">titles</span></div></div>' +
+      donHtml = '<div class="sc-donut"><svg viewBox="0 0 42 42" role="img" aria-label="Movies and series watched">' + circles + '</svg>' +
+        '<div class="sc-donut-c"><span class="sc-donut-n">' + donTotal.toLocaleString() + '</span><span class="sc-donut-l">watched</span></div></div>' +
         '<div class="sc-legend sc-donut-leg">' + don.map((x) => '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' &middot; ' + x[1].toLocaleString() + '</span>').join('') + '</div>';
     }
     // 3. "by the numbers" — rows normalized to the max value (pure CSS bars)
-    const rows = [['Movies', movies, 'var(--v)'], ['Series', series, 'var(--gold)'], ['Episodes', episodes, 'var(--c)'], ['Boxsets', boxsets, 'var(--sage)'], ['Photos', photos, 'var(--sage)']].filter((x) => x[1] != null);
+    const rows = [['Movies', movies, 'var(--v)'], ['Series', series, 'var(--gold)'], ['Episodes', episodes, 'var(--c)'], ['Photos', photos, 'var(--sage)']].filter((x) => x[1] != null);
     const max = rows.reduce((a, x) => Math.max(a, x[1]), 0);
     const numsHtml = rows.length ?
       '<div class="sc-nums">' + rows.map((x) => '<div class="sc-num"><span class="sc-nl">' + esc(x[0]) + '</span><span class="sc-nv">' + x[1].toLocaleString() + '</span><span class="sc-nb"><i style="width:' + Math.max(3, Math.round((x[1] / max) * 100)) + '%;background:' + x[2] + '"></i></span></div>').join('') + '</div>' : '';
@@ -5004,22 +5004,6 @@ function relFuture(v) {
     const mk = (k, l) => '<div class="stat"><div class="n" data-k="' + k + '">0</div><div class="l">' + esc(l) + '</div></div>';
     return mk('movies', 'Movies') + mk('series', 'Series') + mk('photos', 'Photos') + mk('sessions', 'Active sessions');
   }
-  function libHtml(s) {
-    const rows = [['Movies', s.movies], ['Episodes', s.episodes], ['Series', s.series], ['Songs', s.songs], ['Boxsets', s.boxsets]].filter((x) => x[1] != null);
-    if (!rows.length) return '<p class="dim">No library data yet.</p>';
-    const total = rows.reduce((a, x) => a + x[1], 0);
-    const COLS = ['var(--primary)', 'var(--sage)', '#D9A86C', '#5B9DF6', '#B48CF6'];
-    const R = 60, C = 2 * Math.PI * R;
-    let off = 0, segs = '';
-    rows.forEach((x, i) => {
-      const frac = total ? x[1] / total : 0;
-      const len = Math.max(frac * C - 2, 0.5);
-      segs += '<circle class="lib-seg" r="' + R + '" cx="80" cy="80" fill="none" stroke="' + COLS[i % COLS.length] + '" stroke-width="26" stroke-dasharray="' + len.toFixed(1) + ' ' + (C - len).toFixed(1) + '" stroke-dashoffset="' + (-off).toFixed(1) + '" transform="rotate(-90 80 80)"><title>' + esc(x[0]) + ': ' + x[1].toLocaleString() + '</title></circle>';
-      off += frac * C;
-    });
-    const legend = rows.map((x, i) => '<span class="lib-leg"><i style="background:' + COLS[i % COLS.length] + '"></i>' + esc(x[0]) + '<b>' + x[1].toLocaleString() + '</b></span>').join('');
-    return '<div class="lib-graph"><svg viewBox="0 0 160 160" role="img" aria-label="Library composition">' + segs + '<text x="80" y="76" text-anchor="middle" class="lib-total">' + total.toLocaleString() + '</text><text x="80" y="94" text-anchor="middle" class="lib-total-l">items</text></svg><div class="lib-legs">' + legend + '</div></div>';
-  }
   (async () => {
     const el = await waitFor('#stats');
     if (!el) return;
@@ -5032,8 +5016,6 @@ function relFuture(v) {
     const s = mergeStats(d);
     el.innerHTML = statTmpl();
     el.querySelectorAll('.stat .n').forEach((n) => countUp(n, s[n.dataset.k]));
-    const lib = document.getElementById('lib-body');
-    if (lib) lib.innerHTML = libHtml(s);
   })();
   /* palette button (topbar is built dynamically -> delegated) */
   document.addEventListener('click', (e) => {
