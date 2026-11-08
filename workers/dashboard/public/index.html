@@ -2243,13 +2243,25 @@ const GUIDES = {
       { title: 'Press play', text: 'Pauses and seeks sync for everyone. Tip: Settings → Audio Processing → compressor levels quiet dialogue.' },
     ],
   },
-  jellyfin: {
-    name: 'Jellyfin / Moonfin',
-    url: 'https://media.mysweetpea.cc/Moonfin/Web/',
-    plain: 'Your private movie and TV library — on any device.',
+  moonfin: {
+    name: 'Moonfin',
+    url: 'https://aiostreams.mysweetpea.cc/jellyfin/',
+    plain: 'Movies, shows and anime — on your phone, TV and browser.',
     steps: [
-      { title: 'Open your library', text: 'Go to media.mysweetpea.cc and sign in — works in any browser.', url: 'https://media.mysweetpea.cc', btn: 'Open Jellyfin' },
-      { title: 'Pick a device below', text: 'Every platform signs in to the same server — your progress stays in sync.' },
+      { title: 'Get your PIN', text: 'Open the Media tab in this dashboard. Your PIN and your server address are right at the top — copy the address.' },
+      { title: 'Watch in your browser', text: 'You can start straight away in a browser, no install needed.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
+      { title: 'Or install the app', text: 'Moonfin is also an app for your phone, tablet and TV. Pick your device below for the exact steps.' },
+      { title: 'Sign in', text: 'Enter your name and your PIN. Your progress stays in sync on every device.' },
+    ],
+  },
+  jellyfin: {
+    name: 'Jellyfin',
+    url: 'https://media.mysweetpea.cc',
+    plain: 'Live TV and sports — free channels, no cable box.',
+    steps: [
+      { title: 'Open Jellyfin', text: 'Go to media.mysweetpea.cc and sign in — works in any browser.', url: 'https://media.mysweetpea.cc', btn: 'Open Jellyfin' },
+      { title: 'Find Live TV', text: 'Your live TV and sports channels are in the Live TV section.' },
+      { title: 'Pick a device below', text: 'Every platform signs in to the same server.' },
     ],
   },
   nextcloud: {
@@ -2299,36 +2311,36 @@ const guideBrandSel = {};
 // Each brand has its own platform list with complete per-platform steps.
 const PLATFORMS_JF_MOONFIN = [
   { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
-    { title: 'Open Moonfin', text: 'Go to media.mysweetpea.cc — our tuned web app with the Netflix-style home and requests built in.', url: 'https://media.mysweetpea.cc/Moonfin/Web/', btn: 'Open Moonfin' },
-    { title: 'Sign in', text: 'Use your MySweetPea account — your resume points, favorites and requests stay in sync everywhere.', url: '', btn: '' },
+    { title: 'Open Moonfin', text: 'Watch straight away in your browser — no install needed.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
+    { title: 'Sign in', text: 'Enter your name and your PIN from your dashboard. Your progress stays in sync everywhere.', url: '', btn: '' },
   ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the App Store', text: 'Install Moonfin from the App Store.', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
-    { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Point it at your server', text: 'Server address: the one shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the Play Store', text: 'One app covers phones, tablets and Android TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Point it at your server', text: 'Server address: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Point it at your server', text: 'Server address: the one shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
     { title: 'Install Moonfin on your TV', text: 'Find Moonfin in the Play Store on your TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Enter media.mysweetpea.cc and sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Sign in', text: 'Enter the server address shown in your dashboard, then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
     { title: 'Use Swiftfin on Apple TV', text: 'Moonfin has no Apple TV app yet — Swiftfin is the official Jellyfin client for Apple TV. Install it from the App Store.', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728', btn: 'Get Swiftfin' },
-    { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
     { title: 'Add Moonfin from the Channel Store', text: 'Search "Moonfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung / LG / Fire TV', glyph: 'tv', platformSteps: [
     { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+), LG (webOS 3.0+) and Fire TV sticks (Vega OS). Not in the TV stores — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
     { title: 'Get the Moonfin desktop app', text: 'Native app for Windows, macOS and Linux.', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Server: media.mysweetpea.cc — then sign in with your MySweetPea account.', url: '', btn: '' },
+    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
   ] },
 ];
 const PLATFORMS_JF_OFFICIAL = [
@@ -3680,7 +3692,8 @@ function guideDetailHtml(key) {
      filter category. SV_CATS / HM_DOT_MATCH / graft MATCH used to
      duplicate subsets of this by display name; they are DERIVED below. ===== */
   const SERVICES = [
-    { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Movies & TV', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin', 'moonfin'] },
+    { key: 'moonfin',     name: 'Moonfin',     url: 'https://aiostreams.mysweetpea.cc/jellyfin/', blurb: 'Movies, shows & anime', icon: '/icons/icon-ui-moon.svg', cat: 'media', mon: ['moonfin', 'aiostreams'] },
+    { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Live TV & Sports', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin'] },
     { key: 'nextcloud',   name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg', cat: 'cloud', mon: ['nextcloud', 'cloud'] },
     { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'] },
     { key: 'vaultwarden', name: 'Vaultwarden', url: 'https://vault.mysweetpea.cc',   blurb: 'Passwords', icon: '/icons/vaultwarden.svg', cat: 'cloud', mon: ['vaultwarden', 'vault'] },
