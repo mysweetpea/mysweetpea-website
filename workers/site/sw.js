@@ -4,10 +4,10 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-h6bba3586';
+const CACHE = 'mysweetpea-hadc02b66';
 const CORE = [
         '/assets/js/services-page.js?v=habd2a9e0',
-        '/assets/js/site-data.js?v=hf2d0b3e9',
+        '/assets/js/site-data.js?v=hb84686ea',
         '/assets/site-data.json',
         '/assets/js/redeem-page.js?v=h97dd6dd9',
         '/assets/js/status-page.js?v=h45a3307e',
@@ -41,7 +41,6 @@ const CORE = [
   '/assets/screenshots/affine.webp',
   '/assets/screenshots/koalasync.webp',
   '/assets/screenshots/jellyfin.webp',
-  '/assets/screenshots/seerr.webp',
   '/assets/screenshots/nextcloud.webp',
   '/assets/screenshots/immich.webp',
   '/assets/screenshots/openwebui.webp',

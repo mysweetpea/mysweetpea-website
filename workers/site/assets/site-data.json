@@ -140,29 +140,6 @@
       }
     },
     {
-      "key": "seerr",
-      "name": "Seerr",
-      "shortName": "Seerr",
-      "icon": "/assets/icons/seerr.svg",
-      "iconAlt": "Seerr logo",
-      "shot": "/assets/screenshots/seerr.webp",
-      "github": "https://github.com/seerr-team/seerr",
-      "url": "https://request.mysweetpea.cc",
-      "tier": "sweetpea",
-      "tierLabel": "Sweet Pea",
-      "category": "REQUESTS",
-      "keywords": "request movies tv shows new content add requests overrides jellyseerr",
-      "blurb": "Request any shows, movies and anime \u2014 they appear in Jellyfin automatically.",
-      "plain": "A wish list for movies and shows \u2014 request anything you want to watch.",
-      "replaces": "Think of it like a request box for your media library.",
-      "desc": "Seerr is like a wish list for movies and shows. Browse what is trending, see what is already available, and request anything you want to watch. Your request is processed automatically and the content appears in Jellyfin.",
-      "monitorHint": 6,
-      "garden": {
-        "line": "Request anything \u2014 it appears in your library.",
-        "replaces": "recommendation feeds"
-      }
-    },
-    {
       "key": "nextcloud",
       "name": "Nextcloud",
       "shortName": "Nextcloud",
@@ -391,7 +368,7 @@
     }
   ],
   "siteFacts": {
-    "publicServices": 10,
+    "publicServices": 9,
     "publicRepos": 2
   }
 }
