@@ -516,6 +516,24 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
    Sign-in is on the MOUNT path (PIN sign-in does not work on the bare one),
    with Username = the persona NAME and Pw = the PIN. Cached per member for
    an hour so a page load costs at most one extra round-trip. */
+/* The one media-item shape. Every /api/media/* route maps through this, so a
+   renderer can read any of these fields from any rail. The six inline mappers
+   this replaces had drifted apart (latest had no rating, only unplayed had
+   genres, only mostplayed had playCount) — and a renderer reading a field its
+   endpoint does not emit fails silently. */
+const mediaItem = (it: any, base: string) => ({
+  id: it.Id,
+  name: it.Name,
+  seriesName: it.SeriesName ?? '',
+  type: it.Type,
+  year: it.ProductionYear ?? null,
+  rating: it.CommunityRating ?? null,
+  playCount: it.UserData?.PlayCount ?? 0,
+  progressPct: Math.round(it.UserData?.PlayedPercentage ?? 0),
+  genres: (it.Genres ?? []).slice(0, 2),
+  img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+});
+
 async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string; auth: string } | null> {
   const key = 'cache:aios-utok:' + String(sess.username || '').toLowerCase();
   const cached = await cacheGetJson(key);
@@ -1401,14 +1419,7 @@ export default {
             { headers: { authorization: src.auth } });
           if (!r.ok) throw new Error('aios ' + r.status);
           const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => ({
-            id: it.Id,
-            name: it.Name,
-            seriesName: it.SeriesName ?? '',
-            type: it.Type,
-            progressPct: Math.round(it.UserData?.PlayedPercentage ?? 0),
-            img: src.base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
+          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, src.base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
@@ -1422,13 +1433,7 @@ export default {
             { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
-          const items = ((Array.isArray(d) ? d : []) as any[]).map((it) => ({
-            id: it.Id,
-            name: it.Name,
-            seriesName: it.SeriesName ?? '',
-            type: it.Type,
-            img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
+          const items = ((Array.isArray(d) ? d : []) as any[]).map((it) => mediaItem(it, base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
@@ -1444,11 +1449,7 @@ export default {
             { headers: { authorization: src.auth } });
           if (!r.ok) throw new Error('aios ' + r.status);
           const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => ({
-            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
-            rating: it.CommunityRating ?? null, playCount: it.UserData?.PlayCount ?? 0,
-            img: src.base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
+          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, src.base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
@@ -1462,11 +1463,7 @@ export default {
             { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => ({
-            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
-            rating: it.CommunityRating ?? null, genres: (it.Genres ?? []).slice(0, 2),
-            img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
+          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
@@ -1497,11 +1494,7 @@ export default {
             { headers: { authorization: auth } });
           if (!r.ok) throw new Error('jellyfin ' + r.status);
           const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => ({
-            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
-            rating: it.CommunityRating ?? null,
-            img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
+          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
@@ -1530,11 +1523,7 @@ export default {
           const r2 = await fetch(src.base + '/Items/' + seedId + '/Similar?userId=&Limit=12&Fields=ProductionYear,CommunityRating&EnableImages=true', H);
           if (!r2.ok) throw new Error('aios similar ' + r2.status);
           const d2 = await r2.json() as any;
-          const items = ((d2.Items ?? []) as any[]).filter((it) => it.Id !== seedId).slice(0, 12).map((it) => ({
-            id: it.Id, name: it.Name, type: it.Type, year: it.ProductionYear ?? null,
-            rating: it.CommunityRating ?? null,
-            img: src.base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
-          }));
+          const items = ((d2.Items ?? []) as any[]).filter((it) => it.Id !== seedId).slice(0, 12).map((it) => mediaItem(it, src.base));
           return JSON.stringify({ items, seed: seedName });
         });
         return json(JSON.parse(payload));
