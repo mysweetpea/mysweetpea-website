@@ -8,13 +8,6 @@ import {
   reconcile,
   buildUpdate,
 } from './lib/updates-pipeline.mjs';
-import {
-  WINDOW_DAYS,
-  IMPORT_ERA,
-  CAP_FLOOR,
-  bucketByDay,
-  computeGrowth,
-} from './lib/growth.mjs';
 
 export interface Env {
   SESSIONS: KVNamespace;
@@ -26,6 +19,8 @@ export interface Env {
   APP_URL: string;
   KUMA_STATUS_URL: string;
   JELLYFIN_URL: string;
+  AIOS_UUID: string;
+  AIOS_PASSWORD: string;
   JELLYFIN_API_KEY: string;
 
   IMMICH_URL: string;
@@ -163,8 +158,10 @@ async function verifyPassword(env: Env, username: string, password: string): Pro
     if (data.component === 'ak-stage-password' && errs) return false;
     // flow completed -> redirect target present
     if (typeof data.to === 'string' && data.to) return true;
-    // password accepted, flow advanced to another stage (e.g. MFA)
-    if (data.component && data.component !== 'ak-stage-password') return true;
+    // password accepted, flow advanced to another stage (e.g. MFA). An ERROR
+    // stage must not count: an unknown user re-renders identification and the
+    // old "anything but the password stage" rule accepted that as success.
+    if (!errs && data.component && data.component !== 'ak-stage-password' && data.component !== 'ak-stage-identification') return true;
     return false;
   } catch {
     return false;
@@ -772,72 +769,19 @@ async function produceUpdates(env: Env): Promise<string> {
   return JSON.stringify({ updates, generated: Date.now(), reconciled: ok > 0 });
 }
 
-// ---------- Library growth (Jellyfin DateCreated histogram) ----------
-// The ONLY honest source is DateCreated on items (verified live 2026-09-17,
-// server 10.11.11; MinDateCreated/MinDateLastSaved are dead ends — see
-// ./lib/growth.mjs). Verified paging cost: 4,938 items = 5 calls / 1.77s at
-// Limit=1000. Sort is not strictly reliable WITHIN a page, so paging
-// continues while a page contains ANY in-window item; a partial page
-// (< Limit) is the true end of data. MAX_PAGES guards a pathological sort
-// (12 x 1000 = 12k items) and reports partial:true to the UI.
-const GROWTH_PAGE = 1000;
-const GROWTH_MAX_PAGES = 12;
-
-async function fetchJellyfinGrowthItems(env: Env): Promise<{ items: any[]; partial: boolean }> {
-  const base = String(env.JELLYFIN_URL || '').replace(/\/+$/, '');
-  const windowStart = new Date(Date.now() - (WINDOW_DAYS - 1) * 86400000).toISOString().slice(0, 10);
-  const items: any[] = [];
-  for (let page = 0; page < GROWTH_MAX_PAGES; page++) {
-    const r = await fetch(base + '/Items?Recursive=true&IncludeItemTypes=Movie,Series,Episode' +
-      '&Fields=DateCreated&EnableImages=false&EnableUserData=false' +
-      '&SortBy=DateCreated&SortOrder=Descending' +
-      '&StartIndex=' + (page * GROWTH_PAGE) + '&Limit=' + GROWTH_PAGE,
-      { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
-    if (!r.ok) throw new Error('jellyfin ' + r.status);
-    const d = await r.json() as any;
-    const pageItems = (Array.isArray(d && d.Items) ? d.Items : []) as any[];
-    items.push(...pageItems);
-    if (pageItems.length < GROWTH_PAGE) return { items, partial: false }; // partial page = end of data
-    const anyInWindow = pageItems.some((it) => String((it && it.DateCreated) || '').slice(0, 10) >= windowStart);
-    if (!anyInWindow) return { items, partial: false }; // zero in-window here -> older pages are too
-  }
-  return { items, partial: true }; // MAX_PAGES guard hit — return what we have
-}
-
-async function produceGrowth(env: Env): Promise<string> {
-  const today = new Date().toISOString().slice(0, 10);
-  // FAIL-CLOSED: on a Jellyfin error, THROW so swrJson keeps serving the last
-  // good payload (its catch keeps the stale copy). Returning a zero payload
-  // here would be cached as "fresh" for a full hour and blank the card even
-  // after Jellyfin recovers — the exact failure mode the updates feed avoids.
-  const { items, partial } = await fetchJellyfinGrowthItems(env);
-  const growth = computeGrowth(bucketByDay(items), today, { partial });
-  // True library size (all-time, NOT window-scoped) — /Items/Counts is a
-  // separate cheap call already used by /api/stats. totals.all counts only
-  // items ADDED in the window, so the card must not label it "in library".
-  growth.libraryTotal = null;
-  growth.libraryMovies = null;
-  growth.librarySeries = null;
-  growth.libraryEpisodes = null;
-  try {
-    const r = await fetch(String(env.JELLYFIN_URL || '').replace(/\/+$/, '') + '/Items/Counts',
-      { headers: { authorization: `MediaBrowser Token="${env.JELLYFIN_API_KEY}"` } });
-    if (r.ok) {
-      const c = await r.json() as any;
-      const sum = ['MovieCount', 'SeriesCount', 'EpisodeCount']
-        .reduce((a, k) => a + (typeof c[k] === 'number' ? c[k] : 0), 0);
-      growth.libraryTotal = sum || null;
-      growth.libraryMovies = typeof c.MovieCount === 'number' ? c.MovieCount : null;
-      growth.librarySeries = typeof c.SeriesCount === 'number' ? c.SeriesCount : null;
-      growth.libraryEpisodes = typeof c.EpisodeCount === 'number' ? c.EpisodeCount : null;
-    }
-  } catch { /* counts are nice-to-have; the card still renders */ }
-  return JSON.stringify(growth);
-}
+const path0 = (r: Request) => { try { return new URL(r.url).pathname; } catch { return '?'; } };
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-    const res = await this.handle(request, env, ctx);
+    let res: Response;
+    try {
+      res = await this.handle(request, env, ctx);
+    } catch (e) {
+      console.error('handle failed', path0(request), e);
+      res = new Response(JSON.stringify({ error: 'internal error' }), {
+        status: 500, headers: { 'content-type': 'application/json; charset=utf-8' },
+      });
+    }
     // security headers on every response (dashboard is auth-gated, but
     // defense-in-depth costs nothing — mirrors the site worker's posture)
     const h = new Headers(res.headers);
@@ -878,7 +822,7 @@ export default {
     if (path === '/auth/callback') {
       const code = url.searchParams.get('code');
       const state = url.searchParams.get('state');
-      if (!code || !state) {
+      if (!code || !state || !/^[A-Za-z0-9_-]{8,128}$/.test(state)) {
         return new Response('Invalid OAuth state', { status: 400 });
       }
       // Cookie-free PKCE: verifier from KV by state (one-time read).
@@ -985,7 +929,7 @@ export default {
       if (!sid) return json({ ok: false, error: 'token expired' }, 401);
       await env.SESSIONS.delete('land:' + token);
       const headers = new Headers({ 'content-type': 'application/json', 'cache-control': 'no-store' });
-      headers.append('set-cookie', `${COOKIE}=${sid}; Domain=.mysweetpea.cc; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=7776000`);
+      headers.append('set-cookie', `${COOKIE}=${sid}; Domain=.mysweetpea.cc; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=15552000`);
       return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
     }
 
@@ -1062,7 +1006,7 @@ export default {
       if (!raw) return json({ error: 'not found' }, 404);
       const rec = JSON.parse(raw);
       rec.status = status;
-      await env.SESSIONS.put('referral:' + id, JSON.stringify(rec));
+      await env.SESSIONS.put('referral:' + id, JSON.stringify(rec), { expirationTtl: 180 * 86400 });
       return json({ ok: true });
     }
     if (path.startsWith('/api/')) {
@@ -1271,6 +1215,7 @@ export default {
         if (!(await verifyPassword(env, sess.username, currentPassword))) {
           return json({ error: 'Incorrect current password' }, 401);
         }
+        await env.SESSIONS.delete(rlKey);
 
         const upk = await resolveUpk(env, sess);
         if (!upk) return json({ error: 'Password change failed.' }, 502);
@@ -1316,7 +1261,7 @@ export default {
           affine_users: null, affine_docs: null, affine_workspaces: null,
           owui_users: null, owui_chats: null,
         };
-        const payload = await swrJson(ctx, env, 'cache:stats2', 300000, async () => {
+        const payload = await swrJson(ctx, env, `cache:stats2:${sess.sub}`, 300000, async () => {
           for (const k of ['svc-stats:nextcloud', 'svc-stats:vaultwarden', 'svc-stats:affine', 'svc-stats:openwebui']) {
             try {
               const raw = await env.SESSIONS.get(k);
@@ -1343,6 +1288,7 @@ export default {
               let playedItems = 0;
               const seriesIds = new Set<string>();
               const movieIds = new Set<string>();
+              const episodeIds = new Set<string>();
               const seenIds = new Set<string>();
               const buckets: Record<string, { ticks: number; titles: Set<string>; items: number }> = {
                 week: { ticks: 0, titles: new Set<string>(), items: 0 },
@@ -1365,7 +1311,8 @@ export default {
                     const ticks = Number(it.RunTimeTicks) || 0;
                     const isEp = it.Type === 'Episode';
                     const key = String((isEp ? it.SeriesId : it.Id) || '');
-                    if (isEp) { if (key) seriesIds.add(key); } else if (key) movieIds.add(key);
+                    if (isEp) { if (key) seriesIds.add(key); if (it.Id) episodeIds.add(String(it.Id)); }
+                    else if (key) movieIds.add(key);
                     if (it.Id) seenIds.add(String(it.Id));
                     const lp = it.UserData ? it.UserData.LastPlayedDate : null;
                     const ts = lp ? Date.parse(String(lp)) : NaN;
@@ -1379,7 +1326,7 @@ export default {
                 }
               } catch {}
               out.movies = movieIds.size;
-              out.episodes = playedItems - movieIds.size;
+              out.episodes = episodeIds.size;
               out.series = seriesIds.size;
               // in progress: its partial position still counts as watched time
               let resumeTicks = 0;
@@ -1653,7 +1600,8 @@ export default {
         const out = [];
         for (const k of list.keys.slice(-30).reverse()) {
           const v = await env.SESSIONS.get(k.name);
-          if (v) out.push(JSON.parse(v));
+          if (!v) continue;
+          try { out.push(JSON.parse(v)); } catch { /* skip corrupt record */ }
         }
         return json(out);
       }
@@ -1663,18 +1611,6 @@ export default {
         const payload = await swrJson(ctx, env, 'cache:updates', 1800000, () => produceUpdates(env));
         return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
       }
-      if (path === '/api/growth') {
-        // Library growth — SWR cached 1 h. addedToday is time-sensitive (the
-        // pipeline adds items continuously), so 24 h would freeze it; a
-        // refresh is only ~5 Jellyfin calls / ~2 s, <= 24 refreshes/day.
-        // Cache API via swrJson — NEVER KV (free-tier write budget).
-        // Key carries a SCHEMA VERSION: bump it whenever the payload shape
-        // changes so a deploy starts from a clean slot instead of serving the
-        // previous shape for up to an hour (v2 added libraryTotal*).
-        const payload = await swrJson(ctx, env, 'cache:growth:v2', 3600000, () => produceGrowth(env));
-        return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
-      }
-
       // ---------- Referrals: "I recommended a friend" ----------
       // POST /api/referral {name, service, note?} -> KV + Gotify ping
       // GET  /api/referral       -> my referrals (with status)
@@ -1729,7 +1665,7 @@ export default {
         if (!what) return json({ error: 'Describe the bug first' }, 400);
         const id = 'bug-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
         const rec = { id, user: sess.username, name: sess.name, where, what, at: Date.now(), status: 'open' };
-        await env.SESSIONS.put('bug:' + id, JSON.stringify(rec));
+        await env.SESSIONS.put('bug:' + id, JSON.stringify(rec), { expirationTtl: 90 * 86400 });
         if (env.GOTIFY_BUG_TOKEN) {
           try {
             await fetch('https://gotify.mysweetpea.cc/message', {

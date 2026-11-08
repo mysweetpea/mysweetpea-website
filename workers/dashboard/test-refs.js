@@ -5,18 +5,62 @@
    silently killed the home tab's rails and hero. Bare references (passed to
    .map) count too, which a call-only check misses. */
 const fs = require('fs');
-const html = fs.readFileSync(__dirname + '/public/index.html', 'utf8');
+let html;
+try {
+  html = fs.readFileSync(__dirname + '/public/index.html', 'utf8');
+} catch (e) {
+  console.error('FAIL - cannot read public/index.html: ' + e.message);
+  process.exit(1);
+}
 const js = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].map(m => m[1]).join('\n');
 
-// strip string literals first: localStorage keys like 'msp_onboarded' are not
-// identifiers, and a quoted name in a comment is not a reference
-const stripped = js
-  .replace(/\/\*[\s\S]*?\*\//g, '')      // block comments
-  .replace(/(^|\s)\/\/[^\n]*/g, '$1');   // line comments (not URLs: those are ': //')
-const code = stripped.replace(/'(?:[^'\\]|\\.)*'/g, "''")
-               .replace(/"(?:[^"\\]|\\.)*"/g, '""')
-               .replace(/`(?:[^`\\]|\\.)*`/g, '``');
+/* One small scanner instead of chained regexes: comments and string bodies are
+   blanked, template `${...}` bodies are KEPT (a helper used only inside an
+   interpolation is still a live reference), and an apostrophe in prose can no
+   longer pair with one across a whole function and delete live code.
+   ponytail: regex literals containing quotes are not modelled; add if one
+   ever lands in the page. */
+function strip(src) {
+  const out = [];
+  let i = 0;
+  while (i < src.length) {
+    const c = src[i], n = src[i + 1];
+    if (c === '/' && n === '/') { while (i < src.length && src[i] !== '\n') i++; continue; }
+    if (c === '/' && n === '*') { const e = src.indexOf('*/', i + 2); i = e < 0 ? src.length : e + 2; continue; }
+    if (c === "'" || c === '"' || c === '`') {
+      const q = c; i++;
+      out.push(' ');
+      while (i < src.length && src[i] !== q) {
+        if (src[i] === '\\') { i += 2; continue; }
+        if (q === '`' && src[i] === '$' && src[i + 1] === '{') {
+          let depth = 1; i += 2; let inner = '';
+          while (i < src.length && depth > 0) {
+            if (src[i] === '{') depth++;
+            else if (src[i] === '}') { depth--; if (!depth) { i++; break; } }
+            inner += src[i++];
+          }
+          out.push(' ' + inner + ' ');
+          continue;
+        }
+        i++;
+      }
+      i++;
+      out.push(' ');
+      continue;
+    }
+    out.push(c); i++;
+  }
+  return out.join('');
+}
 
+const code = strip(js);
+if (!code.trim()) { console.error('FAIL - no inline script found (page restructured?)'); process.exit(1); }
+
+/* Definitions are read from the RAW source on purpose: the scanner below is
+   lossless for references but can swallow a run of code when a regex literal
+   contains a quote, and a missed definition here fails a good deploy. Erring
+   permissive is the safe direction: a commented-out definition can hide a real
+   regression, a lost one blocks every deploy. */
 const defined = new Set([
   ...[...js.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)/g)].map(m => m[1]),
   ...[...js.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)/g)].map(m => m[1]),

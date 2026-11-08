@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "node test/pipeline-test.mjs && node test/growth-test.mjs && node test-refs.js && node test-tour.js"
+    "test": "node test/pipeline-test.mjs && node test-refs.js && node test-tour.js"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",

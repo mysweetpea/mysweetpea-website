@@ -13,7 +13,7 @@
 @font-face{font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;src:url('/fonts/inter-var.woff2') format('woff2')}
 @font-face{font-family:'Fraunces';font-style:normal;font-weight:100 900;font-display:swap;src:url('/fonts/fraunces-var.woff2') format('woff2')}
 :root{--bg:#08090F;--primary:#8B7EF6;--primary-dim:#6C5CE0;--primary-bright:#C9C2FF;--ice:#EEF0FB;--sage:#45D6C8;--slate:#9BA1C7;--gold:#D9A86C;
---text:#EEF0FB;--text-dim:#9BA1C7;--text-faint:#5E648D;--border:rgba(151,146,255,.13);--border-primary:rgba(151,146,255,.26);--card-bg:rgba(19,21,36,.66);--card:rgba(19,21,36,.66);--radius:22px;--radius-sm:16px;
+--text:#EEF0FB;--text-dim:#9BA1C7;--text-faint:#7E85AE;--border:rgba(151,146,255,.13);--border-primary:rgba(151,146,255,.26);--card-bg:rgba(19,21,36,.66);--card:rgba(19,21,36,.66);--radius:22px;--radius-sm:16px;
 --v:#8B7EF6;--v-soft:rgba(139,126,246,.16);--c:#45D6C8;--c-soft:rgba(69,214,200,.14);--up:#4ADE9C;--down:#F08A8A;--warn:#E5B567;
 --e1:0 1px 2px rgba(0,0,0,.28),0 2px 8px rgba(0,0,0,.22);
 --e2:0 2px 6px rgba(0,0,0,.30),0 8px 24px rgba(0,0,0,.28);
@@ -407,6 +407,13 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .ob-human{margin:16px 0 0;font-size:.88rem;color:var(--text-dim);line-height:1.5}
 .ob-link{background:none;border:0;padding:0;font:inherit;font-size:.88rem;font-weight:600;color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .ob-link:hover{color:var(--gold)}
+/* Touch surfaces: the two smallest controls get a real hit area where the
+   pointer is a finger (mouse keeps the compact rhythm). */
+@media (pointer:coarse){
+  .hm-more{min-height:44px;display:inline-flex;align-items:center}
+  .st2-pill{min-height:36px}
+  .sv-dev-pill,.gp-chip{min-height:36px}
+}
 @media (prefers-reduced-motion: reduce){
 .aurora::before,.aurora::after{animation:none}
 #petalCanvas{display:none}
@@ -763,7 +770,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .contact-pill.ct2-mail:hover{box-shadow:0 10px 30px var(--v-soft)}
 /* ---- aurora p3b2: stats wrapped hero (st2) ---- */
 .st2-hero .st2-eyebrow{margin-bottom:14px}
-.st2-num{font-family:'Fraunces','Inter',Georgia,serif;font-weight:500;font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.08;letter-spacing:-.02em;background-image:linear-gradient(120deg,var(--primary),var(--sage));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-variant-numeric:tabular-nums}
+.st2-num{font-variant-numeric:tabular-nums;font-family:'Fraunces','Inter',Georgia,serif;font-weight:500;font-size:clamp(2.2rem,5vw,3.4rem);line-height:1.08;letter-spacing:-.02em;background-image:linear-gradient(120deg,var(--primary),var(--sage));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;font-variant-numeric:tabular-nums}
 .st2-num small{font-size:.55em;font-weight:500;-webkit-text-fill-color:var(--text-dim)}
 .st2-empty{font-family:'Fraunces','Inter',Georgia,serif;font-style:italic;font-weight:500;font-size:clamp(1.25rem,3vw,1.6rem);color:var(--text-dim);margin:0}
 .st2-sub{margin:12px 0 0;max-width:58ch}
@@ -1268,7 +1275,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .hm-svcrow.isdev{cursor:default;border-style:dashed;background:rgba(19,21,36,.28)}
 .hm-svcrow.isdev .hm-orb-nm{color:var(--text-dim)}
 .hm-svcrow.isdev:hover{transform:none;border-color:var(--border)} /* the img's own gradient was painting over the letter fallback */
-.mrate{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;font-weight:700;color:#E8C878;background:rgba(8,9,15,.8);border:1px solid rgba(217,168,108,.35);padding:2px 6px;border-radius:8px}
+.mrate{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.6rem;font-weight:700;color:#E8C878;background:rgba(8,9,15,.8);border:1px solid rgba(217,168,108,.35);padding:2px 6px;border-radius:8px}
 .mplays{position:absolute;top:6px;left:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:var(--c);background:rgba(8,9,15,.8);border:1px solid rgba(69,214,200,.4);padding:2px 7px;border-radius:99px}
 .m-genre-row{display:flex;gap:8px;flex-wrap:wrap}
 .m-genre{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:7px 15px;border-radius:99px;border:1px solid var(--border);color:var(--text-dim);background:var(--card);cursor:pointer;transition:border-color var(--t-fast),color var(--t-fast),transform var(--t-fast)}
@@ -1281,7 +1288,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .hm-svcrow-main{min-width:0;flex:1}
 .hm-svcrow .hm-orb-nm{font-size:.76rem;gap:5px}
 .hm-svcrow .hm-orb-bl{min-height:0;font-size:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm-svcrow .hm-orb-up{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;letter-spacing:.1em;color:var(--text-dim);font-variant-numeric:tabular-nums;background:rgba(8,9,15,.5);border:1px solid var(--border);border-radius:99px;padding:1px 7px}
+.hm-svcrow .hm-orb-up{flex:none;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.6rem;letter-spacing:.1em;color:var(--text-dim);font-variant-numeric:tabular-nums;background:rgba(8,9,15,.5);border:1px solid var(--border);border-radius:99px;padding:1px 7px}
 .hm-pair.hm-pair-solo{grid-template-columns:minmax(0,1fr)}
 #hm-un-rail{align-items:flex-start}
 .hm-pair>.hm-sec{min-width:0}
@@ -1360,9 +1367,9 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #panel-services .sv-card .nm{font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #panel-services .sv-card .bl{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;font-size:.68rem;line-height:1.35;color:var(--text-dim);min-height:1.35em}
 #panel-services .sv-card .meta{position:relative;display:flex;align-items:center;gap:7px;border-top:1px solid var(--border);padding-top:8px;margin-top:auto}
-#panel-services .sv-card .sv-cat{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%;flex:none}
+#panel-services .sv-card .sv-cat{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44%;flex:none}
 #panel-services .sv-card .sv-uppill{font-size:.56rem;padding:2px 8px}
-#panel-services .sv-card .sv-live{font-size:.54rem;letter-spacing:.12em}
+#panel-services .sv-card .sv-live{font-size:.6rem;letter-spacing:.12em}
 #panel-services .sv-card .sv-pin{opacity:.4;transition:opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1);z-index:2;top:6px;right:6px;width:28px;height:28px;font-size:14px}
 #panel-services .sv-card:hover .sv-pin{opacity:.8}
 #panel-services .sv-card .sv-pin:hover{opacity:1!important;transform:scale(1.25)}
@@ -2620,6 +2627,33 @@ function guideDetailHtml(key) {
   h += platformsHtml(key);
   return h;
 }
+/* A member whose session or Cloudflare check lapses gets 401/403 on the API
+   calls while /api/me may still succeed from cache — every rail then hides
+   itself and the page looks half-built. Say what happened instead. */
+let mspAuthed = false;
+function mspSessionBanner() {
+  if (!mspAuthed || document.getElementById('msp-session-bar')) return;
+  const d = document.createElement('div');
+  d.id = 'msp-session-bar';
+  d.className = 'msp-sbar';
+  d.setAttribute('role', 'status');
+  d.innerHTML = '<span>Some data could not be loaded — your session may have expired.</span>' +
+    '<a href="/auth/login">Sign in again</a>' +
+    '<button type="button" aria-label="Dismiss" onclick="this.parentNode.remove()">&times;</button>';
+  document.body.appendChild(d);
+}
+(function watchApiAuth() {
+  const f = window.fetch.bind(window);
+  window.fetch = function (input, init) {
+    return f(input, init).then((res) => {
+      try {
+        const url = typeof input === 'string' ? input : (input && input.url) || '';
+        if ((res.status === 401 || res.status === 403) && url.indexOf('/api/') >= 0) mspSessionBanner();
+      } catch (e) { /* never let reporting break a fetch */ }
+      return res;
+    });
+  };
+})();
 (async () => {
   const app = $('#app'); const gate = $('#gate');
   let me = null;
@@ -2633,6 +2667,7 @@ function guideDetailHtml(key) {
     if (typeof me.email !== 'string') me.email = '';
     if (typeof me.tier !== 'string') me.tier = 'seedling';
   }
+  if (me) mspAuthed = true;
   if (!me) {
     gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
     return;
@@ -2803,7 +2838,6 @@ function guideDetailHtml(key) {
     '<section class="card" id="sec-stats"><p class="eyebrow">The full ledger</p><h3>The garden in numbers<button type="button" class="mini icon-btn" id="stats-refresh" aria-label="Refresh statistics" title="Refresh statistics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></h3>' +
     '<div class="stats" id="stats-kpi" aria-live="polite"></div>' +
     '<section id="sec-stats-charts" hidden aria-label="Library charts"><p class="eyebrow">By the numbers</p><div id="stats-charts" aria-live="polite"></div><noscript><p class="dim">Charts need JavaScript — the totals above still show.</p></noscript></section>' +
-    '<section id="sec-growth" hidden aria-label="Library growth"></section>' +
     '<div id="stats-services" aria-live="polite"></div></section>' +
     '</div>' +
     '</div>' +
@@ -3100,7 +3134,7 @@ function guideDetailHtml(key) {
   };
   const fmtStorage = (mb) => (mb == null ? '—' : (mb >= 1024 ? (mb / 1024).toFixed(1) + ' GB' : Math.round(mb) + ' MB'));
   const statTile = (label, value, share) => '<div class="stat"><div class="n">' + (typeof value === 'number' ? Number(value).toLocaleString() : esc(String(value))) + '</div><div class="l">' + esc(label) + '</div>' + (typeof share === 'number' ? '<div class="stat-bar"><i style="width:' + Math.max(3, Math.round(share)) + '%"></i></div>' : '') + '</div>';
-  const kpiTile = (label, value, icon) => '<div class="stat"><svg class="kpi-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + icon + '</svg><div class="n">' + (value == null ? '—' : Number(value).toLocaleString()) + '</div><div class="l">' + esc(label) + '</div></div>';
+  const kpiTile = (label, value, icon) => '<div class="stat"><svg class="kpi-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + icon + '</svg><div class="n">' + (value == null ? '—' : (typeof value === 'string' ? esc(value) : Number(value).toLocaleString())) + '</div><div class="l">' + esc(label) + '</div></div>';
   const statSection = (label, tiles) => {
     const filled = tiles.filter((t) => t[1] != null);
     const maxV = Math.max.apply(null, filled.map((t) => (typeof t[1] === 'number' ? t[1] : 0)).concat([0]));
@@ -3109,6 +3143,13 @@ function guideDetailHtml(key) {
     if (!inner) return '';
     return '<div class="svc-sec"><p class="eyebrow">' + esc(label) + '</p><div class="svc-stats">' + inner + '</div></div>';
   };
+  function fmtHours(v) {
+    if (v == null || !isFinite(Number(v))) return null;
+    const mins = Math.round(Number(v) * 60);
+    const h = Math.floor(mins / 60), m = mins % 60;
+    if (!h) return m + 'm';
+    return h + 'h' + (m ? ' ' + m + 'm' : '');
+  }
   function renderStats(s) {
     const kpi = document.getElementById('stats-kpi');
     const svc = document.getElementById('stats-services');
@@ -3117,8 +3158,7 @@ function guideDetailHtml(key) {
       kpi.innerHTML =
       kpiTile('Movies watched', s.movies, KPI_ICONS.film) +
       kpiTile('Episodes watched', s.episodes, KPI_ICONS.tv) +
-      kpiTile('Hours watched', s.jf_watch_hours, KPI_ICONS.clock) +
-      kpiTile(s.users === 1 ? 'Member' : 'Members', s.users, KPI_ICONS.users);
+      kpiTile('Hours watched', fmtHours(s.jf_watch_hours), KPI_ICONS.clock);
       kpi.querySelectorAll('.stat .n').forEach(animateCount);
     }
     renderStatsCharts(s);
@@ -3162,174 +3202,6 @@ function guideDetailHtml(key) {
       (series != null ? '<span class="sc-note">across ' + series.toLocaleString() + ' series' + '</span>' : '') +
       '</div></div></div></div>';
   }
-  // ===== library growth — /api/growth, ONE shared fetch (promise cache, same
-  // pattern) so loadStats (stats card) and hmLoadBanner (home
-  // teaser) never double-fetch. Only success with data is memoized.
-  let growthData = null;
-  function growthFetch(force) {
-    const hit = growthData;
-    if (hit && !force) return hit;
-    const p = fetch('/api/growth')
-      .then((r) => (r.ok ? r.json() : { totals: { all: 0 }, failed: true }))
-      .catch(() => ({ totals: { all: 0 }, failed: true }));
-    p.then((d) => { if (d && !d.failed && d.totals && d.totals.all > 0) growthData = p; });
-    return p;
-  }
-  function renderGrowth(g) {
-    const sec = document.getElementById('sec-growth');
-    if (!sec) return;
-    // hide on fetch failure OR empty totals (degraded payload / zero library)
-    const ok = g && !g.failed && Array.isArray(g.daily) && g.daily.length && g.totals && g.totals.all > 0;
-    if (!ok) { sec.hidden = true; sec.innerHTML = ''; return; }
-    const cap = Math.max(1, Number(g.capValue) || 60);
-    const COLORS = { m: 'var(--v)', s: 'var(--c)', e: 'var(--gold)' };
-    // daily stacked bars — height = min(total, cap)/cap; clamped days get a
-    // faded top (.gr-bar.clamped::after) + their real value in tiny text
-    const bars = g.daily.map((d) => {
-      const m = Number(d.m) || 0, s = Number(d.s) || 0, e = Number(d.e) || 0;
-      const total = Number(d.total) || (m + s + e);
-      const clamped = total > cap;
-      const hPct = Math.max(0, Math.min(100, (total / cap) * 100));
-      const bar = total > 0
-        ? '<div class="gr-bar' + (clamped ? ' clamped' : '') + '" style="height:' + hPct.toFixed(2) + '%">' +
-          [['e', e], ['s', s], ['m', m]].map((x) => (x[1] > 0
-            ? '<i class="gr-seg gr-seg-' + x[0] + '" style="height:' + ((x[1] / total) * 100).toFixed(2) + '%"></i>'
-            : '')).join('') + '</div>'
-        : '<div class="gr-bar zero"></div>';
-      return '<div class="gr-col" data-tip="' + esc(d.date) + '" data-m="' + m + '" data-s="' + s + '" data-e="' + e + '" data-t="' + total + '">' +
-        (clamped ? '<span class="gr-over">' + total.toLocaleString() + '</span>' : '') + bar + '</div>';
-    }).join('');
-    // cumulative area line — running total normalized to the window final
-    let run = 0;
-    const n = g.daily.length;
-    const pts = g.daily.map((d, i) => {
-      run += Number(d.total) || 0;
-      const x = n > 1 ? (i / (n - 1)) * 800 : 0;
-      const y = 100 - (run / g.totals.all) * 100;
-      return x.toFixed(1) + ',' + Math.max(0, Math.min(100, y)).toFixed(1);
-    });
-    // Catmull-Rom -> cubic bezier for a smooth climb (prevents the angular polyline look)
-    let line = 'M' + pts[0];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const p0 = pts[Math.max(0, i - 1)].split(','), p1 = pts[i].split(','), p2 = pts[i + 1].split(','), p3 = pts[Math.min(pts.length - 1, i + 2)].split(',');
-      const c1x = Number(p1[0]) + (Number(p2[0]) - Number(p0[0])) / 6, c1y = Number(p1[1]) + (Number(p2[1]) - Number(p0[1])) / 6;
-      const c2x = Number(p2[0]) - (Number(p3[0]) - Number(p1[0])) / 6, c2y = Number(p2[1]) - (Number(p3[1]) - Number(p1[1])) / 6;
-      line += ' C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' ' + p2[0] + ',' + p2[1];
-    }
-    const all = Number(g.totals.all).toLocaleString();
-    // true all-time library size (NOT the window sum) with an honest fallback
-    const libAll = (g.libraryTotal != null && isFinite(Number(g.libraryTotal)))
-      ? Number(g.libraryTotal).toLocaleString()
-      : all;
-    const footer = g.importVisible
-      ? 'Initial import (up to ' + esc(g.importEnd) + '): +' + Number(g.importTotal).toLocaleString() + ' &middot; Pipeline era: +' + Number(g.pipelineTotal).toLocaleString()
-      : '+' + Number(g.pipelineTotal).toLocaleString() + ' this month';
-    // daily story: how many of the window's days had additions + avg/day
-    const active = g.daily.filter((d) => (Number(d.total) || 0) > 0).length;
-    const sumAll = g.daily.reduce((a, d) => a + (Number(d.total) || 0), 0);
-    const avgDay = g.daily.length ? Math.round(sumAll / g.daily.length) : 0;
-    const firstDay = g.daily.length ? g.daily[0].date : '';
-    const lastDay = g.daily.length ? g.daily[g.daily.length - 1].date : '';
-    const fmtDay = (s) => { const t = Date.parse(String(s) + 'T00:00:00Z'); return isFinite(t) ? new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : ''; };
-    sec.innerHTML = '<p class="eyebrow">Library growth</p>' +
-      '<div class="gr-num">+' + Number(g.addedThisWeek).toLocaleString() + '<small> added this week</small></div>' +
-      '<div class="gr-stats">' +
-      '<div class="gr-stat"><b>+' + Number(g.addedToday).toLocaleString() + '</b><span>added today</span></div>' +
-      '<div class="gr-stat"><b>' + Number(g.streakDays).toLocaleString() + '</b><span>day streak</span></div>' +
-      '<div class="gr-stat"><b>' + active + '</b><span>of ' + g.daily.length + ' days growing</span></div>' +
-      '<div class="gr-stat"><b>~' + avgDay.toLocaleString() + '</b><span>avg per day</span></div>' +
-      '<div class="gr-stat"><b>' + libAll + '</b><span>items total</span></div>' +
-      '</div>' +
-      '<div class="gr-legend">' +
-      '<span data-k="m"><i style="background:var(--v)"></i>movies</span>' +
-      '<span data-k="s"><i style="background:var(--c)"></i>series</span>' +
-      '<span data-k="e"><i style="background:var(--gold)"></i>episodes</span>' +
-      '<span class="gr-legend-note">' + (g.daily.length - active) + ' quiet days</span></div>' +
-      '<div class="gr-bars-wrap"><div class="gr-gridlines" aria-hidden="true"><i></i><i></i><i></i></div>' +
-      '<div class="gr-bars" id="gr-bars" role="img" aria-label="Daily additions over the last 30 days">' + bars + '</div></div>' +
-      '<div class="gr-axis"><span>' + esc(fmtDay(firstDay)) + '</span><span>every bar is one day</span><span>' + esc(fmtDay(lastDay)) + '</span></div>' +
-      '<div class="gr-area-wrap"><svg class="gr-area" id="gr-area" viewBox="0 0 800 100" preserveAspectRatio="none" role="img" aria-label="Cumulative library growth">' +
-      '<defs><linearGradient id="grFill" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" style="stop-color:var(--v);stop-opacity:.5"/>' +
-      '<stop offset="1" style="stop-color:var(--v);stop-opacity:0"/></linearGradient></defs>' +
-      '<path d="' + line + ' L800,100 L0,100 Z" fill="url(#grFill)" stroke="none"></path>' +
-      '<path d="' + line + '" fill="none" style="stroke:var(--v)" stroke-width="2" vector-effect="non-scaling-stroke"></path>' +
-      '<line class="gr-cursor" x1="0" x2="0" y1="0" y2="100"></line>' +
-      '<circle class="gr-dot-hl" r="3.2"></circle>' +
-      '<circle class="gr-dot" cx="' + pts[pts.length - 1].split(',')[0] + '" cy="' + pts[pts.length - 1].split(',')[1] + '" r="3" vector-effect="non-scaling-stroke"></circle></svg>' +
-      '<span class="gr-area-cap">' + libAll + ' items' + (g.partial ? ' (partial data)' : '') + ', still climbing</span></div>' +
-      '<p class="gr-era">' + footer + '</p>';
-    sec.hidden = false;
-  }
-  // ===== chart interactivity: shared tooltip + legend highlight + area scrub.
-  // Delegated + re-render-proof (works over any innerHTML replace); stores the
-  // area's daily data on the host so the scrub needs no per-render state.
-  (function initChartTips() {
-    if (window.__grTips) return; window.__grTips = true;
-    let tip = null;
-    const show = (html, x, y) => {
-      if (!tip) { tip = document.createElement('div'); tip.id = 'gr-tip'; document.body.appendChild(tip); }
-      tip.innerHTML = html;
-      tip.classList.add('on');
-      const r = tip.getBoundingClientRect();
-      tip.style.left = Math.min(Math.max(8, x - r.width / 2), window.innerWidth - r.width - 8) + 'px';
-      tip.style.top = Math.max(8, y - r.height - 12) + 'px';
-    };
-    const hide = () => { if (tip) tip.classList.remove('on'); };
-    const KLS = { m: ['Movies', 'var(--v)'], s: ['Series', 'var(--c)'], e: ['Episodes', 'var(--gold)'] };
-    const rowsHtml = (d) => '<div class="gr-tip-rows">' + ['m', 's', 'e'].map((k) =>
-      (Number(d[k]) || 0) > 0 ? '<div><i style="background:' + KLS[k][1] + '"></i>' + KLS[k][0] + ': ' + Number(d[k]).toLocaleString() + '</div>' : '').join('') + '</div>';
-    // ONE mousemove reconciler: decide what the pointer is over, show OR hide.
-    // (Two competing handlers both firing on every move = bar tooltip instantly
-    // re-hidden by the area handler — the show/hide fight bug.)
-    document.addEventListener('mousemove', (ev) => {
-      const t = ev.target;
-      if (!t || !t.closest) { hide(); return; }
-      const col = t.closest('.gr-col[data-tip]');
-      const svg = t.closest('svg.gr-area');
-      if (!col && !svg) { hide(); return; }
-      if (svg) {
-        const data = svg.closest('.gr-area-wrap') ? svg.closest('.gr-area-wrap').__grData : null;
-        if (!data || !data.length) { hide(); return; }
-        const r = svg.getBoundingClientRect();
-        const fx = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
-        const i = Math.round(fx * (data.length - 1));
-        const d = data[i];
-        const run = data.slice(0, i + 1).reduce((a, x) => a + x.total, 0);
-        const y = 100 - (run / data.totalAll) * 100;
-        const cur = svg.querySelector('.gr-cursor'), dot = svg.querySelector('.gr-dot-hl');
-        const xc = (i / (data.length - 1) * 800).toFixed(1);
-        if (cur) { cur.setAttribute('x1', xc); cur.setAttribute('x2', xc); }
-        if (dot) { dot.setAttribute('cx', xc); dot.setAttribute('cy', Math.max(0, Math.min(100, y)).toFixed(1)); }
-        svg.classList.add('scrub');
-        show('<b>' + esc(d.date) + '</b><div class="gr-tip-rows"><div><i style="background:var(--v)"></i>cumulative: ' + Math.round(run).toLocaleString() + '</div><div>day: +' + Number(d.total).toLocaleString() + '</div></div>', ev.clientX, ev.clientY);
-        return;
-      }
-      const d = { m: col.dataset.m, s: col.dataset.s, e: col.dataset.e };
-      show('<b>' + esc(col.dataset.tip) + '</b>' + rowsHtml(d) + '<div class="gr-tip-rows"><div><b style="display:inline;margin:0">total ' + Number(col.dataset.t).toLocaleString() + '</b></div></div>', ev.clientX, ev.clientY);
-    });
-    document.addEventListener('mouseleave', hide, true);
-    document.addEventListener('scroll', hide, true);
-    // legend hover -> highlight matching bar segments
-    document.addEventListener('mouseover', (ev) => {
-      const leg = ev.target && ev.target.closest ? ev.target.closest('.gr-legend span[data-k]') : null;
-      const bars = document.getElementById('gr-bars');
-      if (!bars) return;
-      if (leg) bars.dataset.hl = leg.dataset.k;
-      else bars.removeAttribute('data-hl');
-    });
-    // (area scrub merged into the reconciler above)
-    // publish area data + donut tooltips (rich <title> already covers donuts)
-    const _rg = renderGrowth;
-    renderGrowth = function (g) {
-      _rg(g);
-      const wrap = document.querySelector('.gr-area-wrap');
-      if (wrap && g && Array.isArray(g.daily) && g.daily.length && g.totals) {
-        wrap.__grData = g.daily.map((d) => ({ date: d.date, total: Number(d.total) || 0 }));
-        wrap.__grData.totalAll = Math.max(1, Number(g.totals.all) || 1);
-      }
-    };
-  })();
   // ===== AURORA P3B2: stats wrapped hero (reads the same /api/stats payload as renderStats) =====
   let st2Period = 'week';
   let st2PeriodPicked = false;
@@ -3412,12 +3284,15 @@ function guideDetailHtml(key) {
     // all-tied rows make "33% of top plays" noise, not information
     const flat = list.length > 1 && list.every((x) => (Number(x.playCount) || 0) === (Number(list[0].playCount) || 0));
     const JF_ITEM_URL = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
-    host.innerHTML = '<div class="st-top-list">' + list.map((x, i) => {
+    const h3 = card.querySelector('h3');
+    if (h3) h3.textContent = flat ? 'Recently watched' : 'Most watched';
+    card.setAttribute('aria-label', flat ? 'Recently watched' : 'Most watched, all time');
+    host.innerHTML = '<div class="st-top-list' + (flat ? ' flat' : '') + '">' + list.map((x, i) => {
       const plays = Number(x.playCount) || 0;
       const share = Math.round((plays / total) * 100);
       const art = (x && x.img) ? '<img class="st-row-art" loading="lazy" alt="" src="' + esc(x.img) + '"/>' : '<span class="st-row-art st-row-fallback hm-g' + (i % 3) + '">' + esc(String(x.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
       return '<a class="st-row" href="' + (JF_ITEM_URL + '/web/') + '" target="_blank" rel="noopener">' +
-        '<span class="st-rank">' + (i + 1) + '</span>' + art +
+        (flat ? '' : '<span class="st-rank">' + (i + 1) + '</span>') + art +
         '<span class="st-row-main"><span class="st-row-title">' + esc(x.name || 'Untitled') + '</span>' +
         '<span class="st-row-bar"><i style="width:' + Math.max(4, Math.round((plays / max) * 100)) + '%"></i></span></span>' +
         '<span class="st-row-num"><b>' + plays.toLocaleString() + '</b> ' + (plays === 1 ? 'play' : 'plays') + (flat ? '' : '<small>' + share + '% of top plays</small>') + '</span></a>';
@@ -3434,7 +3309,8 @@ function guideDetailHtml(key) {
     host.innerHTML = list.map((m) => {
       const pct = (typeof m.up24 === 'number' && isFinite(m.up24)) ? Math.max(0, Math.min(100, m.up24)) : null;
       const down = m.current === false;
-      const col = down ? 'var(--down)' : (pct == null ? 'var(--text-dim)' : 'var(--up)');
+      const col = down || (pct != null && pct < 97) ? 'var(--down)'
+        : pct == null ? 'var(--text-dim)' : (pct < 99.5 ? 'var(--warn)' : 'var(--up)');
       const label = pct == null ? '—' : (pct >= 99.95 ? '100%' : pct.toFixed(pct >= 99.5 ? 1 : 2).replace(/\.?0+$/, '') + '%');
       return '<span class="st-fleet-row' + (down ? ' down' : '') + '" title="' + esc(m.name) + ': ' + (pct == null ? 'no data' : pct + '% uptime, last 24h') + '">' +
         '<i class="st-fleet-dot" style="background:' + col + '"></i>' +
@@ -3454,7 +3330,6 @@ function guideDetailHtml(key) {
     try { const r = await fetch('/api/stats'); if (r.ok) d = await r.json(); } catch (e) {}
     renderStats(mergeStats(d));
     st2Render(d);
-    growthFetch(!!force).then(renderGrowth).catch(() => renderGrowth(null));
     // Fleet health rows inside the hero (compact dot+name+% list, real Kuma 24h)
     fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((sx) => { renderFleet(sx && sx.monitors); }).catch(() => {});
     // Top titles share the most-played fetch with the Media tab (one upstream query)
@@ -4106,11 +3981,10 @@ function guideDetailHtml(key) {
     }
     const de = document.getElementById('hm-date');
     if (de) { try { de.textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }); } catch (e) {} }
-    let stats = {}, devCount = null, growth = null;
+    let stats = {}, devCount = null;
     const jobs = [
       fetch('/api/stats').then((r) => (r.ok ? r.json() : {})).then((d) => { stats = d || {}; }).catch(() => {}),
       fetch('/api/sessions').then((r) => (r.ok ? r.json() : {})).then((d) => { devCount = ((d && d.results) || []).length; }).catch(() => {}),
-      growthFetch().then((d) => { growth = d; }).catch(() => {})
     ];
     try { await Promise.all(jobs); } catch (e) {}
     const per = (stats && stats.jf_periods) || {};
@@ -4894,7 +4768,7 @@ function relFuture(v) {
     home: 'Overview, updates & quick actions',
     media: 'Jellyfin library',
     services: 'Service launcher & status',
-    stats: 'Watch time & library growth',
+    stats: 'Watch time & what you watched',
     guides: 'Step-by-step setup guides',
     contact: 'Reach the gardener',
     security: 'Checklist, MFA & sessions',
@@ -5319,7 +5193,16 @@ function relFuture(v) {
 .st-fleet-row.down .st-fleet-pct{color:var(--down)}
 /* ===== STATS v5 premium polish ===== */
 /* ledger: sections as columns, not stacked walls */
+/* session/auth degrade bar — sits under the nav, dismissible, never blocks */
+.msp-sbar{position:fixed;left:50%;transform:translateX(-50%);top:74px;z-index:60;display:flex;align-items:center;gap:12px;max-width:min(92vw,640px);padding:10px 14px;border-radius:12px;border:1px solid rgba(229,181,103,.45);background:rgba(28,24,16,.96);color:#F3E6CF;font-size:.86rem;box-shadow:0 12px 30px rgba(0,0,0,.45)}
+.msp-sbar a{color:#F0C27B;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.msp-sbar button{margin-left:auto;background:none;border:0;color:inherit;font-size:1.1rem;line-height:1;cursor:pointer;padding:2px 4px}
+@media(max-width:768px){.msp-sbar{top:auto;bottom:14px}}
 #stats-services{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px 28px;margin-top:18px}
+/* uniform ledger rows: groups carry 2 or 3 tiles, so pin a floor or the
+   two-column grid reads as ragged rather than composed */
+#stats-services .stat{min-height:74px;align-content:start}
+.st-top-list.flat .st-row-bar{opacity:.55}
 .svc-sec{display:flex;flex-direction:column;min-width:0}
 #stats-services .eyebrow{margin:0 0 10px;font-size:.62rem;display:flex;align-items:center;gap:10px}
 #stats-services .eyebrow::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard architecture — MySweetPea</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --paper:#08090F; --paper-2:#0E1018; --ink:#EEF0FB; --muted:#9BA1C7; --soft:#7E85AE;
+    --rule:rgba(151,146,255,.16); --accent:#8B7EF6; --link:#45D6C8;
+    --font-sans:'Geist',system-ui,sans-serif; --font-serif:'Instrument Serif',serif;
+    --font-mono:'Geist Mono',ui-monospace,monospace;
+  }
+  body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:3rem 2rem}
+  .frame{max-width:1200px;width:100%}
+  .eyebrow{font-family:var(--font-mono);font-size:.66rem;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+  h1{font-family:var(--font-serif);font-size:clamp(1.5rem,2.4vw+.75rem,2rem);font-weight:400;letter-spacing:-.02em;line-height:1.15;margin-bottom:.35rem}
+  .dek{color:var(--muted);font-size:.92rem;line-height:1.5;max-width:62ch;margin-bottom:1.6rem}
+  .diagram-container{width:100%;overflow-x:auto}
+  svg{width:100%;min-width:1040px;display:block}
+  @media(max-width:1040px){svg{min-width:0}}
+  .legend{display:flex;gap:1.4rem;flex-wrap:wrap;margin-top:1rem;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .legend i{display:inline-block;width:10px;height:10px;margin-right:.45rem;vertical-align:-1px;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="frame">
+  <p class="eyebrow">MySweetPea · homelab</p>
+  <h1>The dashboard, end to end</h1>
+  <p class="dek">One Cloudflare Worker serves the member shell and every API route. It is the only component that talks to the identity provider, the media server and the monitoring stack — the browser never calls them directly.</p>
+
+  <div class="diagram-container">
+    <svg viewBox="0 0 1040 560" role="img" aria-labelledby="dash-arch-title dash-arch-desc">
+      <title id="dash-arch-title">Dashboard architecture</title>
+      <desc id="dash-arch-desc">A member browser reaches the dashboard through Cloudflare; the dashboard Worker fans out to sessions, identity, the media server and uptime monitoring.</desc>
+      <defs>
+        <marker id="a-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#7E85AE"/></marker>
+        <marker id="a-link" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#45D6C8"/></marker>
+        <marker id="a-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#8B7EF6"/></marker>
+      </defs>
+
+      <!-- ============ connectors first (behind boxes) ============ -->
+      <!-- member -> cloudflare -->
+      <line x1="240" y1="165" x2="292" y2="165" stroke="#7E85AE" stroke-width="1.5" marker-end="url(#a-muted)"/>
+      <!-- cloudflare -> worker (headline path) -->
+      <line x1="500" y1="165" x2="552" y2="165" stroke="#8B7EF6" stroke-width="2" marker-end="url(#a-accent)"/>
+
+      <!-- worker -> sessions -->
+      <path d="M608 255 L608 284 L145 284 L145 336" fill="none" stroke="#7E85AE" stroke-width="1.5" marker-end="url(#a-muted)"/>
+      <!-- worker -> authentik -->
+      <path d="M656 255 L656 296 L405 296 L405 336" fill="none" stroke="#7E85AE" stroke-width="1.5" marker-end="url(#a-muted)"/>
+      <!-- worker -> media server -->
+      <path d="M704 255 L704 308 L665 308 L665 336" fill="none" stroke="#45D6C8" stroke-width="1.5" marker-end="url(#a-link)"/>
+      <!-- worker -> uptime -->
+      <path d="M752 255 L752 320 L915 320 L915 336" fill="none" stroke="#7E85AE" stroke-width="1.5" marker-end="url(#a-muted)"/>
+
+      <!-- ============ nodes ============ -->
+      <!-- Member -->
+      <rect x="40" y="120" width="200" height="90" rx="6" fill="#0E1018" stroke="#2A2C42"/>
+      <rect x="54" y="134" width="52" height="18" rx="2" fill="#171A26"/>
+      <text x="80" y="147" text-anchor="middle" font-family="Geist Mono,monospace" font-size="9.5" letter-spacing="1.2" fill="#9BA1C7">MEMBER</text>
+      <text x="56" y="176" font-family="Geist,sans-serif" font-size="17" font-weight="600" fill="#EEF0FB">Browser</text>
+      <text x="56" y="194" font-family="Geist Mono,monospace" font-size="11" fill="#7E85AE">Zen · iOS · TV</text>
+
+      <!-- Cloudflare -->
+      <rect x="300" y="120" width="200" height="90" rx="6" fill="#0E1018" stroke="#2A2C42"/>
+      <rect x="314" y="134" width="76" height="18" rx="2" fill="#171A26"/>
+      <text x="352" y="147" text-anchor="middle" font-family="Geist Mono,monospace" font-size="9.5" letter-spacing="1.2" fill="#9BA1C7">EDGE</text>
+      <text x="316" y="176" font-family="Geist,sans-serif" font-size="17" font-weight="600" fill="#EEF0FB">Cloudflare</text>
+      <text x="316" y="194" font-family="Geist Mono,monospace" font-size="11" fill="#7E85AE">WAF · TLS · bot challenge</text>
+
+      <!-- Dashboard worker (focal) -->
+      <rect x="560" y="110" width="250" height="145" rx="6" fill="#11101F" stroke="#8B7EF6" stroke-width="1.5"/>
+      <rect x="574" y="124" width="96" height="18" rx="2" fill="#211E3D"/>
+      <text x="622" y="137" text-anchor="middle" font-family="Geist Mono,monospace" font-size="9.5" letter-spacing="1.2" fill="#C9C2FF">WORKER</text>
+      <text x="576" y="170" font-family="Geist,sans-serif" font-size="18" font-weight="600" fill="#EEF0FB">dashboard.mysweetpea.cc</text>
+      <text x="576" y="191" font-family="Geist Mono,monospace" font-size="11" fill="#9BA1C7">SPA shell · /api/* · OIDC</text>
+      <text x="576" y="208" font-family="Geist Mono,monospace" font-size="11" fill="#9BA1C7">persona tokens · SWR</text>
+      <text x="576" y="234" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">the only component holding secrets</text>
+
+      <!-- KV -->
+      <rect x="40" y="344" width="210" height="100" rx="6" fill="#0E1018" stroke="#2A2C42"/>
+      <text x="56" y="376" font-family="Geist,sans-serif" font-size="15" font-weight="600" fill="#EEF0FB">Sessions · KV</text>
+      <text x="56" y="396" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">sess: · pkce: · audit:</text>
+      <text x="56" y="412" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">referral: · bug:</text>
+      <text x="56" y="432" font-family="Geist Mono,monospace" font-size="10.5" fill="#9BA1C7">180-day sessions</text>
+
+      <!-- Authentik -->
+      <rect x="300" y="344" width="210" height="100" rx="6" fill="#0E1018" stroke="#2A2C42"/>
+      <text x="316" y="376" font-family="Geist,sans-serif" font-size="15" font-weight="600" fill="#EEF0FB">Authentik</text>
+      <text x="316" y="396" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">OIDC + PKCE</text>
+      <text x="316" y="412" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">step-up re-auth</text>
+      <text x="316" y="432" font-family="Geist Mono,monospace" font-size="10.5" fill="#9BA1C7">groups → tier</text>
+
+      <!-- AIOStreams -->
+      <rect x="560" y="344" width="210" height="100" rx="6" fill="#0E1018" stroke="#3B4A56"/>
+      <text x="576" y="376" font-family="Geist,sans-serif" font-size="15" font-weight="600" fill="#EEF0FB">AIOStreams</text>
+      <text x="576" y="396" font-family="Geist Mono,monospace" font-size="10.5" fill="#45D6C8">/jellyfin API</text>
+      <text x="576" y="412" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">rows · Similar+ · PIN</text>
+      <text x="576" y="432" font-family="Geist Mono,monospace" font-size="10.5" fill="#9BA1C7">behind nginx sidecars</text>
+
+      <!-- Kuma -->
+      <rect x="810" y="344" width="210" height="100" rx="6" fill="#0E1018" stroke="#2A2C42"/>
+      <text x="826" y="376" font-family="Geist,sans-serif" font-size="15" font-weight="600" fill="#EEF0FB">Uptime Kuma</text>
+      <text x="826" y="396" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">/api/status pages</text>
+      <text x="826" y="412" font-family="Geist Mono,monospace" font-size="10.5" fill="#7E85AE">24h beats per service</text>
+      <text x="826" y="432" font-family="Geist Mono,monospace" font-size="10.5" fill="#9BA1C7">public slug only</text>
+
+      <!-- rule note -->
+      <text x="40" y="500" font-family="Geist Mono,monospace" font-size="10.5" fill="#5E648D">Every count on the dashboard is derived at request time from these four — nothing is stored in the SPA.</text>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:#8B7EF6"></i>member path</span>
+    <span><i style="background:#45D6C8"></i>media API</span>
+    <span><i style="background:#7E85AE"></i>worker → dependency</span>
+  </div>
+</div>
+</body>
+</html>
