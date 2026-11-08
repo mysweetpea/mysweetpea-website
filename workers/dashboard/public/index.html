@@ -2569,7 +2569,7 @@ const PLATFORMS = {
    dimmed treatment as its card on the Services tab — one truth, read from
    SERVICES instead of a second hand-kept list. */
 function svcDev(key) {
-  try { return !!(SERVICES.find((x) => x.key === key) || {}).dev; } catch (e) { return false; }
+  try { return !!((window.SERVICES || []).find((x) => x.key === key) || {}).dev; } catch (e) { return false; }
 }
 function guideChipHtml(key, sel) {
   const g = GUIDES[key];
@@ -4269,7 +4269,7 @@ function mspSessionBanner() {
       '<img class="hm-wide-art" loading="lazy" alt="" src="' + esc(hmBackdrop(it && it.id, 480)) + '" onerror="this.style.display=\'none\'">' +
       '<span class="hm-wide-glow"></span>' +
       '<span class="hm-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>' +
-      '<span class="hm-wide-meta"><span class="hm-wide-t">' + esc((it && it.name) || '') + '</span>' +
+      '<span class="hm-wide-meta"><span class="hm-wide-t">' + esc((it && (it.seriesName || it.name)) || '') + '</span>' +
       (sub ? '<span class="hm-wide-e">' + esc(sub) + '</span>' : '') +
       '<span class="hm-bar"><i style="width:' + pct + '%"></i></span></span></a>';
   }
@@ -5359,7 +5359,7 @@ function relFuture(v) {
 #guide-nav .svc-guide-chip.isdev .svc-guide-ico{filter:grayscale(1) opacity(.55)}
 .gp-dev{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
   color:var(--gold,#D9A86C);border:1px solid rgba(217,168,108,.45);background:rgba(217,168,108,.10);
-  border-radius:999px;padding:2px 8px;margin-left:3px;white-space:nowrap}
+  border-radius:999px;padding:2px 8px;margin-left:3px;white-space:nowrap;flex:none}
 .gp-key{display:flex;align-items:center;gap:8px;font-size:.8rem;line-height:1.5;flex-wrap:wrap}
 .gp-key .gp-dev{margin:0}
 .gp-devnote{display:flex;gap:.5rem;align-items:flex-start;margin:.2rem 0 1rem;padding:.7rem .85rem;

@@ -1314,7 +1314,7 @@ export default {
                 b.ticks += ticks; b.items += 1; if (key) b.titles.add(key);
               };
               try {
-                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=Movie,Episode&Fields=RunTimeTicks,SeriesId,SeriesName&SortBy=DatePlayed&SortOrder=Descending&Limit=500', H);
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=Movie,Episode&Fields=RunTimeTicks,SeriesId&SortBy=DatePlayed&SortOrder=Descending&Limit=500', H);
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
@@ -1344,7 +1344,7 @@ export default {
               // in progress: its partial position still counts as watched time
               let resumeTicks = 0;
               try {
-                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Fields=UserData,RunTimeTicks,SeriesId&Limit=50', H);
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Fields=UserData,RunTimeTicks,SeriesId,SeriesName&Limit=50', H);
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
@@ -1485,7 +1485,7 @@ export default {
         if (!src) return json({ items: [] });
         const payload = await swrJson(ctx, env, 'cache:media-mostplayed4:' + sess.sub, 600000, async () => {
           const all = await aiosRow(src.base + '/Items?Filters=IsPlayed&Recursive=true&Limit=200' +
-            '&IncludeItemTypes=Movie,Episode&Fields=SeriesId', src.auth);
+            '&IncludeItemTypes=Movie,Episode&Fields=SeriesId,SeriesName', src.auth);
           const seen = new Set<string>();
           const ranked = all
             .map((it) => ({ it, plays: num(it.UserData?.PlayCount), when: String(it.UserData?.LastPlayedDate || '') }))
