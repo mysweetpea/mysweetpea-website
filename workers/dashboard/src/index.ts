@@ -576,7 +576,14 @@ async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string;
   if (cached) {
     try { const t = JSON.parse(cached).t; if (typeof t === 'string' && t) return { base: AIOS_HOST + '/jellyfin', auth: 'MediaBrowser Token="' + t + '"' }; } catch { /* remint */ }
   }
-  const who = await provisionMember(env, sess);
+  /* One retry: this mints through authentik + the media shim, and a single
+     blip used to blank every personal row for the request (which reads as a
+     missing section, not as an error). */
+  let who = await provisionMember(env, sess);
+  if (!who.ok) {
+    await new Promise((r) => setTimeout(r, 250));
+    who = await provisionMember(env, sess);
+  }
   if (!who.ok) return null;
   // The owner watches as the config account itself (bare lane, uuid+password),
   // so their persona is empty. Their real watching lives on the service
@@ -622,7 +629,13 @@ async function swrJson(ctx: ExecutionContext, env: Env, key: string, freshMs: nu
   const refresh = async (): Promise<void> => {
     try {
       const d = await produce();
-      await cachePutJson(key, JSON.stringify({ d, t: Date.now() }), 86400);
+      /* An EMPTY row is more often a transient upstream failure than a real
+         empty shelf, and caching it fresh hid whole sections of the dashboard
+         for the full TTL. Store it as already-stale so the next request
+         re-computes (and a real failure heals on the following load). */
+      let t = Date.now();
+      try { const j = JSON.parse(d) as any; if (j && Array.isArray(j.items) && !j.items.length) t = 0; } catch { /* not our shape */ }
+      await cachePutJson(key, JSON.stringify({ d, t }), 86400);
     } catch { /* keep serving stale copy */ }
   };
   if (payload !== null && (now - ts) < freshMs) return payload; // fresh

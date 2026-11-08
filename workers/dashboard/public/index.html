@@ -1253,7 +1253,21 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .hm-rate-badge{color:#E8C878;background:rgba(8,9,15,.82);border:1px solid rgba(217,168,108,.4);font-family:'JetBrains Mono',ui-monospace,monospace}
 .mposter-wrap{position:relative;display:block;overflow:hidden;border-radius:14px}
 .mposter-fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fraunces','Inter',Georgia,serif;font-size:2.1rem;color:rgba(255,255,255,.62);z-index:0}
-.mposter-wrap .mposter{position:relative;z-index:1;display:block;background:transparent} /* the img's own gradient was painting over the letter fallback */
+.mposter-wrap .mposter{position:relative;z-index:1;display:block;background:transparent}
+/* in-development services: visible, honestly labelled, not a door */
+/* opacity is pinned by the tab entrance cascade, so the "not a door" look is
+   done with paint instead: dashed edge + dimmer type */
+/* #panel-services .sv-card (1,1,0) owns the border/background and pins opacity
+   with a fill-mode:both animation, so the state rule has to out-specify it. */
+#panel-services .sv-card.isdev{cursor:default;border-style:dashed;border-color:var(--border);background:rgba(19,21,36,.28);box-shadow:none}
+#panel-services .sv-card.isdev .nm{color:var(--text-dim)}
+#panel-services .sv-card.isdev img.svc-ico{filter:grayscale(.55) opacity(.8)}
+.sv-card.isdev:hover{transform:none;border-color:var(--border);box-shadow:var(--e1)}
+.sv-live.dev{color:var(--gold);border-color:rgba(217,168,108,.45);background:rgba(217,168,108,.10)}
+.sv-livedot.dev{background:var(--gold);box-shadow:0 0 6px rgba(217,168,108,.7)}
+.hm-svcrow.isdev{cursor:default;border-style:dashed;background:rgba(19,21,36,.28)}
+.hm-svcrow.isdev .hm-orb-nm{color:var(--text-dim)}
+.hm-svcrow.isdev:hover{transform:none;border-color:var(--border)} /* the img's own gradient was painting over the letter fallback */
 .mrate{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;font-weight:700;color:#E8C878;background:rgba(8,9,15,.8);border:1px solid rgba(217,168,108,.35);padding:2px 6px;border-radius:8px}
 .mplays{position:absolute;top:6px;left:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:var(--c);background:rgba(8,9,15,.8);border:1px solid rgba(69,214,200,.4);padding:2px 7px;border-radius:99px}
 .m-genre-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -1719,6 +1733,32 @@ a.hm-req{text-decoration:none;color:var(--text)}
      deferred/end-of-body tag would race it). -->
 <script src="/tour.js"></script>
 <script>
+/* Boot watchdog: if anything throws before the panels are wired, say so on the
+   page instead of leaving a half-empty dashboard to guess about. */
+(function () {
+  var shown = false;
+  function report(what) {
+    if (shown) return;
+    shown = true;
+    try {
+      var bar = document.createElement('div');
+      bar.id = 'boot-error';
+      bar.style.cssText = 'position:fixed;left:12px;right:12px;top:12px;z-index:99999;padding:10px 14px;border-radius:12px;border:1px solid rgba(240,110,110,.5);background:#2a1418;color:#ffd9d9;font:12px/1.5 JetBrains Mono,ui-monospace,monospace;white-space:pre-wrap';
+      bar.textContent = 'Dashboard failed to finish loading: ' + what + ' — reload, and tell Hermes this line if it persists.';
+      document.documentElement.appendChild(bar);
+    } catch (e) {}
+  }
+  window.addEventListener('error', function (e) {
+    if (e && e.message) report(e.message + (e.lineno ? ' @' + e.lineno : ''));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    var r = e && e.reason;
+    report((r && (r.message || r)) || 'async failure');
+  });
+  window.__bootReport = report;
+})();
+</script>
+<script>
 'use strict';
 /* ===== Deployment config adoption (/api/config) ============================
    The worker exposes public-safe config (site origin, support email, media
@@ -2031,18 +2071,35 @@ function setTab(name, opts) {
 window.setTab = setTab;
   // footer status live (re-invoked after the post-login shell renders — the
   // footer only exists in the DOM once app.innerHTML injects it)
+  /* Substring match, same rule as hmApplyDots/svApplyStatus. A word-boundary
+     match looked stricter but silently dropped compound monitor names:
+     'webui' never matched 'openwebui', 'koala' never matched 'koalasync'. */
+  function findMonitor(svc, monitors) {
+    const keys = ((svc && svc.mon) || []).map((k) => String(k).toLowerCase());
+    return (monitors || []).find((m) => {
+      const n = String((m && m.name) || '').toLowerCase();
+      return keys.some((k) => n.indexOf(k) >= 0);
+    }) || null;
+  }
   window.updateFooterStatus = function () {
     const el = document.getElementById('footerStatusText'), box = document.getElementById('footerStatus');
     if (!el) return; // footer not mounted yet (pre-login)
     fetch('/api/status').then((r) => (r.ok ? r.json() : null)).then((s) => {
       const ms = (s && s.monitors) || [];
-      const down = ms.filter((m) => !m.current).length;
       if (!ms.length) { el.textContent = 'Status unavailable'; box && box.classList.add('down'); return; }
-      const up = ms.length - down;
-      el.textContent = down ? ('Degraded \u00b7 ' + up + '/' + ms.length + ' up') : ('Live \u00b7 ' + up + '/' + ms.length + ' up');
+      /* Count the SERVICE catalog, not the raw monitor list — the footer and
+         the services tab used to print different totals for the same thing.
+         window.SERVICES is the catalog's own handle: reading the const here
+         before it is initialised (this callback can land mid-boot) throws. */
+      const list = window.SERVICES;
+      if (!list || !list.length) return;   // post-shell call fills it
+      const total = list.length;
+      const up = list.filter((svc) => { const m = findMonitor(svc, ms); return !!(m && m.current); }).length;
+      const down = total - up;
+      el.textContent = down ? ('Degraded \u00b7 ' + up + '/' + total + ' up') : ('Live \u00b7 ' + up + '/' + total + ' up');
       if (down) box && box.classList.add('down');
       else box && box.classList.remove('down');
-    }).catch(() => { el.textContent = 'Status unavailable'; box && box.classList.add('down'); });
+    }).catch((e) => { try { console.error('footerStatus failed:', (e && e.message) || e); } catch (_) {} el.textContent = 'Status unavailable'; box && box.classList.add('down'); });
   };
   window.updateFooterStatus();
 function goSection(id) {
@@ -3359,7 +3416,7 @@ function guideDetailHtml(key) {
       const plays = Number(x.playCount) || 0;
       const share = Math.round((plays / total) * 100);
       const art = (x && x.img) ? '<img class="st-row-art" loading="lazy" alt="" src="' + esc(x.img) + '"/>' : '<span class="st-row-art st-row-fallback hm-g' + (i % 3) + '">' + esc(String(x.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
-      return '<a class="st-row" href="' + (JF_ITEM_URL + '/web/index.html#!/item?id=' + encodeURIComponent(String(x.id ?? ''))) + '" target="_blank" rel="noopener">' +
+      return '<a class="st-row" href="' + (JF_ITEM_URL + '/web/') + '" target="_blank" rel="noopener">' +
         '<span class="st-rank">' + (i + 1) + '</span>' + art +
         '<span class="st-row-main"><span class="st-row-title">' + esc(x.name || 'Untitled') + '</span>' +
         '<span class="st-row-bar"><i style="width:' + Math.max(4, Math.round((plays / max) * 100)) + '%"></i></span></span>' +
@@ -3650,11 +3707,13 @@ function guideDetailHtml(key) {
   })();
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
   (async () => {
-    const JF_ITEM = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/index.html#!/item?id=';
+    /* No per-item web viewer exists on this server — the card opens the
+       AIOStreams app itself rather than a dead #!/item route. */
+    const JF_ITEM = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/';
     const g2 = (u) => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
     const posterCard = (it, o) => {
       const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
-      let h = '<a class="mitem" href="' + JF_ITEM + encodeURIComponent(String(it.id ?? '')) + '" target="_blank" rel="noopener">';
+      let h = '<a class="mitem" href="' + JF_ITEM + '" target="_blank" rel="noopener">';
       if (o.badge && it.type) h += '<span class="mtype">' + esc(it.type) + '</span>';
       h += '<span class="mposter-wrap"><span class="mposter-fb hm-g0" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/></span>';
@@ -3670,7 +3729,7 @@ function guideDetailHtml(key) {
       const host = document.getElementById('sec-media-m');
       if (!host) return;
       const [cont, mp, be, fr, ge] = await Promise.all([g2('/api/media/continue'), g2('/api/media/mostplayed'), g2('/api/media/recommend'), g2('/api/media/unplayed'), g2('/api/media/genres')]);
-      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + encodeURIComponent(String(it.id ?? '')) + '" target="_blank" rel="noopener">' +
+      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '" target="_blank" rel="noopener">' +
         '<span class="mposter-wrap"><span class="mposter-fb hm-g' + ((i || 0) % 3) + '" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
         '<div class="mtitle">' + esc(it.name || '') + '</div>' +
@@ -3709,14 +3768,14 @@ function guideDetailHtml(key) {
      duplicate subsets of this by display name; they are DERIVED below. ===== */
   const SERVICES = [
     { key: 'moonfin',     name: 'Moonfin',     url: 'https://aiostreams.mysweetpea.cc/jellyfin/', blurb: 'Movies, shows & anime', icon: '/icons/moonfin.svg', cat: 'media', mon: ['moonfin', 'aiostreams'] },
-    { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Live TV & Sports', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin'] },
+    { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Live TV & Sports', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin'], dev: true },
     { key: 'nextcloud',   name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg', cat: 'cloud', mon: ['nextcloud', 'cloud'] },
-    { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'] },
+    { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'], dev: true },
     { key: 'vaultwarden', name: 'Vaultwarden', url: 'https://vault.mysweetpea.cc',   blurb: 'Passwords', icon: '/icons/vaultwarden.svg', cat: 'cloud', mon: ['vaultwarden', 'vault'] },
-    { key: 'matrix',      name: 'Element',     url: 'https://chat.mysweetpea.cc',    blurb: 'Matrix chat', icon: '/icons/matrix.svg',    cat: 'tools', mon: ['element', 'matrix', 'chat'] },
-    { key: 'affine',      name: 'AFFiNE',      url: 'https://notes.mysweetpea.cc',   blurb: 'Docs, wikis & whiteboards', icon: '/icons/affine.svg', cat: 'tools', mon: ['affine', 'notes'] },
+    { key: 'matrix',      name: 'Element',     url: 'https://chat.mysweetpea.cc',    blurb: 'Matrix chat', icon: '/icons/matrix.svg',    cat: 'tools', mon: ['element', 'matrix', 'chat'], dev: true },
+    { key: 'affine',      name: 'AFFiNE',      url: 'https://notes.mysweetpea.cc',   blurb: 'Docs, wikis & whiteboards', icon: '/icons/affine.svg', cat: 'tools', mon: ['affine', 'notes'], dev: true },
     { key: 'openwebui',   name: 'Open WebUI',  url: 'https://ai.mysweetpea.cc',      blurb: 'AI assistants', icon: '/icons/openwebui.svg', cat: 'ai', mon: ['webui', 'open web', 'ai'] },
-    { key: 'koalasync',   name: 'KoalaSync',   url: 'https://sync.mysweetpea.cc',    blurb: 'Watch parties, in sync', icon: '/icons/koalasync.svg', cat: 'media', mon: ['koala', 'sync'] },
+    { key: 'koalasync',   name: 'KoalaSync',   url: 'https://sync.mysweetpea.cc',    blurb: 'Watch parties, in sync', icon: '/icons/koalasync.svg', cat: 'media', mon: ['koala', 'sync'], dev: true },
   ];
   /* name -> entry view (matchers + future consumers) */
   const SVC_BY_NAME = {};
@@ -3725,6 +3784,9 @@ function guideDetailHtml(key) {
      this to build its service commands, so new services here are searchable
      automatically. (const inside this IIFE is invisible cross-block.) */
   window.SERVICES = SERVICES;
+  /* the footer's first fetch can land before this catalog exists; now that it
+     does, re-run the count so it can never sit on 'unavailable' */
+  try { window.updateFooterStatus(); } catch (e) {}
   const SVC_COLORS = [
     { fg: 'var(--primary-bright)', bg: 'var(--v-soft)' },
     { fg: 'var(--sage)',           bg: 'rgba(163,201,182,.15)' },
@@ -3744,6 +3806,8 @@ function guideDetailHtml(key) {
   let svPinned = svLS('msp-pinned-svcs', ['Jellyfin', 'Vaultwarden']);
   let svRecent = svLS('msp-recent-svcs', []);
   const svIsUp = (name) => svState.monmap[name] !== false;
+  /* Anchored match: the monitor name equals a fragment or contains it as a
+     word. Plain substring matching made 'media' hit unrelated monitors. */
   const svUp24 = (name) => (typeof svState.upmap[name] === 'number' ? svState.upmap[name].toFixed(1) + '%' : '');
   const svStar = (name, pinned) => '<button type="button" class="sv-pin' + (pinned ? ' pinned' : '') + '" title="' + (pinned ? 'Unpin' : 'Pin to Pinned') + '" aria-label="' + (pinned ? 'Unpin service' : 'Pin service') + '" onclick="window.svTrackPin(\'' + esc(name) + '\', event)">★</button>';
   let svUseCounts = svLS('msp-use-counts', {});
@@ -3799,11 +3863,19 @@ function guideDetailHtml(key) {
     }
     host.innerHTML = list.map((s) => {
       const pinned = svPinned.indexOf(s.name) >= 0;
-      return '<a class="sv-card' + (svIsUp(s.name) ? '' : ' isdown') + '" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' +
+      /* An in-development service is a promise, not a door: no href, no
+         click tracking, and the status pill says what it actually is. */
+      const state = s.dev
+        ? '<span class="sv-live dev"><span class="sv-livedot dev"></span>IN DEVELOPMENT</span>'
+        : '<span class="sv-live' + (svIsUp(s.name) ? '' : ' down') + '"><span class="sv-livedot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' + (svIsUp(s.name) ? 'LIVE' : 'DEGRADED') + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + '</span>' : '');
+      const inner =
         svStar(s.name, pinned) +
         '<div class="top">' + svIcon(s, 'svc-ico') + '<div><div class="nm">' + esc(s.name) + '</div><div class="bl">' + esc(s.blurb) + '</div></div></div>' +
-        '<div class="meta"><span class="sv-live' + (svIsUp(s.name) ? '' : ' down') + '"><span class="sv-livedot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' + (svIsUp(s.name) ? 'LIVE' : 'DEGRADED') + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + '</span>' : '') + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div>' +
-        (GUIDES[s.key] ? '<div class="sv-guide-cta"><span class="sv-guide-btn" role="button" tabindex="0" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</span></div>' : '') + '</a>';
+        '<div class="meta">' + state + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div>' +
+        (GUIDES[s.key] ? '<div class="sv-guide-cta"><span class="sv-guide-btn" role="button" tabindex="0" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</span></div>' : '');
+      return s.dev
+        ? '<div class="sv-card isdev">' + inner + '</div>'
+        : '<a class="sv-card' + (svIsUp(s.name) ? '' : ' isdown') + '" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + inner + '</a>';
     }).join('');
   };
   if (!window.__svGuideWire) {
@@ -4006,13 +4078,15 @@ function guideDetailHtml(key) {
     const up = SERVICES.filter(function (s) { return svIsUp(s.name); }).length;
     const nums = SERVICES.map(function (s) { return parseFloat(svUp24(s.name)); }).filter(function (n) { return !isNaN(n); });
     const avg = nums.length ? (nums.reduce(function (a, b) { return a + b; }, 0) / nums.length).toFixed(1) : null;
-    txt.textContent = up + '/' + total + ' LIVE' + (avg ? ' \u00b7 ' + avg + '% \u00b7 24H' : '');
+    /* 'UP' not 'LIVE': five of these are in development, so the count is
+       monitoring coverage, not a claim that everything is open to members. */
+    txt.textContent = up + '/' + total + ' UP' + (avg ? ' \u00b7 ' + avg + '% \u00b7 24H' : '');
     pill.hidden = false;
   };
   window.svUpsum();
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
   const hmJF = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
-  const hmJF_ITEM = hmJF + '/web/index.html#!/item?id=';
+  const hmJF_ITEM = hmJF + '/web/';
   const hmBackdrop = (id, w) => hmJF + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
   const hmGreetingWord = () => { const h = new Date().getHours(); return (h < 5 ? 'Good night,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'); };
   function hmJourney(level) {
@@ -4077,14 +4151,17 @@ function guideDetailHtml(key) {
       '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Resume</span>' +
       (pct ? '<span class="hm-pl">' + pct + '% watched</span>' : '') + '</span></span>' +
       '<span class="hm-prog"><i style="width:' + pct + '%"></i></span>';
-    host.href = hmJF_ITEM + encodeURIComponent(String(it.id));
+    host.href = hmJF_ITEM;
     host.hidden = false;
   }
   function hmLoadServices() {
     const rail = document.getElementById('hm-svc-rail');
     if (!rail) return;
     const MAX = 6;
-    let html = SERVICES.slice(0, MAX).map(hmSvcOrb).join('');
+    /* live services first: the rail is a launchpad, the in-development ones
+       are context (and stay labelled). */
+    const orbList = SERVICES.slice().sort((a, b) => (a.dev ? 1 : 0) - (b.dev ? 1 : 0));
+    let html = orbList.slice(0, MAX).map(hmSvcOrb).join('');
     if (SERVICES.length > MAX) html += '<button type="button" class="hm-svcrow hm-svcrow-more" onclick="setTab(\'services\')" aria-label="All services">+' + (SERVICES.length - MAX) + ' more</button>';
     rail.innerHTML = html;
     try {
@@ -4151,19 +4228,28 @@ function guideDetailHtml(key) {
      that had an item. */
   let hmContPromise = null;
   let hmHeroId = '';
+  /* One retry. The media server mints a token per session and a transient auth
+     blip used to return an empty list — which hides whole rows and looks like
+     the tab failed to render. */
+  function fetchItems(url, attempt) {
+    attempt = attempt || 1;
+    return fetch(url)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => (d && d.items) || [])
+      .catch(() => [])
+      .then((items) => {
+        if (items.length || attempt >= 2) return items;
+        return new Promise((res) => setTimeout(res, 2500)).then(() => fetchItems(url, attempt + 1));
+      });
+  }
   function hmContinue() {
-    if (!hmContPromise) {
-      hmContPromise = fetch('/api/media/continue')
-        .then((r) => (r.ok ? r.json() : { items: [] }))
-        .then((d) => (d && d.items) || [])
-        .catch(() => []);
-    }
+    if (!hmContPromise) hmContPromise = fetchItems('/api/media/continue');
     return hmContPromise;
   }
   async function hmLoadMedia() {
     const [cont, latest] = await Promise.all([
       hmContinue(),
-      fetch('/api/media/latest').then((r) => (r.ok ? r.json() : null)).then((d) => (d && d.items) || []).catch(() => []),
+      fetchItems('/api/media/latest'),
     ]);
     const kwSec = document.getElementById('hm-keepwatch'), kwRail = document.getElementById('hm-kw-rail');
     if (kwSec && kwRail) {
@@ -4198,7 +4284,7 @@ function guideDetailHtml(key) {
     const initial = esc(String((it && it.name) || '?').trim().charAt(0).toUpperCase() || '?');
     const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
     const rating = (it && it.rating != null) ? Number(it.rating).toFixed(1) : null;
-    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + encodeURIComponent(String((it && it.id) == null ? '' : it.id)) + '" target="_blank" rel="noopener noreferrer">' +
+    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + '" target="_blank" rel="noopener noreferrer">' +
       '<span class="hm-poster hm-g' + (i % 3) + '"><span class="hm-poster-init">' + initial + '</span>' +
       ((it && it.img) ? '<img loading="lazy" alt="" src="' + esc(String(it.img)) + '" onerror="this.remove()">' : '') +
       (rating ? '<span class="hm-pbadge hm-rate-badge">' + rating + '</span>' : '<span class="hm-pbadge">NEW</span>') + '</span>' +
@@ -4217,17 +4303,21 @@ function guideDetailHtml(key) {
   }
 
   function hmSvcOrb(s) {
-    return '<a class="hm-card hm-svcrow" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' +
+    const inner =
       '<span class="hm-orb-plate"><img src="' + esc(s.icon) + '" alt="" width="30" height="30" loading="lazy"></span>' +
-      '<span class="hm-svcrow-main"><span class="hm-orb-nm">' + esc(s.name) + '<span class="hm-orb-dot unknown" data-hm-dot="' + esc(s.name) + '"></span></span>' +
-      '<span class="hm-orb-bl">' + esc(s.blurb) + '</span></span>' +
-      '<span class="hm-orb-up" data-hm-hb="' + esc(s.name) + '"></span></a>';
+      '<span class="hm-svcrow-main"><span class="hm-orb-nm">' + esc(s.name) +
+      (s.dev ? '' : '<span class="hm-orb-dot unknown" data-hm-dot="' + esc(s.name) + '"></span>') + '</span>' +
+      '<span class="hm-orb-bl">' + (s.dev ? 'In development' : esc(s.blurb)) + '</span></span>' +
+      (s.dev ? '' : '<span class="hm-orb-up" data-hm-hb="' + esc(s.name) + '"></span>');
+    return s.dev
+      ? '<div class="hm-card hm-svcrow isdev" aria-label="' + esc(s.name + ' — in development') + '">' + inner + '</div>'
+      : '<a class="hm-card hm-svcrow" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' + inner + '</a>';
   }
 
   function hmWideCard(it) {
     const pct = Math.max(0, Math.min(100, Number(it && it.progressPct) || 0));
     const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
-    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + encodeURIComponent(String((it && it.id) == null ? '' : it.id)) + '" target="_blank" rel="noopener noreferrer">' +
+    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + '" target="_blank" rel="noopener noreferrer">' +
       '<img class="hm-wide-art" loading="lazy" alt="" src="' + esc(hmBackdrop(it && it.id, 480)) + '" onerror="this.style.display=\'none\'">' +
       '<span class="hm-wide-glow"></span>' +
       '<span class="hm-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>' +
@@ -4254,10 +4344,7 @@ function guideDetailHtml(key) {
     const seedEl = document.getElementById('hm-because-seed');
     if (!sec || !rail) return;
     try {
-      const r = await fetch('/api/media/trending');
-      if (!r.ok) return;
-      const d = await r.json();
-      const items = (d && d.items) || [];
+      const items = await fetchItems('/api/media/trending');
       if (!items.length) return;
       if (seedEl) seedEl.hidden = true;
       rail.classList.add('is-posters');
@@ -4477,24 +4564,19 @@ function guideDetailHtml(key) {
   const upHost = document.getElementById('sec-uptime');
   const renderUptime = (d) => {
     if (!upHost) return;
-    const rows = uptimeRows(((d && d.monitors) || []).filter((m) => m && Array.isArray(m.beats) && m.beats.length));
+    const monitors = ((d && d.monitors) || []).filter((m) => m && Array.isArray(m.beats) && m.beats.length);
+    /* One row per service, labelled with the SERVICE name. The Kuma monitor
+       names were showing through ('aiostreams (vps)' where the user expects
+       Moonfin), and the raw monitor count never matched the 9-service catalog. */
+    const rows = SERVICES.map((svc) => ({ svc, m: findMonitor(svc, monitors) })).filter((r) => r.m);
     if (!rows.length) { upHost.innerHTML = '<p class="eyebrow">Uptime</p><h3>Uptime — last 24h</h3><p class="dim">No uptime data right now.</p>'; return; }
-    const shown = rows.slice(0, 20);
     let html = '<h3>Uptime — last 24h</h3><div class="up-cols">';
-    let lastGroup = null;
-    shown.forEach((r) => {
-      if (r.group && r.group !== lastGroup) { html += '<div class="up-group">' + esc(r.group) + '</div>'; lastGroup = r.group; }
-      /* anchored match: name equals the key OR contains it as a word-boundary fragment;
-         avoids generic-substring false hits ('media' matching a Plex monitor, etc.) */
-      const un = String(r.m.name || '').toLowerCase();
-      const usvc = SERVICES.find((s) => (s.mon || []).some((k) => {
-        const kk = String(k).toLowerCase();
-        return un === kk || new RegExp('(^|[^a-z])' + kk.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '([^a-z]|$)').test(un);
-      }));
-      const uico = usvc && usvc.icon ? '<img class="up-ico" src="' + esc(usvc.icon) + '" alt="" loading="lazy">' : '';
-      html += '<div class="row up-row"><div class="left"><span class="dot ' + (r.m.current ? 'ok' : 'down') + '"></span>' + uico + '<span>' + esc(r.m.name || 'Monitor') + '</span></div><span class="strip">' + beatStrip(r.m.beats) + '</span><span class="dim">' + (r.m.up24 == null ? '—' : Math.round(r.m.up24) + '%') + '</span></div>';
+    rows.forEach(({ svc, m }) => {
+      const ico = svc.icon ? '<img class="up-ico" src="' + esc(svc.icon) + '" alt="" loading="lazy">' : '';
+      html += '<div class="row up-row"><div class="left"><span class="dot ' + (m.current ? 'ok' : 'down') + '"></span>' + ico +
+        '<span>' + esc(svc.name) + '</span></div><span class="strip">' + beatStrip(m.beats) + '</span>' +
+        '<span class="dim">' + (m.up24 == null ? '—' : Math.round(m.up24) + '%') + '</span></div>';
     });
-    if (rows.length > shown.length) html += '<p class="dim up-more">+' + (rows.length - shown.length) + ' more</p>';
     html += '</div>';
     upHost.innerHTML = html;
   };

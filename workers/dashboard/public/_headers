@@ -14,6 +14,12 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   Strict-Transport-Security: max-age=63072000; includeSubDomains
 
+# The SPA shell itself must never be served stale: a browser holding last
+# deploy's HTML while the API moved on looks exactly like "half the tabs are
+# empty". Cache API/SWR inside the worker is unaffected.
+/
+  Cache-Control: no-store, must-revalidate
+
 # Fingerprinted/static art: long-lived caching (same list the Worker used:
 # woff2|svg|png|webp). Everything else keeps the assets default
 # (public, max-age=0, must-revalidate + ETag).
