@@ -1761,6 +1761,30 @@ a.hm-req{text-decoration:none;color:var(--text)}
 })();
 </script>
 <script>
+/* One shared GET per URL — several cards ask for the same endpoint at boot
+   (status x3, status/extended x4, sessions x3) and each miss cost a full round
+   trip through authentik / Kuma. It lives above the app block because that
+   block is an async IIFE which suspends on /api/me: a helper defined below its
+   first await does not exist yet when the later <script> blocks run. */
+(function () {
+  var cache = new Map();
+  window.apiGet = function (url, ttlMs) {
+    var ttl = ttlMs || 20000;
+    var hit = cache.get(url);
+    if (hit) {
+      if (hit.p) return hit.p;
+      if (Date.now() - hit.at < ttl) return Promise.resolve(hit.data);
+    }
+    var p = fetch(url)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; })
+      .then(function (data) { cache.set(url, { at: Date.now(), data: data }); return data; });
+    cache.set(url, { p: p });
+    return p;
+  };
+})();
+</script>
+<script>
 'use strict';
 /* ===== Deployment config adoption (/api/config) ============================
    The worker exposes public-safe config (site origin, support email, media
@@ -3611,26 +3635,6 @@ function mspSessionBanner() {
       }
     });
   })();
-  /* One shared GET per URL. Several cards ask for the same endpoint at boot
-     (status x3, status/extended x4, sessions x3) and each miss used to cost a
-     full round trip through authentik / Kuma. The first response is reused for
-     every caller and kept briefly, so a tab switch does not re-hit the edge. */
-  const apiGetCache = new Map();
-  function apiGet(url, ttlMs) {
-    const ttl = ttlMs || 20000;
-    const hit = apiGetCache.get(url);
-    if (hit) {
-      if (hit.p) return hit.p;
-      if (Date.now() - hit.at < ttl) return Promise.resolve(hit.data);
-    }
-    const p = fetch(url)
-      .then((r) => (r.ok ? r.json() : null))
-      .catch(() => null)
-      .then((data) => { apiGetCache.set(url, { at: Date.now(), data }); return data; });
-    apiGetCache.set(url, { p });
-    return p;
-  }
-
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
   (async () => {
     /* No per-item web viewer exists on this server — the card opens the

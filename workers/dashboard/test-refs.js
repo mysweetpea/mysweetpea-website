@@ -79,4 +79,18 @@ if (missing.length) {
   console.error('FAIL - referenced but never defined:\n  ' + missing.join('\n  '));
   process.exit(1);
 }
+// The app block is one async IIFE that suspends on /api/me, so a helper it
+// defines below its first await does not exist when the LATER <script> blocks
+// run — exactly how "apiGet is not defined @5816" shipped. Shared helpers must
+// be defined in a block that precedes the block calling them.
+{
+  const blocks = [...html.matchAll(/<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  const defAt = blocks.findIndex((b) => /window\.apiGet\s*=/.test(b));
+  const useAt = blocks.findIndex((b) => /\bapiGet\(/.test(b.replace(/window\.apiGet[\s\S]*?\n\s*\};/, '')));
+  if (defAt < 0 || useAt < 0 || defAt > useAt) {
+    console.error('FAIL window.apiGet must be defined before first use (def@' + defAt + ', use@' + useAt + ')');
+    process.exitCode = 1;
+  }
+}
+
 console.log('PASS - every app-prefixed identifier is defined (' + defined.size + ' definitions scanned)');
