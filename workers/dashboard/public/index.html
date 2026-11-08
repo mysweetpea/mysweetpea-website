@@ -2302,10 +2302,10 @@ const GUIDES = {
       { title: 'That is it', text: 'Moonfin remembers the server, so this is a one-time setup. Your progress syncs on every device.' },
     ],
     video: {
-      src: '/media/moonfin-pin.mp4',
-      poster: '/media/moonfin-pin.jpg',
+      src: '/media/moonfin-pin.mp4?v=2',
+      poster: '/media/moonfin-pin.jpg?v=2',
       alt: 'Ten second loop showing the three fields of Moonfin\u2019s Add server screen being filled in.',
-      cap: 'In the app: the three fields in order — the address you copy, your name, your PIN.',
+      cap: 'Paste the address, then sign in: your name in the first box, your PIN in the second.',
     },
   },
   jellyfin: {
@@ -4056,7 +4056,7 @@ function mspSessionBanner() {
       '<li>Choose <strong>Add server</strong> and paste the address above.</li>' +
       '<li>Sign in with your name <strong>' + esc(d.name || d.username || '') + '</strong> and the PIN.</li>' +
       '</ol>' +
-      '<video class="mp-vid" src="/media/moonfin-pin.mp4" poster="/media/moonfin-pin.jpg" controls muted playsinline preload="none" ' +
+      '<video class="mp-vid" src="/media/moonfin-pin.mp4?v=2" poster="/media/moonfin-pin.jpg?v=2" controls muted playsinline preload="none" ' +
       'aria-label="Short loop of the Moonfin Add server screen being filled in"></video>';
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {
