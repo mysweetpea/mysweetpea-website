@@ -336,6 +336,10 @@ async function handleConfig(env: Env): Promise<Response> {
     mainSite: cleanOrigin(env.MAIN_SITE_URL) || 'https://mysweetpea.cc',
     supportEmail: /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/.test(env.SUPPORT_EMAIL || '') ? (env.SUPPORT_EMAIL as string) : 'support@mysweetpea.cc',
     media: cleanOrigin(env.JELLYFIN_URL) || 'https://media.mysweetpea.cc',
+    // The member-facing media app (Moonfin on the AIOStreams server). Every
+    // media item/genre deep-link must use THIS, not `media` — that host is
+    // Jellyfin, which has carried no library since Oct 2026.
+    moonfin: cleanOrigin(AIOS_HOST) || 'https://aiostreams.mysweetpea.cc',
     request: cleanOrigin(env.SEERR_URL) || 'https://request.mysweetpea.cc',
   };
   const body = JSON.stringify(cfg);
@@ -461,7 +465,7 @@ async function aiosSrc(env: Env): Promise<{ base: string; auth: string }> {
    request). Shared by the PIN card and the per-user media rows so exactly
    one place knows how a member's media identity is minted. */
 type MemberIdentity =
-  | { ok: true; pin: string; name: string }
+  | { ok: true; pin: string; name: string; isAdmin: boolean }
   | { ok: false; error: string; status: number };
 
 async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdentity> {
@@ -472,12 +476,14 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   // never a hardcoded one — or a seedling could self-provision sweetpea media
   // access. Groups come from authentik; SessionData has no groups field.
   let tier = '';
+  let isAdmin = false;
   try {
     const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
     const d = await r.json() as any;
     const u = d && d.user ? d.user : d;
     const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
     tier = names.includes('sweetpea') ? 'sweetpea' : names.includes('seedling') ? 'seedling' : '';
+    isAdmin = names.includes('authentik admins');
   } catch { /* fall through to the no-tier error below */ }
   if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
 
@@ -509,7 +515,7 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   // ⚠️ The sign-in NAME is the persona's name, NOT the authentik username.
   // parseSignIn treats any non-uuid username on a mount as the persona name,
   // and personaByName matches on `name`. We provision with sess.name.
-  return { ok: true, pin, name: String(sess.name || username).trim() };
+  return { ok: true, pin, name: String(sess.name || username).trim(), isAdmin };
 }
 
 /* Base URL + auth header scoped to ONE member, for per-user rows.
@@ -526,6 +532,10 @@ async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string;
   }
   const who = await provisionMember(env, sess);
   if (!who.ok) return null;
+  // The owner watches as the config account itself (bare lane, uuid+password),
+  // so their persona is empty. Their real watching lives on the service
+  // identity — use it, or every personal row reads empty for them.
+  if (who.isAdmin) return aiosSrc(env);
   try {
     const r = await fetch(env.MOONBASE_MOUNT + '/Users/AuthenticateByName', {
       method: 'POST',

@@ -98,7 +98,7 @@
       "key": "moonfin",
       "name": "Moonfin",
       "shortName": "Moonfin",
-      "icon": "/assets/icons/icon-ui-moon.svg",
+      "icon": "/assets/icons/moonfin.svg",
       "iconAlt": "Moonfin",
       "shot": "/assets/screenshots/jellyfin.webp",
       "url": "https://aiostreams.mysweetpea.cc/jellyfin/",
