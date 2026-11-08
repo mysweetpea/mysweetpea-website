@@ -421,7 +421,7 @@ main:not(.msp-ready) section{opacity:0;animation:msp-in .5s ease-out forwards;an
 /* ---- phase 11: mobile optimization (additive only — desktop styles untouched) ---- */
 @media(max-width:760px){
 body{-webkit-tap-highlight-color:transparent}
-.shell{padding-top:80px;width:auto;margin:0 10px}
+.shell{padding-top:80px;width:auto;margin:0 14px}
 .top-nav{padding:9px 16px}
 .top-nav.nav-scrolled{padding:8px 16px}
 .brand{font-size:1.1rem;min-width:0}
@@ -791,7 +791,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 @media (max-width:760px){
 .hm-rail,.sv-orbs,.media-row{display:grid;grid-template-columns:1fr;overflow:visible}
 .hm-rail>*,.sv-orbs>*,.media-row>*{width:100%!important}
-.hm-rail:has(.hm-pcard),.media-row:has(.mposter){grid-template-columns:repeat(2,minmax(0,1fr))}
+.hm-rail.is-posters,.media-row.is-posters{grid-template-columns:repeat(2,minmax(0,1fr))}
 .hm-pcard,.mitem,.mposter{width:auto}
 .hm-sec::after,.media-sec .card::after,.mb2-orbwrap::after{display:none}
 .card h3,.hm-h2{font-size:1.35rem}
@@ -935,8 +935,8 @@ body { overscroll-behavior-x: none; }
 @media (max-width:760px){
   .hm-rail>.hm-un{width:100%!important}
   /* center compact service chips */
-  .hm-rail:has(.hm-orb), .sv-orbs { justify-content:center; }
-  .sv-orbs,.hm-rail:has(.hm-orb){grid-template-columns:repeat(auto-fill,minmax(0,96px));justify-content:center}
+  #hm-svc-rail, .sv-orbs { justify-content:center; }
+  .sv-orbs,#hm-svc-rail{grid-template-columns:repeat(auto-fill,minmax(0,96px));justify-content:center}
   .hm-orb{justify-items:center;text-align:center}
 }
 /* ---- aurora polish 3 (fix1): hm-un cards keep real height on iOS — static meta fallback ---- */
@@ -990,6 +990,7 @@ body { overscroll-behavior-x: none; }
 .sc-donut-n{font-family:'Fraunces',Georgia,serif;font-size:1.3rem;color:var(--text)}
 .sc-donut-l{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint)}
 .sc-donut-leg{margin-top:10px}
+.sc-note{font-size:.75rem;color:var(--text-faint)}
 .sc-nums{display:flex;flex-direction:column;gap:9px}
 .sc-num{display:grid;grid-template-columns:64px 52px 1fr;gap:10px;align-items:center;font-size:.8rem;color:var(--text-dim)}
 .sc-num .sc-nv{color:var(--text);text-align:right;font-variant-numeric:tabular-nums}
@@ -1250,7 +1251,9 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .hm-seed-pill{display:inline-flex;align-items:center;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--bg);background:linear-gradient(135deg,var(--primary-bright),var(--c));border-radius:99px;padding:3px 10px;white-space:nowrap}
 #hm-because .hm-more{margin-left:auto}
 .hm-rate-badge{color:#E8C878;background:rgba(8,9,15,.82);border:1px solid rgba(217,168,108,.4);font-family:'JetBrains Mono',ui-monospace,monospace}
-.mposter-wrap{position:relative;display:block}
+.mposter-wrap{position:relative;display:block;overflow:hidden;border-radius:14px}
+.mposter-fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Fraunces','Inter',Georgia,serif;font-size:2.1rem;color:rgba(255,255,255,.62);z-index:0}
+.mposter-wrap .mposter{position:relative;z-index:1;display:block;background:transparent} /* the img's own gradient was painting over the letter fallback */
 .mrate{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.54rem;font-weight:700;color:#E8C878;background:rgba(8,9,15,.8);border:1px solid rgba(217,168,108,.35);padding:2px 6px;border-radius:8px}
 .mplays{position:absolute;top:6px;left:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:var(--c);background:rgba(8,9,15,.8);border:1px solid rgba(69,214,200,.4);padding:2px 7px;border-radius:99px}
 .m-genre-row{display:flex;gap:8px;flex-wrap:wrap}
@@ -1682,7 +1685,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 /* Moonfin PIN card (media tab). Members get their media PIN here instead of
    hunting for it in the welcome email. */
 .mp-pin{font-family:var(--mono,'JetBrains Mono',monospace);font-size:2.1rem;font-weight:700;
-  letter-spacing:.2em;margin:.35rem 0 .1rem;color:var(--fg,#EAF2F4)}
+  letter-spacing:.2em;margin:.35rem 0 .1rem;color:var(--text,#EAF2F4)}
 .mp-sub{font-size:.86rem;opacity:.72;margin:0 0 .9rem}
 .mp-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.5rem 0}
 .mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.8rem;
@@ -2715,16 +2718,16 @@ function guideDetailHtml(key) {
     '<div class="tier-line" id="hero-tier"></div></div>' +
     '<div class="hm-stats" aria-label="Your week at a glance">' +
     '<div class="hm-stat"><div class="n" id="hm-stat-hours">&mdash;</div><div class="l">watch hours this week</div></div>' +
-    '<div class="hm-stat"><div class="n" id="hm-stat-titles">&mdash;</div><div class="l">titles watched</div></div>' +
-    '<div class="hm-stat"><div class="n" id="hm-stat-devs">&mdash;</div><div class="l">devices signed in</div></div>' +
-    '<div class="hm-stat"><div class="n" id="hm-stat-members">&mdash;</div><div class="l">members</div></div></div>' +
+    '<div class="hm-stat"><div class="n" id="hm-stat-titles">&mdash;</div><div class="l">titles &middot; all time</div></div>' +
+    '<div class="hm-stat"><div class="n" id="hm-stat-devs">&mdash;</div><div class="l" id="hm-stat-devs-l">devices signed in</div></div>' +
+    '<div class="hm-stat"><div class="n" id="hm-stat-members">&mdash;</div><div class="l" id="hm-stat-members-l">members</div></div></div>' +
     '</div>' +
     '<div class="hm-banner-acct" id="hm-banner-acct"></div>' +
     '</div>' +
     '<a class="hm-hero" id="hm-hero" hidden href="https://aiostreams.mysweetpea.cc/jellyfin/" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
-    '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
-    '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">History &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
+    '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" aria-label="All service updates" onclick="var b=document.getElementById(\'upd-bell\');if(b)b.click()">All updates &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
+    '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Moonfin &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
     '<section class="hm-sec" id="hm-upnext" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>New for you</h2><button type="button" class="hm-more" onclick="setTab(\'media\')">Browse media &rarr;</button></div><div class="hm-rail" id="hm-un-rail"></div></section>' +
     '<section class="hm-sec" id="hm-because" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Trending now<span id="hm-because-seed" class="hm-seed-pill" hidden></span></h2><button type="button" class="hm-more" onclick="setTab(\'media\')">More picks &rarr;</button></div><div class="hm-rail" id="hm-because-rail"></div></section>' +
     obHtml +
@@ -2739,7 +2742,7 @@ function guideDetailHtml(key) {
     '<div class="st2-pills" id="st2-pills" role="tablist" aria-label="Stats period"><button type="button" class="st2-pill on" data-p="week" role="tab" aria-selected="true">Week</button><button type="button" class="st2-pill" data-p="month" role="tab" aria-selected="false">Month</button><button type="button" class="st2-pill" data-p="all" role="tab" aria-selected="false">All time</button></div>' +
     '<div class="st-fleet" id="st-fleet" hidden><p class="eyebrow" style="margin-top:22px">Fleet health &middot; 24h</p><div class="st-fleet-rows" id="st-fleet-rows"></div></div>' +
     '</section>' +
-    '<section class="card" id="st-top-card" hidden aria-label="Most watched"><p class="eyebrow">Top titles</p><h3>Most watched</h3><div class="st-top-grid" id="st-top"></div></section>' +
+    '<section class="card" id="st-top-card" hidden aria-label="Most watched, all time"><p class="eyebrow">All time &middot; top titles</p><h3>Most watched</h3><div class="st-top-grid" id="st-top"></div></section>' +
     '<section class="card" id="sec-stats"><p class="eyebrow">The full ledger</p><h3>The garden in numbers<button type="button" class="mini icon-btn" id="stats-refresh" aria-label="Refresh statistics" title="Refresh statistics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button></h3>' +
     '<div class="stats" id="stats-kpi" aria-live="polite"></div>' +
     '<section id="sec-stats-charts" hidden aria-label="Library charts"><p class="eyebrow">By the numbers</p><div id="stats-charts" aria-live="polite"></div><noscript><p class="dim">Charts need JavaScript — the totals above still show.</p></noscript></section>' +
@@ -2750,7 +2753,6 @@ function guideDetailHtml(key) {
     '<div class="tabpanel" id="panel-media" role="tabpanel" aria-labelledby="tab-media">' +
     '<div class="md-head"><p class="eyebrow">Media</p><h2 class="md-title">Tonight&rsquo;s picks<span class="md-dot">.</span></h2></div>' +
     '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin PIN</h3><div id="pin-body"><div class="skel"></div></div></section>' +
-    '<a class="hm-hero md-hero" id="md-hero" hidden href="https://aiostreams.mysweetpea.cc/jellyfin/" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-services" role="tabpanel" aria-labelledby="tab-services">' +
@@ -2781,7 +2783,7 @@ function guideDetailHtml(key) {
     '' +
     '</div>' +
     '<div class="tabpanel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">' +
-    '<section class="card" id="sec-guides"><p class="eyebrow">Setup guides</p><h3>Setup guides<span class="tier-echo" id="tier-echo-guides"></span></h3><pre class="ripple-strip" id="ripple-strip-guides" aria-hidden="true"></pre><p class="dim" style="margin:10px 0 16px">How to get started with each MySweetPea service — step by step.</p>' +
+    '<section class="card" id="sec-guides"><p class="eyebrow">Setup guides</p><h3>Setup guides<span class="tier-echo" id="tier-echo-guides"></span></h3><p class="dim" style="margin:10px 0 16px">How to get started with each MySweetPea service — step by step.</p>' +
     '<div class="svc-guide"><div class="svc-guide-nav" id="guide-nav" role="group" aria-label="Choose a service"></div>' +
     '<details class="m-guide-dd" id="m-guide-dd"><summary class="m-guide-sum"><span class="m-guide-sum-t" id="m-guide-sum-t">Guide</span><span class="m-guide-chev" aria-hidden="true">&rarr;</span></summary><div class="svc-guide-detail" id="guide-body" aria-live="polite"></div></details></section>' +
     '</div>' +
@@ -3045,7 +3047,8 @@ function guideDetailHtml(key) {
   const statSection = (label, tiles) => {
     const filled = tiles.filter((t) => t[1] != null);
     const maxV = Math.max.apply(null, filled.map((t) => (typeof t[1] === 'number' ? t[1] : 0)).concat([0]));
-    const inner = filled.map((t) => statTile(t[0], t[1], (typeof t[1] === 'number' && maxV > 0) ? (t[1] / maxV) * 100 : null)).join('');
+    const singular = (label, v) => (v === 1 && /s$/.test(label) && !/ss$/.test(label) ? label.slice(0, -1) : label);
+    const inner = filled.map((t) => statTile(singular(t[0], t[1]), t[1], (typeof t[1] === 'number' && maxV > 0) ? (t[1] / maxV) * 100 : null)).join('');
     if (!inner) return '';
     return '<div class="svc-sec"><p class="eyebrow">' + esc(label) + '</p><div class="svc-stats">' + inner + '</div></div>';
   };
@@ -3058,13 +3061,12 @@ function guideDetailHtml(key) {
       kpiTile('Movies watched', s.movies, KPI_ICONS.film) +
       kpiTile('Episodes watched', s.episodes, KPI_ICONS.tv) +
       kpiTile('Hours watched', s.jf_watch_hours, KPI_ICONS.clock) +
-      kpiTile('Members', s.users, KPI_ICONS.users);
+      kpiTile(s.users === 1 ? 'Member' : 'Members', s.users, KPI_ICONS.users);
       kpi.querySelectorAll('.stat .n').forEach(animateCount);
     }
     renderStatsCharts(s);
     if (!svc) return;
     let h = '';
-    h += statSection('Your watching', [['Movies watched', s.movies], ['Series watched', s.series], ['Episodes watched', s.episodes], ['Titles in total', s.jf_played_titles], ['Resume queue', s.jf_resume], ['Hours watched', s.jf_watch_hours]]);
     h += statSection('Immich', [['Photos', s.photos], ['Videos', s.videos], ['Storage', s.usage_mb == null ? null : fmtStorage(s.usage_mb)]]);
     h += statSection('Accounts', [['Members', s.users], ['Active sessions', s.sessions]]);
     // In-cluster services (KV snapshots pushed by the cluster; absent = '—')
@@ -3084,35 +3086,24 @@ function guideDetailHtml(key) {
     const series = pos(s && s.series), boxsets = pos(s && s.boxsets);
     if (movies == null && episodes == null && photos == null && series == null && boxsets == null) { sec.hidden = true; host.innerHTML = ''; return; }
     sec.hidden = false;
-    // 1. what you have watched — stacked bar (Movies / Series episodes / Photos)
-    const comp = [['Movies', movies, 'var(--v)'], ['Episodes', episodes, 'var(--c)'], ['Series', series, 'var(--gold)']].filter((x) => x[1] != null);
-    const compHtml = comp.length ?
-      '<div class="sc-bar" role="img" aria-label="What you have watched">' + comp.map((x) => '<i style="flex:' + x[1] + ' 1 0;background:' + x[2] + '" title="' + esc(x[0]) + ': ' + x[1].toLocaleString() + '"></i>').join('') + '</div>' +
-      '<div class="sc-legend">' + comp.map((x) => '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' &middot; ' + x[1].toLocaleString() + '</span>').join('') + '</div>' : '';
-    // 2. donut — Movies vs Series vs Boxsets counts (SVG stroke-dasharray, hides null segments)
-    const don = [['Movies', movies, 'var(--v)'], ['Series', series, 'var(--gold)'], ['Episodes', episodes, 'var(--c)']].filter((x) => x[1] != null);
-    let donHtml = '';
-    if (don.length) {
-      const donTotal = don.reduce((a, x) => a + x[1], 0);
-      let acc = 0;
-      const circles = don.map((x) => {
-        const pct = (x[1] / donTotal) * 100;
-        const off = 25 - acc; acc += pct;
-        return '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="5.5" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + off.toFixed(3) + '"><title>' + esc(x[0]) + ': ' + x[1].toLocaleString() + ' (' + pct.toFixed(1) + '%)</title></circle>';
-      }).join('');
-      donHtml = '<div class="sc-donut"><svg viewBox="0 0 42 42" role="img" aria-label="What you have watched, by type">' + circles + '</svg>' +
-        '<div class="sc-donut-c"><span class="sc-donut-n">' + donTotal.toLocaleString() + '</span><span class="sc-donut-l">watched</span></div></div>' +
-        '<div class="sc-legend sc-donut-leg">' + don.map((x) => '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' &middot; ' + x[1].toLocaleString() + '</span>').join('') + '</div>';
-    }
-    // 3. "by the numbers" — rows normalized to the max value (pure CSS bars)
-    const rows = [['Movies', movies, 'var(--v)'], ['Series', series, 'var(--gold)'], ['Episodes', episodes, 'var(--c)'], ['Photos', photos, 'var(--sage)']].filter((x) => x[1] != null);
-    const max = rows.reduce((a, x) => Math.max(a, x[1]), 0);
-    const numsHtml = rows.length ?
-      '<div class="sc-nums">' + rows.map((x) => '<div class="sc-num"><span class="sc-nl">' + esc(x[0]) + '</span><span class="sc-nv">' + x[1].toLocaleString() + '</span><span class="sc-nb"><i style="width:' + Math.max(3, Math.round((x[1] / max) * 100)) + '%;background:' + x[2] + '"></i></span></div>').join('') + '</div>' : '';
-    host.innerHTML = '<div class="sc-wrap">' +
-      (compHtml ? '<div class="sc-comp">' + compHtml + '</div>' : '') +
-      (donHtml || numsHtml ? '<div class="sc-charts">' + (donHtml ? '<div class="sc-donut-cell">' + donHtml + '</div>' : '') + (numsHtml ? '<div class="sc-nums-cell">' + numsHtml + '</div>' : '') + '</div>' : '') +
-      '</div>';
+    // Leaves only: a movie or an episode is one thing WATCHED; a series is a
+    // container, so adding it to the same total double-counts (0 movies + 3
+    // series + 6 episodes used to read "9 watched").
+    const don = [['Movies', movies, 'var(--v)'], ['Episodes', episodes, 'var(--c)']].filter((x) => x[1] != null);
+    if (!don.length) { sec.hidden = true; host.innerHTML = ''; return; }
+    const donTotal = don.reduce((a, x) => a + x[1], 0);
+    let acc = 0;
+    const circles = don.map((x) => {
+      const pct = (x[1] / donTotal) * 100;
+      const off = 25 - acc; acc += pct;
+      return '<circle cx="21" cy="21" r="15.9155" fill="none" stroke="' + x[2] + '" stroke-width="5.5" stroke-dasharray="' + pct.toFixed(3) + ' ' + (100 - pct).toFixed(3) + '" stroke-dashoffset="' + off.toFixed(3) + '"><title>' + esc(x[0]) + ': ' + x[1].toLocaleString() + ' (' + pct.toFixed(1) + '%)</title></circle>';
+    }).join('');
+    host.innerHTML = '<div class="sc-wrap"><div class="sc-charts">' +
+      '<div class="sc-donut-cell"><div class="sc-donut"><svg viewBox="0 0 42 42" role="img" aria-label="What you have watched, by type">' + circles + '</svg>' +
+      '<div class="sc-donut-c"><span class="sc-donut-n">' + donTotal.toLocaleString() + '</span><span class="sc-donut-l">watched</span></div></div>' +
+      '<div class="sc-legend sc-donut-leg">' + don.map((x) => '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' &middot; ' + x[1].toLocaleString() + '</span>').join('') +
+      (series != null ? '<span class="sc-note">across ' + series.toLocaleString() + ' series' + '</span>' : '') +
+      '</div></div></div></div>';
   }
   // ===== library growth — /api/growth, ONE shared fetch (promise cache, same
   // pattern) so loadStats (stats card) and hmLoadBanner (home
@@ -3323,14 +3314,15 @@ function guideDetailHtml(key) {
     let h = Math.floor(hours);
     let m = Math.round((hours - h) * 60);
     if (m === 60) { h += 1; m = 0; }
-    num.innerHTML = '<span class="st2v">' + h + '</span><small> hrs </small><span class="st2v">' + m + '</span><small> min</small>';
+    num.innerHTML = (h > 0 ? '<span class="st2v">' + h + '</span><small> hrs </small>' : '') +
+      '<span class="st2v">' + m + '</span><small>&nbsp;min</small>';
     num.hidden = false;
     num.querySelectorAll('.st2v').forEach(animateCount);
     empty.hidden = true;
     const titles = Number(p.titles || 0).toLocaleString();
     const plays = Number(p.items || 0).toLocaleString();
     const top = (typeof (st2Data || {}).jf_top_title === 'string' && st2Data.jf_top_title)
-      ? ' &mdash; <span class="st2-top">' + esc(st2Data.jf_top_title) + '</span> up next'
+      ? ' &middot; <span class="st2-top">' + esc(st2Data.jf_top_title) + '</span> in progress'
       : '';
     sub.innerHTML = 'across <b>' + titles + '</b> ' + (p.titles === 1 ? 'title' : 'titles') +
       ' &middot; <b>' + plays + '</b> ' + (p.items === 1 ? 'play' : 'plays') + top;
@@ -3360,6 +3352,8 @@ function guideDetailHtml(key) {
     try { document.body.classList.remove('st-top-absent'); } catch (e0) {}
     const max = Number(list[0].playCount) || 1;
     const total = list.reduce((a, x) => a + (Number(x.playCount) || 0), 0);
+    // all-tied rows make "33% of top plays" noise, not information
+    const flat = list.length > 1 && list.every((x) => (Number(x.playCount) || 0) === (Number(list[0].playCount) || 0));
     const JF_ITEM_URL = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
     host.innerHTML = '<div class="st-top-list">' + list.map((x, i) => {
       const plays = Number(x.playCount) || 0;
@@ -3369,7 +3363,7 @@ function guideDetailHtml(key) {
         '<span class="st-rank">' + (i + 1) + '</span>' + art +
         '<span class="st-row-main"><span class="st-row-title">' + esc(x.name || 'Untitled') + '</span>' +
         '<span class="st-row-bar"><i style="width:' + Math.max(4, Math.round((plays / max) * 100)) + '%"></i></span></span>' +
-        '<span class="st-row-num"><b>' + plays.toLocaleString() + '</b> plays<small>' + share + '% of top ' + list.length + '</small></span></a>';
+        '<span class="st-row-num"><b>' + plays.toLocaleString() + '</b> ' + (plays === 1 ? 'play' : 'plays') + (flat ? '' : '<small>' + share + '% of top plays</small>') + '</span></a>';
     }).join('') + '</div>';
     card.hidden = false;
   }
@@ -3657,50 +3651,53 @@ function guideDetailHtml(key) {
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
   (async () => {
     const JF_ITEM = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/index.html#!/item?id=';
-    const grab = (u) => fetch(u).then(r => (r.ok ? r.json() : { items: [] })).catch(() => ({ items: [] }));
-    let cont = { items: [] }, latest = { items: [] };
-  try { const r = await Promise.all([grab('/api/media/continue'), grab('/api/media/latest')]); cont = r[0] || cont; latest = r[1] || latest; } catch (e) {}
+    const g2 = (u) => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
     const posterCard = (it, o) => {
       const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
       let h = '<a class="mitem" href="' + JF_ITEM + encodeURIComponent(String(it.id ?? '')) + '" target="_blank" rel="noopener">';
       if (o.badge && it.type) h += '<span class="mtype">' + esc(it.type) + '</span>';
-      h += '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>';
+      h += '<span class="mposter-wrap"><span class="mposter-fb hm-g0" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
+        '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/></span>';
       h += '<div class="mtitle">' + esc(it.name || '') + '</div>';
       if (it.seriesName) h += '<div class="msub">' + esc(it.seriesName) + '</div>';
       if (o.progress) h += '<div class="mprog"><i style="width:' + pct + '%"></i></div>';
       return h + '</a>';
     };
-    let html = '';
-    if ((cont.items || []).length) html += '<section class="card"><p class="eyebrow">Your library</p><h3>Continue Watching</h3><div class="media-row">' + cont.items.map(it => posterCard(it, { progress: true })).join('') + '</div></section>';
-    if ((latest.items || []).length) html += '<section class="card"><p class="eyebrow">Your library</p><h3>Recently Added</h3><div class="media-row">' + latest.items.map(it => posterCard(it, { badge: true })).join('') + '</div></section>';
-    document.querySelectorAll('.media-sec').forEach((s) => { s.innerHTML = html; });
-    // Media tab deep build (A2): most played / because / fresh / genres — Home keeps Continue/Recently only
+    // Media tab deep build (A2): continue / most played / because / popular-unwatched / genres.
+    // ⚠️ This is the ONLY writer of #sec-media-m — a second pass used to render
+    // Continue/Recently here and was then overwritten by this one.
     (async () => {
       const host = document.getElementById('sec-media-m');
       if (!host) return;
-      const g2 = (u) => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
-      const [mp, be, fr, ge] = await Promise.all([g2('/api/media/mostplayed'), g2('/api/media/recommend'), g2('/api/media/unplayed'), g2('/api/media/genres')]);
-      const deepCard = (it, chipHtml) => '<a class="mitem" href="' + JF_ITEM + encodeURIComponent(String(it.id ?? '')) + '" target="_blank" rel="noopener">' +
-        '<span class="mposter-wrap"><img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
+      const [cont, mp, be, fr, ge] = await Promise.all([g2('/api/media/continue'), g2('/api/media/mostplayed'), g2('/api/media/recommend'), g2('/api/media/unplayed'), g2('/api/media/genres')]);
+      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + encodeURIComponent(String(it.id ?? '')) + '" target="_blank" rel="noopener">' +
+        '<span class="mposter-wrap"><span class="mposter-fb hm-g' + ((i || 0) % 3) + '" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
+        '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
         '<div class="mtitle">' + esc(it.name || '') + '</div>' +
         '<div class="msub">' + esc([it.year, (it.rating != null ? '\u2605 ' + Number(it.rating).toFixed(1) : '')].filter(Boolean).join(' \u00b7 ')) + '</div></a>';
       const rateChip = (it) => (it.rating != null ? '<span class="mrate">' + Number(it.rating).toFixed(1) + '</span>' : '');
       const playsChip = (it) => (it.playCount ? '<span class="mplays">' + it.playCount + (it.playCount === 1 ? ' play' : ' plays') + '</span>' : '');
       let out = '';
-      if (mp && mp.items && mp.items.length) out += '<section class="card"><p class="eyebrow">All time</p><h3>Most played</h3><div class="media-row">' + mp.items.map(it => deepCard(it, playsChip(it) + rateChip(it))).join('') + '</div></section>';
-      if (be && be.items && be.items.length) out += '<section class="card"><p class="eyebrow">Personal picks</p><h3>Because you watched' + (be.seed ? ' <span class="hm-seed-pill">' + esc(be.seed) + '</span>' : '') + '</h3><div class="media-row">' + be.items.map(it => deepCard(it, rateChip(it))).join('') + '</div></section>';
-      if (fr && fr.items && fr.items.length) out += '<section class="card"><p class="eyebrow">Unwatched \u00b7 top rated</p><h3>Fresh picks</h3><div class="media-row">' + fr.items.map(it => deepCard(it, rateChip(it))).join('') + '</div></section>';
+      if (cont && cont.items && cont.items.length) out += '<section class="card"><p class="eyebrow">Pick up where you left off</p><h3>Continue watching</h3><div class="media-row is-posters">' + cont.items.slice(0, 12).map(it => posterCard(it, { progress: true })).join('') + '</div></section>';
+      if (mp && mp.items && mp.items.length) out += '<section class="card"><p class="eyebrow">All time</p><h3>Most played</h3><div class="media-row is-posters">' + mp.items.map((it, i) => deepCard(it, playsChip(it) + rateChip(it), i)).join('') + '</div></section>';
+      if (be && be.items && be.items.length) out += '<section class="card"><p class="eyebrow">Personal picks</p><h3>Because you watched' + (be.seed ? ' <span class="hm-seed-pill">' + esc(be.seed) + '</span>' : '') + '</h3><div class="media-row is-posters">' + be.items.map((it, i) => deepCard(it, rateChip(it), i)).join('') + '</div></section>';
+      if (fr && fr.items && fr.items.length) out += '<section class="card"><p class="eyebrow">Trending \u00b7 not watched yet</p><h3>Popular, unwatched</h3><div class="media-row is-posters">' + fr.items.map((it, i) => deepCard(it, rateChip(it), i)).join('') + '</div></section>';
       if (ge && ge.genres && ge.genres.length) {
         const MOODS = [['Mind-bending', 'Sci-Fi'], ['Edge of seat', 'Thriller'], ['True story', 'Documentary'], ['Visually stunning', 'Fantasy'], ['Make me laugh', 'Comedy'], ['Keep me up tonight', 'Horror'], ['Based on a book', 'Drama']];
         const have = new Set(ge.genres.map(g => g.name));
         const moodChips = MOODS.filter(m2 => have.has(m2[1]));
         const genreUrl = (name) => ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/index.html#!/movies?genre=' + encodeURIComponent(name);
-        const genreRow = '<div class="m-genre-row">' + ge.genres.map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div>';
+        // Jellyfin reports every genre it has ever seen, including non-genres
+        // (News/Reality/Talk/Soap/TV Movie) that make the grid read like a bug.
+        const GENRE_SKIP = new Set(['news', 'reality', 'talk', 'soap', 'tv movie', 'kids', 'music']);
+        const genreRow = '<div class="m-genre-row">' + ge.genres
+          .filter(g => !GENRE_SKIP.has(String(g.name || '').toLowerCase()))
+          .slice(0, 14)
+          .map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div>';
         if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
         else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
       }
       host.innerHTML = out;
-      hmLoadHero('md-hero');
     })();
   })();
   // ===== SERVICES LAUNCHER =====
@@ -4050,17 +4047,21 @@ function guideDetailHtml(key) {
     if (elT) elT.textContent = (stats && stats.jf_played_titles != null) ? Number(stats.jf_played_titles).toLocaleString() : '\u2014';
     const elD = document.getElementById('hm-stat-devs');
     if (elD) elD.textContent = (devCount == null) ? '\u2014' : String(devCount);
+    const elDL = document.getElementById('hm-stat-devs-l');
+    if (elDL) elDL.textContent = (devCount === 1 ? 'device signed in' : 'devices signed in');
     const elM = document.getElementById('hm-stat-members');
     if (elM) elM.textContent = (stats && stats.users != null) ? String(stats.users) : '\u2014';
+    const elML = document.getElementById('hm-stat-members-l');
+    if (elML) elML.textContent = (stats && stats.users === 1 ? 'member' : 'members');
     ['hm-stat-hours', 'hm-stat-titles', 'hm-stat-devs', 'hm-stat-members'].forEach((id) => { const n = document.getElementById(id); if (n) { n.dataset.counted = ''; animateCount(n); } });
   }
   async function hmLoadHero(hostId, kicker) {
     const host = document.getElementById(hostId || 'hm-hero');
     if (!host) return;
-    let items = [];
-    try { const r = await fetch('/api/media/continue'); if (r.ok) { const d = await r.json(); items = (d && d.items) || []; } } catch (e) {}
+    const items = await hmContinue();
     const it = items[0];
     if (!it || !it.id) { host.hidden = true; return; }
+    hmHeroId = String(it.id);
     const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
     const title = it.seriesName ? it.seriesName : (it.name || 'Continue watching');
     const subBits = [];
@@ -4072,7 +4073,7 @@ function guideDetailHtml(key) {
       '<span class="hm-hero-inner"><span class="hm-hero-copy">' +
       '<span class="hm-kicker">' + (kicker || 'Continue watching') + '</span>' +
       '<span class="hm-hero-title">' + esc(title) + '</span>' +
-      (subBits.length ? '<span class="hm-hero-meta">' + esc(subBits.filter(Boolean).join(' · ')) + (pct ? ' — ' + pct + '% watched' : '') + '</span>' : '') +
+      (subBits.length ? '<span class="hm-hero-meta">' + esc(subBits.filter(Boolean).join(' · ')) + (pct ? ' · ' + pct + '% watched' : '') + '</span>' : '') +
       '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Resume</span>' +
       (pct ? '<span class="hm-pl">' + pct + '% watched</span>' : '') + '</span></span>' +
       '<span class="hm-prog"><i style="width:' + pct + '%"></i></span>';
@@ -4144,19 +4145,37 @@ function guideDetailHtml(key) {
     }
   };
 
+  /* ONE continue-watching fetch for the hero and the rail. Two independent
+     calls could disagree (SWR hands the first caller a stale entry and
+     refreshes in the background), which left the rail hidden under a hero
+     that had an item. */
+  let hmContPromise = null;
+  let hmHeroId = '';
+  function hmContinue() {
+    if (!hmContPromise) {
+      hmContPromise = fetch('/api/media/continue')
+        .then((r) => (r.ok ? r.json() : { items: [] }))
+        .then((d) => (d && d.items) || [])
+        .catch(() => []);
+    }
+    return hmContPromise;
+  }
   async function hmLoadMedia() {
-    let cont = [], latest = [];
-    try { const r = await fetch('/api/media/continue'); if (r.ok) { const d = await r.json(); cont = (d && d.items) || []; } } catch (e) {}
-    try { const r = await fetch('/api/media/latest'); if (r.ok) { const d = await r.json(); latest = (d && d.items) || []; } } catch (e) {}
+    const [cont, latest] = await Promise.all([
+      hmContinue(),
+      fetch('/api/media/latest').then((r) => (r.ok ? r.json() : null)).then((d) => (d && d.items) || []).catch(() => []),
+    ]);
     const kwSec = document.getElementById('hm-keepwatch'), kwRail = document.getElementById('hm-kw-rail');
     if (kwSec && kwRail) {
-      if (cont.length) { kwRail.innerHTML = cont.slice(0, 10).map(hmWideCard).join(''); kwSec.hidden = false; }
+      const railCont = cont.filter((it) => String(it.id) !== hmHeroId);
+      if (railCont.length) { kwRail.innerHTML = railCont.slice(0, 10).map(hmWideCard).join(''); kwSec.hidden = false; }
       else kwSec.hidden = true;
     }
     const un = latest;
     const unSec = document.getElementById('hm-upnext'), unRail = document.getElementById('hm-un-rail');
     if (unSec && unRail) {
       // user verdict: uniform POSTER rail (the mixed wide+poster grid read as two different image types)
+      unRail.classList.add('is-posters');
       if (un.length) { unRail.innerHTML = un.slice(0, 12).map(hmPosterCard).join(''); unSec.hidden = false; }
       else unSec.hidden = true;
     }
@@ -4228,8 +4247,8 @@ function guideDetailHtml(key) {
     try { hmLoadBecause(); } catch (e) {}
   }
   async function hmLoadBecause() {
-    /* renamed per user: 'Trending now' — library's highest-rated titles right now
-       (was 'Because you watched X' similarity row; endpoint swap only, render identical) */
+    /* 'Trending now' — the head of the Trending catalogs (real popularity order;
+       aios ignores SortBy, so no client-side re-ranking here). */
     const sec = document.getElementById('hm-because');
     const rail = document.getElementById('hm-because-rail');
     const seedEl = document.getElementById('hm-because-seed');
@@ -4241,6 +4260,7 @@ function guideDetailHtml(key) {
       const items = (d && d.items) || [];
       if (!items.length) return;
       if (seedEl) seedEl.hidden = true;
+      rail.classList.add('is-posters');
       rail.innerHTML = items.map((it, i) => hmPosterCard(it, i)).join('');
       sec.hidden = false;
     } catch (e) { /* row stays hidden */ }
@@ -5026,7 +5046,9 @@ function relFuture(v) {
     function updApplyBell() {
       var dot = document.getElementById('bell-dot');
       if (!dot || !updData) return;
-      var seen = updSeenGet();
+      // Never opened the bell -> "everything in the last 90 days is new" pinned the
+      // badge at 9+. Unread means "since you last looked", or the last 7 days (same window as the home rail).
+      var seen = updSeenGet() || new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
       var fresh = (updData.updates || []).filter(function (u) { return u.date > seen; });
       if (fresh.length) { dot.textContent = fresh.length > 9 ? '9+' : String(fresh.length); dot.hidden = false; }
       else dot.hidden = true;
@@ -5420,7 +5442,6 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .md-head{margin:4px 0 18px}
 .md-title{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:2rem;letter-spacing:-.01em;margin-top:6px}
 .md-dot{color:var(--primary-bright)}
-.md-hero{margin-bottom:22px}
 .md-mood .md-mood-chip{font-weight:600}
 .md-mood-cap{margin-top:12px;font-size:.78rem}
 
@@ -5434,9 +5455,7 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
   #sec-media-m .card.md-browse .m-genre-row{gap:12px}
   #sec-media-m .card.md-browse .m-genre{padding:11px 18px;font-size:.82rem}
 
-  .md-hero{height:240px;margin-bottom:16px}
 }
-@media(max-width:980px){.md-hero{height:240px}}
 .md-browse-or{color:var(--text-faint);font-weight:400}
 
 /* ===== LIBRARY DONUT ===== */
@@ -5629,7 +5648,6 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 /* ===== DEEP POLISH (dynamic-audit round) ===== */
 /* 1. stats hero: when Top-titles card is hidden the hero sits alone at 5/12 width —
       let it take the full row so the layout never strands half a grid */
-.st3-grid:has(> #st-top-card[hidden]) .st3-hero{grid-column:1/-1}
 /* :has() unsupported (iOS <15) -> fallback via body class set in JS */
 body.st-top-absent .st3-hero{grid-column:1/-1}
 /* 2. decorative ASCII wave: hide on narrow screens (reads as noise at 390px) */

@@ -30,7 +30,6 @@ export interface Env {
 
   IMMICH_URL: string;
   IMMICH_API_KEY: string;
-  JELLYFIN_USER_ID: string;
   AUTHENTIK_ADMIN_TOKEN: string;
   // Optional per-service stats sources (stats tab "beyond the library" tiles).
   // Each absent -> its tiles render '—' (honest degrade).
@@ -521,17 +520,54 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
    this replaces had drifted apart (latest had no rating, only unplayed had
    genres, only mostplayed had playCount) — and a renderer reading a field its
    endpoint does not emit fails silently. */
+/* ⚠️ aios only honours SortBy=Random on /Items, and /Items/Latest without a
+   ParentId round-robins the FIRST few catalogs. So a "sort" requested from
+   this server silently degrades to catalog order — which is how four
+   different rails ended up showing the same twelve titles. Rows therefore
+   come from the right CATALOG, and any ranking is done here on a page we
+   already paid for. */
+let VIEWS_TTL = 0;
+let VIEWS_CACHE: Array<{ id: string; name: string }> = [];
+async function aiosViews(env: Env): Promise<Array<{ id: string; name: string }>> {
+  if (Date.now() < VIEWS_TTL) return VIEWS_CACHE;
+  try {
+    const { base, auth } = await aiosSrc(env);
+    const r = await fetch(base + '/UserViews', { headers: { authorization: auth } });
+    if (r.ok) {
+      const d = await r.json() as any;
+      VIEWS_CACHE = ((d.Items ?? []) as any[])
+        .map((v) => ({ id: String(v.Id), name: String(v.Name || '') }))
+        .filter((v) => v.id);
+      VIEWS_TTL = Date.now() + 600000;
+    }
+  } catch { /* keep the last good list */ }
+  return VIEWS_CACHE;
+}
+const viewBy = (views: Array<{ id: string; name: string }>, re: RegExp) =>
+  (views.find((v) => re.test(v.name)) || { id: '' }).id;
+const num = (v: unknown) => (typeof v === 'number' && isFinite(v) ? v : 0);
+
+async function aiosRow(url: string, auth: string): Promise<any[]> {
+  const r = await fetch(url, { headers: { authorization: auth } });
+  if (!r.ok) throw new Error('aios ' + r.status);
+  const d = await r.json() as any;
+  return (Array.isArray(d) ? d : (d.Items ?? [])) as any[];
+}
+
 const mediaItem = (it: any, base: string) => ({
   id: it.Id,
   name: it.Name,
   seriesName: it.SeriesName ?? '',
   type: it.Type,
   year: it.ProductionYear ?? null,
-  rating: it.CommunityRating ?? null,
+  rating: (typeof it.CommunityRating === 'number' && it.CommunityRating > 0) ? it.CommunityRating : null, // 0 = no votes yet, not a 0-star film
   playCount: it.UserData?.PlayCount ?? 0,
   progressPct: Math.round(it.UserData?.PlayedPercentage ?? 0),
   genres: (it.Genres ?? []).slice(0, 2),
-  img: base + '/Items/' + it.Id + '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
+  // Episodes have no poster of their own upstream — the series art is the
+  // card (same rule Moonfin uses for its Continue-watching row).
+  img: base + '/Items/' + ((it.Type === 'Episode' && it.SeriesId) ? it.SeriesId : it.Id) +
+    '/Images/Primary?fillHeight=420&fillWidth=280&quality=75',
 });
 
 async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string; auth: string } | null> {
@@ -1267,7 +1303,7 @@ export default {
           affine_users: null, affine_docs: null, affine_workspaces: null,
           owui_users: null, owui_chats: null,
         };
-        const payload = await swrJson(ctx, env, 'cache:stats', 300000, async () => {
+        const payload = await swrJson(ctx, env, 'cache:stats2', 300000, async () => {
           for (const k of ['svc-stats:nextcloud', 'svc-stats:vaultwarden', 'svc-stats:affine', 'svc-stats:openwebui']) {
             try {
               const raw = await env.SESSIONS.get(k);
@@ -1386,13 +1422,23 @@ export default {
             })(),
             (async () => {
               try {
-                // admin token: total member count from the users pagination header
-                const r = await authentikFetch(env, env.AUTHENTIK_ADMIN_TOKEN, '/api/v3/core/users/?page=1&page_size=1');
-                if (r.ok) {
+                // Members, not user rows: authentik holds a service account per
+                // outpost/provider (ldap-service-account, svc-dashboard, ...), so
+                // the plain user count read "7 members" on a one-person garden.
+                // Count real people in the two access groups instead.
+                const groups = ['sweetpea', 'seedling'];
+                const seen = new Set<string>();
+                for (const g of groups) {
+                  const r = await authentikFetch(env, env.AUTHENTIK_ADMIN_TOKEN,
+                    '/api/v3/core/users/?page_size=200&groups_by_name=' + g);
+                  if (!r.ok) continue;
                   const d = await r.json() as any;
-                  const c = d && d.pagination && typeof d.pagination.count === 'number' ? d.pagination.count : null;
-                  out.users = c;
+                  for (const u of ((d.results ?? []) as any[])) {
+                    if (!u || u.is_active === false || u.type === 'service_account') continue;
+                    if (u.uuid) seen.add(String(u.uuid));
+                  }
                 }
+                out.users = seen.size;
               } catch {}
             })(),
             (async () => {
@@ -1413,57 +1459,91 @@ export default {
         // token would return the owner's history.
         const src = await aiosUserSrc(env, sess);
         if (!src) return json({ items: [] });
-        const payload = await swrJson(ctx, env, 'cache:media-cont:' + sess.sub, 120000, async () => {
+        const payload = await swrJson(ctx, env, 'cache:media-cont2:' + sess.sub, 120000, async () => {
           const r = await fetch(src.base + '/Items?userId=&Recursive=true&SortBy=DatePlayed&SortOrder=Descending' +
             '&Filters=IsResumable&IncludeItemTypes=Movie,Episode&Limit=12&Fields=ProductionYear,SeriesName&EnableImages=true',
             { headers: { authorization: src.auth } });
           if (!r.ok) throw new Error('aios ' + r.status);
           const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, src.base));
+          // One card per show: the resume list is per EPISODE, so a show you
+          // stopped in the middle of season 4 filled the whole row.
+          const seen = new Set<string>();
+          const items = ((d.Items ?? []) as any[])
+            .filter((it) => {
+              const k = String(it.SeriesId || it.Id || '');
+              if (!k || seen.has(k)) return false;
+              seen.add(k);
+              return true;
+            })
+            .map((it) => mediaItem(it, src.base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
       }
 
       if (path === '/api/media/latest') {
-        // SWR: instant from cache (fresh OR stale); refresh in background.
-        const payload = await swrJson(ctx, env, 'cache:media-latest', 300000, async () => {
+        // "New for you" — the newest titles of the rolling New Releases
+        // catalogs. /Items/Latest with no ParentId walks the first few views
+        // only, which is why this used to return the head of Netflix Movies.
+        const payload = await swrJson(ctx, env, 'cache:media-latest4', 300000, async () => {
           const { base, auth } = await aiosSrc(env);
-          const r = await fetch(base + '/Items/Latest?userId=&Limit=12&EnableImages=true',
-            { headers: { authorization: auth } });
-          if (!r.ok) throw new Error('jellyfin ' + r.status);
-          const d = await r.json() as any;
-          const items = ((Array.isArray(d) ? d : []) as any[]).map((it) => mediaItem(it, base));
-          return JSON.stringify({ items });
+          const views = await aiosViews(env);
+          const pids = [viewBy(views, /^new releases movies$/i), viewBy(views, /^new releases shows$/i)].filter(Boolean);
+          if (!pids.length) {   // catalog rename -> fall back to the old shape rather than go blank
+            const items = (await aiosRow(base + '/Items/Latest?Limit=12', auth)).map((it) => mediaItem(it, base));
+            return JSON.stringify({ items });
+          }
+          const lists = await Promise.all(pids.map((pid) =>
+            aiosRow(base + '/Items/Latest?ParentId=' + encodeURIComponent(pid) + '&Limit=8', auth).catch(() => [] as any[])));
+          const merged: any[] = [];
+          for (let i = 0; i < 8 && merged.length < 12; i++) for (const l of lists) if (l[i]) merged.push(l[i]);
+          return JSON.stringify({ items: merged.slice(0, 12).map((it) => mediaItem(it, base)) });
         });
         return json(JSON.parse(payload));
       }
 
       if (path === '/api/media/mostplayed') {
-        // Most played — per member.
+        // Most played — per member, from the played list (the one watch-state
+        // query aios answers across every catalog), ranked here because
+        // SortBy=PlayCount is ignored upstream. One card per show: six
+        // episodes of the same series is not "most played".
         const src = await aiosUserSrc(env, sess);
         if (!src) return json({ items: [] });
-        const payload = await swrJson(ctx, env, 'cache:media-mostplayed:' + sess.sub, 600000, async () => {
-          const r = await fetch(src.base + '/Items?userId=&SortBy=PlayCount&SortOrder=Descending&Recursive=true' +
-            '&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
-            { headers: { authorization: src.auth } });
-          if (!r.ok) throw new Error('aios ' + r.status);
-          const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, src.base));
-          return JSON.stringify({ items });
+        const payload = await swrJson(ctx, env, 'cache:media-mostplayed4:' + sess.sub, 600000, async () => {
+          const all = await aiosRow(src.base + '/Items?Filters=IsPlayed&Recursive=true&Limit=200' +
+            '&IncludeItemTypes=Movie,Episode&Fields=SeriesId', src.auth);
+          const seen = new Set<string>();
+          const ranked = all
+            .map((it) => ({ it, plays: num(it.UserData?.PlayCount), when: String(it.UserData?.LastPlayedDate || '') }))
+            .sort((a, b) => (b.plays - a.plays) || b.when.localeCompare(a.when))
+            .filter(({ it }) => {
+              const k = String(it.SeriesId || it.Id || '');
+              if (!k || seen.has(k)) return false;
+              seen.add(k);
+              return true;
+            })
+            .slice(0, 12)
+            .map(({ it }) => mediaItem(it, src.base));
+          return JSON.stringify({ items: ranked });
         });
         return json(JSON.parse(payload));
       }
 
       if (path === '/api/media/unplayed') {
-        // Fresh picks: highest-rated unwatched movies. Deep Media tab — not on Home.
-        const payload = await swrJson(ctx, env, 'cache:media-unplayed', 600000, async () => {
+        // Popular you have not watched: the trending catalog minus anything
+        // played, ranked by rating on the page we fetched.
+        const payload = await swrJson(ctx, env, 'cache:media-unplayed5', 600000, async () => {
           const { base, auth } = await aiosSrc(env);
-          const r = await fetch(base + '/Items?userId=' + '&SortBy=CommunityRating&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie&Filters=IsUnplayed&Fields=ProductionYear,CommunityRating,Genres&EnableImages=true',
-            { headers: { authorization: auth } });
-          if (!r.ok) throw new Error('jellyfin ' + r.status);
-          const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, base));
+          const views = await aiosViews(env);
+          const pid = viewBy(views, /^trending movies$/i);
+          const q = pid
+            ? '/Items?ParentId=' + encodeURIComponent(pid)
+            : '/Items?Recursive=true';
+          // Catalog order == popularity order, and it is the only order the
+          // server keeps. Ranking by rating here surfaced one-vote 10.0 titles,
+          // so the catalog's own order wins.
+          const rows = await aiosRow(base + q + '&Filters=IsUnplayed&Limit=100&IncludeItemTypes=Movie,Series', auth);
+          const items = rows.slice(0, 12).map((it) => mediaItem(it, base));
           return JSON.stringify({ items });
         });
         return json(JSON.parse(payload));
@@ -1485,17 +1565,22 @@ export default {
 
       
       if (path === '/api/media/trending') {
-        // Home 'Trending now' rail: highest CommunityRating across movies+series,
-        // then PlayCount as tiebreak. Reads as 'the best of the library right now'
-        // without pretending to have global trending data (honest-degrade law).
-        const payload = await swrJson(ctx, env, 'cache:media-trending', 1800000, async () => {
+        // Home "Trending now": the head of the Trending catalogs — real
+        // popularity order, straight from the catalog rather than a sort this
+        // server would ignore.
+        const payload = await swrJson(ctx, env, 'cache:media-trending4', 1800000, async () => {
           const { base, auth } = await aiosSrc(env);
-          const r = await fetch(base + '/Items?userId=' + '&SortBy=CommunityRating,PlayCount&SortOrder=Descending&Recursive=true&Limit=12&IncludeItemTypes=Movie,Series&Fields=ProductionYear,CommunityRating&EnableImages=true',
-            { headers: { authorization: auth } });
-          if (!r.ok) throw new Error('jellyfin ' + r.status);
-          const d = await r.json() as any;
-          const items = ((d.Items ?? []) as any[]).map((it) => mediaItem(it, base));
-          return JSON.stringify({ items });
+          const views = await aiosViews(env);
+          const pids = [viewBy(views, /^trending movies$/i), viewBy(views, /^trending shows$/i)].filter(Boolean);
+          if (!pids.length) {
+            const items = (await aiosRow(base + '/Items/Latest?Limit=12', auth)).map((it) => mediaItem(it, base));
+            return JSON.stringify({ items });
+          }
+          const lists = await Promise.all(pids.map((pid) =>
+            aiosRow(base + '/Items/Latest?ParentId=' + encodeURIComponent(pid) + '&Limit=8', auth).catch(() => [] as any[])));
+          const merged: any[] = [];
+          for (let i = 0; i < 8 && merged.length < 12; i++) for (const l of lists) if (l[i]) merged.push(l[i]);
+          return JSON.stringify({ items: merged.slice(0, 12).map((it) => mediaItem(it, base)) });
         });
         return json(JSON.parse(payload));
       }
@@ -1506,18 +1591,28 @@ export default {
         // taste and not the owner's.
         const src = await aiosUserSrc(env, sess);
         if (!src) return json({ items: [], seed: '' });
-        const payload = await swrJson(ctx, env, 'cache:media-recommend-v4:' + sess.sub, 1800000, async () => {
+        const payload = await swrJson(ctx, env, 'cache:media-recommend-v6:' + sess.sub, 1800000, async () => {
           const H = { headers: { authorization: src.auth } };
           let seedId = '', seedName = '';
-          for (const q of [
-            '/Items?userId=&SortBy=PlayCount&SortOrder=Descending&Recursive=true&Limit=1&IncludeItemTypes=Movie',
-            '/Items?userId=&Recursive=true&SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable&IncludeItemTypes=Movie,Series&Limit=1',
-          ]) {
-            if (seedId) break;
+          // SortBy is a no-op upstream, so rank the played list here. An episode
+          // seeds its SERIES (Similar on an episode returns an empty list), and
+          // the label reads the show name, not the episode title.
+          const pick = (it: any) => ({
+            id: String((it.Type === 'Episode' ? it.SeriesId : it.Id) || it.Id || ''),
+            name: String((it.Type === 'Episode' ? it.SeriesName : it.Name) || it.Name || ''),
+          });
+          try {
+            const rows = await aiosRow(src.base + '/Items?Filters=IsPlayed&Recursive=true&Limit=200&IncludeItemTypes=Movie,Episode', src.auth);
+            const best = rows
+              .map((it) => ({ it, plays: num(it.UserData?.PlayCount), when: String(it.UserData?.LastPlayedDate || '') }))
+              .sort((a, b) => (b.plays - a.plays) || b.when.localeCompare(a.when))[0];
+            if (best) ({ id: seedId, name: seedName } = pick(best.it));
+          } catch { /* fall through to the resume seed */ }
+          if (!seedId) {
             try {
-              const r = await fetch(src.base + q, H);
-              if (r.ok) { const d = await r.json() as any; const it = (d.Items ?? [])[0]; if (it) { seedId = it.Id; seedName = it.Name; } }
-            } catch { /* try the next seed source */ }
+              const rows = await aiosRow(src.base + '/Items?Filters=IsResumable&Recursive=true&IncludeItemTypes=Movie,Episode&Limit=1', src.auth);
+              if (rows[0]) ({ id: seedId, name: seedName } = pick(rows[0]));
+            } catch { /* no seed -> empty row */ }
           }
           if (!seedId) return JSON.stringify({ items: [], seed: '' });
           const r2 = await fetch(src.base + '/Items/' + seedId + '/Similar?userId=&Limit=12&Fields=ProductionYear,CommunityRating&EnableImages=true', H);

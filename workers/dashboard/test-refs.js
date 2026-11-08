@@ -10,7 +10,10 @@ const js = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g
 
 // strip string literals first: localStorage keys like 'msp_onboarded' are not
 // identifiers, and a quoted name in a comment is not a reference
-const code = js.replace(/'(?:[^'\\]|\\.)*'/g, "''")
+const stripped = js
+  .replace(/\/\*[\s\S]*?\*\//g, '')      // block comments
+  .replace(/(^|\s)\/\/[^\n]*/g, '$1');   // line comments (not URLs: those are ': //')
+const code = stripped.replace(/'(?:[^'\\]|\\.)*'/g, "''")
                .replace(/"(?:[^"\\]|\\.)*"/g, '""')
                .replace(/`(?:[^`\\]|\\.)*`/g, '``');
 
