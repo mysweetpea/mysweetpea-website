@@ -3471,3 +3471,25 @@ body[data-page='services'] .service-card:hover .dev-pill {
 @media (max-width: 420px) {
     body[data-page='services'] .dev-pill { display: none; }
 }
+
+/* ---- form: live character budget under the "Why you" note ---------------- */
+body[data-page='form'] .tier-form-panel .scount {
+  grid-column: 1 / -1;          /* it lands in the 30px icon column otherwise */
+  white-space: nowrap;
+  margin: 6px 0 0 2px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: .72rem;
+  letter-spacing: .04em;
+  color: var(--text-faint, #7E85AE);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  transition: color .18s ease;
+}
+body[data-page='form'] .tier-form-panel .scount-n { font-variant-numeric: tabular-nums; color: var(--text-dim, #9BA1C7); }
+body[data-page='form'] .tier-form-panel .scount-min { font-style: normal; opacity: .72; }
+body[data-page='form'] .tier-form-panel .scount.is-near { color: #E8B463; }
+body[data-page='form'] .tier-form-panel .scount.is-near .scount-n { color: #E8B463; }
+body[data-page='form'] .tier-form-panel .scount.is-full { color: #E88A8A; }
+body[data-page='form'] .tier-form-panel .scount.is-full .scount-n { color: #E88A8A; }
+body[data-page='form'] .tier-form-panel .scount.is-full::after { content: "· limit reached"; opacity: .8; }

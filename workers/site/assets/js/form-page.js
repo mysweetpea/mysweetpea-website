@@ -70,6 +70,21 @@
     }
     ['ga-verify','sp-verify'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('change',updateButtons);});
     var spMsg = document.getElementById('sp-message');
+    /* The textarea silently stopped accepting keystrokes at 500 characters —
+       a real tester spent minutes assuming the field was broken. Show the
+       budget from the first character, and turn amber as it runs out. */
+    function syncWhyCount() {
+        var el = document.getElementById('sp-message-count');
+        if (!spMsg || !el) return;
+        var n = spMsg.value.length, max = Number(spMsg.getAttribute('maxlength')) || 500;
+        el.firstChild.textContent = String(n);
+        el.classList.toggle('is-near', n >= max * 0.9);
+        el.classList.toggle('is-full', n >= max);
+    }
+    if (spMsg) {
+        spMsg.addEventListener('input', syncWhyCount);
+        syncWhyCount();
+    }
     if (spMsg) spMsg.addEventListener('input', syncBloomAndRail);   /* validateField('sp-message') already bound by the generic loop */
     document.querySelectorAll('.access-choice-card').forEach(function (card) {
         card.addEventListener('click', function () {

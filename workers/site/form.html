@@ -54,7 +54,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=h6b17b99d">
     <link rel="stylesheet" href="/assets/css/site.css?v=he75391b2">
-    <link rel="stylesheet" href="/assets/css/premium.css?v=h52a57865">
+    <link rel="stylesheet" href="/assets/css/premium.css?v=h3f850703">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=h6e396228">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=hdf458fd2">
 <link rel="canonical" href="https://mysweetpea.cc/form">
@@ -276,7 +276,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                     </div>
                     <div class="srow note-row">
                         <label class="slabel" for="sp-message">Why you<i>why should we consider you for the Sweet Pea tier?</i></label>
-                        <div class="sfield"><textarea id="sp-message" rows="4" required placeholder="Tell us why you should be considered for the Sweet Pea tier." maxlength="500"></textarea><span class="grow"></span></div>
+                        <div class="sfield"><textarea id="sp-message" rows="4" required placeholder="Tell us why you should be considered for the Sweet Pea tier." maxlength="500" aria-describedby="sp-message-count"></textarea><span class="grow"></span></div>
+                        <div class="scount" id="sp-message-count" aria-live="polite"><span class="scount-n">0</span> / 500 characters <i class="scount-min">at least 20</i></div>
                         <span class="vic-spacer" aria-hidden="true"></span>
                     </div>
                     <label class="verify-check covenant"><input type="checkbox" id="sp-verify" required aria-label="The Gardener's Covenant — I understand that a real person will review this request."><span class="cov-head"><span class="seal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span><span class="cov-title">The Gardener's Covenant<b>I understand that a real person will review this request.</b></span></span><span class="cov-note">Every request is verified by hand. Your invite usually arrives within 24 hours.</span></label>
@@ -345,7 +346,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <script src="/assets/js/site-data.js?v=h109cb376" defer></script>
     <script src="/assets/js/premium.js?v=h84a6809b" defer></script>
     <script src="/assets/js/qrcode.min.js?v=h18ae399f" defer></script>
-    <script src="/assets/js/form-page.js?v=hfe50712e" defer></script>
+    <script src="/assets/js/form-page.js?v=h025f7ce2" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
