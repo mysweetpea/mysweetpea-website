@@ -4264,7 +4264,8 @@ function mspSessionBanner() {
 
   function hmWideCard(it) {
     const pct = Math.max(0, Math.min(100, Number(it && it.progressPct) || 0));
-    const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
+    /* the title is the show now, so the sub-line is the episode (or the type for a film) */
+    const sub = (it && it.seriesName) ? String(it.name || '') : String((it && it.type) || '');
     return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + '" target="_blank" rel="noopener noreferrer">' +
       '<img class="hm-wide-art" loading="lazy" alt="" src="' + esc(hmBackdrop(it && it.id, 480)) + '" onerror="this.style.display=\'none\'">' +
       '<span class="hm-wide-glow"></span>' +

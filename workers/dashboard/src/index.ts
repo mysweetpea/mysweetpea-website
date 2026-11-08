@@ -1483,7 +1483,7 @@ export default {
         // episodes of the same series is not "most played".
         const src = await aiosUserSrc(env, sess);
         if (!src) return json({ items: [] });
-        const payload = await swrJson(ctx, env, 'cache:media-mostplayed4:' + sess.sub, 600000, async () => {
+        const payload = await swrJson(ctx, env, 'cache:media-mostplayed5:' + sess.sub, 600000, async () => {
           const all = await aiosRow(src.base + '/Items?Filters=IsPlayed&Recursive=true&Limit=200' +
             '&IncludeItemTypes=Movie,Episode&Fields=SeriesId,SeriesName', src.auth);
           const seen = new Set<string>();
