@@ -769,6 +769,19 @@ async function produceUpdates(env: Env): Promise<string> {
   return JSON.stringify({ updates, generated: Date.now(), reconciled: ok > 0 });
 }
 
+// The MOONBASE_MOUNT secret holds the per-device token only, so the card used
+// to hand members a bare 'eyJ...' blob with no host — unpasteable. Compose the
+// address members actually type into Moonfin: origin + /jellyfin/<uuid>/<token>.
+function fullMount(env: Env): string {
+  const raw = String(env.MOONBASE_MOUNT || '').trim().replace(/^\/+/, '');
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw)) return raw;
+  const origin = cleanOrigin(AIOS_HOST) || 'https://aiostreams.mysweetpea.cc';
+  const segs = raw.split('/');
+  const hasUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segs[0] || '');
+  return origin + '/jellyfin/' + (hasUuid ? raw : String(env.AIOS_UUID || '') + '/' + raw);
+}
+
 const path0 = (r: Request) => { try { return new URL(r.url).pathname; } catch { return '?'; } };
 
 export default {
@@ -1704,7 +1717,7 @@ export default {
           pin: who.pin,
           name: who.name,
           username: String(sess.username || '').toLowerCase(),
-          mount: env.MOONBASE_MOUNT,
+          mount: fullMount(env),
         });
       }
 
