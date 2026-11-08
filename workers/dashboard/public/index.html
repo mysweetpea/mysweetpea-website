@@ -2295,11 +2295,18 @@ const GUIDES = {
     url: 'https://aiostreams.mysweetpea.cc/jellyfin/',
     plain: 'Movies, shows and anime — on your phone, TV and browser.',
     steps: [
-      { title: 'Get your PIN', text: 'Open the Media tab in this dashboard. The \u201cYour Moonfin PIN\u201d card at the very top shows your PIN and your server address — you need both to sign in.' },
-      { title: 'Watch in your browser', text: 'You can start straight away in a browser, no install needed.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
+      { title: 'Copy your address', text: 'Open the Media tab in this dashboard. The \u201cYour Moonfin PIN\u201d card at the top shows a long server address and your PIN — tap Copy address.' },
+      { title: 'Watch in your browser', text: 'No install needed: this sign-in page works in any browser.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
       { title: 'Or install the app', text: 'Moonfin is also an app for your phone, tablet and TV. Pick your device below for the exact steps.' },
-      { title: 'Sign in', text: 'Enter your name and your PIN. Your progress stays in sync on every device.' },
+      { title: 'Add the server', text: 'In Moonfin choose Add server. Server address is the long link you copied. Your name is what you sign in with here (not your email). PIN is the number from the card.' },
+      { title: 'That is it', text: 'Moonfin remembers the server, so this is a one-time setup. Your progress syncs on every device.' },
     ],
+    video: {
+      src: '/media/moonfin-pin.mp4',
+      poster: '/media/moonfin-pin.jpg',
+      alt: 'Ten second loop showing the three fields of Moonfin\u2019s Add server screen being filled in.',
+      cap: 'In the app: the three fields in order — the address you copy, your name, your PIN.',
+    },
   },
   jellyfin: {
     name: 'Jellyfin',
@@ -2358,15 +2365,15 @@ const guidePlatSel = {};
 const PLATFORMS_MOONFIN = [
   { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
     { title: 'Open Moonfin', text: 'Watch straight away in your browser — no install needed.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
-    { title: 'Sign in', text: 'Enter your name and your PIN from your dashboard. Your progress stays in sync everywhere.', url: '', btn: '' },
+    { title: 'Sign in', text: 'Type your name (not your email) and your PIN — both are on the Media tab. The browser stays signed in, and your progress syncs on every device.', url: '', btn: '' },
   ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the App Store', text: 'Install Moonfin from the App Store.', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
-    { title: 'Point it at your server', text: 'Server address: the one shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the Play Store', text: 'One app covers phones, tablets and Android TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Point it at your server', text: 'Server address: the one shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
     { title: 'Install Moonfin on your TV', text: 'Find Moonfin in the Play Store on your TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
@@ -2374,19 +2381,19 @@ const PLATFORMS_MOONFIN = [
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
     { title: 'Use Swiftfin on Apple TV', text: 'Moonfin has no Apple TV app yet — Swiftfin is the official Jellyfin client for Apple TV. Install it from the App Store.', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728', btn: 'Get Swiftfin' },
-    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
     { title: 'Add Moonfin from the Channel Store', text: 'Search "Moonfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung / LG / Fire TV', glyph: 'tv', platformSteps: [
     { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+), LG (webOS 3.0+) and Fire TV sticks (Vega OS). Not in the TV stores — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
     { title: 'Get the Moonfin desktop app', text: 'Native app for Windows, macOS and Linux.', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
-    { title: 'Sign in', text: 'Server: the address shown in your dashboard (Media tab). Then sign in with your name and your PIN.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address you copied from the Media tab. In the two boxes under it, type your name (not your email) and your PIN. You only do this once.', url: '', btn: '' },
   ] },
 ];
 const PLATFORMS_JELLYFIN = [
@@ -2605,6 +2612,12 @@ function guideDetailHtml(key) {
     h += guideVariantsHtml(g);
   } else {
     (g.steps || []).forEach((s, i) => { h += guideStepHtml(s, i); });
+  }
+  if (g.video && !(sel && sel.p === 'web')) {
+    h += '<figure class="gp-vid">' +
+      '<video src="' + esc(g.video.src) + '" poster="' + esc(g.video.poster) + '" controls muted playsinline preload="none" ' +
+      'aria-label="' + esc(g.video.alt) + '"></video>' +
+      '<figcaption>' + esc(g.video.cap) + '</figcaption></figure>';
   }
   h += platformsHtml(key);
   return h;
@@ -4042,7 +4055,9 @@ function mspSessionBanner() {
       '<li>Open <strong>Moonfin</strong> on your device.</li>' +
       '<li>Choose <strong>Add server</strong> and paste the address above.</li>' +
       '<li>Sign in with your name <strong>' + esc(d.name || d.username || '') + '</strong> and the PIN.</li>' +
-      '</ol>';
+      '</ol>' +
+      '<video class="mp-vid" src="/media/moonfin-pin.mp4" poster="/media/moonfin-pin.jpg" controls muted playsinline preload="none" ' +
+      'aria-label="Short loop of the Moonfin Add server screen being filled in"></video>';
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {
       const t = document.getElementById('mp-server');
@@ -5179,6 +5194,10 @@ function relFuture(v) {
 .msp-sbar a{color:#F0C27B;font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .msp-sbar button{margin-left:auto;background:none;border:0;color:inherit;font-size:1.1rem;line-height:1;cursor:pointer;padding:2px 4px}
 @media(max-width:768px){.msp-sbar{top:auto;bottom:14px}}
+.gp-vid,.mp-vid{margin:18px 0 0;padding:0;max-width:360px}
+.gp-vid video,.mp-vid{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--border);background:#0B0C15}
+.gp-vid figcaption{margin-top:8px;font-size:.74rem;color:var(--text-faint);line-height:1.45}
+@media (prefers-reduced-motion:reduce){.gp-vid video,.mp-vid{/* poster only; nothing moves until the member presses play */}}
 #stats-services{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px 28px;margin-top:18px}
 /* uniform ledger rows: groups carry 2 or 3 tiles, so pin a floor or the
    two-column grid reads as ragged rather than composed */
