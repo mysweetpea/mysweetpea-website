@@ -2003,10 +2003,9 @@ function setTab(name, opts) {
     if (p) p.hidden = t !== name;
   });
   if (prev !== name) {
-    // Deferred requests-grid load (review fix): scope=all is fetched on FIRST
-    // Media-tab visit instead of at boot, halving Seerr load for home-only visits.
+    // First Media-tab visit is when the PIN card loads — deferred from boot so
+    // a home-only visit never provisions anything.
     if (name === 'media') {
-      try { if (typeof window.rqLoadFull === 'function') window.rqLoadFull(); } catch (e) {}
       try { if (typeof window.mpLoadPin === 'function') window.mpLoadPin(); } catch (e) {}
     }
     // BLINK FIX (Sep 15): the moment a switch happens, retire the boot entrance
