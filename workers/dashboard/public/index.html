@@ -4954,6 +4954,7 @@ function relFuture(v) {
     var UPD_ICONS = { 'vaultwarden': '/icons/vaultwarden.svg', 'matrix': '/icons/matrix.svg', 'affine': '/icons/affine.svg', 'koalasync': '/icons/koalasync.svg', 'jellyfin': '/icons/jellyfin.svg', 'seerr': '/icons/seerr.svg', 'nextcloud': '/icons/nextcloud.svg', 'immich': '/icons/immich.svg', 'open-webui': '/icons/openwebui.svg' };
     var UPD_NAME_KEY = { 'Vaultwarden': 'vaultwarden', 'Element': 'matrix', 'AFFiNE': 'affine', 'KoalaSync': 'koalasync', 'Jellyfin': 'jellyfin', 'Seerr': 'seerr', 'Nextcloud': 'nextcloud', 'Immich': 'immich', 'Open WebUI': 'open-webui' };
     var updData = null;
+    var UPD_HIDDEN = ['seerr'];
     var updWaitFor = function (sel) {
       return new Promise(function (resolve) {
         var el = document.querySelector(sel);
@@ -4984,7 +4985,8 @@ function relFuture(v) {
       else dot.hidden = true;
     }
     function updRowInner(u) {
-      return '<img src="' + esc(UPD_ICONS[u.service] || '') + '" alt="" width="20" height="20" loading="lazy">' +
+      var ic = UPD_ICONS[u.service];
+      return (ic ? '<img src="' + esc(ic) + '" alt="" width="20" height="20" loading="lazy">' : '') +
         '<span class="un">' + esc(u.name) + '</span><span class="uv">' + esc(updShort(u)) + '</span>' +
         '<span class="ud">' + esc(updDaysAgo(u.date)) + '</span>';
     }
@@ -5013,7 +5015,8 @@ function relFuture(v) {
       if (!week.length) { sec.hidden = true; if (pair) pair.classList.add('hm-pair-solo'); return; }
       if (pair) pair.classList.remove('hm-pair-solo');
       rail.innerHTML = week.map(function (u) {
-        var inner = '<img src="' + esc(UPD_ICONS[u.service] || '') + '" alt="" width="26" height="26" loading="lazy">' +
+        var ic2 = UPD_ICONS[u.service];
+        var inner = (ic2 ? '<img src="' + esc(ic2) + '" alt="" width="26" height="26" loading="lazy">' : '') +
           '<span class="uc-main"><span class="uc-nm">' + esc(u.name) + '</span><span class="uc-ver">' + esc(updShort(u)) + '</span></span>' +
           '<span class="uc-when">' + esc(updDaysAgo(u.date)) + '</span>';
         return u.releaseUrl
@@ -5105,7 +5108,14 @@ function relFuture(v) {
       if (!bell) return; // gate screen (not signed in)
       try {
         var r = await fetch('/api/updates');
-        if (r.ok) updData = await r.json();
+        if (r.ok) {
+          updData = await r.json();
+          // Retired services are not "new on the platform" — drop them once
+          // here so the bell count, the popup and the home rail all agree.
+          if (updData && Array.isArray(updData.updates)) {
+            updData.updates = updData.updates.filter(function (u) { return UPD_HIDDEN.indexOf(u.service) < 0; });
+          }
+        }
       } catch (e) { /* feed stays hidden */ }
       if (!updData || !Array.isArray(updData.updates)) return;
       updApplyBell(); updApplyHome(); updApplyHints();
