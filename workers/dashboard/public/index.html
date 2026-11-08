@@ -1689,11 +1689,11 @@ a.hm-req{text-decoration:none;color:var(--text)}
    hunting for it in the welcome email. */
 .mp-pin{font-family:var(--mono,'JetBrains Mono',monospace);font-size:2.1rem;font-weight:700;
   letter-spacing:.2em;margin:.35rem 0 .1rem;color:var(--text,#EAF2F4)}
-.mp-sub{font-size:.86rem;opacity:.72;margin:0 0 .9rem}
+.mp-sub{font-size:.86rem;opacity:.82;margin:0 0 .9rem}
 .mp-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.5rem 0}
-.mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.8rem;
-  word-break:break-all;flex:1 1 240px;min-width:0;opacity:.9;
-  background:rgba(255,255,255,.05);padding:.5rem .7rem;border-radius:8px}
+.mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.82rem;
+  word-break:break-all;flex:1 1 240px;min-width:0;color:var(--text,#EAF2F4);opacity:1;
+  background:rgba(255,255,255,.05);padding:.6rem .75rem;border-radius:8px;line-height:1.5}
 .mp-btn{font:inherit;font-size:.86rem;font-weight:600;cursor:pointer;
   padding:.55rem 1.05rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.07);color:inherit}
@@ -1703,6 +1703,18 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .mp-steps{margin:.85rem 0 0;padding-left:1.15rem;font-size:.88rem;line-height:1.65}
 .mp-steps li{margin:.25rem 0}
 .mp-ok{font-size:.8rem;font-weight:600;color:#45D6C8;margin:.5rem 0 0}
+.mp-demo{display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;margin:1.3rem 0 0}
+.mp-fig{margin:0;flex:0 0 258px;max-width:258px}
+.mp-demo-txt{flex:1 1 210px;min-width:0;padding-top:.15rem}
+.mp-demo-h{font-size:.94rem;font-weight:650;margin:0 0 .4rem;color:var(--text,#EAF2F4)}
+.mp-demo-sub{font-size:.83rem;line-height:1.6;color:var(--text-dim);margin:0;max-width:34ch}
+@media (max-width:560px){.mp-fig{flex:1 1 100%;max-width:100%}}
+.mp-vidwrap{position:relative;border-radius:14px;overflow:hidden;background:#0B0C15;border:1px solid rgba(255,255,255,.1)}
+.mp-vidwrap video{display:block;width:100%;height:auto}
+.mp-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,rgba(8,9,15,.05),rgba(8,9,15,.42));pointer-events:none}
+.mp-play svg{width:56px;height:56px;padding:14px;border-radius:999px;color:#08090F;
+  background:rgba(242,244,250,.94);box-shadow:0 8px 24px rgba(0,0,0,.45)}
 </style>
 </head><body>
 <div class="aurora" aria-hidden="true"></div>
@@ -4066,11 +4078,23 @@ function mspSessionBanner() {
       'Treat it like a password — tap <strong>Copy address</strong> and paste it, never type it by hand.</p>' +
       '<ol class="mp-steps">' +
       '<li>Open <strong>Moonfin</strong> and choose <strong>Add Server</strong> \u2192 <strong>Server Address</strong>.</li>' +
-      '<li>Paste the address above into the field, then tap <strong>Connect</strong>.</li>' +
-      '<li>On the sign-in screen pick <strong>Password</strong>: your name <strong>' + esc(d.name || d.username || '') + '</strong> in the first box, this PIN in the second.</li>' +
+      '<li>Paste the address above, tap <strong>Connect</strong>, then <strong>Continue</strong>.</li>' +
+      '<li>On <strong>Who\u2019s watching?</strong> pick <strong>' + esc(d.name || d.username || 'your name') + '</strong> \u2014 then paste this PIN.</li>' +
       '</ol>' +
-      '<video class="mp-vid" src="/media/moonfin-pin.mp4?v=12" poster="/media/moonfin-pin.jpg?v=12" controls muted playsinline preload="none" ' +
-      'aria-label="Short loop of the Moonfin Add server screen being filled in"></video>';
+      '<div class="mp-demo">' +
+      '<figure class="mp-fig">' +
+      '<div class="mp-vidwrap">' +
+      '<span class="mp-play" id="mp-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>' +
+      '<video id="mp-video" src="/media/moonfin-pin.mp4?v=12" poster="/media/moonfin-pin.jpg?v=12" controls muted playsinline preload="none" ' +
+      'aria-label="30-second walkthrough: adding MySweetPea in Moonfin and signing in with your PIN"></video>' +
+      '</div></figure>' +
+      '<div class="mp-demo-txt">' +
+      '<p class="mp-demo-h">Watch it once</p>' +
+      '<p class="mp-demo-sub">Thirty seconds, no sound. It follows the three steps above \u2014 copy your address first, then play.</p>' +
+      '</div></div>';
+    const pv = document.getElementById('mp-play');
+    const mvid = document.getElementById('mp-video');
+    if (pv && mvid) mvid.addEventListener('play', () => pv.remove(), { once: true });
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {
       const t = document.getElementById('mp-server');
