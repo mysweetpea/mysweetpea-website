@@ -244,8 +244,8 @@
               <div class="tab on">Password</div>
             </div>
             <div class="ins">
-              <div class="in" id="e-user"><span class="ph">Username</span><span class="fx" id="e-user-fx">alex</span><span class="tag" id="e-t1">your name</span></div>
-              <div class="in" id="e-pass"><span class="ph">Password</span><span class="fx" id="e-pass-fx">••••••</span><span class="tag" id="e-t2">your PIN</span></div>
+              <div class="in" id="e-user"><span class="ph">Username</span><span class="fx" id="e-user-fx"></span><span class="tag" id="e-t1">your name</span></div>
+              <div class="in" id="e-pass"><span class="ph">Password</span><span class="fx" id="e-pass-fx"></span><span class="tag" id="e-t2">your PIN</span></div>
             </div>
             <div class="acts">
               <div class="ghost">Back</div>
@@ -279,13 +279,24 @@
       function move(x, y, at, dur) {
         tl.to(cur, { x: x, y: y, duration: dur || 0.6, ease: 'power2.inOut' }, at);
       }
+      // Real typing: rewrite the text node one character at a time. A clip-path
+      // wipe moves a mask across finished text, which reads as a paste.
+      function typeInto(sel, text, at, dur) {
+        const el = document.querySelector(sel);
+        const st = { i: 0 };
+        tl.set(el, { clipPath: 'none' }, at);
+        tl.to(st, {
+          i: text.length, duration: dur, ease: 'none',
+          onUpdate: () => { el.textContent = text.slice(0, Math.round(st.i)); },
+        }, at);
+      }
       function press(x, y, at, target) {
         tl.set(ring, { x: x, y: y, scale: 0.5, autoAlpha: 0 }, at);
         tl.to(ring, { autoAlpha: 0.95, scale: 1, duration: 0.13, ease: 'power1.out' }, at + 0.02);
         tl.to(ring, { autoAlpha: 0, scale: 1.6, duration: 0.46, ease: 'power2.out' }, at + 0.15);
         if (target) {
-          tl.to(target, { scale: 0.978, filter: 'brightness(1.2)', duration: 0.11, ease: 'power1.in' }, at + 0.04);
-          tl.to(target, { scale: 1, filter: 'brightness(1)', duration: 0.32, ease: 'back.out(2)' }, at + 0.15);
+          tl.to(target, { scale: 0.972, duration: 0.11, ease: 'power1.in' }, at + 0.04);
+          tl.to(target, { scale: 1, duration: 0.32, ease: 'back.out(2)' }, at + 0.15);
         }
       }
 
@@ -313,8 +324,10 @@
       press(430, 637, 7.65, '#c-val');
       tl.to('#c-val', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.2 }, 7.65);
       tl.to('#c-ph', { autoAlpha: 0, duration: 0.25, ease: 'power1.out' }, 7.95);
+      tl.to(cur, { autoAlpha: 0, duration: 0.25 }, 8.0);
       tl.fromTo('#c-val', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.15, ease: 'steps(18)' }, 8.15);
-      move(863, 637, 9.6, 0.45);
+      tl.set(ring, { autoAlpha: 0 }, 8.0);
+      tl.to(cur, { x: 863, y: 637, autoAlpha: 1, duration: 0.5, ease: 'power2.inOut' }, 9.45);
       press(863, 637, 9.95, '#c-btn');
       tl.to('#c-btn', { backgroundColor: '#2fb9a8', duration: 0.2, ease: 'power1.out' }, 10.1);
       tl.to('#c-btn .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 10.2);
@@ -331,20 +344,22 @@
 
       // E — click Username, type; click Password, type; press Sign In
       tl.fromTo('#e-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 14.4);
-      move(600, 619, 14.9, 0.5);
-      press(600, 619, 15.35, '#e-user');
+      move(300, 619, 14.9, 0.5);
+      press(300, 619, 15.35, '#e-user');
       tl.to('#e-user', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.18 }, 15.35);
-      tl.to('#e-user .ph', { autoAlpha: 0, duration: 0.2 }, 15.55);
-      tl.fromTo('#e-user-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.7, ease: 'steps(4)' }, 15.55);
-      tl.fromTo('#e-t1', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 16.3);
-      move(600, 715, 16.7, 0.45);
-      press(600, 715, 17.1, '#e-pass');
-      tl.to('#e-pass', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.18 }, 17.1);
-      tl.to('#e-user', { borderColor: 'rgba(140,160,190,0.18)', duration: 0.2 }, 17.1);
+      tl.to(cur, { autoAlpha: 0, duration: 0.22 }, 15.55);
+      tl.to('#e-user .ph', { autoAlpha: 0, duration: 0.2 }, 15.6);
+      typeInto('#e-user-fx', 'alex', 15.6, 0.7);
+      tl.fromTo('#e-t1', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 16.35);
+      tl.to(cur, { x: 560, y: 715, autoAlpha: 1, duration: 0.42, ease: 'power2.inOut' }, 16.55);
+      press(560, 715, 17.05, '#e-pass');
+      tl.to('#e-pass', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.18 }, 17.05);
+      tl.to('#e-user', { borderColor: 'rgba(140,160,190,0.18)', duration: 0.2 }, 17.05);
+      tl.to(cur, { autoAlpha: 0, duration: 0.22 }, 17.25);
       tl.to('#e-pass .ph', { autoAlpha: 0, duration: 0.2 }, 17.3);
-      tl.fromTo('#e-pass-fx', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.9, ease: 'steps(6)' }, 17.3);
-      tl.fromTo('#e-t2', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 18.25);
-      move(755, 816, 18.6, 0.45);
+      typeInto('#e-pass-fx', '••••••', 17.3, 0.85);
+      tl.fromTo('#e-t2', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 18.2);
+      tl.to(cur, { x: 755, y: 816, autoAlpha: 1, duration: 0.45, ease: 'power2.inOut' }, 18.45);
       press(755, 816, 19.05, '#e-go');
       tl.to('#e-go', { backgroundColor: '#2fb9a8', duration: 0.2, ease: 'power1.out' }, 19.2);
       tl.to('#e-go .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 19.3);
