@@ -113,7 +113,8 @@
       .in > span { grid-area: 1 / 1; }
       .in .ph { color: var(--faint); }
       .in .fx { clip-path: inset(0 100% 0 0); }
-      #d-pass-fx { letter-spacing: 7px; font-size: 30px; }
+      /* the PIN reads at password size, not the 17px the address uses */
+      #f-val { font-size: 30px; letter-spacing: 7px; }
       /* scoped: a bare .tag rule was also painting the brand frame's <p class="tag"> */
       .in .tag {
         position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
@@ -126,6 +127,28 @@
       .cap h2 em { font-style: normal; color: var(--cyan); }
       .cap p { margin-top: 18px; font-size: 28px; color: var(--dim); line-height: 1.45; }
 
+
+      /* ---- profile picker ---- */
+      .prof { text-align: center; }
+      .prof .q { font-size: 46px; font-weight: 700; letter-spacing: -0.02em; }
+      .prof .sub2 { margin-top: 10px; font-size: 25px; color: var(--dim); }
+      .ptiles { display: flex; gap: 44px; justify-content: center; margin-top: 44px; }
+      .ptile { width: 216px; text-align: center; padding: 18px 12px 20px; border-radius: 22px; border: 2px solid transparent; }
+      .ptile.on { border-color: var(--cyan); background: rgba(79, 227, 208, 0.08); }
+      .pav {
+        width: 150px; height: 150px; border-radius: 20px; margin: 0 auto 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--serif); font-size: 74px; color: #fff;
+        background: linear-gradient(140deg, #aa5cc3, #3a8cd4);
+      }
+      .pav.alt { background: linear-gradient(140deg, #2f6b52, #45d6c8); }
+      .pav.sm { width: 96px; height: 96px; border-radius: 16px; font-size: 48px; }
+      .pn { font-size: 29px; font-weight: 600; }
+      .padd { margin-top: 34px; font-size: 27px; color: var(--dim); }
+      .pinmodal { text-align: center; }
+      .pinmodal .who { margin: 14px 0 26px; font-size: 34px; font-weight: 650; }
+      .pinmodal .field { margin-top: 0; }
+      .pinmodal .acts { margin-top: 22px; }
       /* ---- the pointer, so every tap is visible ---- */
       .cursor {
         position: absolute; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%;
@@ -144,15 +167,13 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="main" data-start="0" data-duration="20.9" data-width="1080" data-height="1080">
+
+    <div id="root" data-composition-id="main" data-start="0" data-duration="26.4" data-width="1080" data-height="1080">
 
       <!-- A · brand -->
       <div id="sA" class="clip scene" data-start="0" data-duration="2.9" data-track-index="0">
         <div class="inner brand" id="a-in" data-layout-allow-overlap>
-          <div class="lock">
-            <svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772" > <stop offset="0.1" style="stop-color:#AA5CC3" /> <stop offset="0.2029" style="stop-color:#9C62C5" /> <stop offset="0.3988" style="stop-color:#7672CB" /> <stop offset="0.6646" style="stop-color:#3A8CD4" /> <stop offset="0.8944" style="stop-color:#00A4DC" /> </linearGradient></defs><path style="fill:url(#mfg);" d="M580.593,137.312c0.236,1.437-1.764,1.397-2.792,1.682 c-9.692,2.687-20.11,4.17-29.967,7.043c-121.791,35.504-202.149,150.49-179.921,278.449 c12.427,71.54,55.048,119.207,132.449,97.079c88.146-25.199,99.429-101.063,147.839-164.161 c20.295-26.453,44.824-49.573,71.482-69.518c4.092-3.062,44.959-31.555,46.91-29.58 c-4.974,18.877-12.625,36.926-17.711,55.778c-17.376,64.396-23.167,162.393,67.715,164.225l-10.013,39.99 c-16.446-7.617-33.575-13.262-51.63-15.857c-31.725-4.561-68.255-0.546-99.549,6.166 c-81.083,17.391-149.924,71.416-231.798,89.202c-65.253,14.176-171.515,7.963-199.029-64.993 c-32.857-87.123-17.129-196.894,34.796-273.239C329.708,156.173,458.551,108.174,580.593,137.312z" /> <path style="fill:#00A4DC;" d="M796.599,546.311c-8.783,22.644-20.315,44.297-34.604,63.909 c-16.913-7.035-35.708-8.954-53.939-7.959c-101.271,5.523-183.793,95.852-288.454,89.052l14.808,4.677 c94.845,28.604,181.214-45.296,270.697-49.677c3.07-0.15,25.483-0.402,25.47,2.49 c-42.221,42.774-97.662,73.834-156.791,86.189c-120.75,25.23-242.358-26.603-312.177-126.206l0.484-1.478 c25.284,19.74,57.578,33.429,89.297,38.703c134.365,22.345,209.318-77.749,329.022-102.394 C719.682,535.531,757.934,534.758,796.599,546.311z" /></svg>
-            <span class="word">Moonfin</span>
-          </div>
+          <div class="lock"><svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772" > <stop offset="0.1" style="stop-color:#AA5CC3" /> <stop offset="0.2029" style="stop-color:#9C62C5" /> <stop offset="0.3988" style="stop-color:#7672CB" /> <stop offset="0.6646" style="stop-color:#3A8CD4" /> <stop offset="0.8944" style="stop-color:#00A4DC" /> </linearGradient></defs><path style="fill:url(#mfg);" d="M580.593,137.312c0.236,1.437-1.764,1.397-2.792,1.682 c-9.692,2.687-20.11,4.17-29.967,7.043c-121.791,35.504-202.149,150.49-179.921,278.449 c12.427,71.54,55.048,119.207,132.449,97.079c88.146-25.199,99.429-101.063,147.839-164.161 c20.295-26.453,44.824-49.573,71.482-69.518c4.092-3.062,44.959-31.555,46.91-29.58 c-4.974,18.877-12.625,36.926-17.711,55.778c-17.376,64.396-23.167,162.393,67.715,164.225l-10.013,39.99 c-16.446-7.617-33.575-13.262-51.63-15.857c-31.725-4.561-68.255-0.546-99.549,6.166 c-81.083,17.391-149.924,71.416-231.798,89.202c-65.253,14.176-171.515,7.963-199.029-64.993 c-32.857-87.123-17.129-196.894,34.796-273.239C329.708,156.173,458.551,108.174,580.593,137.312z" /> <path style="fill:#00A4DC;" d="M796.599,546.311c-8.783,22.644-20.315,44.297-34.604,63.909 c-16.913-7.035-35.708-8.954-53.939-7.959c-101.271,5.523-183.793,95.852-288.454,89.052l14.808,4.677 c94.845,28.604,181.214-45.296,270.697-49.677c3.07-0.15,25.483-0.402,25.47,2.49 c-42.221,42.774-97.662,73.834-156.791,86.189c-120.75,25.23-242.358-26.603-312.177-126.206l0.484-1.478 c25.284,19.74,57.578,33.429,89.297,38.703c134.365,22.345,209.318-77.749,329.022-102.394 C719.682,535.531,757.934,534.758,796.599,546.311z" /></svg><span class="word">Moonfin</span></div>
           <p class="tag">Your library, on every screen — set up once</p>
         </div>
       </div>
@@ -186,7 +207,7 @@
       </div>
 
       <!-- C · Connect to Server -->
-      <div id="sC" class="clip scene" data-start="6.5" data-duration="3.9" data-track-index="0">
+      <div id="sC" class="clip scene" data-start="6.5" data-duration="4.9" data-track-index="0">
         <div class="inner" id="c-in">
           <div class="modal hasnav">
             <div class="back">‹</div>
@@ -227,38 +248,44 @@
         </div>
       </div>
 
-      <!-- E · Sign In -->
-      <div id="sE" class="clip scene" data-start="14.4" data-duration="5.5" data-track-index="0">
-        <div class="inner" id="e-in">
-          <div class="logo">
-            <svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772" > <stop offset="0.1" style="stop-color:#AA5CC3" /> <stop offset="0.2029" style="stop-color:#9C62C5" /> <stop offset="0.3988" style="stop-color:#7672CB" /> <stop offset="0.6646" style="stop-color:#3A8CD4" /> <stop offset="0.8944" style="stop-color:#00A4DC" /> </linearGradient></defs><path style="fill:url(#mfg);" d="M580.593,137.312c0.236,1.437-1.764,1.397-2.792,1.682 c-9.692,2.687-20.11,4.17-29.967,7.043c-121.791,35.504-202.149,150.49-179.921,278.449 c12.427,71.54,55.048,119.207,132.449,97.079c88.146-25.199,99.429-101.063,147.839-164.161 c20.295-26.453,44.824-49.573,71.482-69.518c4.092-3.062,44.959-31.555,46.91-29.58 c-4.974,18.877-12.625,36.926-17.711,55.778c-17.376,64.396-23.167,162.393,67.715,164.225l-10.013,39.99 c-16.446-7.617-33.575-13.262-51.63-15.857c-31.725-4.561-68.255-0.546-99.549,6.166 c-81.083,17.391-149.924,71.416-231.798,89.202c-65.253,14.176-171.515,7.963-199.029-64.993 c-32.857-87.123-17.129-196.894,34.796-273.239C329.708,156.173,458.551,108.174,580.593,137.312z" /> <path style="fill:#00A4DC;" d="M796.599,546.311c-8.783,22.644-20.315,44.297-34.604,63.909 c-16.913-7.035-35.708-8.954-53.939-7.959c-101.271,5.523-183.793,95.852-288.454,89.052l14.808,4.677 c94.845,28.604,181.214-45.296,270.697-49.677c3.07-0.15,25.483-0.402,25.47,2.49 c-42.221,42.774-97.662,73.834-156.791,86.189c-120.75,25.23-242.358-26.603-312.177-126.206l0.484-1.478 c25.284,19.74,57.578,33.429,89.297,38.703c134.365,22.345,209.318-77.749,329.022-102.394 C719.682,535.531,757.934,534.758,796.599,546.311z" /></svg>
-            <span class="word">Moonfin</span>
+      <!-- E · Who's watching? -->
+      <div id="sE" class="clip scene" data-start="14.9" data-duration="4.6" data-track-index="0">
+        <div class="inner prof" id="e-in">
+          <div class="q">Who's watching?</div>
+          <div class="sub2">Pick your own name — the one on your dashboard.</div>
+          <div class="ptiles">
+            <div class="ptile" id="p1"><div class="pav">A</div><div class="pn">alex</div></div>
+            <div class="ptile" id="p2"><div class="pav alt">S</div><div class="pn">sam</div></div>
           </div>
-          <div class="modal">
-            <div style="text-align:center">
-              <div class="ttl">Sign In</div>
-              <div class="sub">Connecting to MySweetPea</div>
-            </div>
-            <div class="tabs">
-              <div class="tab">Quick Connect</div>
-              <div class="tab on">Password</div>
-            </div>
-            <div class="ins">
-              <div class="in" id="e-user"><span class="ph">Username</span><span class="fx" id="e-user-fx"></span><span class="tag" id="e-t1">your name</span></div>
-              <div class="in" id="e-pass"><span class="ph">Password</span><span class="fx" id="e-pass-fx"></span><span class="tag" id="e-t2">your PIN</span></div>
+          <div class="padd">+ Add User</div>
+        </div>
+      </div>
+
+      <!-- F · PIN only -->
+      <div id="sF" class="clip scene" data-start="19.5" data-duration="5.0" data-track-index="0">
+        <div class="inner" id="f-in">
+          <div class="logo"><svg viewBox="192 116 639 639" xmlns="http://www.w3.org/2000/svg" aria-label="Moonfin"><defs><linearGradient id="mfg" gradientUnits="userSpaceOnUse" x1="302.974" y1="208.6414" x2="709.6098" y2="615.2772" > <stop offset="0.1" style="stop-color:#AA5CC3" /> <stop offset="0.2029" style="stop-color:#9C62C5" /> <stop offset="0.3988" style="stop-color:#7672CB" /> <stop offset="0.6646" style="stop-color:#3A8CD4" /> <stop offset="0.8944" style="stop-color:#00A4DC" /> </linearGradient></defs><path style="fill:url(#mfg);" d="M580.593,137.312c0.236,1.437-1.764,1.397-2.792,1.682 c-9.692,2.687-20.11,4.17-29.967,7.043c-121.791,35.504-202.149,150.49-179.921,278.449 c12.427,71.54,55.048,119.207,132.449,97.079c88.146-25.199,99.429-101.063,147.839-164.161 c20.295-26.453,44.824-49.573,71.482-69.518c4.092-3.062,44.959-31.555,46.91-29.58 c-4.974,18.877-12.625,36.926-17.711,55.778c-17.376,64.396-23.167,162.393,67.715,164.225l-10.013,39.99 c-16.446-7.617-33.575-13.262-51.63-15.857c-31.725-4.561-68.255-0.546-99.549,6.166 c-81.083,17.391-149.924,71.416-231.798,89.202c-65.253,14.176-171.515,7.963-199.029-64.993 c-32.857-87.123-17.129-196.894,34.796-273.239C329.708,156.173,458.551,108.174,580.593,137.312z" /> <path style="fill:#00A4DC;" d="M796.599,546.311c-8.783,22.644-20.315,44.297-34.604,63.909 c-16.913-7.035-35.708-8.954-53.939-7.959c-101.271,5.523-183.793,95.852-288.454,89.052l14.808,4.677 c94.845,28.604,181.214-45.296,270.697-49.677c3.07-0.15,25.483-0.402,25.47,2.49 c-42.221,42.774-97.662,73.834-156.791,86.189c-120.75,25.23-242.358-26.603-312.177-126.206l0.484-1.478 c25.284,19.74,57.578,33.429,89.297,38.703c134.365,22.345,209.318-77.749,329.022-102.394 C719.682,535.531,757.934,534.758,796.599,546.311z" /></svg><span class="word">Moonfin</span></div>
+          <div class="modal pinmodal">
+            <div class="pav sm" style="margin:0 auto">A</div>
+            <div class="who">alex</div>
+            <div class="field" data-layout-allow-overlap>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4fe3d0" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+              <div class="ph" id="f-ph">Password</div>
+              <div class="val fx" id="f-val"></div>
+              <span class="tag" id="f-tag">your PIN</span>
             </div>
             <div class="acts">
-              <div class="ghost">Back</div>
-              <div class="primary" id="e-go">Sign In<span class="tick">✓</span></div>
+              <div class="ghost">Switch user</div>
+              <div class="primary" id="f-go">Sign In<span class="tick">✓</span></div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- F · caption -->
-      <div id="sF" class="clip scene" data-start="20.05" data-duration="1.3" data-track-index="0">
+      <!-- G · caption -->
+      <div id="sG" class="clip scene" data-start="24.5" data-duration="1.9" data-track-index="0">
         <div class="inner cap">
-          <h2>Name in the first box.<br /><em>PIN</em> in the second.</h2>
+          <h2>Your name, then your <em>PIN</em>.</h2>
           <p>Both are on your dashboard's Media tab.</p>
         </div>
       </div>
@@ -273,22 +300,8 @@
       const cur = '#cur', ring = '#ring';
       const REST = { x: 812, y: 972 };
 
-      // The pointer never leaves the frame: it rests bottom-right, travels to a
-      // target, presses, and stays put. Every click gets the same three beats —
-      // move, ripple, shade — so a viewer can follow the whole flow by eye.
       function move(x, y, at, dur) {
         tl.to(cur, { x: x, y: y, duration: dur || 0.6, ease: 'power2.inOut' }, at);
-      }
-      // Real typing: rewrite the text node one character at a time. A clip-path
-      // wipe moves a mask across finished text, which reads as a paste.
-      function typeInto(sel, text, at, dur) {
-        const el = document.querySelector(sel);
-        const st = { i: 0 };
-        tl.set(el, { clipPath: 'none' }, at);
-        tl.to(st, {
-          i: text.length, duration: dur, ease: 'none',
-          onUpdate: () => { el.textContent = text.slice(0, Math.round(st.i)); },
-        }, at);
       }
       function press(x, y, at, target) {
         tl.set(ring, { x: x, y: y, scale: 0.5, autoAlpha: 0 }, at);
@@ -299,8 +312,18 @@
           tl.to(target, { scale: 1, duration: 0.32, ease: 'back.out(2)' }, at + 0.15);
         }
       }
+      // Real typing: rewrite the text node one character at a time.
+      function typeInto(sel, text, at, dur) {
+        const el = document.querySelector(sel);
+        const st = { i: 0 };
+        tl.set(el, { clipPath: 'none' }, at);
+        tl.to(st, {
+          i: text.length, duration: dur, ease: 'none',
+          onUpdate: () => { el.textContent = text.slice(0, Math.round(st.i)); },
+        }, at);
+      }
 
-      // A — brand
+      // A
       tl.set(cur, { x: REST.x, y: REST.y, autoAlpha: 0 }, 0);
       tl.to(cur, { autoAlpha: 1, duration: 0.4 }, 0.35);
       tl.fromTo('#a-in .lock svg', { scale: 0.82, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.9, ease: 'back.out(1.6)' }, 0.1);
@@ -308,7 +331,7 @@
       tl.fromTo('#a-in .tag', { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.7, ease: E }, 0.85);
       tl.to('#a-in', { opacity: 0, y: -16, duration: 0.5, ease: 'power2.in' }, 2.4);
 
-      // B — Add Server: press the first row
+      // B
       tl.fromTo('#b-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 2.95);
       tl.fromTo('#r1, #r2, #r3', { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55, ease: E, stagger: 0.14 }, 3.3);
       move(540, 521, 3.95);
@@ -318,22 +341,20 @@
       tl.fromTo('#r1 .arrow', { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(2.4)' }, 4.8);
       tl.to('#b-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 6.1);
 
-      // C — click into the address box, then Connect
+      // C
       tl.fromTo('#c-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 6.6);
       move(430, 637, 7.1);
       press(430, 637, 7.65, '#c-val');
-      tl.to('#c-val', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.2 }, 7.65);
       tl.to('#c-ph', { autoAlpha: 0, duration: 0.25, ease: 'power1.out' }, 7.95);
       tl.to(cur, { autoAlpha: 0, duration: 0.25 }, 8.0);
       tl.fromTo('#c-val', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.15, ease: 'steps(18)' }, 8.15);
-      tl.set(ring, { autoAlpha: 0 }, 8.0);
-      tl.to(cur, { x: 863, y: 637, autoAlpha: 1, duration: 0.5, ease: 'power2.inOut' }, 9.45);
-      press(863, 637, 9.95, '#c-btn');
+      tl.to(cur, { x: 848, y: 637, autoAlpha: 1, duration: 0.5, ease: 'power2.inOut' }, 9.45);
+      press(848, 637, 9.95, '#c-btn');
       tl.to('#c-btn', { backgroundColor: '#2fb9a8', duration: 0.2, ease: 'power1.out' }, 10.1);
       tl.to('#c-btn .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 10.2);
       tl.to('#c-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 10.95);
 
-      // D — found, then Continue
+      // D
       tl.fromTo('#d-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 11.4);
       tl.fromTo('.check', { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(2.2)' }, 11.6);
       tl.fromTo('.found', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.55, ease: E }, 11.9);
@@ -342,32 +363,32 @@
       tl.to('#d-go .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 13.4);
       tl.to('#d-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 13.95);
 
-      // E — click Username, type; click Password, type; press Sign In
-      tl.fromTo('#e-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 14.4);
-      move(300, 619, 14.9, 0.5);
-      press(300, 619, 15.35, '#e-user');
-      tl.to('#e-user', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.18 }, 15.35);
-      tl.to(cur, { autoAlpha: 0, duration: 0.22 }, 15.55);
-      tl.to('#e-user .ph', { autoAlpha: 0, duration: 0.2 }, 15.6);
-      typeInto('#e-user-fx', 'alex', 15.6, 0.7);
-      tl.fromTo('#e-t1', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 16.35);
-      tl.to(cur, { x: 560, y: 715, autoAlpha: 1, duration: 0.42, ease: 'power2.inOut' }, 16.55);
-      press(560, 715, 17.05, '#e-pass');
-      tl.to('#e-pass', { borderColor: 'rgba(79,227,208,0.9)', duration: 0.18 }, 17.05);
-      tl.to('#e-user', { borderColor: 'rgba(140,160,190,0.18)', duration: 0.2 }, 17.05);
-      tl.to(cur, { autoAlpha: 0, duration: 0.22 }, 17.25);
-      tl.to('#e-pass .ph', { autoAlpha: 0, duration: 0.2 }, 17.3);
-      typeInto('#e-pass-fx', '••••••', 17.3, 0.85);
-      tl.fromTo('#e-t2', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 18.2);
-      tl.to(cur, { x: 755, y: 816, autoAlpha: 1, duration: 0.45, ease: 'power2.inOut' }, 18.45);
-      press(755, 816, 19.05, '#e-go');
-      tl.to('#e-go', { backgroundColor: '#2fb9a8', duration: 0.2, ease: 'power1.out' }, 19.2);
-      tl.to('#e-go .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 19.3);
-      tl.to('#e-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 19.9);
+      // E — pick your own profile
+      tl.fromTo('#e-in', { opacity: 0, y: 24, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 14.9);
+      tl.fromTo('#p1, #p2', { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.55, ease: E, stagger: 0.16 }, 15.25);
+      move(407, 620, 16.0);
+      press(407, 620, 16.7, '#p1');
+      tl.set('#p1', { className: 'ptile on' }, 16.82);
+      tl.to('#p2', { opacity: 0.4, duration: 0.3, ease: 'power1.out' }, 16.82);
+      tl.to('#e-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 18.6);
 
-      // F — caption
-      tl.fromTo('#sF .inner', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 20.05);
-      tl.to('#sF .inner', { y: -8, duration: 1.0, ease: 'sine.inOut' }, 20.5);
+      // F — the PIN, on its own
+      tl.fromTo('#f-in', { opacity: 0, y: 26, scale: 1.02 }, { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: E }, 19.6);
+      move(520, 656, 20.3);
+      press(520, 656, 20.9, '#f-val');
+      tl.to('#f-ph', { autoAlpha: 0, duration: 0.2 }, 21.05);
+      tl.to(cur, { autoAlpha: 0, duration: 0.22 }, 21.1);
+      typeInto('#f-val', '••••••', 21.15, 0.9);
+      tl.fromTo('#f-tag', { opacity: 0, x: 12 }, { opacity: 1, x: 0, duration: 0.4, ease: E }, 22.1);
+      tl.to(cur, { x: 755, y: 745, autoAlpha: 1, duration: 0.45, ease: 'power2.inOut' }, 22.35);
+      press(755, 745, 22.85, '#f-go');
+      tl.to('#f-go', { backgroundColor: '#2fb9a8', duration: 0.2, ease: 'power1.out' }, 23.0);
+      tl.to('#f-go .tick', { opacity: 1, x: 0, duration: 0.28, ease: 'back.out(2)' }, 23.1);
+      tl.to('#f-in', { opacity: 0, y: -16, duration: 0.4, ease: 'power2.in' }, 23.85);
+
+      // G
+      tl.fromTo('#sG .inner', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: E }, 24.55);
+      tl.to('#sG .inner', { y: -8, duration: 1.2, ease: 'sine.inOut' }, 25.0);
 
       window.__timelines['main'] = tl;
       tl.seek(0);
