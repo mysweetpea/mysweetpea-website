@@ -17,22 +17,32 @@ const html = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf8');
 let bad = 0;
 
 /* ── 1. step targets ──────────────────────────────────────────────────── */
-const targets = [...tour.matchAll(/target:\s*'([^']+)'/g)].map((m) => m[1]);
+const targets = [...tour.matchAll(/target:\s*(['"`])([^'"`]+)\1/g)].map((m) => m[2]);
 if (!targets.length) { console.error('FAIL: no targets found — did the step shape change?'); process.exit(1); }
 for (const sel of [...new Set(targets)]) {
   const id = sel.startsWith('#') ? sel.slice(1) : null;
   const cls = sel.startsWith('.') ? sel.slice(1) : null;
+  if (!id && !cls) { console.error('  FAIL unsupported selector: ' + sel); bad++; continue; }
   const ok = id
     ? html.includes('id="' + id + '"')
-    : new RegExp('class="[^"]*\\b' + cls + '\\b').test(html);
+    : new RegExp('class="[^"]*\\b' + cls.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(html);
   console.log(`  ${ok ? 'ok  ' : 'MISS'} ${sel}`);
   if (!ok) bad++;
 }
 
 /* ── 2. driven hooks ──────────────────────────────────────────────────── */
-const hooks = ['setTab', 'nav-toggle', 'dh-menu', 'dh-lock', 'acct-pop', 'acct-trigger'];
-for (const h of hooks) {
+const hooks = ['setTab', 'nav-toggle', 'dh-menu', 'acct-pop', 'acct-trigger'];
+// dh-lock is a body class the tour toggles, so it is styled in a <style> block
+// rather than written in markup — check it against the whole file.
+const cssHooks = ['dh-lock'];
+const markup = html.replace(/<style[\s\S]*?<\/style>/g, '').replace(/<!--[\s\S]*?-->/g, '');
+for (const h of cssHooks) {
   const ok = html.includes(h);
+  console.log(`  ${ok ? 'ok  ' : 'MISS'} css-hook:${h}`);
+  if (!ok) bad++;
+}
+for (const h of hooks) {
+  const ok = new RegExp('(id|class)="[^"]*\\b' + h + '\\b|function\\s+' + h + '\\b|window\\.' + h + '\\s*=').test(markup);
   console.log(`  ${ok ? 'ok  ' : 'MISS'} hook:${h}`);
   if (!ok) bad++;
 }
@@ -40,9 +50,11 @@ for (const h of hooks) {
 /* ── 3. stagePath regression guard ────────────────────────────────────── */
 const src = tour.match(/function stagePath\(s\)\s*\{[\s\S]*?\n  \}/);
 if (!src) { console.error('FAIL: could not extract stagePath from tour.js'); process.exit(1); }
+const radius = (tour.match(/var RADIUS\s*=\s*(\d+(?:\.\d+)?)/) || [])[1];
+if (!radius) { console.error('FAIL: could not read RADIUS from tour.js'); process.exit(1); }
 const stagePath = new Function(
   'window',
-  'var RADIUS = 14; ' + src[0] + '; return stagePath;'
+  'const RADIUS = ' + radius + '; ' + src[0] + '; return stagePath;'
 )({ innerWidth: 390, innerHeight: 844 });
 
 const cases = [

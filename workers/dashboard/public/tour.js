@@ -68,6 +68,10 @@
       title: 'Media — where you watch',
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
+    { target: '#sec-pin',
+      title: 'Your PIN, ready to copy',
+      body: 'This card hands you two things: your Moonfin PIN and your server address. Copy PIN and Copy address put them on your clipboard \u2014 paste them into Moonfin, never type them. There is a 30-second walkthrough right below if you want to watch it done.' },
+
     { target: '#sec-media-m',
       title: 'Browse or search',
       body: 'Everything you can watch, in rows — new arrivals, top rated, and by genre. Tap any poster to start watching.' },
@@ -96,6 +100,10 @@
       title: 'Pick a service',
       body: 'Choose any service here and the guide beside it updates to match.' },
 
+    { target: '.gp-key',
+      title: 'Some are still being built',
+      body: 'A gold Soon tag means that service is not open to everyone yet. The steps are written down early, so nothing is a surprise when it goes live.' },
+
     { target: '.svc-guide-step',
       title: 'Follow the steps, use the buttons',
       body: 'Every guide is numbered steps in plain language. Where a step needs an action, the button sits right there — open the app, copy a server address, download the app.' },
@@ -106,7 +114,7 @@
 
     { tab: 'stats',
       title: 'Stats — how things are doing',
-      body: 'A live look at your services and what has been happening.' },
+      body: 'A live look at your services and what you have been watching. Titles are listed by show or film, never the single episode.' },
 
     { tab: 'contact',
       title: 'Contact — talk to us',
@@ -138,6 +146,10 @@
       title: 'Media — where you watch',
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
+    { target: '#sec-pin',
+      title: 'Your PIN, ready to copy',
+      body: 'This card hands you two things: your Moonfin PIN and your server address. Copy PIN and Copy address put them on your clipboard \u2014 paste them into Moonfin, never type them. There is a 30-second walkthrough right below if you want to watch it done.' },
+
     { target: '#sec-media-m',
       title: 'Browse or search',
       body: 'Everything you can watch, in rows — new arrivals, top rated, and by genre. Click any poster to start watching.' },
@@ -166,6 +178,10 @@
       title: 'Pick a service',
       body: 'Choose any service here and the guide beside it updates to match.' },
 
+    { target: '.gp-key',
+      title: 'Some are still being built',
+      body: 'A gold Soon tag means that service is not open to everyone yet. The steps are written down early, so nothing is a surprise when it goes live.' },
+
     { target: '.svc-guide-step',
       title: 'Follow the steps, use the buttons',
       body: 'Every guide is numbered steps in plain language. Where a step needs an action, the button sits right there — open the app, copy a server address, download the app.' },
@@ -176,7 +192,7 @@
 
     { tab: 'stats',
       title: 'Stats — how things are doing',
-      body: 'A live look at your services and what has been happening.' },
+      body: 'A live look at your services and what you have been watching. Titles are listed by show or film, never the single episode.' },
 
     { tab: 'contact',
       title: 'Contact — talk to us',
@@ -242,7 +258,7 @@
       '  padding:9px 18px;border-radius:999px;font-size:.83rem;font-weight:700;letter-spacing:.2px;',
       '  background:linear-gradient(135deg,rgba(139,126,246,.97),rgba(69,214,200,.92));color:#08090f;',
       '  box-shadow:0 12px 34px rgba(0,0,0,.5);white-space:nowrap}',
-      '@media (max-width:768px){.mst-toast{top:auto;bottom:calc(100% + 14px)}}',
+      '@media (max-width:768px){.mst-toast{top:76px;bottom:auto}}',
       // mobile: card becomes a bottom sheet — thumb reachable, no clamping math
       '@media (max-width:768px){',
       '  .mst-card{left:0!important;right:0;bottom:0;top:auto!important;max-width:none;',
@@ -312,7 +328,7 @@
          { opacity: 0, transform: 'translateX(-50%) translateY(-8px)' }],
         { duration: 260, easing: 'ease-in', fill: 'forwards' }
       );
-      a.onfinish = function () { toast.hidden = true; toast.style.opacity = ''; };
+      a.onfinish = function () { a.cancel(); toast.hidden = true; toast.style.opacity = ''; };
     }, 1500);
   }
 
@@ -402,7 +418,9 @@
     var d = document.getElementById('dh-menu');
     if (!d) return;
     d.classList.toggle('dh-open', !!open);
-    document.body.classList.toggle('dh-lock', !!open);
+    // the tour owns the lock while it is visible — closing the drawer must not
+    // re-enable page scroll underneath the overlay
+    document.body.classList.toggle('dh-lock', !!open || (root && !root.hidden));
     var tg = document.getElementById('nav-toggle');
     if (tg) tg.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
@@ -488,12 +506,18 @@
     if (my !== seq) return;
     tweenTo(cutoutFor(el), TWEEN_MS);
     placeCard(el);
-    if (st.doIt && el) el.addEventListener('click', onDoIt, { once: true });
+    clearDoIt();
+    if (st.doIt && el) {
+      doItEl = el;
+      doItHandler = function () { if (!root.hidden) next(); };
+      el.addEventListener('click', doItHandler, { once: true });
+    }
   }
 
   function paint() {
     var st = steps[idx];
     if (!st) return finish();
+    clearDoIt();
     var my = ++seq; // any earlier async work is now stale
 
     // side effects first, so the layout we measure is the layout we keep
@@ -536,6 +560,11 @@
     }, TAB_SETTLE);
   }
 
+  var doItEl = null, doItHandler = null;
+  function clearDoIt() {
+    if (doItEl && doItHandler) doItEl.removeEventListener('click', doItHandler);
+    doItEl = null; doItHandler = null;
+  }
   function onDoIt() { next(); }
 
   function go(i) {
@@ -549,9 +578,14 @@
   function start(force) {
     build();
     if (!force && seen()) return;
+    // restarting an open tour used to overwrite escHandler/resizeHandler, so the
+    // old pair could never be removed and every restart stacked another listener
+    if (!root.hidden) finish();
     steps = isMobile() ? MOBILE_STEPS : DESKTOP_STEPS;
     idx = 0; stage = null; seq++;
-    curTab = 'home'; appliedTab = null; // always start from a known tab
+    curTab = 'home';
+    appliedTab = 'home';   // the welcome step needs no tab switch, so skip the slow path
+    try { if (typeof window.setTab === 'function') window.setTab('home'); } catch (e) {}
     root.hidden = false;
     document.body.classList.add('dh-lock');
     paintStage(null);
