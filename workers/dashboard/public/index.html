@@ -2617,7 +2617,7 @@ function guideDetailHtml(key) {
   } else {
     (g.steps || []).forEach((s, i) => { h += guideStepHtml(s, i); });
   }
-  if (g.video && !(sel && sel.p === 'web')) {
+  if (g.video && guidePlatSel[key] !== 'web') {
     h += '<figure class="gp-vid">' +
       '<video src="' + esc(g.video.src) + '" poster="' + esc(g.video.poster) + '" controls muted playsinline preload="none" ' +
       'aria-label="' + esc(g.video.alt) + '"></video>' +
