@@ -9,11 +9,6 @@ import {
   buildUpdate,
 } from './lib/updates-pipeline.mjs';
 import {
-  SEERR_UA,
-  resolveSeerrUser,
-  buildCard,
-} from './lib/requests-display.mjs';
-import {
   WINDOW_DAYS,
   IMPORT_ERA,
   CAP_FLOOR,
@@ -31,9 +26,7 @@ export interface Env {
   APP_URL: string;
   KUMA_STATUS_URL: string;
   JELLYFIN_URL: string;
-  SEERR_URL: string;
   JELLYFIN_API_KEY: string;
-  SEERR_API_KEY: string;
 
   IMMICH_URL: string;
   IMMICH_API_KEY: string;
@@ -321,7 +314,7 @@ interface KumaMonitor {
 // heartbeat endpoint for beats/uptime). Cached 180s in the Cache API under a
 // public-specific key (`cache:kuma-pub`) so switching slugs later stays trivial.
 // Best-effort KV write for the small set of durable keys that remain in KV
-// (session docs, the seerr-uid mapping). A KV failure (quota, transient
+// (session docs). A KV failure (quota, transient
 // errors) must never 500 a route — session refreshes retry on the next
 // request. Response caches no longer live here (see cachePutJson).
 async function kvPutBestEffort(env: Env, key: string, value: string, ttl: number): Promise<void> {
@@ -340,7 +333,6 @@ async function handleConfig(env: Env): Promise<Response> {
     // media item/genre deep-link must use THIS, not `media` — that host is
     // Jellyfin, which has carried no library since Oct 2026.
     moonfin: cleanOrigin(AIOS_HOST) || 'https://aiostreams.mysweetpea.cc',
-    request: cleanOrigin(env.SEERR_URL) || 'https://request.mysweetpea.cc',
   };
   const body = JSON.stringify(cfg);
   await cachePutJson('cache:spa-config', body, 3600).catch(() => {});
@@ -1247,12 +1239,11 @@ export default {
         // Vaultwarden, AFFiNE, Open WebUI) come from a KV snapshot pushed by
         // the cluster (svc-stats:<key>) — the worker cannot reach
         // cluster-internal hosts, and public origins sit behind BFM.
-        const out: Record<string, number | string | null> = {
+        const out: Record<string, unknown> = {
           movies: null, series: null, episodes: null, songs: null, boxsets: null, jf_resume: null,
-          jf_watch_hours: null, jf_resume_titles: null, jf_top_title: null,
+          jf_watch_hours: null, jf_resume_titles: null, jf_top_title: null, jf_played_titles: null, jf_periods: null,
           photos: null, videos: null, usage_mb: null,
           users: null, sessions: null,
-          seerr_total: null, seerr_pending: null, seerr_approved: null, seerr_available: null, seerr_media: null,
           nc_files: null, nc_shares: null, nc_activity: null,
           vw_users: null, vw_items: null,
           affine_users: null, affine_docs: null, affine_workspaces: null,
@@ -1274,38 +1265,95 @@ export default {
               const src = await aiosUserSrc(env, sess);
               if (!src) return;   // no persona yet -> tiles stay '—' (honest)
               const H = { headers: { authorization: src.auth } };
-              // how much they have watched — TotalRecordCount only, no fetch
-              const counted = async (type: string): Promise<number | null> => {
-                try {
-                  const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=' + type + '&Limit=0', H);
-                  if (!r.ok) return null;
-                  const d = await r.json() as any;
-                  return typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : null;
-                } catch { return null; }
+              // One fetch of the member's PLAYED items gives everything:
+              // watched movies, episodes, distinct series (SeriesId — note
+              // that counting IsPlayed *Series* is structurally always 0, you
+              // play episodes not series) and real watch time from RunTimeTicks.
+              // UserData.LastPlayedDate is populated, so the same list buckets
+              // into the hero's week / month / all-time pills.
+              // ponytail: one page of 500; a member past 500 plays under-reports
+              // by the tail. Page it only if someone gets there.
+              let playedItems = 0;
+              const seriesIds = new Set<string>();
+              const movieIds = new Set<string>();
+              const seenIds = new Set<string>();
+              const buckets: Record<string, { ticks: number; titles: Set<string>; items: number }> = {
+                week: { ticks: 0, titles: new Set<string>(), items: 0 },
+                month: { ticks: 0, titles: new Set<string>(), items: 0 },
+                all: { ticks: 0, titles: new Set<string>(), items: 0 },
               };
-              const [mv, sr, ep] = await Promise.all([counted('Movie'), counted('Series'), counted('Episode')]);
-              out.movies = mv; out.series = sr; out.episodes = ep;
-              // in progress now
+              const now = Date.now();
+              const WEEK = 7 * 86400000, MONTH = 30 * 86400000;
+              const add = (b: { ticks: number; titles: Set<string>; items: number }, ticks: number, key: string) => {
+                b.ticks += ticks; b.items += 1; if (key) b.titles.add(key);
+              };
               try {
-                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Limit=1', H);
-                if (r.ok) {
-                  const d = await r.json() as any;
-                  out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : null;
-                }
-              } catch {}
-              // watch hours + top title, summed from playback positions
-              try {
-                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Fields=UserData,PlaybackPositionTicks&Limit=50', H);
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsPlayed&IncludeItemTypes=Movie,Episode&Fields=RunTimeTicks,SeriesId&SortBy=DatePlayed&SortOrder=Descending&Limit=500', H);
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
-                  let hours = 0;
-                  for (const it of items) hours += (it && it.UserData && typeof it.UserData.PlaybackPositionTicks === 'number' ? it.UserData.PlaybackPositionTicks : 0) / 3.6e10; // .NET ticks are 100ns
-                  out.jf_watch_hours = Math.round(hours * 10) / 10;
+                  playedItems = items.length;
+                  for (const it of items) {
+                    if (!it) continue;
+                    const ticks = Number(it.RunTimeTicks) || 0;
+                    const isEp = it.Type === 'Episode';
+                    const key = String((isEp ? it.SeriesId : it.Id) || '');
+                    if (isEp) { if (key) seriesIds.add(key); } else if (key) movieIds.add(key);
+                    if (it.Id) seenIds.add(String(it.Id));
+                    const lp = it.UserData ? it.UserData.LastPlayedDate : null;
+                    const ts = lp ? Date.parse(String(lp)) : NaN;
+                    add(buckets.all, ticks, key);
+                    if (isFinite(ts)) {
+                      const age = now - ts;
+                      if (age <= MONTH) add(buckets.month, ticks, key);
+                      if (age <= WEEK) add(buckets.week, ticks, key);
+                    }
+                  }
+                }
+              } catch {}
+              out.movies = movieIds.size;
+              out.episodes = playedItems - movieIds.size;
+              out.series = seriesIds.size;
+              // in progress: its partial position still counts as watched time
+              let resumeTicks = 0;
+              try {
+                const r = await fetch(src.base + '/Items?userId=&Recursive=true&Filters=IsResumable&Fields=UserData,RunTimeTicks,SeriesId&Limit=50', H);
+                if (r.ok) {
+                  const d = await r.json() as any;
+                  const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
+                  for (const it of items) {
+                    const pos = it && it.UserData ? Number(it.UserData.PlaybackPositionTicks) : 0;
+                    const t = (isFinite(pos) ? pos : 0) || 0;
+                    resumeTicks += t;
+                    // an in-progress item belongs in the period it was LAST
+                    // played — adding it to every bucket gave 'week' hours with
+                    // zero plays in it. It is a play in its own right, so it
+                    // lands in `all` too, unless it is already in the played
+                    // list (a re-watch in progress).
+                    if (it && it.Id && seenIds.has(String(it.Id))) continue;
+                    const lp = it && it.UserData ? it.UserData.LastPlayedDate : null;
+                    const ts = lp ? Date.parse(String(lp)) : NaN;
+                    const key = String((it && (it.SeriesId || it.Id)) || '');
+                    add(buckets.all, t, key);
+                    if (isFinite(ts)) {
+                      const age = now - ts;
+                      if (age <= MONTH) add(buckets.month, t, key);
+                      if (age <= WEEK) add(buckets.week, t, key);
+                    }
+                  }
+                  out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : items.length;
                   out.jf_resume_titles = items.length;
                   out.jf_top_title = (items[0] && typeof items[0].Name === 'string' && items[0].Name) || null;
                 }
               } catch {}
+              const hrs = (t: number) => (t > 0 ? Math.round((t / 3.6e10) * 10) / 10 : 0); // .NET ticks are 100ns
+              out.jf_watch_hours = hrs(buckets.all.ticks);
+              out.jf_played_titles = buckets.all.titles.size;
+              out.jf_periods = {
+                week: { hours: hrs(buckets.week.ticks), titles: buckets.week.titles.size, items: buckets.week.items },
+                month: { hours: hrs(buckets.month.ticks), titles: buckets.month.titles.size, items: buckets.month.items },
+                all: { hours: hrs(buckets.all.ticks), titles: buckets.all.titles.size, items: buckets.all.items },
+              };
             })(),
             (async () => {
               try {
@@ -1490,53 +1538,6 @@ export default {
           return JSON.stringify({ items, seed: seedName });
         });
         return json(JSON.parse(payload));
-      }
-      if (path === '/api/requests') {
-        // Seerr retired 2026-10-15 (old media stack gone). Keep the route as an
-        // empty payload for stale clients; the SPA no longer renders requests.
-        return json({ requests: [], linked: false });
-        // Home "Your requests" rail (default take 12) + Media tab full list
-        // (?scope=all, take 24). Seerr user resolved by jellyfinUsername ==
-        // authentik username (email fallback — the admin Seerr account has an
-        // empty email, email-only matching never worked). EVERY Seerr fetch
-        // sends a browser UA (Cloudflare BFM 403s server UAs) and hits
-        // /api/v1/* ONLY (this fork 307s /api/v3/* to /login). SWR-cached per
-        // user+scope for 120s via the Cache API (never KV): stale serves
-        // instantly while one background produce refreshes. Unmatched users
-        // get {requests:[],linked:false} — the SPA shows a link hint, no error.
-        // Subrequest budget: 1 (users) + 1 (list) + <=24 details = <=26 of 32.
-        const scopeAll = url.searchParams.get('scope') === 'all';
-        const payload = await swrJson(ctx, env, 'cache:requests:' + sess.sub + (scopeAll ? ':all' : ''), 120000, async () => {
-          const take = scopeAll ? 24 : 12;
-          const seerrHeaders = { 'user-agent': SEERR_UA, 'X-Api-Key': env.SEERR_API_KEY };
-          const ur = await fetch(env.SEERR_URL + '/api/v1/user?take=100', { headers: seerrHeaders })
-            .then((r) => (r.ok ? r.json() as any : null))
-            .catch(() => null);
-          // Seerr UNREACHABLE (outage/BFM blip) must NOT be cached as "not linked":
-          // throw so swrJson keeps serving the stale copy instead of persisting a
-          // misleading linked:false for the whole TTL.
-          if (ur == null) throw new Error('seerr users fetch failed');
-          const users: any[] = Array.isArray(ur) ? ur : ((ur && ur.results) || []);
-          const uid = resolveSeerrUser(users, { username: sess.username, email: sess.email });
-          if (!uid) return JSON.stringify({ requests: [], linked: false, seerrBase: env.SEERR_URL });
-          const lr = await fetch(env.SEERR_URL + '/api/v1/request?take=' + take + '&sort=added&requestedBy=' + uid, { headers: seerrHeaders })
-            .then((r) => (r.ok ? r.json() as any : null))
-            .catch(() => null);
-          if (lr == null) throw new Error('seerr request list fetch failed');
-          const reqs: any[] = (lr && lr.results) || [];
-          const details = await Promise.allSettled(reqs.map((rq) => {
-            const seg = rq?.type === 'tv' ? 'tv' : 'movie';
-            const tmdb = rq?.media?.tmdbId;
-            if (tmdb == null) return Promise.resolve(null);
-            return fetch(env.SEERR_URL + '/api/v1/' + seg + '/' + tmdb, { headers: seerrHeaders })
-              .then((r) => (r.ok ? r.json() as any : null))
-              .catch(() => null);
-          }));
-          const cards = reqs.map((rq, i) =>
-            buildCard(rq, details[i].status === 'fulfilled' ? details[i].value : null, env.SEERR_URL, env.JELLYFIN_URL));
-          return JSON.stringify({ requests: cards, linked: true, seerrBase: env.SEERR_URL });
-        });
-        return new Response(payload, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
       }
       if (path === '/api/status') {
         // Home "Service status" card — public slug only, shaped for the SPA.

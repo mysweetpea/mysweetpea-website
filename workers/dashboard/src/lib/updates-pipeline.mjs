@@ -62,7 +62,6 @@ function immichVersion(d) {
 export const RUNTIME_PROBES = {
   'vaultwarden': { url: 'https://vault.mysweetpea.cc/api/version', pick: (d) => (typeof d === 'string' ? d : '') },
   'matrix-synapse': { url: 'https://matrix.mysweetpea.cc/_matrix/federation/v1/version', pick: (d) => (d && d.server && d.server.version) || '' },
-  'seerr': { url: 'https://request.mysweetpea.cc/api/v1/status', pick: (d) => (d && d.version) || '' },
   'nextcloud': { url: 'https://cloud.mysweetpea.cc/status.php', pick: (d) => (d && d.versionstring) || '' },
   'immich': {
     url: 'https://photos.mysweetpea.cc/api/server/version',
