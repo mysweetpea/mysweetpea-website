@@ -465,13 +465,25 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   // access. Groups come from authentik; SessionData has no groups field.
   let tier = '';
   let isAdmin = false;
-  try {
+  const tierKey = 'cache:tier:' + String(sess.sub || '');
+  const tierRaw = await cacheGetJson(tierKey);
+  if (tierRaw) {
+    try {
+      const t = JSON.parse(tierRaw) as { tier?: string; admin?: boolean };
+      tier = String(t.tier || '');
+      isAdmin = !!t.admin;
+    } catch { /* re-derive below */ }
+  }
+  if (!tier) try {
     const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
     const d = await r.json() as any;
     const u = d && d.user ? d.user : d;
     const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
     tier = names.includes('sweetpea') ? 'sweetpea' : names.includes('seedling') ? 'seedling' : '';
     isAdmin = names.includes('authentik admins');
+    if (tier) {
+      try { await cachePutJson(tierKey, JSON.stringify({ tier, admin: isAdmin }), 300); } catch { /* cache is optional */ }
+    }
   } catch { /* fall through to the no-tier error below */ }
   if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
 
@@ -646,7 +658,16 @@ async function swrJson(ctx: ExecutionContext, env: Env, key: string, freshMs: nu
   return '{"items":[]}';
 }
 
-async function fetchPublicKuma(env: Env): Promise<{ monitors: KumaMonitor[] } | null> {
+let kumaInFlight: Promise<{ monitors: KumaMonitor[] } | null> | null = null;
+function fetchPublicKuma(env: Env): Promise<{ monitors: KumaMonitor[] } | null> {
+  // Several cards ask for status at boot; without this they all miss the cache
+  // on the same tick and multiply the upstream load.
+  if (!kumaInFlight) {
+    kumaInFlight = fetchPublicKumaOnce(env).finally(() => { kumaInFlight = null; });
+  }
+  return kumaInFlight;
+}
+async function fetchPublicKumaOnce(env: Env): Promise<{ monitors: KumaMonitor[] } | null> {
   const cached = await cacheGetJson('cache:kuma-pub');
   if (cached) {
     try { return JSON.parse(cached) as { monitors: KumaMonitor[] }; } catch { /* refetch */ }
@@ -1244,19 +1265,30 @@ export default {
       }
 
       if (path === '/api/sessions') {
-        const r = await authentikFetch(env, sess.at, '/api/v3/core/authenticated_sessions/');
-        return json(await r.json(), r.status);
+        const out = await swrJson(ctx, env, 'cache:sess:' + sess.sub, 60000, async () => {
+          const r = await authentikFetch(env, sess.at, '/api/v3/core/authenticated_sessions/');
+          return JSON.stringify(await r.json());
+        });
+        return new Response(out, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
       }
       if (path === '/api/consents') {
-        const r = await authentikFetch(env, sess.at, '/api/v3/core/user_consent/');
-        return json(await r.json(), r.status);
+        const out = await swrJson(ctx, env, 'cache:consent:' + sess.sub, 60000, async () => {
+          const r = await authentikFetch(env, sess.at, '/api/v3/core/user_consent/');
+          return JSON.stringify(await r.json());
+        });
+        return new Response(out, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
       }
       if (path === '/api/devices') {
-        const r = await authentikFetch(env, sess.at, '/api/v3/authenticators/totp/?include_unconfirmed=true');
-        const r2 = await authentikFetch(env, sess.at, '/api/v3/authenticators/webauthn/');
-        const r3 = await authentikFetch(env, sess.at, '/api/v3/authenticators/static/');
-        const [totp, webauthn, statics] = await Promise.all([r.json(), r2.json(), r3.json()]);
-        return json({ totp: totp.results ?? [], webauthn: webauthn.results ?? [], static: statics.results ?? [] });
+        const out = await swrJson(ctx, env, 'cache:dev:' + sess.sub, 60000, async () => {
+          const [r, r2, r3] = await Promise.all([
+            authentikFetch(env, sess.at, '/api/v3/authenticators/totp/?include_unconfirmed=true'),
+            authentikFetch(env, sess.at, '/api/v3/authenticators/webauthn/'),
+            authentikFetch(env, sess.at, '/api/v3/authenticators/static/'),
+          ]);
+          const [totp, webauthn, statics] = await Promise.all([r.json(), r2.json(), r3.json()]);
+          return JSON.stringify({ totp: (totp as any).results ?? [], webauthn: (webauthn as any).results ?? [], static: (statics as any).results ?? [] });
+        });
+        return new Response(out, { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
       }
       if (path === '/api/stats') {
         // SWR: instant from cache (fresh OR stale); refresh in background.

@@ -2089,7 +2089,7 @@ window.setTab = setTab;
   window.updateFooterStatus = function () {
     const el = document.getElementById('footerStatusText'), box = document.getElementById('footerStatus');
     if (!el) return; // footer not mounted yet (pre-login)
-    fetch('/api/status').then((r) => (r.ok ? r.json() : null)).then((s) => {
+    apiGet('/api/status').then((s) => {
       const ms = (s && s.monitors) || [];
       if (!ms.length) { el.textContent = 'Status unavailable'; box && box.classList.add('down'); return; }
       /* Count the SERVICE catalog, not the raw monitor list — the footer and
@@ -3362,7 +3362,7 @@ function mspSessionBanner() {
     renderStats(mergeStats(d));
     st2Render(d);
     // Fleet health rows inside the hero (compact dot+name+% list, real Kuma 24h)
-    fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((sx) => { renderFleet(sx && sx.monitors); }).catch(() => {});
+    apiGet('/api/status/extended').then((sx) => { renderFleet(sx && sx.monitors); }).catch(() => {});
     // Top titles share the most-played fetch with the Media tab (one upstream query)
     fetch('/api/media/mostplayed').then((r) => (r.ok ? r.json() : null)).then((mp) => {
       renderTopTitles(mp && mp.items);
@@ -3611,12 +3611,32 @@ function mspSessionBanner() {
       }
     });
   })();
+  /* One shared GET per URL. Several cards ask for the same endpoint at boot
+     (status x3, status/extended x4, sessions x3) and each miss used to cost a
+     full round trip through authentik / Kuma. The first response is reused for
+     every caller and kept briefly, so a tab switch does not re-hit the edge. */
+  const apiGetCache = new Map();
+  function apiGet(url, ttlMs) {
+    const ttl = ttlMs || 20000;
+    const hit = apiGetCache.get(url);
+    if (hit) {
+      if (hit.p) return hit.p;
+      if (Date.now() - hit.at < ttl) return Promise.resolve(hit.data);
+    }
+    const p = fetch(url)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null)
+      .then((data) => { apiGetCache.set(url, { at: Date.now(), data }); return data; });
+    apiGetCache.set(url, { p });
+    return p;
+  }
+
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
   (async () => {
     /* No per-item web viewer exists on this server — the card opens the
        AIOStreams app itself rather than a dead #!/item route. */
     const JF_ITEM = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/';
-    const g2 = (u) => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
+    const g2 = (u) => apiGet(u, 15000);
     const posterCard = (it, o) => {
       const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
       let h = '<a class="mitem" href="' + JF_ITEM + '" target="_blank" rel="noopener">';
@@ -3890,7 +3910,7 @@ function mspSessionBanner() {
     if (svState.sort === 'updated') svRenderGrid();
   }).catch(() => {});
   // OPT: one fetch instead of two — extended carries current + up24 + beats
-  fetch('/api/status/extended').then((r) => (r.ok ? r.json() : null)).then((d) => {
+  apiGet('/api/status/extended').then((d) => {
     const ms = (d && d.monitors) || [];
     ms.forEach((m) => {
       /* dual-key: by RAW monitor name (Kuma lowercase keys like 'jellyfin')
@@ -4072,7 +4092,7 @@ function mspSessionBanner() {
     if (SERVICES.length > MAX) html += '<button type="button" class="hm-svcrow hm-svcrow-more" onclick="setTab(\'services\')" aria-label="All services">+' + (SERVICES.length - MAX) + ' more</button>';
     rail.innerHTML = html;
     try {
-      fetch('/api/status').then((r) => (r.ok ? r.json() : { monitors: [] })).then((d) => hmApplyDots((d && d.monitors) || [])).catch(() => {});
+      apiGet('/api/status').then((d) => hmApplyDots((d && d.monitors) || [])).catch(() => {});
     } catch (e) {}
   }
   /* ── Moonfin PIN card ────────────────────────────────────────────────
@@ -4529,7 +4549,7 @@ function mspSessionBanner() {
     html += '</div>';
     upHost.innerHTML = html;
   };
-  fetch('/api/status/extended').then(r => r.json()).then(renderUptime).catch(() => { if (upHost) upHost.innerHTML = '<p class="eyebrow">Uptime</p><h3>Uptime — last 24h</h3><p class="dim">Unavailable.</p>'; });
+  apiGet('/api/status/extended').then(renderUptime).catch(() => { if (upHost) upHost.innerHTML = '<p class="eyebrow">Uptime</p><h3>Uptime — last 24h</h3><p class="dim">Unavailable.</p>'; });
   // ===== SECURITY CENTER (checklist + actions) =====
   let devices = { totp: [], webauthn: [], static: [] };
   try { const r = await fetch('/api/devices'); if (r.ok) devices = await r.json(); } catch (e) {}
@@ -5791,7 +5811,7 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
     if (LAST) { ensureStrips(); fill(LAST); }
     if (++ticks > 300) clearInterval(iv);
   }, 1200);
-  fetch('/api/status/extended').then(function(r){ return r.ok ? r.json() : null; })
+  apiGet('/api/status/extended').then(function(d){ return d; })
     .then(function(d){ LAST = (d && d.monitors) || null; ensureStrips(); fill(LAST); })
     .catch(function(){});
 })();
