@@ -1259,6 +1259,14 @@ export default {
         });
         if (!pr.ok) return json({ error: 'Password change failed.' }, 502);
 
+        // mark the 7-day temp-password tracker (Password Expiry Check reads this).
+        // Fire-and-forget: never block the response on the n8n webhook.
+        ctx.waitUntil(fetch('https://subscribe.mysweetpea.cc/webhook/password-changed', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-msp-internal': env.MSP_INTERNAL_HEADER },
+          body: JSON.stringify({ username: sess.username }),
+        }).catch(() => {}));
+
         const now = Date.now();
         await env.SESSIONS.put(`audit:${sess.sub}:${now}`, JSON.stringify({ t: now, event: 'password_changed' }), { expirationTtl: 90 * 86400 });
         return json({ ok: true });
