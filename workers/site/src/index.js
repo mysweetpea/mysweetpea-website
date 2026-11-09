@@ -25,7 +25,7 @@ let commitsCache = { data: null, ts: 0 };
 let commitsInflight = null; // shared fan-out: concurrent cold misses get the same promise
 const COMMITS_TTL = 300_000; // 5 minutes in ms
 
-export default {
+const worker = {
   async fetch(request, env) {
     const url = new URL(request.url);
 
@@ -204,10 +204,15 @@ export default {
       // every request, without blanking the changelog for 5 minutes.
       // A total outage must never overwrite the last good payload. Serve it
       // stale with a 30s retry; partial failures also retry quickly.
-      if (failedRepos === repos.length && repos.length && items.length === 0 && commitsCache.data) {
-        commitsCache = { ...commitsCache, ts: now, ttl: 30_000 };
-        return new Response(JSON.stringify(commitsCache.data), {
-          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=30', 'X-Cache': 'STALE' }
+      if (failedRepos === repos.length && repos.length && items.length === 0) {
+        if (commitsCache.data) {
+          commitsCache = { ...commitsCache, ts: now, ttl: 30_000 };
+          return new Response(JSON.stringify(commitsCache.data), {
+            headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=30', 'X-Cache': 'STALE' }
+          });
+        }
+        return new Response(JSON.stringify({ error: 'upstream_unavailable' }), {
+          status: 503, headers: { ...JSON_HEADERS, 'Cache-Control': 'no-store', 'Retry-After': '30', 'X-Cache': 'ERROR' }
         });
       }
       const ttl = failedRepos ? 30_000 : ((items.length > 0 || total.noise > 0) ? COMMITS_TTL : 30_000);
@@ -297,7 +302,7 @@ export default {
       if (!payload || (now - commitsCache.ts) >= (commitsCache.ttl || COMMITS_TTL)) {
         // trigger a fresh fetch through the API route logic by calling it
         try {
-          const r = await fetch(new URL('/api/commits', url.origin), { headers: { 'User-Agent': 'mysweetpea-site-rss' } });
+          const r = await worker.fetch(new Request(new URL('/api/commits', url.origin)), env);
           payload = r.ok ? await r.json() : commitsCache.data;
         } catch (e) { /* fall back to stale cache */ }
       }
@@ -410,3 +415,5 @@ export default {
     return env.ASSETS.fetch(request);
   }
 };
+
+export default worker;
