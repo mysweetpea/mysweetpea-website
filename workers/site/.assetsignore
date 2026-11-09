@@ -21,3 +21,6 @@ wrangler.jsonc
 _fntest*.html
 ocr-work/           # OCR review copies — never publish
 mockups-p1
+# Release/test tooling lives beside the site for the release gate, never public.
+*.py
+test-*
