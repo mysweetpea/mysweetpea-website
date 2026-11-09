@@ -1730,6 +1730,75 @@ a.hm-req{text-decoration:none;color:var(--text)}
     <div class="pal-list" id="pal-list"></div>
   </div>
 </div>
+<style id="pwg-css">
+#pw-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:rgba(4,5,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#pw-gate[hidden]{display:none!important}
+.pwg-card{width:100%;max-width:430px;box-sizing:border-box;padding:26px 24px 22px;border-radius:20px;
+  background:#121320;border:1px solid #24273A;box-shadow:0 24px 70px rgba(0,0,0,.6);text-align:left}
+.pwg-eyebrow{margin:0 0 8px;font-size:.7rem;letter-spacing:1.6px;text-transform:uppercase;color:#7E85AE}
+.pwg-card h2{margin:0 0 10px;font-size:1.32rem;line-height:1.25;color:#EEF0FB}
+.pwg-card p{margin:0 0 18px;font-size:.94rem;line-height:1.6;color:#9BA1C7}
+.pwg-card p b{color:#EEF0FB;font-weight:600}
+.pwg-row{display:flex;flex-wrap:wrap;gap:10px}
+.pwg-row .mp-btn{flex:1 1 auto;min-width:130px}
+#pwg-ok[disabled]{opacity:.55;cursor:not-allowed}
+body.pwg-lock{overflow:hidden}
+.gp-jump{appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:#45D6C8;
+  text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+</style>
+<div id="pw-gate" hidden>
+  <div class="pwg-card" role="dialog" aria-modal="true" aria-labelledby="pwg-h">
+    <p class="pwg-eyebrow">One thing first</p>
+    <h2 id="pwg-h">Change your temporary password</h2>
+    <p>Your account was created with a <b>temporary password</b> that was emailed to you. Change it now, from the
+      <b>Account</b> tab &mdash; an account still using its temporary password is deleted after <b>7 days</b>.</p>
+    <div class="pwg-row">
+      <button type="button" class="mp-btn" id="pwg-go">Change it now</button>
+      <button type="button" class="mp-btn" id="pwg-ok" disabled>Got it (5)</button>
+    </div>
+  </div>
+</div>
+<script>
+/* First-run gate. Sits above the tour and cannot be dismissed for 5 seconds, so
+   the one instruction that matters (change the temp password) is actually read.
+   Dismissing hands straight over to the tour. */
+(function pwGate() {
+  var KEY = 'msp_pw_gate_v1', seen = false;
+  try { seen = localStorage.getItem(KEY) === '1'; } catch (e) {}
+  var el = document.getElementById('pw-gate');
+  if (!el || seen) return;
+  el.hidden = false;
+  document.body.classList.add('pwg-lock');
+  var ok = document.getElementById('pwg-ok'), n = 5;
+  var t = setInterval(function () {
+    n--;
+    ok.textContent = n > 0 ? 'Got it (' + n + ')' : 'Got it';
+    if (n <= 0) { clearInterval(t); ok.disabled = false; try { ok.focus(); } catch (e) {} }
+  }, 1000);
+  function close() {
+    try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    el.hidden = true;
+    document.body.classList.remove('pwg-lock');
+    if (window.mspTour) setTimeout(function () { try { window.mspTour.auto(); } catch (e) {} }, 300);
+  }
+  document.getElementById('pwg-go').addEventListener('click', function () {
+    close();
+    try { setTab('account'); } catch (e) { location.hash = '#account'; }
+    var f = document.getElementById('pw-current');
+    if (f) setTimeout(function () { try { f.focus(); f.scrollIntoView({ block: 'center' }); } catch (e) {} }, 350);
+  });
+  ok.addEventListener('click', close);
+})();
+/* Guides: the "from here" jump switches to the Media tab. */
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('.gp-jump');
+  if (!b) return;
+  e.preventDefault();
+  var tab = b.getAttribute('data-jump') || 'media';
+  try { setTab(tab); } catch (err) { location.hash = '#' + tab; }
+});
+</script>
 <!-- Dashboard tour. Loaded BEFORE the app script so window.mspTour exists when
      the app's wiring runs (the app is an async IIFE that awaits /api/me, so a
      deferred/end-of-body tag would race it). -->
@@ -2404,44 +2473,40 @@ const guidePlatSel = {};
 // ---- Jellyfin guide: brand toggle (Moonfin = premium curated client, Jellyfin = free official apps) ----
 // Each brand has its own platform list with complete per-platform steps.
 const PLATFORMS_MOONFIN = [
-  { p: 'web', label: 'Web browser', glyph: 'web', platformSteps: [
-    { title: 'Open Moonfin', text: 'Watch straight away in your browser — no install needed.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
-    { title: 'Sign in', text: 'Pick your own name on the \u201cWho\u2019s watching?\u201d screen, then paste your PIN \u2014 both are on the Media tab. The browser stays signed in, and your progress syncs on every device.', url: '', btn: '' },
-  ] },
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the App Store', text: 'Install Moonfin from the App Store.', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the Play Store', text: 'One app covers phones, tablets and Android TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
     { title: 'Install Moonfin on your TV', text: 'Find Moonfin in the Play Store on your TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Paste the address from the Media tab, tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the address from the Media tab [[from here]], tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
     { title: 'Use Swiftfin on Apple TV', text: 'Moonfin has no Apple TV app yet — Swiftfin is the official Jellyfin client for Apple TV. Install it from the App Store.', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728', btn: 'Get Swiftfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
     { title: 'Add Moonfin from the Channel Store', text: 'Search "Moonfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung / LG / Fire TV', glyph: 'tv', platformSteps: [
     { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+), LG (webOS 3.0+) and Fire TV sticks (Vega OS). Not in the TV stores — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
     { title: 'Get the Moonfin desktop app', text: 'Native app for Windows, macOS and Linux.', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your PIN from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
   ] },
 ];
 const PLATFORMS_JELLYFIN = [
@@ -2634,7 +2699,8 @@ function mspCfgUrl(u) {
   return u;
 }
 function guideStepHtml(s, i) {
-  return '<div class="svc-guide-step"><span class="svc-guide-num">' + (i + 1) + '</span><div class="svc-guide-body"><h4>' + esc(s.title) + '</h4><p>' + esc(s.text) + '</p>' +
+  return '<div class="svc-guide-step"><span class="svc-guide-num">' + (i + 1) + '</span><div class="svc-guide-body"><h4>' + esc(s.title) + '</h4><p>' +
+      esc(s.text).replace(/\[\[from here\]\]/g, '<button type="button" class="gp-jump" data-jump="media">from here</button>') + '</p>' +
     (s.url && s.btn ? '<a class="svc-guide-btn" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(s.btn) + '</a>' : '') +
     '</div></div>';
 }
@@ -2897,7 +2963,7 @@ function mspSessionBanner() {
     '</div>' +
     '<div class="tabpanel" id="panel-media" role="tabpanel" aria-labelledby="tab-media">' +
     '<div class="md-head"><p class="eyebrow">Media</p><h2 class="md-title">Tonight&rsquo;s picks<span class="md-dot">.</span></h2></div>' +
-    '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin PIN</h3><div id="pin-body"><div class="skel"></div></div></section>' +
+    '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin Password</h3><div id="pin-body"><div class="skel"></div></div></section>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-services" role="tabpanel" aria-labelledby="tab-services">' +
@@ -3338,7 +3404,7 @@ function mspSessionBanner() {
     const total = list.reduce((a, x) => a + (Number(x.playCount) || 0), 0);
     // all-tied rows make "33% of top plays" noise, not information
     const flat = list.length > 1 && list.every((x) => (Number(x.playCount) || 0) === (Number(list[0].playCount) || 0));
-    const JF_ITEM_URL = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
+    const JF_ITEM_URL = '#services';   // no Moonfin web client exists — send members to Services
     const h3 = card.querySelector('h3');
     if (h3) h3.textContent = flat ? 'Recently watched' : 'Most watched';
     card.setAttribute('aria-label', flat ? 'Recently watched' : 'Most watched, all time');
@@ -3346,7 +3412,7 @@ function mspSessionBanner() {
       const plays = Number(x.playCount) || 0;
       const share = Math.round((plays / total) * 100);
       const art = (x && x.img) ? '<img class="st-row-art" loading="lazy" alt="" src="' + esc(x.img) + '"/>' : '<span class="st-row-art st-row-fallback hm-g' + (i % 3) + '">' + esc(String(x.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
-      return '<a class="st-row" href="' + (JF_ITEM_URL + '/web/') + '" target="_blank" rel="noopener">' +
+      return '<a class="st-row" href="' + JF_ITEM_URL + '">' +
         (flat ? '' : '<span class="st-rank">' + (i + 1) + '</span>') + art +
         '<span class="st-row-main"><span class="st-row-title">' + esc(x.name || 'Untitled') + '</span>' +
         '<span class="st-row-bar"><i style="width:' + Math.max(4, Math.round((plays / max) * 100)) + '%"></i></span></span>' +
@@ -3639,11 +3705,11 @@ function mspSessionBanner() {
   (async () => {
     /* No per-item web viewer exists on this server — the card opens the
        AIOStreams app itself rather than a dead #!/item route. */
-    const JF_ITEM = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/';
+    const JF_ITEM = '#services';   // poster/genre taps land on Services
     const g2 = (u) => apiGet(u, 15000);
     const posterCard = (it, o) => {
       const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
-      let h = '<a class="mitem" href="' + JF_ITEM + '" target="_blank" rel="noopener">';
+      let h = '<a class="mitem" href="' + JF_ITEM + '">';
       if (o.badge && it.type) h += '<span class="mtype">' + esc(it.type) + '</span>';
       h += '<span class="mposter-wrap"><span class="mposter-fb hm-g0" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/></span>';
@@ -3661,7 +3727,7 @@ function mspSessionBanner() {
       const host = document.getElementById('sec-media-m');
       if (!host) return;
       const [cont, mp, be, fr, ge] = await Promise.all([g2('/api/media/continue'), g2('/api/media/mostplayed'), g2('/api/media/recommend'), g2('/api/media/unplayed'), g2('/api/media/genres')]);
-      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '" target="_blank" rel="noopener">' +
+      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '">' +
         '<span class="mposter-wrap"><span class="mposter-fb hm-g' + ((i || 0) % 3) + '" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
         '<div class="mtitle">' + esc(it.seriesName || it.name || '') + '</div>' +
@@ -3677,15 +3743,15 @@ function mspSessionBanner() {
         const MOODS = [['Mind-bending', 'Sci-Fi'], ['Edge of seat', 'Thriller'], ['True story', 'Documentary'], ['Visually stunning', 'Fantasy'], ['Make me laugh', 'Comedy'], ['Keep me up tonight', 'Horror'], ['Based on a book', 'Drama']];
         const have = new Set(ge.genres.map(g => g.name));
         const moodChips = MOODS.filter(m2 => have.has(m2[1]));
-        const genreUrl = (name) => ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin/web/index.html#!/movies?genre=' + encodeURIComponent(name);
+        const genreUrl = () => '#services';   // genres are browsable inside Moonfin only
         // Jellyfin reports every genre it has ever seen, including non-genres
         // (News/Reality/Talk/Soap/TV Movie) that make the grid read like a bug.
         const GENRE_SKIP = new Set(['news', 'reality', 'talk', 'soap', 'tv movie', 'kids', 'music']);
         const genreRow = '<div class="m-genre-row">' + ge.genres
           .filter(g => !GENRE_SKIP.has(String(g.name || '').toLowerCase()))
           .slice(0, 14)
-          .map(g => '<button type="button" class="m-genre" onclick="window.open(\'' + genreUrl(g.name) + '\', \'_blank\')">' + esc(g.name) + '</button>').join('') + '</div>';
-        if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" onclick="window.open(\'' + genreUrl(m2[1]) + '\', \'_blank\')" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
+          .map(g => '<button type="button" class="m-genre" href="#services">' + esc(g.name) + '</button>').join('') + '</div>';
+        if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" href="#services" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
         else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
       }
       host.innerHTML = out;
@@ -4018,7 +4084,7 @@ function mspSessionBanner() {
   window.svUpsum();
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
   const hmJF = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
-  const hmJF_ITEM = hmJF + '/web/';
+  const hmJF_ITEM = '#services';   // no Moonfin web client — see Services
   const hmBackdrop = (id, w) => hmJF + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
   const hmGreetingWord = () => { const h = new Date().getHours(); return (h < 5 ? 'Good night,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'); };
   function hmJourney(level) {
@@ -4109,8 +4175,8 @@ function mspSessionBanner() {
   function mpPinRender(body, d) {
     body.innerHTML =
       '<div class="mp-pinrow"><p class="mp-pin">' + esc(d.pin) + '</p>' +
-      '<button type="button" class="mp-btn" id="mp-copy-pin">Copy PIN</button></div>' +
-      '<p class="mp-sub">This is your personal PIN. It stays the same every time you look here. ' +
+      '<button type="button" class="mp-btn" id="mp-copy-pin">Copy Password</button></div>' +
+      '<p class="mp-sub">This is your Moonfin password \u2014 the same thing Moonfin asks for when it says \u201cpassword\u201d. It stays the same every time you look here. ' +
       'Brand-new accounts can take a minute to become available — if Moonfin says the password is wrong, wait a moment and try again.</p>' +
       '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code>' +
       '<button type="button" class="mp-btn" id="mp-copy">Copy address</button></div>' +
@@ -4119,7 +4185,7 @@ function mspSessionBanner() {
       '<ol class="mp-steps">' +
       '<li>Open <strong>Moonfin</strong> and choose <strong>Add Server</strong> \u2192 <strong>Server Address</strong>.</li>' +
       '<li>Paste the address above, tap <strong>Connect</strong>, then <strong>Continue</strong>.</li>' +
-      '<li>On <strong>Who\u2019s watching?</strong> pick <strong>' + esc(d.name || d.username || 'your name') + '</strong> \u2014 then paste this PIN.</li>' +
+      '<li>On <strong>Who\u2019s watching?</strong> pick <strong>' + esc(d.name || d.username || 'your name') + '</strong> \u2014 then paste this password.</li>' +
       '</ol>' +
       '<div class="mp-demo">' +
       '<figure class="mp-fig">' +
@@ -4139,7 +4205,7 @@ function mspSessionBanner() {
     if (cpp) cpp.addEventListener('click', async () => {
       try { await navigator.clipboard.writeText(String(d.pin || '')); cpp.textContent = 'Copied'; }
       catch (e) { cpp.textContent = 'Select and copy'; }
-      setTimeout(() => { cpp.textContent = 'Copy PIN'; }, 1800);
+      setTimeout(() => { cpp.textContent = 'Copy Password'; }, 1800);
     });
     const cp = document.getElementById('mp-copy');
     if (cp) cp.addEventListener('click', async () => {
@@ -4398,7 +4464,11 @@ function mspSessionBanner() {
     if (obTour) obTour.addEventListener('click', () => window.mspTour.start());
     // First run only. Delayed so the home rails have painted — otherwise the
     // spotlight lands on an empty section. auto() self-checks the seen flag.
-    setTimeout(() => { try { window.mspTour.auto(); } catch (e) {} }, 1400);
+    setTimeout(() => {
+      const gate = document.getElementById('pw-gate');
+      if (gate && !gate.hidden) return;   // the password gate starts the tour when dismissed
+      try { window.mspTour.auto(); } catch (e) {}
+    }, 1400);
   }
   const obContact = document.getElementById('ob-contact');
   if (obContact) obContact.addEventListener('click', () => setTab('contact'));
