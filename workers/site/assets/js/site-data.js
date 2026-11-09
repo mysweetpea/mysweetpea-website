@@ -64,8 +64,10 @@
         if (!isStr(s.iconAlt, 1, 60)) return false;
         if (!isStr(s.url, 10, 200) || !SITE_URL_RE.test(s.url)) return false;
         /* github is OPTIONAL: a service may have no public repo (consumers
-           already guard). Requiring it invalidates ALL site data. */
-        if (s.github != null && (!isStr(s.github, 18, 200) || !GH_RE.test(s.github))) return false;
+           already guard). Requiring it invalidates ALL site data — and so does
+           treating an empty string as "wrong", which is how a human writes
+           "none" in the JSON. Absent/null/'' are all "no repo". */
+        if (s.github != null && s.github !== '' && (!isStr(s.github, 18, 200) || !GH_RE.test(s.github))) return false;
         if (s.tier !== 'sweetpea') return false;
         if (s.tierLabel !== 'Sweet Pea') return false;
         if (typeof s.keywords !== 'string' || !KEYWORDS_RE.test(s.keywords)) return false;
