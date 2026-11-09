@@ -54,16 +54,20 @@ test('baked copy validates: every service reaches MSP.data()', async () => {
   const bakedMoonfin = d.services.find(s => s.key === 'moonfin');
   assert.ok(bakedMoonfin, 'baked copy is missing moonfin');
   /* hints only matter when the live fetch fails, i.e. exactly this path */
-  assert.equal(bakedMoonfin.monitorHint, 65, 'baked monitorHint is stale — re-run deploy.py');
+  const srcMoonfin = json.services.find(s => s.key === 'moonfin');
+  assert.equal(bakedMoonfin.monitorHint, srcMoonfin.monitorHint, 'baked monitorHint drifted from site-data.json — re-run deploy.py');
 });
+
+/* Serve a payload for the site-data fetch; anything else the module asks for
+   (heartbeat) just needs a valid shape so it does not reject unhandled. */
+const fetchJson = (json) => async (url) => (String(url).includes('site-data.json')
+  ? { ok: true, json: async () => json }
+  : { ok: true, json: async () => ({ heartbeatList: {}, uptimeList: {} }) });
 
 test('a service without a github url does not invalidate the whole payload', async () => {
   const json = JSON.parse(fs.readFileSync(path.join(SITE, 'assets/site-data.json'), 'utf8'));
   json.services.forEach(s => { delete s.github; });
-  const MSCP = load(async (url) => (String(url).includes('site-data.json')
-    ? { ok: true, json: async () => json }
-    : { ok: true, json: async () => ({ heartbeatList: {}, uptimeList: {} }) }));
-  const d = await MSCP.data();
+  const d = await load(fetchJson(json)).data();
   assert.ok(d, 'github must be optional — one repo-less service killed every widget');
   assert.equal(d.services.length, json.services.length);
 });
@@ -71,10 +75,6 @@ test('a service without a github url does not invalidate the whole payload', asy
 /* Both github tests stamp a marker on the payload, so acceptance is
    observable: the served data carries the marker only if the FETCHED payload
    passed validation; otherwise the baked copy (no marker) is served. */
-const fetchJson = (json) => async (url) => (String(url).includes('site-data.json')
-  ? { ok: true, json: async () => json }
-  : { ok: true, json: async () => ({ heartbeatList: {}, uptimeList: {} }) });
-
 test('an empty github string means "no repo", not invalid', async () => {
   const json = JSON.parse(fs.readFileSync(path.join(SITE, 'assets/site-data.json'), 'utf8'));
   json.services.forEach(s => { s.github = ''; });
