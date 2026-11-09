@@ -2477,7 +2477,7 @@ const GUIDES = {
       { title: 'Get the app', text: 'Install Bitwarden (iPhone, Android, Mac, Windows). On the login screen, tap the gear icon and set server to https://vault.mysweetpea.cc', url: 'https://bitwarden.com/download/', btn: 'Get the app' },
       { title: 'Sign in', text: 'Tap "Use single sign-on" and log in with your MySweetPea account.', url: 'https://vault.mysweetpea.cc', btn: 'Open Vaultwarden' },
       { title: 'Set your master password', text: 'You will be asked to create one. It unlocks your vault and cannot be reset — make it strong and memorable.' },
-      { title: 'Make it effortless', text: 'Open Settings → Account security. Turn on "Unlock with Face ID" (phone) or "Unlock with PIN" (computer). Then set Vault timeout to 4 hours or Never, and Vault timeout action to Lock. From then on you unlock with your face or a short PIN — not your master password.' },
+      { title: 'Make it effortless', text: 'After you sign in, open Settings → Account security (desktop app: Settings → Security) and turn on unlock with Face ID / biometrics / Windows Hello — or "Unlock with PIN" in the browser extension. Then set Session timeout to Never and Session timeout action to Lock. Each app keeps its own setting, so repeat it once per device.' },
       { title: 'Harden it (1 minute)', text: 'Settings → Security: set KDF to Argon2id — stronger than the default and unlocks faster. For two-step login, add an authenticator app under MFA Devices in your MySweetPea account settings (not in Bitwarden).' },
     ],
   },
@@ -2698,20 +2698,24 @@ const PLATFORMS = {
       { title: 'Get the Bitwarden extension', text: 'Works with Chrome, Firefox, Edge and Safari.', url: 'https://bitwarden.com/download', btn: 'Get the extension' },
       { title: 'Point it at our server', text: 'In the extension settings choose self-hosted and enter https://vault.mysweetpea.cc.', url: '', btn: '' },
       { title: 'Sign in and save a login', text: 'Use single sign-on with your MySweetPea account — the extension offers to save passwords as you browse.', url: '', btn: '' },
+      { title: 'Stay unlocked', text: 'Extension Settings → Account security: turn on "Unlock with PIN" and choose a PIN (biometrics here only works with the desktop app installed). Then set Session timeout to Never and Session timeout action to Lock.', url: '', btn: '' },
     ] },
     { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
       { title: 'Get Bitwarden', text: 'Install the Bitwarden app from the App Store.', url: 'https://bitwarden.com/download', btn: 'Get the app' },
       { title: 'Point to our server', text: 'When asked for the server URL, enter https://vault.mysweetpea.cc, then sign in with single sign-on.', url: '', btn: '' },
       { title: 'Enable autofill', text: 'iOS Settings → Passwords → AutoFill → allow Bitwarden and logins fill themselves.', url: '', btn: '' },
+      { title: 'Stay unlocked', text: 'Settings → Account security: turn on "Unlock with Face ID". Set Session timeout to Never and Session timeout action to Lock — from then on your face opens the vault, not your master password.', url: '', btn: '' },
     ] },
     { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
       { title: 'Get Bitwarden', text: 'Install the Bitwarden app from the Play Store.', url: 'https://bitwarden.com/download', btn: 'Get the app' },
       { title: 'Point to our server', text: 'When asked for the server URL, enter https://vault.mysweetpea.cc, then sign in with single sign-on.', url: '', btn: '' },
       { title: 'Enable autofill', text: 'Android offers Bitwarden as your autofill provider — accept it.', url: '', btn: '' },
+      { title: 'Stay unlocked', text: 'Settings → Account security: turn on "Unlock with Biometrics" (fingerprint or face). Set Session timeout to Never and Session timeout action to Lock.', url: '', btn: '' },
     ] },
     { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
       { title: 'Get the desktop app', text: 'Bitwarden has apps for Windows, macOS and Linux.', url: 'https://bitwarden.com/download', btn: 'Download' },
       { title: 'Point to our server', text: 'When asked for the server URL, enter https://vault.mysweetpea.cc, then sign in with single sign-on.', url: '', btn: '' },
+      { title: 'Stay unlocked', text: 'Open Settings → Security (Windows/Linux: File → Settings; macOS: Bitwarden → Settings) and turn on "Unlock with Windows Hello" on Windows, or Touch ID / system authentication on macOS and Linux. Set Session timeout to Never and Session timeout action to Lock.', url: '', btn: '' },
     ] },
   ],
   matrix: [
