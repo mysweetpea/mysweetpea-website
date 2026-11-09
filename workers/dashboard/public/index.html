@@ -3056,7 +3056,7 @@ function mspSessionBanner() {
     '</div>' +
     '<div class="hm-banner-acct" id="hm-banner-acct"></div>' +
     '</div>' +
-    '<a class="hm-hero" id="hm-hero" hidden href="#services" aria-label="Continue watching"></a>' +
+    '<a class="hm-hero" id="hm-hero" hidden href="#guides/moonfin" aria-label="Continue watching"></a>' +
     '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" aria-label="All service updates" onclick="var b=document.getElementById(\'upd-bell\');if(b)b.click()">All updates &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Moonfin &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
@@ -3542,7 +3542,7 @@ function mspSessionBanner() {
     const total = list.reduce((a, x) => a + (Number(x.playCount) || 0), 0);
     // all-tied rows make "33% of top plays" noise, not information
     const flat = list.length > 1 && list.every((x) => (Number(x.playCount) || 0) === (Number(list[0].playCount) || 0));
-    const JF_ITEM_URL = '#services';   // no Moonfin web client exists — send members to Services
+    const JF_ITEM_URL = '#guides/moonfin';   // no Moonfin web client exists — send members to Services
     const h3 = card.querySelector('h3');
     if (h3) h3.textContent = flat ? 'Recently watched' : 'Most watched';
     card.setAttribute('aria-label', flat ? 'Recently watched' : 'Most watched, all time');
@@ -3628,7 +3628,8 @@ function mspSessionBanner() {
   });
   let initialTab = 'home';
   try {
-    const h = (location.hash || '').replace(/^#/, '');
+    const hAll = (location.hash || '').replace(/^#/, '');
+    const h = hAll.split('/')[0];   /* #guides/<key> selects the tab too */
     const ALL_TABS = TABS.concat(EXTRA_TABS);
     if (ALL_TABS.indexOf(h) >= 0) initialTab = h;
     else {
@@ -3638,8 +3639,12 @@ function mspSessionBanner() {
   } catch (e) {}
   setTab(initialTab, { fromHash: true });
   window.addEventListener('hashchange', () => {
-    const h = (location.hash || '').replace(/^#/, '');
+    const hAll = (location.hash || '').replace(/^#/, '');
+    const h = hAll.split('/')[0];
     if ((TABS.concat(EXTRA_TABS)).indexOf(h) >= 0 && h !== currentTab) setTab(h, { fromHash: true });
+    /* #guides/<key> = land on that service's setup guide */
+    const gk = hAll.split('/')[1];
+    if (h === 'guides' && gk && typeof window.mspOpenGuide === 'function') window.mspOpenGuide(gk);
   });
   // T1a: keep the pill glued to the active tab across relayouts
   window.addEventListener('resize', () => moveTabPill(false));
@@ -3856,7 +3861,7 @@ function mspSessionBanner() {
   (async () => {
     /* No per-item web viewer exists on this server — the card opens the
        AIOStreams app itself rather than a dead #!/item route. */
-    const JF_ITEM = '#services';   // poster/genre taps land on Services
+    const JF_ITEM = '#guides/moonfin';   // poster/genre taps land on Services
     const g2 = async (u) => {
       const d = await apiGet(u, 15000);
       if (d && Array.isArray(d.items)) d.items = validObjects(d.items);
@@ -3899,7 +3904,7 @@ function mspSessionBanner() {
         const MOODS = [['Mind-bending', 'Sci-Fi'], ['Edge of seat', 'Thriller'], ['True story', 'Documentary'], ['Visually stunning', 'Fantasy'], ['Make me laugh', 'Comedy'], ['Keep me up tonight', 'Horror'], ['Based on a book', 'Drama']];
         const have = new Set(ge.genres.map(g => g.name));
         const moodChips = MOODS.filter(m2 => have.has(m2[1]));
-        const genreUrl = () => '#services';   // genres are browsable inside Moonfin only
+        const genreUrl = () => '#guides/moonfin';   // genres are browsable inside Moonfin only
         // Jellyfin reports every genre it has ever seen, including non-genres
         // (News/Reality/Talk/Soap/TV Movie) that make the grid read like a bug.
         const GENRE_SKIP = new Set(['news', 'reality', 'talk', 'soap', 'tv movie', 'kids', 'music']);
@@ -3921,7 +3926,7 @@ function mspSessionBanner() {
      filter category. SV_CATS / HM_DOT_MATCH / graft MATCH used to
      duplicate subsets of this by display name; they are DERIVED below. ===== */
   const SERVICES = [
-    { key: 'moonfin',     name: 'Moonfin',     url: 'https://aiostreams.mysweetpea.cc/jellyfin/', blurb: 'Movies, shows & anime', icon: '/icons/moonfin.svg', cat: 'media', mon: ['moonfin', 'aiostreams'] },
+    { key: 'moonfin',     name: 'Moonfin',     url: 'https://aiostreams.mysweetpea.cc/jellyfin/', blurb: 'Movies, shows & anime', icon: '/icons/moonfin.svg', cat: 'media', mon: ['moonfin', 'aiostreams'], noWeb: true },
     { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Live TV & Sports', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin'], dev: true },
     { key: 'nextcloud',   name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg', cat: 'cloud', mon: ['nextcloud', 'cloud'] },
     { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'], dev: true },
@@ -4035,7 +4040,8 @@ function mspSessionBanner() {
         '<div class="meta">' + state + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div>' +
         (GUIDES[s.key] ? '<div class="sv-guide-cta"><button type="button" class="sv-guide-btn" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</button></div>' : '');
       return '<div class="sv-card' + (s.dev ? ' isdev' : svState.monmap[s.name] === false ? ' isdown' : '') + '">' +
-        (s.dev ? '' : '<a class="sv-card-hit" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open ' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')"></a>') + inner + '</div>';
+        (s.noWeb ? '<a class="sv-card-hit" href="#guides/' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' setup guide"></a>'
+          : s.dev ? '' : '<a class="sv-card-hit" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open ' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')"></a>') + inner + '</div>';
     }).join('');
   };
   if (!window.__svGuideWire) {
@@ -4045,6 +4051,7 @@ function mspSessionBanner() {
       if (!b) return;
       e.preventDefault(); e.stopPropagation();
       const k = b.dataset.gguide;
+      if (typeof window.mspOpenGuide === 'function') { window.mspOpenGuide(k); return; }
       if (typeof window.setTab === 'function') window.setTab('guides');
       try { const c = document.querySelector('.svc-guide-chip[data-guide="' + k + '"]'); if (c) c.click(); } catch (err) {}
     });
@@ -4088,7 +4095,9 @@ function mspSessionBanner() {
       '<div class="sv-spot-blurb">' + esc(s.blurb) + '</div>' +
       '<div class="sv-spot-meta">' + svStatus(s) + '</div>' +
       '<div class="sv-dots">' + SV_FEATURED.map((n, di) => '<button type="button" class="sv-dot' + (di === svState.featured % SV_FEATURED.length ? ' on' : '') + '" aria-label="Show ' + esc(n) + '" onclick="svState.featured=' + di + ';window.svRenderSpot();window.svSpotTimerReset()"></button>').join('') + '</div></div>' +
-      (s.dev ? '' : '<a class="btn" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">Open ' + esc(s.name) + '</a>') +
+      (s.noWeb && GUIDES[s.key]
+        ? '<a class="btn" href="#guides/' + esc(s.key) + '">Setup guide</a>'
+        : s.dev ? '' : '<a class="btn" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">Open ' + esc(s.name) + '</a>') +
       '<button type="button" class="sv-refresh" title="Next featured" aria-label="Next featured service" onclick="svState.featured++;window.svRenderSpot();window.svSpotTimerReset()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>' +
       '<span class="sv-spot-timer" aria-hidden="true"><i></i></span>';
   };
@@ -4239,7 +4248,7 @@ function mspSessionBanner() {
   window.svUpsum();
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
   const hmJF = () => ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
-  const hmJF_ITEM = '#services';   // no Moonfin web client — see Services
+  const hmJF_ITEM = '#guides/moonfin';   // no Moonfin web client — see Services
   const hmBackdrop = (id, w) => hmJF() + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
   const hmGreetingWord = () => { const h = new Date().getHours(); return (h < 5 ? 'Good night,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'); };
   function hmJourney(level) {
@@ -4551,6 +4560,20 @@ function mspSessionBanner() {
   const guideNav = document.getElementById('guide-nav');
   const guideBody = document.getElementById('guide-body');
   if (guideNav && guideBody) {
+    /* #guides/<key> deep link (media taps + the Moonfin tile): pick the guide
+       before the first paint so the right steps render immediately. */
+    try {
+      const dp = (location.hash || '').replace(/^#/, '').split('/');
+      if (dp[0] === 'guides' && GUIDES[dp[1]]) guideSel = dp[1];
+    } catch (e) {}
+    window.mspOpenGuide = function (key) {
+      if (!GUIDES[key]) return;
+      guideSel = key;
+      guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === key ? 'true' : 'false'));
+      guideBody.innerHTML = guideDetailHtml(key);
+      if (typeof setTab === 'function') setTab('guides');
+      try { guideBody.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    };
     guideNav.innerHTML = GUIDE_ORDER.map((k) => guideChipHtml(k, guideSel)).join('');
     guideBody.innerHTML = guideDetailHtml(guideSel);
     const mDD0 = document.getElementById('m-guide-dd');
