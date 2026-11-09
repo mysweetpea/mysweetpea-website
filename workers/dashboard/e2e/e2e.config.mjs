@@ -8,6 +8,7 @@ const llm = createOpenAICompatible({
 });
 
 export default {
+  tests: ['*.e2e.ts'],
   agents: { default: { model: llm.chatModel(process.env.E2E_LLM_MODEL), system: 'You are a meticulous QA agent.' } },
   targets: [{ engine: web({
         // Cloudflare serves a managed challenge to a bare headless Chromium;

@@ -12,6 +12,14 @@ export E2E_SESSION=$(cat ~/.cache/e2e-session)   # a live msp_dash_session value
 ./node_modules/.bin/e2e run
 ```
 
+No session? Run `dashboard-stub.e2e.ts` instead — same assertions plus the
+Moonfin guide routing and the `#guides/<key>` deep link, with `/api/me`
+fulfilled from a fixture so no member login is needed:
+
+```bash
+./node_modules/.bin/e2e run dashboard-stub.e2e.ts
+```
+
 Model: any OpenAI-compatible endpoint (this repo points at the homelab LiteLLM
 gateway). `@e2e-dev/web` is installed by `e2e init` in a real project; copy it
 in when rebuilding from scratch.
