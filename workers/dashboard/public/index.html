@@ -1252,8 +1252,10 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #panel-services .sv-card.isdev .nm{color:var(--text-dim)}
 #panel-services .sv-card.isdev img.svc-ico{filter:grayscale(.55) opacity(.8)}
 .sv-card.isdev:hover{transform:none;border-color:var(--border);box-shadow:var(--e1)}
-.sv-live.dev{color:var(--gold);border-color:rgba(217,168,108,.45);background:rgba(217,168,108,.10)}
-.sv-livedot.dev{background:var(--gold);box-shadow:0 0 6px rgba(217,168,108,.7)}
+#panel-services .sv-live.dev{color:#9BA1C7;border-color:rgba(155,161,199,.35);background:rgba(155,161,199,.08);white-space:nowrap}
+#panel-services .sv-livedot.dev{background:#9BA1C7;box-shadow:0 0 6px rgba(155,161,199,.5)}
+#panel-services .sv-card .sv-live{white-space:nowrap;flex:none}
+#panel-services .sv-card .sv-cat{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .hm-svcrow.isdev{cursor:default;border-style:dashed;background:rgba(19,21,36,.28)}
 .hm-svcrow.isdev .hm-orb-nm{color:var(--text-dim)}
 .hm-svcrow.isdev:hover{transform:none;border-color:var(--border)} /* the img's own gradient was painting over the letter fallback */
