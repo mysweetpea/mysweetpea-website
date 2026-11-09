@@ -204,7 +204,7 @@ def main():
         problems.append('CSP hash drift: run python rebuild_csp.py before deploying')
 
     # Behavioral regressions share the release gate; each runs in its own process.
-    for test in ('test-worker.mjs', 'test-sw.js', 'test-public-interactions.cjs'):
+    for test in ('test-worker.mjs', 'test-sw.js', 'test-public-interactions.cjs', 'test-site-data.cjs'):
         if os.path.isfile(test):
             tr = subprocess.run(['node', test], capture_output=True, text=True)
             report.append('%s: %s' % (test, 'PASS' if tr.returncode == 0 else 'FAIL'))
