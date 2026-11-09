@@ -54,6 +54,11 @@
             foot.appendChild(hb); foot.appendChild(pill);
             inner.appendChild(row1); inner.appendChild(row2); inner.appendChild(blurb); inner.appendChild(foot);
             card.appendChild(inner);
+            /* Appended after site.js's static reveal/animation scans. */
+            card.classList.add('visible');
+            card.addEventListener('animationend', function (e) {
+                if (e.animationName === 'cardIn') card.style.animation = 'none';
+            });
             if (last && last.nextSibling) grid.insertBefore(card, last.nextSibling);
             else grid.appendChild(card);
             last = card;
@@ -73,8 +78,10 @@
         counts.forEach(function (el) {
             var btn = el.closest('.filter-btn');
             if (!btn) return;
-            if (btn.getAttribute('data-filter') === 'all') el.textContent = String(nAll);
-            else if (btn.getAttribute('data-filter') === 'coming-soon') el.textContent = String(document.querySelectorAll('.coming-soon-card:not([hidden])').length);
+            var tier = btn.getAttribute('data-filter');
+            if (tier === 'all') { el.textContent = String(nAll); return; }
+            var group = document.querySelector('[data-tier-group="' + tier + '"]');
+            if (group) el.textContent = String(group.querySelectorAll('.service-card:not([hidden]), .coming-soon-card:not([hidden])').length);
         });
     }).catch(function () { /* static grid stands */ });
 })();

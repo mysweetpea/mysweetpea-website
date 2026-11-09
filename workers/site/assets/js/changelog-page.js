@@ -211,6 +211,22 @@
     /* === 30-day stacked activity graph (pure DOM; shares the chip filters) === */
     function dayKey(d) { return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
 
+    /* One deduplicated activity set for the graph, counts and day lookup.
+       Highlights are pulled OUT of weeks by the API, so weeks alone undercount. */
+    function allChanges() {
+        var out = [], seen = {};
+        var source = ((data && data.highlights) || []).slice();
+        ((data && data.weeks) || []).forEach(function (wk) { source = source.concat(wk.items || []); });
+        source.forEach(function (it) {
+            if (!it) return;
+            var key = (it.repo || '') + ':' + (it.sha || '');
+            if (it.sha && seen[key]) return;
+            if (it.sha) seen[key] = true;
+            out.push(it);
+        });
+        return out;
+    }
+
     function renderGraph() {
         var g = document.getElementById('cl2-graph');
         var cap = document.getElementById('cl2-graph-cap');
@@ -219,8 +235,7 @@
         if (!g) return;
         g.textContent = '';
         // NOTE: legend is STATIC in HTML now — do not clear it here.
-        var all = [];
-        (data.weeks || []).forEach(function (wk) { all = all.concat(wk.items || []); });
+        var all = allChanges();
         if (!all.length) { g.hidden = true; if (cap) cap.hidden = true; return; }
         g.hidden = false; if (cap) cap.hidden = false;
 
@@ -385,7 +400,17 @@
             if (hit) { target = block; return true; }
             return false;
         });
-        if (!target) return;
+        if (!target) {
+            // Highlighted changes are not duplicated in the week accordions.
+            // If the clicked day contains one, land on that actual card.
+            var hi = ((data && data.highlights) || []).findIndex(function (it) {
+                var dt = new Date(it.date);
+                return !isNaN(dt.getTime()) && dayKey(dt) === key;
+            });
+            var card = hi >= 0 && hlList ? hlList.children[hi] : null;
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
         target.classList.add('open');
         var h = target.querySelector('.cl2-wk-head');
         if (h) h.setAttribute('aria-expanded', 'true');
@@ -419,13 +444,10 @@
         var counts = {};
         REPO_KEYS.forEach(function (k) { counts[k] = 0; });
         CAT_KEYS.forEach(function (k) { counts[k] = 0; });
-        data.weeks.forEach(function (w) {
-            (w.items || []).forEach(function (item) {
-                if (!item) return;
-                var rk = 'repo:' + repoKeyOf(item.repo);
-                if (counts[rk] !== undefined) counts[rk]++;
-                if (item.cat && counts['cat:' + item.cat] !== undefined) counts['cat:' + item.cat]++;
-            });
+        allChanges().forEach(function (item) {
+            var rk = 'repo:' + repoKeyOf(item.repo);
+            if (counts[rk] !== undefined) counts[rk]++;
+            if (item.cat && counts['cat:' + item.cat] !== undefined) counts['cat:' + item.cat]++;
         });
         Array.prototype.forEach.call(document.querySelectorAll('.cl2-count'), function (c) {
             var k = c.getAttribute('data-count');

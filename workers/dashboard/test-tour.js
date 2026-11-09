@@ -7,6 +7,7 @@
  * 3. stagePath() never emits a non-finite path. REGRESSION GUARD: emitting
  *    `d="MNaN,…"` makes the SVG invalid, and browsers then KEEP THE PREVIOUS
  *    `d` — which left a stale spotlight box on screen on centred steps.
+ * 4. Focus, drawer/account state, mobile breakpoint and target-skip guards.
  */
 const fs = require('fs');
 const path = require('path');
@@ -78,6 +79,32 @@ for (const [name, s] of cases) {
 const hasCut = (stagePath({ x: 20, y: 300, w: 340, h: 60 }).match(/M/g) || []).length === 2;
 console.log(`  ${hasCut ? 'ok  ' : 'MISS'} stagePath: normal box has a cutout (2 subpaths)`);
 if (!hasCut) bad++;
+
+/* ── 4. interaction regression guards ─────────────────────────────────── */
+const setDrawerSrc = (tour.match(/function setDrawer\(open\) \{[\s\S]*?\n  \}/) || [])[0] || '';
+const paintSrc = (tour.match(/function paint\(\) \{[\s\S]*?\n  \}/) || [])[0] || '';
+const readySrc = (tour.match(/function whenVisible\(st, my, cb\) \{[\s\S]*?\n  \}/) || [])[0] || '';
+const arriveSrc = (tour.match(/function arrive\(st, el, my\) \{[\s\S]*?\n  \}/) || [])[0] || '';
+const guards = [
+  ['focus: opener, primary, Tab containment and restore',
+    /opener\s*=\s*document\.activeElement/.test(tour) && /primary\.focus\(/.test(tour) &&
+    /e\.key !== 'Tab'/.test(tour) && /focusTarget\.focus\(/.test(tour) &&
+    /opener\.getClientRects\(\)\.length/.test(tour) && /getElementById\('acct-trigger'\)/.test(tour)],
+  ['drawer: nav-open, dh-open, dh-lock and aria-expanded stay in sync',
+    ['top-nav', 'nav-open', 'dh-menu', 'dh-open', 'dh-lock', 'nav-toggle', 'aria-expanded']
+      .every((token) => setDrawerSrc.includes(token))],
+  ['account: opening survives the initiating document click',
+    /st\.openAcct\) setTimeout\(function \(\) \{ if \(my === seq\) setAcct\(true\); \}, 0\)/.test(paintSrc)],
+  ['mobile: every tour breakpoint is 760px',
+    !/768px/.test(tour) && /MOBILE_MQ = '\(max-width: 760px\)'/.test(tour)],
+  ['targets: hidden targets are bounded and skipped, never centred',
+    /getComputedStyle\(el\)\.visibility/.test(tour) && /if \(dir < 0\) back\(\); else next\(\)/.test(readySrc) &&
+    /st\.target && !visible\(el\)/.test(arriveSrc)],
+];
+for (const [name, ok] of guards) {
+  console.log(`  ${ok ? 'ok  ' : 'FAIL'} ${name}`);
+  if (!ok) bad++;
+}
 
 console.log(bad
   ? `\nFAIL — ${bad} problem(s)`

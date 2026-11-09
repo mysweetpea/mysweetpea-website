@@ -545,7 +545,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .dash-footer .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;max-width:1100px;margin:0 auto 26px}
 .dash-footer .footer-brand p{margin:12px 0 14px;max-width:34ch;line-height:1.6;color:var(--text-dim)}
 .dash-footer .footer-brand .nav-logo{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--text);font-size:1.02rem}
-.dash-footer .footer-status{display:inline-flex;align-items:center;gap:8px;color:var(--text-dim);font-size:.8rem}
+.dash-footer .footer-status{display:inline-flex;align-items:center;gap:8px;color:var(--text-dim);font-size:.8rem;white-space:nowrap}
 .dash-footer .footer-status .status-dot{width:9px;height:9px;border-radius:50%;background:#58d68d;box-shadow:0 0 8px rgba(88,214,141,.7);display:inline-block}
 .dash-footer .footer-status.down .status-dot{background:var(--error);box-shadow:0 0 8px rgba(217,140,140,.7)}
 .dash-footer .footer-col{display:flex;flex-direction:column;gap:9px}
@@ -732,13 +732,17 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .sv-refresh:hover{color:var(--text);border-color:var(--border-primary);transform:rotate(90deg)}
 .sv-row-h{display:flex;align-items:center;gap:10px;margin:20px 0 10px}
 .sv-orbs{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 8px}
+.sv-orb-shell{position:relative;flex:none;width:64px;height:64px;scroll-snap-align:start}
+.sv-orb-shell .sv-orb{width:100%;height:100%;scroll-snap-align:unset}
 .sv-orb{position:relative;flex:none;width:64px;height:64px;border-radius:20px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;scroll-snap-align:start;transition:transform .2s cubic-bezier(.4,0,.2,1),border-color .2s,box-shadow .2s;box-shadow:var(--e1)}
 .sv-orb:hover{transform:translateY(-4px);border-color:var(--border-primary);box-shadow:var(--e2)}
 .sv-orb img{width:38px;height:38px;object-fit:contain}
 .sv-orb .sdot{position:absolute;bottom:6px;right:6px;width:9px;height:9px;border-radius:99px;background:var(--up);border:2px solid var(--bg)}
 .sv-orb .sdot.down{background:var(--down)}
-.sv-orb .unpin{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:99px;background:var(--bg);border:1px solid var(--down);color:var(--down);font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center}
-.sv-orb:hover .unpin{display:flex}
+.sv-orb .sdot.unknown{background:var(--text-faint)}
+.sv-orb-shell .unpin{position:absolute;top:-5px;right:-5px;width:24px;height:24px;border-radius:99px;background:var(--bg);border:1px solid var(--down);color:var(--down);font-size:11px;line-height:1;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:2}
+.sv-orb-shell:hover .unpin,.sv-orb-shell:focus-within .unpin{display:flex}
+@media(hover:none){.sv-orb-shell .unpin{display:flex}}
 .sv-chiprow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px;min-height:26px}
 .sv-chip{font-size:.72rem;color:var(--text-dim);border:1px solid var(--border);background:rgba(255,255,255,.03);border-radius:99px;padding:4px 10px;display:inline-flex;gap:6px;align-items:center}
 .sv-chip img{width:14px;height:14px;object-fit:contain}
@@ -749,6 +753,10 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .sv-sort{margin-left:auto}
 .sv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:14px}
 .sv-card{position:relative;display:flex;flex-direction:column;gap:8px;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px;text-decoration:none;color:var(--text);transition:transform .2s cubic-bezier(.4,0,.2,1),border-color .2s,box-shadow .2s;box-shadow:var(--e1)}
+.sv-card-hit{position:absolute;inset:0;border-radius:inherit;z-index:0}
+.sv-card-hit:focus-visible{outline:2px solid var(--primary);outline-offset:-3px}
+.sv-card .top,.sv-card .meta,.sv-card .sv-guide-cta,.sv-card .upd-hint{position:relative;z-index:1;pointer-events:none}
+.sv-card .sv-pin,.sv-card .sv-guide-btn,.sv-card .upd-hint{pointer-events:auto;z-index:2}
 .sv-card:hover{transform:translateY(-3px);border-color:var(--border-primary);box-shadow:var(--e2)}
 .sv-card .top{display:flex;align-items:center;gap:12px}
 .sv-card img.svc-ico{width:38px;height:38px;object-fit:contain}
@@ -1262,7 +1270,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .mrate{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.6rem;font-weight:700;color:#E8C878;background:rgba(8,9,15,.8);border:1px solid rgba(217,168,108,.35);padding:2px 6px;border-radius:8px}
 .mplays{position:absolute;top:6px;left:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:var(--c);background:rgba(8,9,15,.8);border:1px solid rgba(69,214,200,.4);padding:2px 7px;border-radius:99px}
 .m-genre-row{display:flex;gap:8px;flex-wrap:wrap}
-.m-genre{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:7px 15px;border-radius:99px;border:1px solid var(--border);color:var(--text-dim);background:var(--card);cursor:pointer;transition:border-color var(--t-fast),color var(--t-fast),transform var(--t-fast)}
+.m-genre{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:7px 15px;border-radius:99px;border:1px solid var(--border);color:var(--text-dim);background:var(--card);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:border-color var(--t-fast),color var(--t-fast),transform var(--t-fast)}
 .m-genre:hover{border-color:var(--c);color:var(--primary-bright);background:linear-gradient(120deg,var(--v-soft),transparent 70%);transform:translateY(-1px)}
 @media(max-width:760px){#hm-svc-rail{grid-template-columns:1fr}}
 .hm-svcrow{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:12px;background:linear-gradient(180deg,rgba(151,146,255,.05),transparent),var(--card);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--e1);text-decoration:none;color:var(--text);transition:border-color var(--t-fast),transform var(--t-fast),box-shadow var(--t-fast)}
@@ -1311,8 +1319,10 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #sv-spot .sv-spot-meta{display:flex;align-items:center;gap:10px;margin-top:11px;flex-wrap:wrap}
 #panel-services .sv-live{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.14em;color:var(--up)}
 #panel-services .sv-live.down{color:var(--down)}
+#panel-services .sv-live.unknown{color:var(--text-faint)}
 #panel-services .sv-livedot{width:7px;height:7px;border-radius:99px;background:var(--up);box-shadow:0 0 10px rgba(69,214,200,.7);animation:svEPulse 2.4s ease-in-out infinite}
 #panel-services .sv-livedot.down{background:var(--down);box-shadow:0 0 8px rgba(240,110,110,.6);animation:none}
+#panel-services .sv-livedot.unknown{background:var(--text-faint);box-shadow:none;animation:none}
 #panel-services .sv-uppill{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text-dim);border:1px solid var(--border);border-radius:99px;padding:3px 10px;font-variant-numeric:tabular-nums}
 @keyframes svEPulse{0%,100%{box-shadow:0 0 10px rgba(69,214,200,.7)}50%{box-shadow:0 0 3px rgba(69,214,200,.3)}}
 #sv-spot .sv-dots{display:flex;gap:7px;margin-top:auto;padding-top:12px}
@@ -2137,12 +2147,22 @@ document.addEventListener('keydown', (e) => {
   start();
 })();
 // Popup ceremony helper (authentik-hosted, branded, deep-links back)
+async function revokeSessionSet(list) {
+  return Promise.all(list.map(async (s) => {
+    try { return (await fetch('/api/sessions/' + encodeURIComponent(s.uuid), { method: 'DELETE' })).ok; }
+    catch (e) { return false; }
+  }));
+}
 async function revokeAll() {
-  const d = await (await fetch('/api/sessions')).json();
-  const others = ((d && d.results) || []).filter(s => !s.current);
+  let d = null;
+  try { const r = await fetch('/api/sessions'); if (r.ok) d = await r.json(); } catch (e) {}
+  if (!d) { toast('Could not load sessions — try again', { type: 'err' }); return; }
+  const others = ((d && Array.isArray(d.results)) ? d.results : []).filter(s => s && !s.current);
   if (!others.length) { toast('No other sessions to sign out'); return; }
-  for (const s of others) await fetch('/api/sessions/' + s.uuid, { method: 'DELETE' });
-  toast('Signed out ' + others.length + ' session' + (others.length === 1 ? '' : 's'), { action: () => location.reload(), label: 'Reload' });
+  const results = await revokeSessionSet(others);
+  const count = results.filter(Boolean).length, failed = results.length - count;
+  if (count) toast('Signed out ' + count + ' session' + (count === 1 ? '' : 's') + (failed ? '; ' + failed + ' failed' : ''), { action: () => location.reload(), label: 'Reload' });
+  else toast('Could not sign out those sessions — try again', { type: 'err' });
 }
 function ceremony(flowSlug, label) {
   const url = '/auth/ceremony?f=' + encodeURIComponent(flowSlug);
@@ -2157,6 +2177,7 @@ function ceremony(flowSlug, label) {
 const TABS = ['home', 'media', 'services', 'stats', 'guides', 'contact'];
 // API lists are untrusted: drop null/scalar entries once, before any renderer.
 const validObjects = (v) => Array.isArray(v) ? v.filter((x) => x && typeof x === 'object' && !Array.isArray(x)) : [];
+const safeHttpUrl = (v) => { try { const u = new URL(String(v || '')); return (u.protocol === 'http:' || u.protocol === 'https:') ? u.href : ''; } catch (e) { return ''; } };
 // Tabs reachable from the account dropdown (not in the nav row). Hoisted to
 // module scope — the hashchange handler needs it too (was function-scoped
 // inside setTab, so hash navigation threw ReferenceError. Fixed Sep 14.)
@@ -2257,6 +2278,7 @@ function setTab(name, opts) {
   // in-page anchor jumps elsewhere.
   try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); } catch (e) { window.scrollTo(0, 0); }
   if (name === 'stats' && typeof window.loadStats === 'function') window.loadStats();
+  if (name === 'services' && typeof window.svSpotTimerReset === 'function') window.svSpotTimerReset();
 }
 window.setTab = setTab;
   // footer status live (re-invoked after the post-login shell renders — the
@@ -2878,12 +2900,14 @@ function mspSessionBanner() {
     if (typeof me.name !== 'string' || !me.name) me.name = me.username;
     if (typeof me.email !== 'string') me.email = '';
     if (typeof me.tier !== 'string') me.tier = 'seedling';
+    me.avatar_ts = Number.isFinite(Number(me.avatar_ts)) ? Math.max(0, Math.floor(Number(me.avatar_ts))) : 0;
   }
   if (me) mspAuthed = true;
   if (!me) {
     gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
     return;
   }
+  try { if (window.mspPwGate) window.mspPwGate(me.username); } catch (e) {}
   const initialsOf = (n, u) => (n || u || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
   const CAM = '<span class="av-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>';
   const avatarInner = () => (me.has_avatar && me.avatar_ts ? '<img src="/api/avatar?v=' + me.avatar_ts + '" alt="Profile picture"/>' : esc(initialsOf(me.name, me.username)));
@@ -2982,7 +3006,7 @@ function mspSessionBanner() {
         '<a role="menuitem" href="/auth/logout" class="danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Sign out</a>' +
       '</div>' +
     '</div>' +
-    '<button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="tabs" aria-label="Toggle navigation menu"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button>' +
+    '<button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="dh-menu" aria-label="Toggle navigation menu"><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span><span class="nav-toggle-bar"></span></button>' +
     '</div></nav>' +
     '<div class="dh-menu" id="dh-menu" aria-label="Menu">' +
     '<div class="dh-scrim" id="dh-scrim"></div>' +
@@ -3028,7 +3052,7 @@ function mspSessionBanner() {
     '</div>' +
     '<div class="hm-banner-acct" id="hm-banner-acct"></div>' +
     '</div>' +
-    '<a class="hm-hero" id="hm-hero" hidden href="https://aiostreams.mysweetpea.cc/jellyfin/" target="_blank" rel="noopener noreferrer" aria-label="Continue watching"></a>' +
+    '<a class="hm-hero" id="hm-hero" hidden href="#services" aria-label="Continue watching"></a>' +
     '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" aria-label="All service updates" onclick="var b=document.getElementById(\'upd-bell\');if(b)b.click()">All updates &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Moonfin &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
@@ -3080,7 +3104,7 @@ function mspSessionBanner() {
     '<div class="full"><label for="sg-category">Category<span class="req">required</span></label><select id="sg-category"><option value="">Select a category...</option><option value="media">Media &amp; Entertainment</option><option value="productivity">Productivity</option><option value="communication">Communication</option><option value="security">Security &amp; Privacy</option><option value="development">Development</option><option value="monitoring">Monitoring &amp; Analytics</option><option value="storage">File Storage &amp; Sync</option><option value="other">Other</option></select><div class="hint" id="sg-category-hint">Please select a category.</div></div>' +
     '<div class="full"><label for="sg-reason">Why<span class="req">required</span></label><textarea id="sg-reason" maxlength="500" placeholder="Explain why this service would be valuable..."></textarea><div class="hint" id="sg-reason-hint">Please provide an explanation (min 10 characters).</div></div>' +
     '<div><label for="sg-yourname">Your name<span class="opt">optional</span></label><input type="text" id="sg-yourname" maxlength="60" placeholder="Leave blank to submit anonymously." autocomplete="off"/></div>' +
-    '<div><label for="sg-youremail">Your email<span class="opt">optional</span></label><input type="email" id="sg-youremail" maxlength="120" placeholder="Only if you want us to follow up with you." autocomplete="off"/></div>' +
+    '<div><label for="sg-youremail">Your email<span class="opt">optional</span></label><input type="email" id="sg-youremail" maxlength="120" placeholder="Only if you want us to follow up with you." autocomplete="off"/><div class="hint" id="sg-youremail-hint">Enter a valid email address, or leave this blank.</div></div>' +
     '<div class="full sgf-actions"><button type="submit" class="sgf-submit" id="sg-submit" disabled>Send suggestion</button></div>' +
     '</form></dialog>' +
     '' +
@@ -3138,7 +3162,7 @@ function mspSessionBanner() {
     '<div class="merr" id="pw-err" aria-live="polite" style="margin-top:8px"></div>' +
     '<div class="pw-ok" id="pw-ok" aria-live="polite" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Password updated &mdash; use it next time you sign in.</div>' +
     '<div class="pwf-actions"><a class="pwf-adv" href="#" onclick="ceremony(\'password\',\'Password change\');return false">Advanced options</a>' +
-    '<button type="button" class="sgf-submit" id="pw-save" disabled>Update password</button></div></section>' +
+    '<button type="submit" form="pwf" class="sgf-submit" id="pw-save" disabled>Update password</button></div></section>' +
     '<section class="card" id="sec-spirit" style="--i:2"><p class="eyebrow">Behind the garden</p><h3>The spirit of MySweetPea</h3>' +
     '<p class="dim">The little spirit tending the garden &mdash; drawn by us, for you.</p>' +
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
@@ -3506,7 +3530,8 @@ function mspSessionBanner() {
     const card = document.getElementById('st-top-card');
     const host = document.getElementById('st-top');
     if (!card || !host) return;
-    const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0).slice(0, 9);
+    const list = (Array.isArray(items) ? items : []).filter((x) => x && x.playCount > 0)
+      .sort((a, b) => (Number(b.playCount) || 0) - (Number(a.playCount) || 0)).slice(0, 9);
     if (!list.length) { card.hidden = true; host.innerHTML = ''; try { document.body.classList.add('st-top-absent'); } catch (e0) {} return; }
     try { document.body.classList.remove('st-top-absent'); } catch (e0) {}
     const max = Number(list[0].playCount) || 1;
@@ -3556,18 +3581,29 @@ function mspSessionBanner() {
     const svc = document.getElementById('stats-services');
     if (kpi) kpi.innerHTML = '<div class="skel" style="grid-column:1/-1"></div>';
     if (svc) svc.innerHTML = '<div class="skel" style="margin-top:6px"></div>';
-    let d = {};
+    let d = null;
     try { const r = await fetch('/api/stats'); if (r.ok) d = await r.json(); } catch (e) {}
-    renderStats(mergeStats(d));
-    st2Render(d);
-    // Fleet health rows inside the hero (compact dot+name+% list, real Kuma 24h)
-    apiGet('/api/status/extended').then((sx) => { renderFleet(sx && sx.monitors); }).catch(() => {});
-    // Top titles share the most-played fetch with the Media tab (one upstream query)
-    fetch('/api/media/mostplayed').then((r) => (r.ok ? r.json() : null)).then((mp) => {
-      renderTopTitles(mp && mp.items);
-    }).catch(() => {});
-    statsLoaded = true;
-    statsLoading = false;
+    try {
+      if (!d) {
+        if (kpi) kpi.innerHTML = '<p class="dim">Watching stats are unavailable right now. Use Refresh to try again.</p>';
+        if (svc) svc.innerHTML = '';
+        const num = document.getElementById('st2-num'), empty = document.getElementById('st2-empty');
+        if (num) num.hidden = true;
+        if (empty) { empty.hidden = false; empty.textContent = 'Your watching stats are unavailable right now. Use Refresh to try again.'; }
+      } else {
+        renderStats(mergeStats(d));
+        st2Render(d);
+      }
+      // Fleet health rows inside the hero (compact dot+name+% list, real Kuma 24h)
+      apiGet('/api/status/extended').then((sx) => { renderFleet(sx && sx.monitors); }).catch(() => {});
+      // Top titles share the most-played fetch with the Media tab (one upstream query)
+      fetch('/api/media/mostplayed').then((r) => (r.ok ? r.json() : null)).then((mp) => {
+        renderTopTitles(mp && mp.items);
+      }).catch(() => {});
+      statsLoaded = !!d;
+    } finally {
+      statsLoading = false;
+    }
   }
   window.loadStats = loadStats;
   const refreshBtn = document.getElementById('stats-refresh');
@@ -3610,6 +3646,7 @@ function mspSessionBanner() {
   window.openAvatarModal = async () => {
     let meta = { has: false, mime: '', bytes: 0, updated: 0 };
     try { const r = await fetch('/api/avatar/meta'); if (r.ok) meta = await r.json(); } catch (e) {}
+    meta.updated = Number.isFinite(Number(meta.updated)) ? Math.max(0, Math.floor(Number(meta.updated))) : 0;
     let b64 = '';
     modal('<h3>Profile picture</h3>' +
       '<p class="sub">PNG, JPEG or WebP &middot; up to 512KB. Shown next to your name across MySweetPea.</p>' +
@@ -3670,7 +3707,7 @@ function mspSessionBanner() {
       '<p class="sub">Your name and email are used by every MySweetPea service. Changing them here updates your account everywhere (media, files, photos, sign-in). Your password is required.</p>' +
       '<label for="pf-name" style="display:none">Display name</label><input id="pf-name" type="text" maxlength="80" placeholder="Display name" value="' + esc(me.name || '') + '"/>' +
       '<label for="pf-email" style="display:none">Email address</label><input id="pf-email" type="email" maxlength="254" placeholder="Email address" value="' + esc(me.email || '') + '"/>' +
-      '<label for="pf-pass" style="display:none">Current password</label><span class="pw-wrap pf-pass-wrap"><input id="pf-pass" type="password" placeholder="Current password" autocomplete="current-password"/>' + '<button type="button" class="pw-eye" data-eye="pf-pass" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>' +  + '</span>' +
+      '<label for="pf-pass" style="display:none">Current password</label><span class="pw-wrap pf-pass-wrap"><input id="pf-pass" type="password" placeholder="Current password" autocomplete="current-password"/>' + '<button type="button" class="pw-eye" data-eye="pf-pass" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>' + '</span>' +
       '<p class="sub" style="margin:-2px 0 10px">Want a new password instead? <a href="#" onclick="closeModal();ceremony(\'password\',\'Password change\');return false" style="color:var(--gold)">Change password instead</a></p>' +
       '<div class="merr" id="pf-err" aria-live="polite"></div>' +
       '<div class="mrow"><button class="b-cancel" onclick="closeModal()">Cancel</button><button class="b-go" id="pf-save" disabled>Save changes</button></div>');
@@ -3774,7 +3811,8 @@ function mspSessionBanner() {
       b.classList.toggle('on', show);
       b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
     }));
-    btn.addEventListener('click', async () => {
+    document.getElementById('pwf').addEventListener('submit', async (e) => {
+      e.preventDefault();
       if (posting) return;
       err.textContent = '';
       okMsg.hidden = true;
@@ -3847,7 +3885,7 @@ function mspSessionBanner() {
         '<div class="mtitle">' + esc(it.seriesName || it.name || '') + '</div>' +
         '<div class="msub">' + esc([it.year, (it.rating != null ? '\u2605 ' + Number(it.rating).toFixed(1) : '')].filter(Boolean).join(' \u00b7 ')) + '</div></a>';
       const rateChip = (it) => (it.rating != null ? '<span class="mrate">' + Number(it.rating).toFixed(1) + '</span>' : '');
-      const playsChip = (it) => (it.playCount ? '<span class="mplays">' + it.playCount + (it.playCount === 1 ? ' play' : ' plays') + '</span>' : '');
+      const playsChip = (it) => { const n = Number(it.playCount); if (!Number.isFinite(n) || n <= 0) return ''; const plays = Math.floor(n); return '<span class="mplays">' + plays + (plays === 1 ? ' play' : ' plays') + '</span>'; };
       let out = '';
       if (cont && cont.items && cont.items.length) out += '<section class="card"><p class="eyebrow">Pick up where you left off</p><h3>Continue watching</h3><div class="media-row is-posters">' + cont.items.slice(0, 12).map(it => posterCard(it, { progress: true })).join('') + '</div></section>';
       if (mp && mp.items && mp.items.length) out += '<section class="card"><p class="eyebrow">All time</p><h3>Most played</h3><div class="media-row is-posters">' + mp.items.map((it, i) => deepCard(it, playsChip(it) + rateChip(it), i)).join('') + '</div></section>';
@@ -3864,8 +3902,8 @@ function mspSessionBanner() {
         const genreRow = '<div class="m-genre-row">' + ge.genres
           .filter(g => !GENRE_SKIP.has(String(g.name || '').toLowerCase()))
           .slice(0, 14)
-          .map(g => '<button type="button" class="m-genre" href="#services">' + esc(g.name) + '</button>').join('') + '</div>';
-        if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<button type="button" class="m-genre md-mood-chip" href="#services" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</button>').join('') + '</div>' + genreRow + '</section>';
+          .map(g => '<a class="m-genre" href="' + genreUrl() + '">' + esc(g.name) + '</a>').join('') + '</div>';
+        if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<a class="m-genre md-mood-chip" href="' + genreUrl() + '" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</a>').join('') + '</div>' + genreRow + '</section>';
         else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
       }
       host.innerHTML = out;
@@ -3917,7 +3955,13 @@ function mspSessionBanner() {
   const svLSset = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
   let svPinned = svLS('msp-pinned-svcs', ['Jellyfin', 'Vaultwarden']);
   let svRecent = svLS('msp-recent-svcs', []);
-  const svIsUp = (name) => svState.monmap[name] !== false;
+  const svIsUp = (name) => svState.monmap[name] === true;
+  const svStatus = (s) => {
+    if (s.dev) return '<span class="sv-live dev"><span class="sv-livedot dev"></span>IN DEVELOPMENT</span>';
+    const v = svState.monmap[s.name], cls = v === true ? '' : v === false ? ' down' : ' unknown';
+    const label = v === true ? 'LIVE' : v === false ? 'DEGRADED' : (svState.statusError ? 'UNKNOWN' : 'CHECKING');
+    return '<span class="sv-live' + cls + '" title="' + (v === undefined ? 'Status not available yet' : '') + '"><span class="sv-livedot' + cls + '"></span>' + label + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + '</span>' : '');
+  };
   /* Anchored match: the monitor name equals a fragment or contains it as a
      word. Plain substring matching made 'media' hit unrelated monitors. */
   const svUp24 = (name) => (typeof svState.upmap[name] === 'number' ? svState.upmap[name].toFixed(1) + '%' : '');
@@ -3943,16 +3987,19 @@ function mspSessionBanner() {
     const host = document.getElementById('sv-orbs'); if (!host) return;
     host.innerHTML = svPinned.map((name) => {
       const s = SERVICES.find((x) => x.name === name); if (!s) return '';
-      return '<a class="sv-orb" href="' + s.url + '" target="_blank" rel="noopener noreferrer" title="' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + svIcon(s, 'orbico') +
-        '<span class="sdot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' +
-        '<button type="button" class="unpin" aria-label="Unpin ' + esc(s.name) + '" onclick="window.svTogglePin(\'' + esc(s.name) + '\', event)">✕</button></a>';
+      const dot = svState.monmap[s.name] === false ? ' down' : svState.monmap[s.name] === true ? '' : ' unknown';
+      const inner = svIcon(s, 'orbico') + (s.dev ? '' : '<span class="sdot' + dot + '"></span>');
+      const orb = s.dev
+        ? '<span class="sv-orb isdev" title="' + esc(s.name + ' — in development') + '">' + inner + '</span>'
+        : '<a class="sv-orb" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" title="' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + inner + '</a>';
+      return '<span class="sv-orb-shell">' + orb + '<button type="button" class="unpin" aria-label="Unpin ' + esc(s.name) + '" onclick="window.svTogglePin(\'' + esc(s.name) + '\', event)">✕</button></span>';
     }).join('') || '<span class="sv-chip sv-hint">Hover a service below and hit ★ to pin it here</span>';
   };
   window.svRenderRecent = function () {
     const host = document.getElementById('sv-recent'); if (!host) return;
     host.innerHTML = svRecent.map((name) => {
-      const s = SERVICES.find((x) => x.name === name); if (!s) return '';
-      return '<a class="sv-chip" href="' + s.url + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + (s.icon ? '<img src="' + s.icon + '" alt="">' : '') + esc(s.name) + '</a>';
+      const s = SERVICES.find((x) => x.name === name); if (!s || s.dev) return '';
+      return '<a class="sv-chip" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + (s.icon ? '<img src="' + s.icon + '" alt="">' : '') + esc(s.name) + '</a>';
     }).join('') || '<span class="sv-chip">Open something and it shows up here</span>';
   };
   window.svRenderGrid = function () {
@@ -3977,17 +4024,14 @@ function mspSessionBanner() {
       const pinned = svPinned.indexOf(s.name) >= 0;
       /* An in-development service is a promise, not a door: no href, no
          click tracking, and the status pill says what it actually is. */
-      const state = s.dev
-        ? '<span class="sv-live dev"><span class="sv-livedot dev"></span>IN DEVELOPMENT</span>'
-        : '<span class="sv-live' + (svIsUp(s.name) ? '' : ' down') + '"><span class="sv-livedot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' + (svIsUp(s.name) ? 'LIVE' : 'DEGRADED') + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + '</span>' : '');
+      const state = svStatus(s);
       const inner =
         svStar(s.name, pinned) +
         '<div class="top">' + svIcon(s, 'svc-ico') + '<div><div class="nm">' + esc(s.name) + '</div><div class="bl">' + esc(s.blurb) + '</div></div></div>' +
         '<div class="meta">' + state + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div>' +
-        (GUIDES[s.key] ? '<div class="sv-guide-cta"><span class="sv-guide-btn" role="button" tabindex="0" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</span></div>' : '');
-      return s.dev
-        ? '<div class="sv-card isdev">' + inner + '</div>'
-        : '<a class="sv-card' + (svIsUp(s.name) ? '' : ' isdown') + '" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + inner + '</a>';
+        (GUIDES[s.key] ? '<div class="sv-guide-cta"><button type="button" class="sv-guide-btn" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</button></div>' : '');
+      return '<div class="sv-card' + (s.dev ? ' isdev' : svState.monmap[s.name] === false ? ' isdown' : '') + '">' +
+        (s.dev ? '' : '<a class="sv-card-hit" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open ' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')"></a>') + inner + '</div>';
     }).join('');
   };
   if (!window.__svGuideWire) {
@@ -3999,13 +4043,6 @@ function mspSessionBanner() {
       const k = b.dataset.gguide;
       if (typeof window.setTab === 'function') window.setTab('guides');
       try { const c = document.querySelector('.svc-guide-chip[data-guide="' + k + '"]'); if (c) c.click(); } catch (err) {}
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      const b = e.target && e.target.closest ? e.target.closest('.sv-guide-btn') : null;
-      if (!b) return;
-      e.preventDefault(); e.stopPropagation();
-      b.click();
     });
   }
   window.svSetFilter = function (f, ev) {
@@ -4045,14 +4082,14 @@ function mspSessionBanner() {
     host.innerHTML = '<div class="sv-spot-ico">' + svIcon(s, 'spotimg') + '</div>' +
       '<div class="sv-spot-main"><div class="sv-cat">Featured</div><div class="sv-spot-name">' + esc(s.name) + '</div>' +
       '<div class="sv-spot-blurb">' + esc(s.blurb) + '</div>' +
-      '<div class="sv-spot-meta"><span class="sv-live' + (svIsUp(s.name) ? '' : ' down') + '"><span class="sv-livedot' + (svIsUp(s.name) ? '' : ' down') + '"></span>' + (svIsUp(s.name) ? 'LIVE' : 'DEGRADED') + '</span>' + (svUp24(s.name) ? '<span class="sv-uppill">' + svUp24(s.name) + ' · 24h</span>' : '') + '</div>' +
+      '<div class="sv-spot-meta">' + svStatus(s) + '</div>' +
       '<div class="sv-dots">' + SV_FEATURED.map((n, di) => '<button type="button" class="sv-dot' + (di === svState.featured % SV_FEATURED.length ? ' on' : '') + '" aria-label="Show ' + esc(n) + '" onclick="svState.featured=' + di + ';window.svRenderSpot();window.svSpotTimerReset()"></button>').join('') + '</div></div>' +
-      '<a class="btn" href="' + s.url + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">Open ' + esc(s.name) + '</a>' +
+      (s.dev ? '' : '<a class="btn" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">Open ' + esc(s.name) + '</a>') +
       '<button type="button" class="sv-refresh" title="Next featured" aria-label="Next featured service" onclick="svState.featured++;window.svRenderSpot();window.svSpotTimerReset()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg></button>' +
       '<span class="sv-spot-timer" aria-hidden="true"><i></i></span>';
   };
   window.svRenderSpot(); window.svRenderOrbs(); window.svRenderRecent();
-  if (svcGrid) svcGrid.innerHTML = SERVICES.map((s) => '<div class="sv-card" style="opacity:.5"><div class="top">' + svIcon(s, 'svc-ico') + '<div><div class="nm">' + esc(s.name) + '</div><div class="bl">' + esc(s.blurb) + '</div></div></div></div>').join('');
+  if (svcGrid) window.svRenderGrid();
   (function svToolbar() {
     const host = document.getElementById('sv-toolbar'); if (!host) return;
     host.innerHTML = SV_CAT_LABELS.map((c, ci) => '<button type="button" class="sv-fchip' + (ci === 0 ? ' on' : '') + '" data-f="' + c[0] + '" onclick="window.svSetFilter(\'' + c[0] + '\')">' + c[1] + '</button>').join('') +
@@ -4068,28 +4105,28 @@ function mspSessionBanner() {
     const bar0 = document.querySelector('#sv-spot .sv-spot-timer i');
     if (bar0) bar0.style.width = '0%';
     let t0 = performance.now();
-    let last = t0;
     const step = (now) => {
       const p = document.getElementById('panel-services');
-      if (document.hidden || (p && p.hidden)) { t0 += now - last; } // frozen while hidden
+      if (document.hidden || (p && p.hidden)) { svSpotTimer = null; return; } // stop; setTab restarts on entry
       else {
         const el = Math.min(SV_SPOT_MS, now - t0);
         const bar = document.querySelector('#sv-spot .sv-spot-timer i');
         if (bar) bar.style.width = (el / SV_SPOT_MS) * 100 + '%';
         if (el >= SV_SPOT_MS) { svState.featured++; window.svRenderSpot(); window.svSpotTimerReset(); return; }
       }
-      last = now;
       svSpotTimer = requestAnimationFrame(step);
     };
     svSpotTimer = requestAnimationFrame(step);
   };
   window.svSpotTimerReset();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && window.currentTab === 'services') window.svSpotTimerReset(); });
   // service update dates (for the 'Recently updated' sort) — /api/updates is SWR-cached 30min server-side
   fetch('/api/updates').then((r) => (r.ok ? r.json() : null)).then((d) => {
     ((d && d.updates) || []).forEach((u) => {
       if (!u || !u.service || !u.date) return;
-      const prev = svState.updmap[u.service];
-      if (!prev || String(u.date) > String(prev)) svState.updmap[u.service] = u.date;
+      const key = u.service === 'open-webui' ? 'openwebui' : u.service;
+      const prev = svState.updmap[key];
+      if (!prev || String(u.date) > String(prev)) svState.updmap[key] = u.date;
     });
     if (svState.sort === 'updated') svRenderGrid();
   }).catch(() => {});
@@ -4110,7 +4147,7 @@ function mspSessionBanner() {
       }
     });
     window.svRenderSpot(); window.svRenderOrbs(); window.svRenderGrid(); window.svUpsum();
-  }).catch(() => {});
+  }).catch(() => { svState.statusError = true; window.svRenderSpot(); window.svRenderOrbs(); window.svRenderGrid(); });
   // suggest dialog wiring (native <dialog>: Esc + backdrop-click close)
   window.openSuggestDialog = function () { const d = document.getElementById('sg-dialog'); if (d && !d.open) d.showModal(); };
 
@@ -4197,9 +4234,9 @@ function mspSessionBanner() {
   };
   window.svUpsum();
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
-  const hmJF = ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
+  const hmJF = () => ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
   const hmJF_ITEM = '#services';   // no Moonfin web client — see Services
-  const hmBackdrop = (id, w) => hmJF + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
+  const hmBackdrop = (id, w) => hmJF() + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
   const hmGreetingWord = () => { const h = new Date().getHours(); return (h < 5 ? 'Good night,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'); };
   function hmJourney(level) {
     let h = '';
@@ -4335,7 +4372,7 @@ function mspSessionBanner() {
     }, 'Copy address');
   }
 
-  const MP_CACHE_KEY = 'msp_pin_v1';
+  const MP_CACHE_KEY = 'msp_pin_v2:' + String(me.username).toLowerCase();
   function mpCacheRead() {
     try { return JSON.parse(sessionStorage.getItem(MP_CACHE_KEY) || 'null'); } catch (e) { return null; }
   }
@@ -4346,7 +4383,7 @@ function mspSessionBanner() {
     // Paint the card from this session's last response before the network
     // answers — the fetch stays authoritative and overwrites it a moment later.
     const cached = mpCacheRead();
-    if (cached && cached.pin) mpPinRender(body, cached);
+    if (cached && cached.pin) mpPinRender(body, cached); // key is already scoped to this member
     else body.innerHTML = '<div class="skel"></div>';
     let d = {};
     try {
@@ -4373,11 +4410,6 @@ function mspSessionBanner() {
       if (b) b.addEventListener('click', () => window.mpLoadPin(true));
     }
   };
-  // Warm the card while the browser is idle, so the first Media visit paints
-  // from memory instead of waiting on a round trip that mints the persona.
-  const mpWarm = () => { try { window.mpLoadPin(); } catch (e) {} };
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(mpWarm, { timeout: 3500 });
-  else setTimeout(mpWarm, 2200);
 
   /* ONE continue-watching fetch for the hero and the rail. Two independent
      calls could disagree (SWR hands the first caller a stale entry and
@@ -4441,7 +4473,7 @@ function mspSessionBanner() {
     const initial = esc(String((it && it.name) || '?').trim().charAt(0).toUpperCase() || '?');
     const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
     const rating = (it && it.rating != null) ? Number(it.rating).toFixed(1) : null;
-    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + '" target="_blank" rel="noopener noreferrer">' +
+    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + '">' +
       '<span class="hm-poster hm-g' + (i % 3) + '"><span class="hm-poster-init">' + initial + '</span>' +
       ((it && it.img) ? '<img loading="lazy" alt="" src="' + esc(String(it.img)) + '" onerror="this.remove()">' : '') +
       (rating ? '<span class="hm-pbadge hm-rate-badge">' + rating + '</span>' : '<span class="hm-pbadge">NEW</span>') + '</span>' +
@@ -4475,7 +4507,7 @@ function mspSessionBanner() {
     const pct = Math.max(0, Math.min(100, Number(it && it.progressPct) || 0));
     /* the title is the show now, so the sub-line is the episode (or the type for a film) */
     const sub = (it && it.seriesName) ? String(it.name || '') : String((it && it.type) || '');
-    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + '" target="_blank" rel="noopener noreferrer">' +
+    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + '">' +
       '<img class="hm-wide-art" loading="lazy" alt="" src="' + esc(hmBackdrop(it && it.id, 480)) + '" onerror="this.style.display=\'none\'">' +
       '<span class="hm-wide-glow"></span>' +
       '<span class="hm-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>' +
@@ -4595,7 +4627,7 @@ function mspSessionBanner() {
   if (obHuman) obHuman.addEventListener('click', () => setTab('contact'));
   const ctCopy = document.getElementById('ct-copy');
   if (ctCopy) ctCopy.addEventListener('click', async () => {
-    const email = 'support@mysweetpea.cc';
+    const email = (window.MSP_CFG && window.MSP_CFG.supportEmail) || 'support@mysweetpea.cc';
     const setLabel = (t) => { try { ctCopy.textContent = t; } catch (e2) {} };
     try {
       await navigator.clipboard.writeText(email);
@@ -4623,7 +4655,7 @@ function mspSessionBanner() {
     const where = document.getElementById('bug-where');
     const send = document.getElementById('bug-send');
     if (!what || !send) return;
-    const sync = () => { send.disabled = what.value.trim().length < 4; };
+    const sync = () => { send.disabled = !where.value.trim() || what.value.trim().length < 4; };
     what.addEventListener('input', sync);
     where.addEventListener('input', sync);
     const dlg = document.getElementById('bug-dialog');
@@ -4691,11 +4723,21 @@ function mspSessionBanner() {
       } else if (hint) hint.classList.remove('error', 'success');
       return valid;
     };
-    const checkSubmit = () => { submit.disabled = !fields.every(validate); };
+    const email = document.getElementById('sg-youremail');
+    const emailValid = () => {
+      const value = String(email.value || '').trim(), valid = !value || email.checkValidity();
+      const hint = document.getElementById('sg-youremail-hint');
+      if (hint) { hint.classList.toggle('error', !!value && !valid); hint.classList.toggle('success', !!value && valid); }
+      email.setAttribute('aria-invalid', value && !valid ? 'true' : 'false');
+      return valid;
+    };
+    const checkSubmit = () => { submit.disabled = !fields.every(validate) || !emailValid(); };
+    email.addEventListener('input', checkSubmit);
+    email.addEventListener('blur', checkSubmit);
     fields.forEach((f) => ['input', 'change', 'blur'].forEach((ev) => f.el.addEventListener(ev, () => checkSubmit())));
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      if (!fields.every(validate)) { const dlg0 = document.getElementById('sg-dialog'); if (dlg0 && dlg0.open) dlg0.close(); toast('Please fix the highlighted fields', { err: true }); return; }
+      if (!fields.every(validate) || !emailValid()) { toast('Please fix the highlighted fields', { err: true }); return; }
       submit.disabled = true;
       submit.textContent = 'Sending…';
       const payload = {
@@ -4930,9 +4972,11 @@ function relFuture(v) {
       }).join('') + '<div class="row"><div class="left"><span class="dim">Ends all other sessions</span></div><button class="mini" id="revoke-all">Sign out everywhere</button></div>';
     el.querySelectorAll('button.mini[data-sid]').forEach(b => b.onclick = async () => {
       b.disabled = true; b.textContent = '…';
-      await fetch('/api/sessions/' + b.dataset.sid, { method: 'DELETE' });
-      const row = b.closest('.sess-row'); if (row) row.style.opacity = .35; b.textContent = 'Signed out';
-      toast('Session signed out', { action: () => location.reload(), label: 'Reload' });
+      const ok = (await revokeSessionSet([{ uuid: b.dataset.sid }]))[0];
+      if (ok) {
+        const row = b.closest('.sess-row'); if (row) row.style.opacity = .35; b.textContent = 'Signed out';
+        toast('Session signed out', { action: () => location.reload(), label: 'Reload' });
+      } else { b.disabled = false; b.textContent = 'Sign out'; toast('Could not sign out that session — try again', { type: 'err' }); }
     });
     const all = el.querySelector('#revoke-all');
     if (all) all.onclick = async () => {
@@ -4940,9 +4984,11 @@ function relFuture(v) {
       $('#confirm-all').onclick = async () => {
         closeModal();
         const others = list.filter(s => !s.current);
-        for (const s of others) await fetch('/api/sessions/' + s.uuid, { method: 'DELETE' });
-        toast('Signed out ' + others.length + ' session' + (others.length === 1 ? '' : 's'));
-        setTimeout(() => location.reload(), 900);
+        const results = await revokeSessionSet(others);
+        const count = results.filter(Boolean).length, failed = results.length - count;
+        if (count) toast('Signed out ' + count + ' session' + (count === 1 ? '' : 's') + (failed ? '; ' + failed + ' failed' : ''));
+        else toast('Could not sign out those sessions — try again', { type: 'err' });
+        if (count) setTimeout(() => location.reload(), 900);
       };
     };
   }).catch(() => { $('#sec-sessions').innerHTML = '<p class="eyebrow">Sessions</p><h3>Your sessions</h3><p class="dim">Unavailable.</p>'; });
@@ -5044,7 +5090,7 @@ function relFuture(v) {
       var name = String(s.name || '');
       /* avoid "Open Open WebUI" when the name already starts with Open */
       var title = /^open\b/i.test(name) ? name : 'Open ' + name;
-      return { t: title, d: (s.blurb || '') + ' · ' + String(s.url || '').replace(/^https?:\/\//, '').split('/')[0], k: MSP_SVC_KW[s.name] || '', run: function () { window.open(s.url, '_blank', 'noopener'); } };
+      return { t: title, d: (s.blurb || '') + ' · ' + String(mspCfgUrl(s.url) || '').replace(/^https?:\/\//, '').split('/')[0], k: MSP_SVC_KW[s.name] || '', run: function () { window.open(mspCfgUrl(s.url), '_blank', 'noopener'); } };
     });
   }
   function mspGuideCmds() {
@@ -5141,7 +5187,7 @@ function relFuture(v) {
   });
   /* palette button (topbar is built dynamically -> delegated) */
   document.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'pal-open') { e.preventDefault(); window.mspPalette.open(); }
+    if (e.target && e.target.closest && e.target.closest('#pal-open')) { e.preventDefault(); window.mspPalette.open(); }
   });
 })();
   // ===== account dropdown: delegated handlers (work regardless of render timing) =====
@@ -5401,7 +5447,7 @@ function relFuture(v) {
           // Retired services are not "new on the platform" — drop them once
           // here so the bell count, the popup and the home rail all agree.
           if (updData && Array.isArray(updData.updates)) {
-            updData.updates = validObjects(updData.updates).filter(function (u) { return UPD_HIDDEN.indexOf(u.service) < 0; });
+            updData.updates = validObjects(updData.updates).filter(function (u) { return UPD_HIDDEN.indexOf(u.service) < 0; }).map(function (u) { u.releaseUrl = safeHttpUrl(u.releaseUrl); return u; });
           }
         }
       } catch (e) { /* feed stays hidden */ }
@@ -5668,7 +5714,7 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .ct3-mailrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px solid var(--border-primary);border-radius:12px;padding:13px 16px;background:rgba(10,12,22,.5)}
 .ct3-mail{color:var(--text);font-size:.98rem;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s ease;overflow-wrap:anywhere}
 .ct3-mail:hover{border-bottom-color:var(--sage)}
-.ct3-copy{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;border:1px solid var(--border-primary);background:transparent;color:var(--primary-bright);padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .2s ease;flex:none}
+.ct3-copy{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;border:1px solid var(--border-primary);background:transparent;color:var(--primary-bright);padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .2s ease;flex:none;min-height:44px;min-width:64px}
 .ct3-copy:hover{background:rgba(139,126,246,.12);border-color:rgba(139,126,246,.5)}
 .ct3-cta{margin-top:14px;width:100%;justify-content:center;border:none;background:linear-gradient(135deg,var(--primary),#5B9DF6);color:#0C1316;font-weight:700;font-size:.9rem;padding:13px 18px;border-radius:12px;cursor:pointer;text-decoration:none;transition:transform .2s ease,box-shadow .2s ease}
 .ct3-cta:hover{transform:translateY(-1px);box-shadow:0 9px 26px rgba(139,126,246,.35)}
@@ -5856,7 +5902,7 @@ h1.gate-h{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size
 
 /* ===== SERVICES guide CTA ===== */
 .sv-guide-cta{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.sv-guide-btn{display:inline-flex;align-items:center;gap:7px;font-size:.76rem;font-weight:600;color:var(--primary-bright);cursor:pointer;padding:6px 12px;border-radius:9px;border:1px solid rgba(139,126,246,.25);background:rgba(139,126,246,.07);transition:all .2s ease}
+.sv-guide-btn{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:.76rem;font-weight:600;color:var(--primary-bright);cursor:pointer;padding:6px 12px;border-radius:9px;border:1px solid rgba(139,126,246,.25);background:rgba(139,126,246,.07);transition:all .2s ease}
 .sv-guide-btn svg{width:14px;height:14px}
 .sv-guide-btn:hover{background:rgba(139,126,246,.16);border-color:rgba(139,126,246,.5)}
 .sv-guide-btn:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
@@ -5884,7 +5930,8 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
 #panel-services .sv-card .nm{font-size:.95rem;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 #panel-services .sv-card:hover .nm{white-space:normal;overflow:visible;word-break:break-word}
 #panel-services .sv-card .bl{font-size:.78rem;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-#panel-services .sv-card .meta{margin-top:auto}
+#panel-services .sv-card .meta{margin-top:auto;flex-wrap:wrap}
+#panel-services .sv-card .sv-cat{max-width:100%}
 @media (max-width:768px){
  #panel-services .sv-grid{grid-template-columns:1fr;gap:10px}
  #panel-services .sv-card{padding:14px 16px 12px;gap:8px}

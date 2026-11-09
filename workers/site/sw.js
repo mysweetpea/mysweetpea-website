@@ -4,30 +4,30 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-ha69bc6e0';
+const CACHE = 'mysweetpea-h5582560a';
 const CORE = [
-        '/assets/js/services-page.js?v=habd2a9e0',
+        '/assets/js/services-page.js?v=hde7d3914',
         '/assets/js/site-data.js?v=h109cb376',
         '/assets/site-data.json',
-        '/assets/js/redeem-page.js?v=hffc2e2b9',
+        '/assets/js/redeem-page.js?v=h38267321',
         '/assets/js/status-page.js?v=h45a3307e',
         '/assets/js/about-page.js?v=h1a2908e3',
-        '/assets/js/form-page.js?v=h025f7ce2',
-        '/assets/js/changelog-page.js?v=h617471db',
+        '/assets/js/form-page.js?v=hb5cbfe52',
+        '/assets/js/changelog-page.js?v=h54254541',
         '/assets/js/support-page.js?v=h32bcd4cc',
         '/assets/css/type-tokens.css?v=h6e396228',
         '/assets/css/hermes-type.css?v=hdf458fd2',
   '/',
   '/index.html',
   '/assets/css/fonts.css?v=h6b17b99d',
-  '/assets/css/site.css?v=hede86e62',
-  '/assets/css/premium.css?v=h3f850703',
+  '/assets/css/site.css?v=hfded513a',
+  '/assets/css/premium.css?v=hf831a15e',
   '/assets/css/home.css?v=hb17db558',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',
-  '/assets/js/site.js?v=ha7c03ff6',
+  '/assets/js/site.js?v=h899e544e',
   '/assets/js/premium.js?v=h84a6809b',
-  '/assets/js/home-page.js?v=h59bbae3e',
+  '/assets/js/home-page.js?v=h4d3b5fa6',
   '/assets/js/lenis.min.js?v=h1375bb5f',
   '/assets/js/lenis-init.js?v=h3379bccf',
   '/assets/fonts/figtree-var.woff2',
@@ -95,6 +95,11 @@ self.addEventListener('fetch', (event) => {
 
   const reqUrl = new URL(req.url);
 
+  // Private/session-bearing API responses must NEVER enter the shared cache.
+  // Also leave third-party requests to the browser; runtime caching is for our
+  // static/public same-origin assets only.
+  if (reqUrl.origin !== self.location.origin || reqUrl.pathname.startsWith('/api/')) return;
+
   // NEVER intercept Cloudflare challenge/platform traffic (/cdn-cgi/*).
   // The HTML handler below reconstructs responses from raw text, which drops
   // Set-Cookie (cf_clearance) and challenge headers — the BFM challenge then
@@ -125,7 +130,7 @@ self.addEventListener('fetch', (event) => {
             headers,
           });
           const copy = out.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
+          event.waitUntil(caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {}));
           return out;
         });
       }).catch(() => caches.match(req).then((cached) => cached || caches.match('/index.html')))
@@ -140,11 +145,12 @@ self.addEventListener('fetch', (event) => {
       const fetchPromise = fetch(req).then((res) => {
         if (res && res.status === 200) {
           const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
+          event.waitUntil(caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {}));
         }
         return res;
       }).catch(() => cached);
 
+      event.waitUntil(fetchPromise);
       return cached || fetchPromise;
     })
   );

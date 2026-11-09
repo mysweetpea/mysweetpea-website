@@ -855,6 +855,7 @@ async function fileBugIssue(env: Env, rec: BugRecord): Promise<boolean> {
   const repo = env.GH_ISSUES_REPO;
   if (!env.GITHUB_TOKEN || !repo) return false;
   const first = rec.what.split('\n')[0].trim();
+  const inline = (v: unknown) => String(v || '—').replace(/[`\r\n]/g, ' ').slice(0, 300);
   const short = first.length > 58 ? first.slice(0, 57).trimEnd() + '…' : first;
   const loc = (rec.where || rec.tab || 'dashboard').slice(0, 40);
   const title = '[bug] ' + loc + ' — ' + short;
@@ -864,9 +865,9 @@ async function fileBugIssue(env: Env, rec: BugRecord): Promise<boolean> {
   if (rec.auto) lines.push('_filed automatically by the error handler_');
   lines.push(
     '',
-    `where: \`${rec.where || '—'}\` · tab: \`${rec.tab || '—'}\` · viewport: \`${rec.vp || '—'}\``,
-    `url: ${rec.url || '—'}`,
-    `ua: ${rec.ua || '—'}`,
+    `where: \`${inline(rec.where)}\` · tab: \`${inline(rec.tab)}\` · viewport: \`${inline(rec.vp)}\``,
+    `url: ${inline(rec.url)}`,
+    `ua: ${inline(rec.ua)}`,
     '',
     '**What happened**',
     '```',
@@ -1844,9 +1845,9 @@ export default {
       if (path === '/api/bug' && request.method === 'POST') {
         let b: any = {};
         try { b = await request.json(); } catch { /* handled below */ }
-        const where = String(b.where || '').slice(0, 80).trim();
-        const what = String(b.what || '').slice(0, 2000).trim();
-        if (!what) return json({ error: 'Describe the bug first' }, 400);
+        const where = (typeof b.where === 'string' ? b.where : '').replace(/[`\r\n]/g, ' ').slice(0, 80).trim();
+        const what = (typeof b.what === 'string' ? b.what : '').slice(0, 2000).trim();
+        if (!where || !what) return json({ error: 'Location and description required' }, 400);
         const auto = b.auto === true;
         const rec: BugRecord = {
           id: 'bug-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),

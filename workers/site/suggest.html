@@ -53,8 +53,8 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=h6b17b99d">
-    <link rel="stylesheet" href="/assets/css/site.css?v=hede86e62">
-    <link rel="stylesheet" href="/assets/css/premium.css?v=h3f850703">
+    <link rel="stylesheet" href="/assets/css/site.css?v=hfded513a">
+    <link rel="stylesheet" href="/assets/css/premium.css?v=hf831a15e">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=h6e396228">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=hdf458fd2">
 <link rel="canonical" href="https://mysweetpea.cc/suggest">
@@ -257,7 +257,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=h1375bb5f" defer></script>
     <script src="/assets/js/lenis-init.js?v=h3379bccf" defer></script>
-    <script src="/assets/js/site.js?v=ha7c03ff6" defer></script>
+    <script src="/assets/js/site.js?v=h899e544e" defer></script>
     <script src="/assets/js/site-data.js?v=h109cb376" defer></script>
     <script src="/assets/js/premium.js?v=h84a6809b" defer></script>    <script>
 function validateField(id, type) {
@@ -278,8 +278,10 @@ function validateField(id, type) {
             checkSubmit(); return valid;
         }
         function checkSubmit() {
+            var btn = document.getElementById('s-submit');
+            if (btn.classList.contains('loading')) return;
             var valid = ['s-name', 's-category', 's-reason'].every(function(id) { var el = document.getElementById(id); return el && el.classList.contains('valid'); }) && (function(u){ return !u.value.trim() || u.classList.contains('valid'); })(document.getElementById('s-url'));
-            document.getElementById('s-submit').disabled = !valid;
+            btn.disabled = !valid;
         }
         /* CSP-safe validation binding (inline oninput/onchange handlers are blocked
            by the hash-based script-src — bind via addEventListener instead) */
@@ -305,8 +307,15 @@ function validateField(id, type) {
                 if (btn && !btn.disabled) btn.click();
             });
         });
+        var submitGeneration = 0;
         document.getElementById('s-submit').addEventListener('click', function() {
             var btn = this;
+            if (btn.classList.contains('loading')) return;
+            var generation = ++submitGeneration;
+            var aborter = typeof AbortController !== 'undefined' ? new AbortController() : null, timedOut = false;
+            /* Abort the POST itself, not just its promise, so a retry cannot be
+               completed later by an abandoned request. */
+            var abortTimer = setTimeout(function () { timedOut = true; if (aborter) aborter.abort(); }, 15000);
             btn.classList.add('loading'); btn.disabled = true;
             var payload = {
                 service_name: document.getElementById('s-name').value.trim(),
@@ -316,19 +325,16 @@ function validateField(id, type) {
                 your_name: document.getElementById('s-yourname').value.trim() || '',
                 your_email: document.getElementById('s-youremail') ? document.getElementById('s-youremail').value.trim() : ''
             };
-            /* 15s budget: a hung connection must release the button instead of
-               leaving it permanently 'Submitting…' */
-            var post = fetch('/api/suggest', {
+            fetch('/api/suggest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            var timeout = new Promise(function (_, rej) {
-                setTimeout(function () { rej(new Error('timeout')); }, 15000);
-            });
-            Promise.race([post, timeout])
+                body: JSON.stringify(payload),
+                signal: aborter ? aborter.signal : undefined
+            })
             .then(function(r) { return r.text().then(function(t){ if(t){try{return JSON.parse(t);}catch(e){return {ok:r.ok};}} return {ok:r.ok}; }); })
             .then(function(data) {
+                clearTimeout(abortTimer);
+                if (generation !== submitGeneration) return;
                 if (data.ok) {
                     var sm = document.getElementById('successMsg'); sm.hidden = false; sm.classList.add('show');
                     document.querySelector('.card').style.display = 'none';
@@ -338,13 +344,15 @@ function validateField(id, type) {
                 } else {
                     btn.textContent = data.msg || 'Submission failed';
                     btn.classList.remove('loading'); btn.disabled = false;
-                    setTimeout(function() { btn.textContent = 'Submit Suggestion'; }, 3000);
+                    setTimeout(function() { if (generation === submitGeneration) btn.textContent = 'Submit Suggestion'; }, 3000);
                 }
             })
             .catch(function(err) {
-                btn.textContent = err && err.message === 'timeout' ? 'Timed out — try again.' : 'Network error. Try again.';
+                clearTimeout(abortTimer);
+                if (generation !== submitGeneration) return;
+                btn.textContent = timedOut ? 'Timed out — try again.' : 'Network error. Try again.';
                 btn.classList.remove('loading'); btn.disabled = false;
-                setTimeout(function() { btn.textContent = 'Submit Suggestion'; }, 3000);
+                setTimeout(function() { if (generation === submitGeneration) btn.textContent = 'Submit Suggestion'; }, 3000);
             });
         });
     

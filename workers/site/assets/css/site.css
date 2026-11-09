@@ -8659,7 +8659,11 @@ body[data-page='services'] .service-card .svc-open {
     cursor: pointer;
     font: inherit;
     color: inherit;
-    display: inline;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    max-width: 100%;
+    text-align: left;
     border-radius: 6px;
 }
 body[data-page='services'] .service-card .svc-open:focus-visible {

@@ -200,6 +200,16 @@ def main():
     r = subprocess.run([sys.executable, 'rebuild_csp.py', '--check'], capture_output=True, text=True)
     csp_drift = 'OK' if (r.returncode == 0 and 'drift' not in (r.stdout or '').lower()) else 'DRIFT'
     report.append('rebuild_csp.py --check: %s%s' % (csp_drift, '' if csp_drift == 'OK' else ' (run: python rebuild_csp.py)'))
+    if r.returncode != 0:
+        problems.append('CSP hash drift: run python rebuild_csp.py before deploying')
+
+    # Behavioral regressions share the release gate; each runs in its own process.
+    for test in ('test-worker.mjs', 'test-sw.js', 'test-public-interactions.cjs'):
+        if os.path.isfile(test):
+            tr = subprocess.run(['node', test], capture_output=True, text=True)
+            report.append('%s: %s' % (test, 'PASS' if tr.returncode == 0 else 'FAIL'))
+            if tr.returncode != 0:
+                problems.append('%s failed: %s' % (test, (tr.stderr or tr.stdout).strip()[-500:]))
 
     # ---- 5. report ----
     print('=' * 62)

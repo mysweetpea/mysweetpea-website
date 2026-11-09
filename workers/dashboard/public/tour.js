@@ -29,7 +29,7 @@
   if (window.mspTour) return; // idempotent
 
   var KEY = 'msp_tour_v1';
-  var MOBILE_MQ = '(max-width: 768px)';
+  var MOBILE_MQ = '(max-width: 760px)';
   var TWEEN_MS = 380;   // cutout travel
   var PAD = 8;          // cutout padding around the target
   var RADIUS = 14;      // cutout corner radius
@@ -215,6 +215,8 @@
   var rafId = null;
   var escHandler = null, resizeHandler = null;
   var seq = 0;        // guards against a stale async step finishing late
+  var dir = 1;        // direction used when skipping an unavailable target
+  var opener = null;
   // Tab state is STICKY: a step without `tab` inherits the previous step's tab.
   // Without this, stepping BACKWARD from a tab-switching step left the app on
   // the wrong panel, so the next target was hidden and the tour looked broken.
@@ -259,9 +261,9 @@
       '  padding:9px 18px;border-radius:999px;font-size:.83rem;font-weight:700;letter-spacing:.2px;',
       '  background:linear-gradient(135deg,rgba(139,126,246,.97),rgba(69,214,200,.92));color:#08090f;',
       '  box-shadow:0 12px 34px rgba(0,0,0,.5);white-space:nowrap}',
-      '@media (max-width:768px){.mst-toast{top:76px;bottom:auto}}',
+      '@media (max-width:760px){.mst-toast{top:76px;bottom:auto}}',
       // mobile: card becomes a bottom sheet — thumb reachable, no clamping math
-      '@media (max-width:768px){',
+      '@media (max-width:760px){',
       '  .mst-card{left:0!important;right:0;bottom:0;top:auto!important;max-width:none;',
       '    border-radius:18px 18px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom))}',
       '  .mst-skip{top:auto;bottom:calc(100% + 8px);right:14px}',
@@ -418,12 +420,13 @@
   /* ── drawer + account helpers (reuse existing UI) ──────────────────── */
   function setDrawer(open) {
     var d = document.getElementById('dh-menu');
-    if (!d) return;
-    d.classList.toggle('dh-open', !!open);
+    var nav = document.getElementById('top-nav');
+    var tg = document.getElementById('nav-toggle');
+    if (nav) nav.classList.toggle('nav-open', !!open);
+    if (d) d.classList.toggle('dh-open', !!open);
     // the tour owns the lock while it is visible — closing the drawer must not
     // re-enable page scroll underneath the overlay
     document.body.classList.toggle('dh-lock', !!open || (root && !root.hidden));
-    var tg = document.getElementById('nav-toggle');
     if (tg) tg.setAttribute('aria-expanded', open ? 'true' : 'false');
   }
 
@@ -482,6 +485,8 @@
           (last ? 'Done' : esc(st.nextLabel || 'Next')) +
         '</button>' +
       '</div>';
+    var primary = card.querySelector('.mst-btn.primary');
+    if (primary) primary.focus({ preventScroll: true });
     animateCard();
   }
 
@@ -499,6 +504,26 @@
     try { el.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (e) {}
   }
 
+  function visible(el) {
+    if (!el || !el.getClientRects().length || getComputedStyle(el).visibility !== 'visible') return false;
+    var r = el.getBoundingClientRect();
+    return r.width > 1 && r.height > 1;
+  }
+  function whenVisible(st, my, cb) {
+    if (!st.target) return cb(null);
+    var t0 = performance.now();
+    (function poll() {
+      if (my !== seq) return;
+      var el = document.querySelector(st.target);
+      if (visible(el)) return cb(el);
+      if (performance.now() - t0 >= 1200) {
+        if (dir < 0) back(); else next();
+        return;
+      }
+      requestAnimationFrame(poll);
+    })();
+  }
+
   var TAB_LABELS = {
     home: 'Home', media: 'Media', services: 'Services',
     stats: 'Stats', guides: 'Guides', contact: 'Contact',
@@ -506,6 +531,7 @@
 
   function arrive(st, el, my) {
     if (my !== seq) return;
+    if (st.target && !visible(el)) { if (dir < 0) back(); else next(); return; }
     tweenTo(cutoutFor(el), TWEEN_MS);
     placeCard(el);
     clearDoIt();
@@ -525,7 +551,9 @@
     // side effects first, so the layout we measure is the layout we keep
     if (st.drawer === true) setDrawer(true);
     else if (st.drawer === false) setDrawer(false);
-    if (st.openAcct) setAcct(true);
+    // Let the initiating click finish bubbling before opening, or the account
+    // menu's outside-click handler immediately closes it again.
+    if (st.openAcct) setTimeout(function () { if (my === seq) setAcct(true); }, 0);
     if (st.closeAcct) setAcct(false);
     block.hidden = !!st.doIt;
 
@@ -542,9 +570,10 @@
 
     if (!needsTab) {
       // FAST PATH: no panel change, so the cutout can move on the next frame.
-      var el = st.target ? document.querySelector(st.target) : null;
-      revealTarget(el);
-      requestAnimationFrame(function () { arrive(st, el, my); });
+      whenVisible(st, my, function (el) {
+        revealTarget(el);
+        requestAnimationFrame(function () { arrive(st, el, my); });
+      });
       return;
     }
 
@@ -557,9 +586,10 @@
     setTimeout(function () {
       if (my !== seq) return;
       // look the target up only now: the panel has just been rendered
-      var el2 = st.target ? document.querySelector(st.target) : null;
-      revealTarget(el2);
-      settle(el2, function () { arrive(st, el2, my); }, 900);
+      whenVisible(st, my, function (el2) {
+        revealTarget(el2);
+        settle(el2, function () { arrive(st, el2, my); }, 900);
+      });
     }, TAB_SETTLE);
   }
 
@@ -574,8 +604,8 @@
     idx = Math.max(0, Math.min(i, steps.length - 1));
     paint();
   }
-  function next() { if (idx >= steps.length - 1) finish(); else go(idx + 1); }
-  function back() { if (idx > 0) go(idx - 1); }
+  function next() { dir = 1; if (idx >= steps.length - 1) finish(); else go(idx + 1); }
+  function back() { dir = -1; if (idx > 0) go(idx - 1); }
 
   /* ── lifecycle ─────────────────────────────────────────────────────── */
   function start(force) {
@@ -584,8 +614,9 @@
     // restarting an open tour used to overwrite escHandler/resizeHandler, so the
     // old pair could never be removed and every restart stacked another listener
     if (!root.hidden) finish();
+    opener = document.activeElement;
     steps = isMobile() ? MOBILE_STEPS : DESKTOP_STEPS;
-    idx = 0; stage = null; seq++;
+    idx = 0; stage = null; seq++; dir = 1;
     curTab = 'home';
     appliedTab = 'home';   // the welcome step needs no tab switch, so skip the slow path
     try { if (typeof window.setTab === 'function') window.setTab('home'); } catch (e) {}
@@ -595,7 +626,21 @@
     if (!reduceMotion() && root.animate) {
       root.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280, easing: 'ease-out' });
     }
-    escHandler = function (e) { if (e.key === 'Escape') finish(); };
+    escHandler = function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); finish(); return; }
+      if (e.key !== 'Tab') return;
+      var st = steps[idx];
+      var items = Array.prototype.slice.call(card.querySelectorAll('button:not([disabled]),a[href]'))
+        .filter(function (el) { return el.getClientRects().length; });
+      var actionTarget = st && st.doIt && st.target ? document.querySelector(st.target) : null;
+      if (actionTarget && actionTarget.getClientRects().length) items.push(actionTarget);
+      if (!items.length) { e.preventDefault(); return; }
+      e.preventDefault();
+      var current = items.indexOf(document.activeElement);
+      var nextIndex = current < 0 ? (e.shiftKey ? items.length - 1 : 0)
+        : (current + (e.shiftKey ? -1 : 1) + items.length) % items.length;
+      items[nextIndex].focus();
+    };
     document.addEventListener('keydown', escHandler);
     resizeHandler = function () {
       var st = steps[idx];
@@ -623,6 +668,10 @@
     if (escHandler) document.removeEventListener('keydown', escHandler);
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     escHandler = resizeHandler = null;
+    var focusTarget = opener && opener !== document.body && opener.isConnected && opener.getClientRects().length
+      ? opener : (document.getElementById('acct-trigger') || document.getElementById('tour-open'));
+    if (focusTarget) focusTarget.focus({ preventScroll: true });
+    opener = null;
   }
 
   function seen() { try { return localStorage.getItem(KEY) === '1'; } catch (e) { return true; } }
@@ -632,6 +681,7 @@
     var t = e.target && e.target.closest ? e.target.closest('[data-tour]') : null;
     if (!t) return;
     e.preventDefault();
+    e.stopPropagation(); // do not let the app's outside-click handler close a tour-opened drawer
     var act = t.getAttribute('data-tour');
     if (act === 'next') next();
     else if (act === 'back') back();

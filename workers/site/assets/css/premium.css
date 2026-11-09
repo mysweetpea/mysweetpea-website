@@ -1916,7 +1916,7 @@ body[data-page='redeem'] .verify-banner a { color: var(--sage); border-bottom: 1
    3x3 grid at 1440, interior hierarchy, M3 hover, pill-on-own-row,
    focus ring, rhythm. Replaces the r2b/r2c patch-on-patch block. */
 
-body[data-page='services'] .services-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+body[data-page='services'] .services-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 20px; }
 
 /* interior hierarchy */
 body[data-page='services'] .service-card h3 { font-size: 1.12rem; letter-spacing: .01em; line-height: 1.25; }
@@ -2981,7 +2981,7 @@ body[data-page='services'] .coming-soon-card { display: block;
 /* grids */
 body[data-page='services'] .services-grid,
 body[data-page='services'] .coming-soon-grid { display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     gap: 18px; }
 
 body[data-page='services'] .card-inner { min-width: 0; }

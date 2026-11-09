@@ -29,6 +29,9 @@
     if (reduce || !(target > 0)) { el.textContent = target.toFixed(dec) + suffix; return; }
     var t0 = null, dur = 1100;
     function step(ts){
+      var current = parseFloat(el.getAttribute('data-count'));
+      if (!isFinite(current)) return;
+      target = current;
       if(!t0) t0 = ts;
       var p = Math.min((ts - t0)/dur, 1);
       var eased = 1 - Math.pow(1-p, 4);

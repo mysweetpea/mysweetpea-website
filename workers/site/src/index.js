@@ -45,7 +45,7 @@ export default {
       }
       // In-flight dedup: concurrent cold misses share one GitHub fan-out;
       // the handler RETURNS the shared promise so the route resolves the response.
-      if (commitsInflight) return commitsInflight;
+      if (commitsInflight) return (await commitsInflight).clone();
       commitsInflight = (async () => {
       const token = env.GITHUB_TOKEN || '';
       /* repos come from the environment (vars) so a future repo rename is a
@@ -58,10 +58,11 @@ export default {
       };
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
+      let failedRepos = 0;
       const results = await Promise.all(repos.map(async (repo) => {
         try {
           const res = await fetch('https://api.github.com/repos/' + repo + '/commits?per_page=100', { headers });
-          if (!res.ok) { console.error('commits fetch failed', repo, res.status); return []; }
+          if (!res.ok) { console.error('commits fetch failed', repo, res.status); failedRepos++; return []; }
           let data = await res.json();
           // Paginate until the 30-day window is covered (guarded, max 3 pages).
           const cutoff = Date.now() - 30 * 86400000;
@@ -70,12 +71,12 @@ export default {
             const od = oldest && oldest.commit && oldest.commit.author && Date.parse(oldest.commit.author.date);
             if (!od || od < cutoff) break;
             const res2 = await fetch('https://api.github.com/repos/' + repo + '/commits?per_page=100&page=' + (page + 1), { headers });
-            if (!res2.ok) break;
+            if (!res2.ok) { failedRepos++; break; }
             const more = await res2.json();
             if (!Array.isArray(more) || more.length === 0) break;
             data = data.concat(more);
           }
-          if (!Array.isArray(data)) return [];
+          if (!Array.isArray(data)) { failedRepos++; return []; }
           return data.filter((c) => c && c.sha && c.commit && c.commit.author && c.commit.author.date).map((c) => ({
             repo: repo, /* full owner/name — display labels are the page's job */
             full: c.sha,
@@ -85,6 +86,7 @@ export default {
           }));
         } catch (e) {
           console.error('commits fetch threw', repo, e && e.message);
+          failedRepos++;
           return [];
         }
       }));
@@ -200,7 +202,15 @@ export default {
       // Cache good results for the full TTL; cache empty results only 30s so a
       // GitHub failure/repo-hiccup bounds the fan-out instead of re-fetching on
       // every request, without blanking the changelog for 5 minutes.
-      const ttl = (items.length > 0 || total.noise > 0) ? COMMITS_TTL : 30_000;
+      // A total outage must never overwrite the last good payload. Serve it
+      // stale with a 30s retry; partial failures also retry quickly.
+      if (failedRepos === repos.length && repos.length && items.length === 0 && commitsCache.data) {
+        commitsCache = { ...commitsCache, ts: now, ttl: 30_000 };
+        return new Response(JSON.stringify(commitsCache.data), {
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=30', 'X-Cache': 'STALE' }
+        });
+      }
+      const ttl = failedRepos ? 30_000 : ((items.length > 0 || total.noise > 0) ? COMMITS_TTL : 30_000);
       commitsCache = { data: payload, ts: now, ttl };
 
       return new Response(JSON.stringify(payload), {
@@ -213,9 +223,12 @@ export default {
         }
       });
       })();
-      const result = commitsInflight;
-      commitsInflight = null;
-      return result;
+      const inflight = commitsInflight;
+      try {
+        return (await inflight).clone();
+      } finally {
+        if (commitsInflight === inflight) commitsInflight = null;
+      }
     }
 
     // --- Suggest-a-Service: authenticated proxy to the n8n webhook ---
@@ -234,12 +247,21 @@ export default {
         const ua = request.headers.get('User-Agent');
         if (cookie) fwd['Cookie'] = cookie;
         if (ua) fwd['User-Agent'] = ua;
-        try { return await (await fetch(dashUrl(env) + '/api/auth/state', { headers: fwd })).json(); }
-        catch { return { logged_in: false }; }
+        try {
+          const r = await fetch(dashUrl(env) + '/api/me', { headers: fwd });
+          const me = await r.json();
+          return r.ok && me && (typeof me.username === 'string' || typeof me.sub === 'string') ? { ...me, logged_in: true } : { logged_in: false };
+        } catch { return { logged_in: false }; }
       })();
       if (!state.logged_in) return new Response(JSON.stringify({ error: 'sign_in_required' }), { status: 401, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+      const length = Number(request.headers.get('Content-Length') || 0);
+      if (length > 4096) return new Response(JSON.stringify({ error: 'too_large' }), { status: 413, headers: JSON_HEADERS });
       let payload;
-      try { payload = await request.json(); } catch { return new Response(JSON.stringify({ error: 'bad_json' }), { status: 400, headers: JSON_HEADERS }); }
+      try {
+        const raw = await request.text();
+        if (new TextEncoder().encode(raw).length > 4096) return new Response(JSON.stringify({ error: 'too_large' }), { status: 413, headers: JSON_HEADERS });
+        payload = JSON.parse(raw);
+      } catch { return new Response(JSON.stringify({ error: 'bad_json' }), { status: 400, headers: JSON_HEADERS }); }
       if (!payload || typeof payload !== 'object') return new Response(JSON.stringify({ error: 'bad_json' }), { status: 400, headers: JSON_HEADERS });
       // Sanitize: only known fields, bounded lengths, explicit types
       const str = (v) => (typeof v === 'string' ? v : '');
@@ -248,7 +270,7 @@ export default {
         project_url: str(payload.project_url).slice(0, 300),
         category: str(payload.category).slice(0, 60),
         reason: str(payload.reason).slice(0, 2000),
-        your_name: (typeof state.name === 'string' && state.name ? state.name : str(payload.your_name)).slice(0, 120),
+        your_name: String(state.name || state.username || '').slice(0, 120),
         your_email: str(payload.your_email).slice(0, 200)
       };
       if (!clean.service_name || !clean.category || !clean.reason) return new Response(JSON.stringify({ error: 'missing_fields' }), { status: 400, headers: JSON_HEADERS });
@@ -279,7 +301,15 @@ export default {
           payload = r.ok ? await r.json() : commitsCache.data;
         } catch (e) { /* fall back to stale cache */ }
       }
-      const items = (payload && Array.isArray(payload.highlights) ? payload.highlights : []).slice(0, 15);
+      const every = [...(payload && Array.isArray(payload.highlights) ? payload.highlights : [])];
+      for (const week of (payload && payload.weeks) || []) every.push(...(week.items || []));
+      const seen = new Set();
+      const items = every.filter((it) => {
+        if (!it || !it.sha || !it.message || !it.date) return false;
+        const key = (it.repo || '') + ':' + it.sha;
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      }).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 50);
       const esc = (t) => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       const xml = '<?xml version="1.0" encoding="UTF-8"?>' +
         '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel>' +

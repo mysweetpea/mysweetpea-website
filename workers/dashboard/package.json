@@ -1,10 +1,11 @@
 {
   "name": "msp-dashboard-worker",
   "private": true,
+  "engines": { "node": ">=22.18.0" },
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "test": "node test/pipeline-test.mjs && node test-refs.js && node test-tour.js"
+    "test": "node test/pipeline-test.mjs && node test-refs.js && node test-tour.js && node test-payloads.js && node test-worker.mjs"
   },
   "devDependencies": {
     "wrangler": "^4.0.0",
