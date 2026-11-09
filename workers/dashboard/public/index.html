@@ -1747,12 +1747,12 @@ a.hm-req{text-decoration:none;color:var(--text)}
 <div class="grain-overlay" aria-hidden="true"></div>
 <canvas id="petalCanvas" aria-hidden="true"></canvas>
 <div id="app"><div class="card" id="gate"><a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" data-msp-site-img="/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-check"><span class="gate-dot" aria-hidden="true"></span>Checking your session…</p></div></div>
-<div id="modal"><div class="mcard" id="mbody"></div></div>
+<div id="modal" role="dialog" aria-modal="true" aria-hidden="true"><div class="mcard" id="mbody" tabindex="-1"></div></div>
 <div id="toasts" aria-live="polite"></div>
 <div class="pal-backdrop" id="pal">
-  <div class="palette">
-    <input id="pal-q" type="text" placeholder="Type a command…  (Esc to close)" autocomplete="off" spellcheck="false"/>
-    <div class="pal-list" id="pal-list"></div>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input id="pal-q" type="text" role="combobox" aria-autocomplete="list" aria-controls="pal-list" aria-expanded="false" aria-label="Search commands" placeholder="Type a command…  (Esc to close)" autocomplete="off" spellcheck="false"/>
+    <div class="pal-list" id="pal-list" role="listbox" aria-label="Commands"></div>
   </div>
 </div>
 <style id="pwg-css">
@@ -1795,8 +1795,8 @@ body.pwg-lock{overflow:hidden}
 /* First-run gate. Sits above the tour and cannot be dismissed for 5 seconds, so
    the one instruction that matters (change the temp password) is actually read.
    Dismissing hands straight over to the tour. */
-(function pwGate() {
-  var KEY = 'msp_pw_gate_v1', seen = false;
+window.mspPwGate = function (username) {
+  var KEY = 'msp_pw_gate_v1:' + String(username || '').toLowerCase(), seen = false;
   try { seen = localStorage.getItem(KEY) === '1'; } catch (e) {}
   var el = document.getElementById('pw-gate');
   if (!el || seen) return;
@@ -1821,7 +1821,7 @@ body.pwg-lock{overflow:hidden}
     if (f) setTimeout(function () { try { f.focus(); f.scrollIntoView({ block: 'center' }); } catch (e) {} }, 350);
   });
   ok.addEventListener('click', close);
-})();
+};
 /* Guides: the "from here" jump switches to the Media tab. */
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('.gp-jump');
@@ -1840,6 +1840,38 @@ document.addEventListener('click', function (e) {
    page instead of leaving a half-empty dashboard to guess about. */
 (function () {
   var shown = false;
+  /* Last 20 console.error lines. A report that says "it broke" cannot be
+     fixed; one that carries a trail can. */
+  var errs = [];
+  window.__mspErrs = errs;
+  function pushErr(s) { try { errs.push(String(s).slice(0, 300)); if (errs.length > 20) errs.shift(); } catch (e) {} }
+  var ce = console.error;
+  console.error = function () { try { pushErr(Array.prototype.join.call(arguments, ' ')); } catch (e) {} return ce.apply(console, arguments); };
+  /* What a fixer needs to reproduce: which panel, where, on what. */
+  window.__mspCtx = function () {
+    var href = '';
+    try { href = location.pathname + (location.hash || ''); } catch (e) {}
+    return {
+      tab: window.currentTab || '',
+      url: href,
+      ua: navigator.userAgent,
+      vp: (window.innerWidth || 0) + 'x' + (window.innerHeight || 0),
+      errs: errs.slice(-20),
+    };
+  };
+  /* Uncaught errors file themselves (server dedupes by signature, 3/day). */
+  function autofile(what) {
+    try {
+      var key = 'msp:auto:' + what.slice(0, 80);
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+      fetch('/api/bug', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(Object.assign({ where: 'uncaught', what: what, auto: true }, window.__mspCtx())),
+      }).catch(function () {});
+    } catch (e) {}
+  }
   function report(what) {
     if (shown) return;
     shown = true;
@@ -1847,9 +1879,10 @@ document.addEventListener('click', function (e) {
       var bar = document.createElement('div');
       bar.id = 'boot-error';
       bar.style.cssText = 'position:fixed;left:12px;right:12px;top:12px;z-index:99999;padding:10px 14px;border-radius:12px;border:1px solid rgba(240,110,110,.5);background:#2a1418;color:#ffd9d9;font:12px/1.5 JetBrains Mono,ui-monospace,monospace;white-space:pre-wrap';
-      bar.textContent = 'Dashboard failed to finish loading: ' + what + ' — reload, and tell Hermes this line if it persists.';
+      bar.textContent = 'Dashboard failed to finish loading: ' + what + ' — reloading usually clears this. Reported automatically.';
       document.documentElement.appendChild(bar);
     } catch (e) {}
+    autofile(what);
   }
   window.addEventListener('error', function (e) {
     if (e && e.message) report(e.message + (e.lineno ? ' @' + e.lineno : ''));
@@ -1945,9 +1978,34 @@ function toast(msg, opts) {
   $('#toasts').appendChild(t);
   setTimeout(() => { t.classList.add('t-out'); setTimeout(() => t.remove(), 260); }, 6500);
 }
-function modal(html) { $('#mbody').innerHTML = html; $('#modal').classList.add('open'); }
-function closeModal() { $('#modal').classList.remove('open'); }
+let modalReturn = null;
+function modal(html) {
+  const root = $('#modal'), card = $('#mbody');
+  if (!root.classList.contains('open')) modalReturn = document.activeElement;
+  card.innerHTML = html; root.classList.add('open'); root.setAttribute('aria-hidden', 'false');
+  const title = card.querySelector('h1,h2,h3');
+  if (title) { if (!title.id) title.id = 'modal-title'; root.setAttribute('aria-labelledby', title.id); }
+  setTimeout(() => { const target = card.querySelector('input:not([type="hidden"]),button,a[href],select,textarea') || card; target.focus(); }, 0);
+}
+function closeModal() {
+  const root = $('#modal');
+  if (!root.classList.contains('open')) return;
+  root.classList.remove('open'); root.setAttribute('aria-hidden', 'true');
+  if (modalReturn && modalReturn.getClientRects().length) modalReturn.focus();
+  modalReturn = null;
+}
 $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', (e) => {
+  const root = $('#modal');
+  if (!root.classList.contains('open')) return;
+  if (e.key === 'Escape') { e.preventDefault(); closeModal(); return; }
+  if (e.key !== 'Tab') return;
+  const items = Array.from(root.querySelectorAll('input:not([type="hidden"]),button:not([disabled]),a[href],select,textarea,[tabindex="0"]')).filter((el) => el.getClientRects().length);
+  if (!items.length) { e.preventDefault(); $('#mbody').focus(); return; }
+  const first = items[0], last = items[items.length - 1], active = document.activeElement;
+  if (e.shiftKey && (active === first || !root.contains(active))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && (active === last || !root.contains(active))) { e.preventDefault(); first.focus(); }
+});
 // T2a: cursor-tracked border glow on service cards / home tiles (pointer only)
 (function cursorGlow() {
   if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -2097,6 +2155,8 @@ function ceremony(flowSlug, label) {
 }
 // ===== PHASE 9: TABS + shared pure helpers (top-level: palette block reuses them) =====
 const TABS = ['home', 'media', 'services', 'stats', 'guides', 'contact'];
+// API lists are untrusted: drop null/scalar entries once, before any renderer.
+const validObjects = (v) => Array.isArray(v) ? v.filter((x) => x && typeof x === 'object' && !Array.isArray(x)) : [];
 // Tabs reachable from the account dropdown (not in the nav row). Hoisted to
 // module scope — the hashchange handler needs it too (was function-scoped
 // inside setTab, so hash navigation threw ReferenceError. Fixed Sep 14.)
@@ -3219,9 +3279,16 @@ function mspSessionBanner() {
     const links = document.getElementById('tabs');
     const drawer = document.getElementById('dh-menu');
     if (!nav || !tg || (!links && !drawer)) return;
+    let dhLastFocus = null;
     const close = () => {
+      const wasOpen = !!(drawer && drawer.classList.contains('dh-open'));
       nav.classList.remove('nav-open'); tg.setAttribute('aria-expanded', 'false');
       if (drawer) { drawer.classList.remove('dh-open'); document.body.classList.remove('dh-lock'); }
+      if (wasOpen) {
+        const target = dhLastFocus && dhLastFocus.getClientRects().length ? dhLastFocus : tg;
+        dhLastFocus = null;
+        if (target && target.getClientRects().length) target.focus();
+      }
     };
     /* Drawer open-time sync: active tab rows + updates badge mirror the bell. */
     const syncDrawer = () => {
@@ -3236,18 +3303,28 @@ function mspSessionBanner() {
       const open = !nav.classList.contains('nav-open');
       nav.classList.toggle('nav-open', open);
       tg.setAttribute('aria-expanded', open ? 'true' : 'false');
-      if (drawer) {
-        drawer.classList.toggle('dh-open', open);
-        document.body.classList.toggle('dh-lock', open);
-        if (open) syncDrawer();
-      }
+      if (open && drawer) {
+        dhLastFocus = document.activeElement;
+        drawer.classList.add('dh-open'); document.body.classList.add('dh-lock');
+        syncDrawer();
+        const first = drawer.querySelector('.dh-panel button:not([disabled]),.dh-panel a[href]');
+        if (first) first.focus();
+      } else if (!open) close();
     });
     document.addEventListener('click', (e) => {
       if (!nav.classList.contains('nav-open')) return;
       const inDrawer = drawer && drawer.contains(e.target);
       if ((!links || !links.contains(e.target)) && !tg.contains(e.target) && !inDrawer) close();
     });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key !== 'Tab' || !drawer || !drawer.classList.contains('dh-open')) return;
+      const items = Array.from(drawer.querySelectorAll('.dh-panel button:not([disabled]),.dh-panel a[href]')).filter((el) => el.getClientRects().length);
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1], active = document.activeElement;
+      if (e.shiftKey && (active === first || !drawer.contains(active))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (active === last || !drawer.contains(active))) { e.preventDefault(); first.focus(); }
+    });
     if (links) links.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('.tab')) close(); });
     if (drawer) drawer.addEventListener('click', (e) => {
       if (e.target && e.target.id === 'dh-scrim') { close(); return; }
@@ -3738,7 +3815,12 @@ function mspSessionBanner() {
     /* No per-item web viewer exists on this server — the card opens the
        AIOStreams app itself rather than a dead #!/item route. */
     const JF_ITEM = '#services';   // poster/genre taps land on Services
-    const g2 = (u) => apiGet(u, 15000);
+    const g2 = async (u) => {
+      const d = await apiGet(u, 15000);
+      if (d && Array.isArray(d.items)) d.items = validObjects(d.items);
+      if (d && Array.isArray(d.genres)) d.genres = validObjects(d.genres);
+      return d;
+    };
     const posterCard = (it, o) => {
       const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
       let h = '<a class="mitem" href="' + JF_ITEM + '">';
@@ -4310,7 +4392,7 @@ function mspSessionBanner() {
     attempt = attempt || 1;
     return fetch(url)
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => (d && d.items) || [])
+      .then((d) => validObjects(d && d.items))
       .catch(() => [])
       .then((items) => {
         if (items.length || attempt >= 2) return items;
@@ -4557,7 +4639,10 @@ function mspSessionBanner() {
         const r = await fetch('/api/bug', {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ where: where.value.trim(), what: what.value.trim() }),
+          body: JSON.stringify(Object.assign(
+            { where: where.value.trim(), what: what.value.trim() },
+            window.__mspCtx ? window.__mspCtx() : {},
+          )),
         });
         if (r.ok) {
           toast('Bug reported — thank you', { ok: true });
@@ -5011,10 +5096,11 @@ function relFuture(v) {
   let sel = 0, filtered = [];
   const pal = $('#pal'), input = $('#pal-q'), list = $('#pal-list');
   function render() {
-    if (!filtered.length) { list.innerHTML = '<div class="pal-empty">No matching commands</div>'; return; }
+    if (!filtered.length) { list.innerHTML = '<div class="pal-empty">No matching commands</div>'; input.removeAttribute('aria-activedescendant'); return; }
     list.innerHTML = filtered.map((c, i) =>
-      '<div class="pal-item' + (i === sel ? ' sel' : '') + '" data-i="' + i + '">' +
+      '<div class="pal-item' + (i === sel ? ' sel' : '') + '" id="pal-item-' + i + '" role="option" aria-selected="' + (i === sel) + '" data-i="' + i + '">' +
       '<b>' + esc(c.t) + '</b><span class="dim">' + esc(c.d) + '</span></div>').join('');
+    input.setAttribute('aria-activedescendant', 'pal-item-' + sel);
     list.querySelectorAll('.pal-item').forEach(el => {
       el.onclick = () => { close(); filtered[+el.dataset.i].run(); };
       el.onmouseenter = () => { sel = +el.dataset.i; render(); };
@@ -5028,8 +5114,9 @@ function relFuture(v) {
     if (!mspCmdCache) mspCmdCache = mspBuildCommands();
     return mspCmdCache;
   }
-  function open()  { mspCmdCache = null; filtered = mspFilter(mspAllCommands(), ''); sel = 0; pal.classList.add('open'); input.value = ''; render(); setTimeout(() => input.focus(), 0); }
-  function close() { pal.classList.remove('open'); input.blur(); }
+  var palReturn = null;
+  function open()  { palReturn = document.activeElement; mspCmdCache = null; filtered = mspFilter(mspAllCommands(), ''); sel = 0; pal.classList.add('open'); input.setAttribute('aria-expanded', 'true'); input.value = ''; render(); setTimeout(() => input.focus(), 0); }
+  function close() { const wasOpen = pal.classList.contains('open'); pal.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); input.blur(); if (wasOpen && palReturn && palReturn.getClientRects().length) palReturn.focus(); palReturn = null; }
   window.mspPalette = { open, close };
   input.addEventListener('input', () => {
     filtered = mspFilter(mspAllCommands(), input.value);
@@ -5045,43 +5132,13 @@ function relFuture(v) {
   /* Esc closes from anywhere (input handler above only fires when the input
      has focus; arrow/tab navigation can leave focus elsewhere). */
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && pal.classList.contains('open')) { e.preventDefault(); close(); }
+    if (!pal.classList.contains('open')) return;
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    else if (e.key === 'Tab') { e.preventDefault(); input.focus(); }
   });
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); pal.classList.contains('open') ? close() : open(); }
   });
-  /* ---- stat tiles (count-up) + library bar chart ---- */
-  function waitFor(sel) {
-    return new Promise(resolve => {
-      const el = document.querySelector(sel);
-      if (el) return resolve(el);
-      const t = setInterval(() => { const e2 = document.querySelector(sel); if (e2) { clearInterval(t); resolve(e2); } }, 120);
-      setTimeout(() => { clearInterval(t); resolve(null); }, 15000);
-    });
-  }
-  function dashRow() {
-    return '<div class="stat"><div class="n">—</div><div class="l">Movies</div></div>' +
-      '<div class="stat"><div class="n">—</div><div class="l">Series</div></div>' +
-      '<div class="stat"><div class="n">—</div><div class="l">Photos</div></div>' +
-      '<div class="stat"><div class="n">—</div><div class="l">Active sessions</div></div>';
-  }
-  function statTmpl() {
-    const mk = (k, l) => '<div class="stat"><div class="n" data-k="' + k + '">0</div><div class="l">' + esc(l) + '</div></div>';
-    return mk('movies', 'Movies') + mk('series', 'Series') + mk('photos', 'Photos') + mk('sessions', 'Active sessions');
-  }
-  (async () => {
-    const el = await waitFor('#stats');
-    if (!el) return;
-    el.innerHTML = dashRow();
-    let d = {};
-    try {
-      const r = await fetch('/api/stats');
-      if (r.ok) d = await r.json();
-    } catch (e) { /* keep dashes */ }
-    const s = mergeStats(d);
-    el.innerHTML = statTmpl();
-    el.querySelectorAll('.stat .n').forEach((n) => countUp(n, s[n.dataset.k]));
-  })();
   /* palette button (topbar is built dynamically -> delegated) */
   document.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'pal-open') { e.preventDefault(); window.mspPalette.open(); }
@@ -5344,7 +5401,7 @@ function relFuture(v) {
           // Retired services are not "new on the platform" — drop them once
           // here so the bell count, the popup and the home rail all agree.
           if (updData && Array.isArray(updData.updates)) {
-            updData.updates = updData.updates.filter(function (u) { return UPD_HIDDEN.indexOf(u.service) < 0; });
+            updData.updates = validObjects(updData.updates).filter(function (u) { return UPD_HIDDEN.indexOf(u.service) < 0; });
           }
         }
       } catch (e) { /* feed stays hidden */ }
@@ -5597,7 +5654,7 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 #rf-dialog .rf-status{color:var(--up)}
 
 /* ===== CONTACT v3 (postcard hybrid) ===== */
-.ct3-wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column}
+.ct3-wrap{max-width:640px;min-width:0;width:100%;margin:0 auto;display:flex;flex-direction:column}
 .ct3-head{text-align:center;margin-bottom:22px}
 .ct3-h{font-family:'Fraunces','Inter',Georgia,serif;font-size:1.6rem;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
 .ct3-head .dim{font-size:.92rem}
@@ -5606,10 +5663,10 @@ dialog#rf-dialog .sgf-actions .sgf-submit{width:100%}
 .ct3-stat:last-child{border-right:none}
 .ct3-n{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:1rem;color:var(--text)}
 .ct3-cap{font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint)}
-.ct3-card{padding:24px 26px}
+.ct3-card{padding:24px 26px;min-width:0}
 .ct3-top{position:relative}
-.ct3-mailrow{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border-primary);border-radius:12px;padding:13px 16px;background:rgba(10,12,22,.5)}
-.ct3-mail{color:var(--text);font-size:.98rem;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s ease}
+.ct3-mailrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border:1px solid var(--border-primary);border-radius:12px;padding:13px 16px;background:rgba(10,12,22,.5)}
+.ct3-mail{color:var(--text);font-size:.98rem;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s ease;overflow-wrap:anywhere}
 .ct3-mail:hover{border-bottom-color:var(--sage)}
 .ct3-copy{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;border:1px solid var(--border-primary);background:transparent;color:var(--primary-bright);padding:7px 13px;border-radius:8px;cursor:pointer;transition:all .2s ease;flex:none}
 .ct3-copy:hover{background:rgba(139,126,246,.12);border-color:rgba(139,126,246,.5)}

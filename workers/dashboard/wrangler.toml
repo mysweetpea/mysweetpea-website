@@ -23,6 +23,8 @@ MAIN_SITE_URL = "https://mysweetpea.cc"
 SUPPORT_EMAIL = "support@mysweetpea.cc"
 # commits source repo for the changelog/updates feed ('owner/name')
 GH_COMMITS_REPO = "mysweetpea/mysweetpea-homelab"
+# bug reports become issues here — this is the queue the fixer agent reads
+GH_ISSUES_REPO = "mysweetpea/mysweetpea-website"
 
 # Secrets (set via `npx wrangler secret put ...`):
 #   AUTHENTIK_CLIENT_ID
