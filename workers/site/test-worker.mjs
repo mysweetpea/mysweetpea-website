@@ -20,7 +20,15 @@ const env = {
   COMMITS_REPOS: 'mysweetpea/example',
   ASSETS: { fetch: async () => new Response('not found', { status: 404 }) },
 };
+const healthyFetch = globalThis.fetch;
 try {
+  const { default: coldWorker } = await import('data:text/javascript;base64,' + Buffer.from(source).toString('base64') + '#cold-rss');
+  globalThis.fetch = async () => Response.json({ message: 'outage' }, { status: 503 });
+  const coldFeed = await coldWorker.fetch(new Request('https://mysweetpea.cc/feed.xml'), env);
+  assert.equal(coldFeed.status, 503, 'a cold total outage must be retryable, never a fake empty feed');
+  assert.equal(coldFeed.headers.get('Retry-After'), '30');
+  globalThis.fetch = healthyFetch;
+  console.log('PASS cold RSS outage returns a retryable 503');
   const request = () => new Request('https://mysweetpea.cc/api/commits');
   const responses = await Promise.all([worker.fetch(request(), env), worker.fetch(request(), env), worker.fetch(request(), env)]);
   assert.equal(calls, 1, 'three concurrent cold requests must share one upstream fetch');

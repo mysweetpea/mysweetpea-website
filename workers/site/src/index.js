@@ -301,6 +301,12 @@ export default {
           payload = r.ok ? await r.json() : commitsCache.data;
         } catch (e) { /* fall back to stale cache */ }
       }
+      if (!payload) {
+        return new Response('Changelog temporarily unavailable', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Retry-After': '30', 'Cache-Control': 'no-store' }
+        });
+      }
       const every = [...(payload && Array.isArray(payload.highlights) ? payload.highlights : [])];
       for (const week of (payload && payload.weeks) || []) every.push(...(week.items || []));
       const seen = new Set();
