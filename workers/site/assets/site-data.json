@@ -110,7 +110,7 @@
       "plain": "Watch movies, shows and anime on any device",
       "replaces": "Think of it like Netflix, Hulu, Crunchyroll combined into one",
       "desc": "Moonfin is the app you watch on. Movies, shows and anime, all in one place \u2014 on your phone, your TV, or in the browser. It picks up where you left off on every device, so you can start something on the couch and finish it on the bus.",
-      "monitorHint": 5,
+      "monitorHint": 65,
       "garden": {
         "line": "Movies, shows and anime. This is your stream, your rules.",
         "replaces": "Netflix"
