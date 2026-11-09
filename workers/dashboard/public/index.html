@@ -3056,7 +3056,7 @@ function mspSessionBanner() {
     '</div>' +
     '<div class="hm-banner-acct" id="hm-banner-acct"></div>' +
     '</div>' +
-    '<a class="hm-hero" id="hm-hero" hidden href="#guides/moonfin" aria-label="Continue watching"></a>' +
+    '<a class="hm-hero" id="hm-hero" hidden href="#guides/moonfin" aria-label="Open the Moonfin setup guide"></a>' +
     '<div class="hm-pair">' + '<section class="hm-sec" id="hm-services-sec"><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Your services</h2><button type="button" class="hm-more" onclick="setTab(\'services\')">All services &rarr;</button></div><div class="hm-rail" id="hm-svc-rail"></div></section>' +
     '<section class="hm-sec" id="hm-updates" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Updated</h2><button type="button" class="hm-more" aria-label="All service updates" onclick="var b=document.getElementById(\'upd-bell\');if(b)b.click()">All updates &rarr;</button></div><div class="hm-rail" id="hm-upd-rail"></div></section>' + '</div>' +
     '<section class="hm-sec" id="hm-keepwatch" hidden><div class="hm-head"><h2 class="hm-h2"><span class="hm-accent"></span>Keep watching</h2><a class="hm-more" data-msp-media="1" href="https://media.mysweetpea.cc" target="_blank" rel="noopener noreferrer">Open Moonfin &rarr;</a></div><div class="hm-rail" id="hm-kw-rail"></div></section>' +
@@ -3943,6 +3943,13 @@ function mspSessionBanner() {
      this to build its service commands, so new services here are searchable
      automatically. (const inside this IIFE is invisible cross-block.) */
   window.SERVICES = SERVICES;
+  /* Services with no web client (Moonfin — its URL just lands on the
+     AIOStreams login) open their setup guide instead of a dead end. One rule,
+     one helper: every renderer that links a service uses svcLinkAttrs. */
+  const svcHref = (s) => (s && s.noWeb && GUIDES[s.key]) ? '#guides/' + s.key : mspCfgUrl(s.url);
+  const svcLinkAttrs = (s) => (s && s.noWeb && GUIDES[s.key])
+    ? 'href="#guides/' + s.key + '"'
+    : 'href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer"';
   /* the footer's first fetch can land before this catalog exists; now that it
      does, re-run the count so it can never sit on 'unavailable' */
   try { window.updateFooterStatus(); } catch (e) {}
@@ -4000,7 +4007,7 @@ function mspSessionBanner() {
       const inner = svIcon(s, 'orbico') + (s.dev ? '' : '<span class="sdot' + dot + '"></span>');
       const orb = s.dev
         ? '<span class="sv-orb isdev" title="' + esc(s.name + ' — in development') + '">' + inner + '</span>'
-        : '<a class="sv-orb" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" title="' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + inner + '</a>';
+        : '<a class="sv-orb" ' + svcLinkAttrs(s) + ' title="' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + inner + '</a>';
       return '<span class="sv-orb-shell">' + orb + '<button type="button" class="unpin" aria-label="Unpin ' + esc(s.name) + '" onclick="window.svTogglePin(\'' + esc(s.name) + '\', event)">✕</button></span>';
     }).join('') || '<span class="sv-chip sv-hint">Hover a service below and hit ★ to pin it here</span>';
   };
@@ -4008,7 +4015,7 @@ function mspSessionBanner() {
     const host = document.getElementById('sv-recent'); if (!host) return;
     host.innerHTML = svRecent.map((name) => {
       const s = SERVICES.find((x) => x.name === name); if (!s || s.dev) return '';
-      return '<a class="sv-chip" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" onclick="window.svTrack(\'' + esc(s.name) + '\')">' + (s.icon ? '<img src="' + s.icon + '" alt="">' : '') + esc(s.name) + '</a>';
+      return '<a class="sv-chip" ' + svcLinkAttrs(s) + ' onclick="window.svTrack(\'' + esc(s.name) + '\')">' + (s.icon ? '<img src="' + s.icon + '" alt="">' : '') + esc(s.name) + '</a>';
     }).join('') || '<span class="sv-chip">Open something and it shows up here</span>';
   };
   window.svRenderGrid = function () {
@@ -4040,8 +4047,7 @@ function mspSessionBanner() {
         '<div class="meta">' + state + '<span class="sv-cat">' + esc((SV_CAT_LABELS.find((c) => c[0] === SV_CATS[s.name]) || ['',''])[1] || '') + '</span></div>' +
         (GUIDES[s.key] ? '<div class="sv-guide-cta"><button type="button" class="sv-guide-btn" data-gguide="' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</button></div>' : '');
       return '<div class="sv-card' + (s.dev ? ' isdev' : svState.monmap[s.name] === false ? ' isdown' : '') + '">' +
-        (s.noWeb ? '<a class="sv-card-hit" href="#guides/' + esc(s.key) + '" aria-label="Open the ' + esc(s.name) + ' setup guide"></a>'
-          : s.dev ? '' : '<a class="sv-card-hit" href="' + mspCfgUrl(s.url) + '" target="_blank" rel="noopener noreferrer" aria-label="Open ' + esc(s.name) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')"></a>') + inner + '</div>';
+        (s.dev ? '' : '<a class="sv-card-hit" ' + svcLinkAttrs(s) + ' aria-label="' + ((s.noWeb && GUIDES[s.key]) ? 'Open the ' + esc(s.name) + ' setup guide' : 'Open ' + esc(s.name)) + '" onclick="window.svTrack(\'' + esc(s.name) + '\')"></a>') + inner + '</div>';
     }).join('');
   };
   if (!window.__svGuideWire) {
@@ -4309,7 +4315,7 @@ function mspSessionBanner() {
       '<span class="hm-kicker">' + (kicker || 'Continue watching') + '</span>' +
       '<span class="hm-hero-title">' + esc(title) + '</span>' +
       (subBits.length ? '<span class="hm-hero-meta">' + esc(subBits.filter(Boolean).join(' · ')) + '</span>' : '') +
-      '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>Resume</span>' +
+      '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</span>' +
       (pct ? '<span class="hm-pl">' + pct + '% watched</span>' : '') + '</span></span>' +
       '<span class="hm-prog"><i style="width:' + pct + '%"></i></span>';
     host.href = hmJF_ITEM;
@@ -4513,7 +4519,7 @@ function mspSessionBanner() {
       (s.dev ? '' : '<span class="hm-orb-up" data-hm-hb="' + esc(s.name) + '"></span>');
     return s.dev
       ? '<div class="hm-card hm-svcrow isdev" aria-label="' + esc(s.name + ' — in development') + '">' + inner + '</div>'
-      : '<a class="hm-card hm-svcrow" href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' + inner + '</a>';
+      : '<a class="hm-card hm-svcrow" ' + svcLinkAttrs(s) + ' aria-label="' + esc(s.name + ' — ' + s.blurb) + '">' + inner + '</a>';
   }
 
   function hmWideCard(it) {
@@ -4560,22 +4566,42 @@ function mspSessionBanner() {
   const guideNav = document.getElementById('guide-nav');
   const guideBody = document.getElementById('guide-body');
   if (guideNav && guideBody) {
-    /* #guides/<key> deep link (media taps + the Moonfin tile): pick the guide
-       before the first paint so the right steps render immediately. */
-    try {
-      const dp = (location.hash || '').replace(/^#/, '').split('/');
-      if (dp[0] === 'guides' && GUIDES[dp[1]]) guideSel = dp[1];
-    } catch (e) {}
-    window.mspOpenGuide = function (key) {
-      if (!GUIDES[key]) return;
+    /* One entry point for "show guide X" — the chip list, the Services tab,
+       #guides/<key> deep links and the command palette all funnel here, so the
+       mobile accordion + summary label can never drift from the desktop path. */
+    function mspApplyGuide(key, opts) {
+      opts = opts || {};
+      if (!Object.prototype.hasOwnProperty.call(GUIDES, key)) return false;  /* '#guides/constructor' and friends */
       guideSel = key;
       guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === key ? 'true' : 'false'));
       guideBody.innerHTML = guideDetailHtml(key);
-      if (typeof setTab === 'function') setTab('guides');
-      try { guideBody.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
-    };
+      const dd = document.getElementById('m-guide-dd');
+      if (dd) {
+        const lab = document.getElementById('m-guide-sum-t');
+        if (lab) lab.textContent = GUIDES[key].name;
+        dd.dataset.origin = key;
+        dd.open = true;                       /* <=760px: steps live inside this <details> */
+      }
+      if (opts.scroll) {
+        try { (dd || guideBody).scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+      }
+      if (opts.tab) {
+        try { history.replaceState(null, '', '#guides/' + encodeURIComponent(key)); } catch (e) {}
+        if (typeof setTab === 'function') setTab('guides', { fromHash: true });
+        if (!dd) { try { guideBody.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+      }
+      return true;
+    }
+    window.mspOpenGuide = function (key) { return mspApplyGuide(key, { tab: true }); };
+    let deepGuide = '';
+    try {
+      const dp = (location.hash || '').replace(/^#/, '').split('/');
+      if (dp[0] === 'guides' && Object.prototype.hasOwnProperty.call(GUIDES, dp[1] || '')) deepGuide = dp[1];
+    } catch (e) {}
+    if (deepGuide) guideSel = deepGuide;
     guideNav.innerHTML = GUIDE_ORDER.map((k) => guideChipHtml(k, guideSel)).join('');
     guideBody.innerHTML = guideDetailHtml(guideSel);
+    if (deepGuide) mspApplyGuide(deepGuide, {});
     const mDD0 = document.getElementById('m-guide-dd');
     const mLab0 = document.getElementById('m-guide-sum-t');
     if (mLab0 && GUIDES[guideSel]) mLab0.textContent = GUIDES[guideSel].name;
@@ -4584,18 +4610,7 @@ function mspSessionBanner() {
     guideNav.addEventListener('click', (e) => {
       const chip = e.target && e.target.closest ? e.target.closest('.svc-guide-chip') : null;
       if (!chip) return;
-      guideSel = chip.dataset.guide;
-      guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === guideSel ? 'true' : 'false'));
-      guideBody.innerHTML = guideDetailHtml(guideSel);
-      // mobile accordion: tapping a service drops the guide open beneath the chips
-      const dd = document.getElementById('m-guide-dd');
-      if (dd) {
-        const lab = document.getElementById('m-guide-sum-t');
-        if (lab && GUIDES[guideSel]) lab.textContent = GUIDES[guideSel].name;
-        dd.open = true;
-        dd.dataset.origin = guideSel; // remember which chip to return to
-        try { dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
-      }
+      mspApplyGuide(chip.dataset.guide, { scroll: true });
     });
     // summary tap = "take me back": collapse AND return to the tapped service chip
     const mSum = document.querySelector('.m-guide-sum');
@@ -5116,8 +5131,10 @@ function relFuture(v) {
     return src.map(function (s) {
       var name = String(s.name || '');
       /* avoid "Open Open WebUI" when the name already starts with Open */
-      var title = /^open\b/i.test(name) ? name : 'Open ' + name;
-      return { t: title, d: (s.blurb || '') + ' · ' + String(mspCfgUrl(s.url) || '').replace(/^https?:\/\//, '').split('/')[0], k: MSP_SVC_KW[s.name] || '', run: function () { window.open(mspCfgUrl(s.url), '_blank', 'noopener'); } };
+      var noWeb = !!(s.noWeb && typeof window.mspOpenGuide === 'function');
+      var title = noWeb ? 'Setup guide: ' + name : (/^open\b/i.test(name) ? name : 'Open ' + name);
+      var desc = noWeb ? (s.blurb || '') + ' · setup guide' : (s.blurb || '') + ' · ' + String(mspCfgUrl(s.url) || '').replace(/^https?:\/\//, '').split('/')[0];
+      return { t: title, d: desc, k: MSP_SVC_KW[s.name] || '', run: noWeb ? function () { window.mspOpenGuide(s.key); } : function () { window.open(mspCfgUrl(s.url), '_blank', 'noopener'); } };
     });
   }
   function mspGuideCmds() {
