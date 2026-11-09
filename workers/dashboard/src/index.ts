@@ -36,6 +36,7 @@ export interface Env {
   OPENWEBUI_URL?: string;       // internal URL reachable from the worker is NOT possible;
   OPENWEBUI_STATS_B64?: string; // so webui.db snapshot, base64 (users+chats only)
   GOTIFY_REFERRAL_TOKEN?: string; // referral pings -> Gotify app 14 'Referrals'
+  REFERRAL_FEED_TOKEN?: string;   // lets the Telegram bot read the pending queue (no session)
   GOTIFY_BUG_TOKEN?: string; // user bug reports -> Gotify 'Bugs' app (PC alert-poller -> Paperclip)
   // Media access ("generate pin"): the dashboard provisions the member's
   // Moonfin persona on demand instead of the redeem workflow emailing a PIN.
@@ -1141,6 +1142,19 @@ export default {
       }
       await env.SESSIONS.put('svc-stats:' + key, JSON.stringify(clean), { expirationTtl: 172800 });
       return json({ ok: true, fields: Object.keys(clean).length });
+    }
+    // GET /api/referral/pending — the Telegram bot's queue view. It has no
+    // session, and MSP_INTERNAL_HEADER is the WAF literal (not shared with
+    // n8n), so this read-only lane carries its own token.
+    if (path === '/api/referral/pending' && request.method === 'GET') {
+      if (!env.REFERRAL_FEED_TOKEN || request.headers.get('x-msp-internal') !== env.REFERRAL_FEED_TOKEN) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      const pending = (await listReferrals(env))
+        .filter((r) => r.status === 'pending')
+        .slice(0, 20)
+        .map((r) => ({ id: r.id, name: r.name, service: r.service, note: r.note, byName: r.byName, at: r.at }));
+      return json({ referrals: pending });
     }
     if (path === '/api/referral/status' && request.method === 'PATCH') {
       // Owner-only status flip (internal header, like the ingest route).
