@@ -1690,11 +1690,12 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .mp-pinrow{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin:.35rem 0 .1rem}
 .mp-pin{font-family:var(--mono,'JetBrains Mono',monospace);font-size:2.1rem;font-weight:700;
   letter-spacing:.2em;margin:0;color:var(--text,#EAF2F4)}
-.mp-sub{font-size:.86rem;opacity:.82;margin:0 0 .9rem}
+.mp-sub{font-size:.9rem;opacity:.9;margin:0 0 .9rem;line-height:1.6}
 .mp-row{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin:.5rem 0}
 .mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.82rem;
-  word-break:break-all;flex:1 1 240px;min-width:0;color:var(--text,#EAF2F4);opacity:1;
-  background:rgba(255,255,255,.05);padding:.6rem .75rem;border-radius:8px;line-height:1.5}
+  flex:1 1 240px;min-width:0;color:var(--text,#EAF2F4);
+  background:rgba(255,255,255,.05);padding:.6rem .75rem;border-radius:8px;line-height:1.5;
+  display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mp-btn{font:inherit;font-size:.86rem;font-weight:600;cursor:pointer;
   padding:.55rem 1.05rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.07);color:inherit}
@@ -1708,8 +1709,30 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .mp-fig{margin:0;flex:0 0 258px;max-width:258px}
 .mp-demo-txt{flex:1 1 210px;min-width:0;padding-top:.15rem}
 .mp-demo-h{font-size:.94rem;font-weight:650;margin:0 0 .4rem;color:var(--text,#EAF2F4)}
-.mp-demo-sub{font-size:.83rem;line-height:1.6;color:var(--text-dim);margin:0;max-width:34ch}
+.mp-demo-sub{font-size:.86rem;line-height:1.6;color:var(--text-dim);margin:0;max-width:34ch}
 @media (max-width:560px){.mp-fig{flex:1 1 100%;max-width:100%}}
+/* premium layout: credentials+steps left, walkthrough right */
+.mp-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:1.75rem;align-items:start;margin-top:.4rem}
+@media (max-width:860px){.mp-grid{grid-template-columns:1fr}}
+.mp-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  border-radius:14px;padding:16px 18px;margin:0 0 14px}
+.mp-panel:last-of-type{margin-bottom:0}
+.mp-label{font-size:.74rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-dim);margin:0 0 10px}
+.mp-copybtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:12px}
+.mp-copybtn svg{width:16px;height:16px;flex:0 0 auto}
+.mp-copybtn.is-copied{border-color:#45D6C8;color:#45D6C8;background:rgba(69,214,200,.10)}
+.mp-side{min-width:0}
+.mp-side .mp-fig{flex:none;max-width:100%;margin:0}
+.mp-side .mp-demo-h{margin-top:14px}
+.mp-dur{position:absolute;top:10px;right:10px;z-index:2;background:rgba(0,0,0,.62);color:#EEF0FB;
+  font-family:var(--mono,'JetBrains Mono',monospace);font-size:.72rem;padding:3px 8px;border-radius:6px}
+@media (prefers-color-scheme: light){
+  .mp-panel{background:rgba(8,9,15,.035);border-color:rgba(8,9,15,.10)}
+  .mp-copybtn{border-color:rgba(8,9,15,.20);color:#23263a;background:rgba(8,9,15,.05)}
+  .mp-copybtn:hover{background:rgba(8,9,15,.09)}
+  .mp-copybtn.is-copied{border-color:#1F8A72;color:#1F8A72;background:rgba(31,138,114,.10)}
+  .mp-row code{background:rgba(8,9,15,.05);color:#23263a}
+}
 .mp-vidwrap{position:relative;border-radius:14px;overflow:hidden;background:#0B0C15;border:1px solid rgba(255,255,255,.1)}
 .mp-vidwrap video{display:block;width:100%;height:auto}
 .mp-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
@@ -1734,15 +1757,22 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #pw-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
   padding:20px;background:rgba(4,5,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #pw-gate[hidden]{display:none!important}
-.pwg-card{width:100%;max-width:430px;box-sizing:border-box;padding:26px 24px 22px;border-radius:20px;
-  background:#121320;border:1px solid #24273A;box-shadow:0 24px 70px rgba(0,0,0,.6);text-align:left}
-.pwg-eyebrow{margin:0 0 8px;font-size:.7rem;letter-spacing:1.6px;text-transform:uppercase;color:#7E85AE}
-.pwg-card h2{margin:0 0 10px;font-size:1.32rem;line-height:1.25;color:#EEF0FB}
-.pwg-card p{margin:0 0 18px;font-size:.94rem;line-height:1.6;color:#9BA1C7}
+.pwg-card{width:100%;max-width:440px;box-sizing:border-box;padding:30px 28px 24px;border-radius:20px;
+  background:#121320;border:1px solid #2A2E44;box-shadow:0 24px 70px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.04) inset;text-align:left}
+.pwg-eyebrow{margin:0 0 10px;font-size:.7rem;letter-spacing:1.6px;text-transform:uppercase;color:#8B7EF6}
+.pwg-card h2{margin:0 0 12px;font-size:1.5rem;line-height:1.25;color:#EEF0FB}
+.pwg-card p{margin:0 0 16px;font-size:.95rem;line-height:1.65;color:#B7BDD9}
 .pwg-card p b{color:#EEF0FB;font-weight:600}
-.pwg-row{display:flex;flex-wrap:wrap;gap:10px}
-.pwg-row .mp-btn{flex:1 1 auto;min-width:130px}
-#pwg-ok[disabled]{opacity:.55;cursor:not-allowed}
+.pwg-warn{display:flex;align-items:flex-start;gap:9px;margin:0 0 20px;padding:11px 13px;
+  border-radius:12px;background:rgba(224,178,106,.10);border:1px solid rgba(224,178,106,.30);
+  color:#E8C98F;font-size:.87rem;line-height:1.55}
+.pwg-warn svg{flex:0 0 auto;margin-top:2px}
+.pwg-warn b{color:#F0DDB8;font-weight:650}
+.pwg-row{display:flex;flex-wrap:wrap;gap:12px}
+.pwg-row .mp-btn{flex:1 1 auto;min-width:130px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.pwg-ghost{background:transparent;border-color:rgba(255,255,255,.16);color:#C9CCE4}
+.pwg-ghost:hover{background:rgba(255,255,255,.06)}
+#pwg-ok[disabled]{opacity:.6;cursor:not-allowed}
 body.pwg-lock{overflow:hidden}
 .gp-jump{appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:#45D6C8;
   text-decoration:underline;text-underline-offset:2px;cursor:pointer}
@@ -1750,12 +1780,12 @@ body.pwg-lock{overflow:hidden}
 <div id="pw-gate" hidden>
   <div class="pwg-card" role="dialog" aria-modal="true" aria-labelledby="pwg-h">
     <p class="pwg-eyebrow">One thing first</p>
-    <h2 id="pwg-h">Change your temporary password</h2>
-    <p>Your account was created with a <b>temporary password</b> that was emailed to you. Change it now, from the
-      <b>Account</b> tab &mdash; an account still using its temporary password is deleted after <b>7 days</b>.</p>
+    <h2 id="pwg-h">Set your new password</h2>
+    <p>We emailed you a <b>temporary password</b>. Replace it in the <b>Account</b> tab to secure your account.</p>
+    <p class="pwg-warn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Change it within <b>7 days</b> to avoid account deletion.</span></p>
     <div class="pwg-row">
-      <button type="button" class="mp-btn" id="pwg-go">Change it now</button>
-      <button type="button" class="mp-btn" id="pwg-ok" disabled>Got it (5)</button>
+      <button type="button" class="mp-btn mp-btn-primary" id="pwg-go">Change password</button>
+      <button type="button" class="mp-btn pwg-ghost" id="pwg-ok" disabled>Remind me later (5)</button>
     </div>
   </div>
 </div>
@@ -1773,7 +1803,7 @@ body.pwg-lock{overflow:hidden}
   var ok = document.getElementById('pwg-ok'), n = 5;
   var t = setInterval(function () {
     n--;
-    ok.textContent = n > 0 ? 'Got it (' + n + ')' : 'Got it';
+    ok.textContent = n > 0 ? 'Remind me later (' + n + ')' : 'Remind me later';
     if (n <= 0) { clearInterval(t); ok.disabled = false; try { ok.focus(); } catch (e) {} }
   }, 1000);
   function close() {
@@ -4173,47 +4203,52 @@ function mspSessionBanner() {
   let mpPinLoaded = false;
 
   function mpPinRender(body, d) {
+    const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
     body.innerHTML =
-      '<div class="mp-pinrow"><p class="mp-pin">' + esc(d.pin) + '</p>' +
-      '<button type="button" class="mp-btn" id="mp-copy-pin">Copy Password</button></div>' +
-      '<p class="mp-sub">This is your Moonfin password \u2014 the same thing Moonfin asks for when it says \u201cpassword\u201d. It stays the same every time you look here. ' +
-      'Brand-new accounts can take a minute to become available — if Moonfin says the password is wrong, wait a moment and try again.</p>' +
-      '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code>' +
-      '<button type="button" class="mp-btn" id="mp-copy">Copy address</button></div>' +
-      '<p class="mp-note">The address is long on purpose: it carries your account key, so the app knows which account to open. ' +
-      'Treat it like a password — tap <strong>Copy address</strong> and paste it, never type it by hand.</p>' +
+      '<div class="mp-grid">' +
+      '<div class="mp-main">' +
+      '<div class="mp-panel"><p class="mp-label">Server address</p>' +
+      '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code></div>' +
+      '<button type="button" class="mp-btn mp-copybtn" id="mp-copy">' + COPY_ICON + ' Copy address</button></div>' +
+      '<div class="mp-panel"><p class="mp-label">Your Moonfin password</p>' +
+      '<div class="mp-pinrow"><p class="mp-pin">' + esc(d.pin) + '</p></div>' +
+      '<button type="button" class="mp-btn mp-copybtn" id="mp-copy-pin">' + COPY_ICON + ' Copy password</button></div>' +
+      '<p class="mp-sub">This is the password Moonfin asks for. It stays the same every visit. Brand-new accounts can take a minute &mdash; if Moonfin says it\u2019s wrong, wait a moment and try again.</p>' +
       '<ol class="mp-steps">' +
       '<li>Open <strong>Moonfin</strong> and choose <strong>Add Server</strong> \u2192 <strong>Server Address</strong>.</li>' +
       '<li>Paste the address above, tap <strong>Connect</strong>, then <strong>Continue</strong>.</li>' +
       '<li>On <strong>Who\u2019s watching?</strong> pick <strong>' + esc(d.name || d.username || 'your name') + '</strong> \u2014 then paste this password.</li>' +
-      '</ol>' +
-      '<div class="mp-demo">' +
+      '</ol></div>' +
+      '<div class="mp-side">' +
       '<figure class="mp-fig">' +
       '<div class="mp-vidwrap">' +
+      '<span class="mp-dur">0:30</span>' +
       '<span class="mp-play" id="mp-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>' +
       '<video id="mp-video" src="/media/moonfin-pin.mp4?v=12" poster="/media/moonfin-pin.jpg?v=12" controls muted playsinline preload="none" ' +
       'aria-label="30-second walkthrough: adding MySweetPea in Moonfin and signing in with your PIN"></video>' +
       '</div></figure>' +
-      '<div class="mp-demo-txt">' +
       '<p class="mp-demo-h">Watch it once</p>' +
-      '<p class="mp-demo-sub">Thirty seconds, no sound. It follows the three steps above \u2014 copy your address first, then play.</p>' +
+      '<p class="mp-demo-sub">Thirty seconds, no sound. Copy your address first, then play.</p>' +
       '</div></div>';
     const pv = document.getElementById('mp-play');
     const mvid = document.getElementById('mp-video');
     if (pv && mvid) mvid.addEventListener('play', () => pv.remove(), { once: true });
-    const cpp = document.getElementById('mp-copy-pin');
-    if (cpp) cpp.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(String(d.pin || '')); cpp.textContent = 'Copied'; }
-      catch (e) { cpp.textContent = 'Select and copy'; }
-      setTimeout(() => { cpp.textContent = 'Copy Password'; }, 1800);
-    });
-    const cp = document.getElementById('mp-copy');
-    if (cp) cp.addEventListener('click', async () => {
+    const CHECK_ICON = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+    function mpCopy(btn, getText, label) {
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        const orig = btn.innerHTML;
+        try { await navigator.clipboard.writeText(getText()); btn.innerHTML = CHECK_ICON + ' Copied'; }
+        catch (e) { btn.innerHTML = CHECK_ICON + ' Select and copy'; }
+        btn.classList.add('is-copied');
+        setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('is-copied'); }, 1800);
+      });
+    }
+    mpCopy(document.getElementById('mp-copy-pin'), () => String(d.pin || ''), 'Copy password');
+    mpCopy(document.getElementById('mp-copy'), () => {
       const t = document.getElementById('mp-server');
-      try { await navigator.clipboard.writeText(t ? t.textContent : ''); cp.textContent = 'Copied'; }
-      catch (e) { cp.textContent = 'Select and copy'; }
-      setTimeout(() => { cp.textContent = 'Copy address'; }, 1800);
-    });
+      return t ? t.textContent : '';
+    }, 'Copy address');
   }
 
   const MP_CACHE_KEY = 'msp_pin_v1';
