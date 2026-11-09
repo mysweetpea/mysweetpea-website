@@ -136,4 +136,38 @@ el.addEventListener('input',function(){if(id==='rc-code')return;var ok=valid(fie
  Object.keys(fields).forEach(function(id){var el=document.getElementById(id);if(!el)return;el.addEventListener('keydown',function(e){if(e.key!=='Enter'||e.isComposing)return;e.preventDefault();if(!btn.disabled&&!posting)btn.click();});});
  btn.addEventListener('click',function(){if(btn.disabled||posting)return;posting=true;var data={invite_code:normCode(document.getElementById('rc-code').value),name:document.getElementById('rc-name').value.trim(),email:document.getElementById('rc-email').value.trim(),username:document.getElementById('rc-username').value.trim()};btn.disabled=true;btn.classList.add('loading');btn.textContent='Creating account…';fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(function(r){return r.text().then(function(t){if(t){try{return JSON.parse(t);}catch(e){return {ok:r.ok};}}return {ok:r.ok};});}).then(function(result){if(!result.ok)throw new Error(result.msg||'Could not create account');window.location.href='/success.html?type=redeem';}).catch(function(e){posting=false;btn.disabled=false;btn.classList.remove('loading');btn.textContent=e.message||'Try again';setTimeout(function(){btn.textContent='Create MySweetPea Account';update();},3000);});});
  paint();
+
+ /* === Prefill from an invite link =====================================
+    The invite email carries ?code=&name=&email=, so the member lands with
+    the code in the ledger and their details filled in — they only pick a
+    username. Values are only written into the form, never trusted or posted
+    on their own; the webhook still validates every field server-side. */
+ (function prefill() {
+   var q;
+   /* Some mail clients hand the href through verbatim, so a link written as
+      &amp;name= arrives with the entity intact and every param after the first
+      is lost. Normalising here is what makes the email button work. */
+   try { q = new URLSearchParams(location.search.replace(/&amp;/g, '&')); } catch (e) { return; }
+   var code = (q.get('code') || '').trim().toUpperCase();
+   var name = (q.get('name') || '').trim().slice(0, 60);
+   var email = (q.get('email') || '').trim().slice(0, 120);
+   if (code) {
+     input.value = normCode(code);
+     input.dispatchEvent(new Event('input', { bubbles: true }));
+   }
+   var pairs = [['rc-name', name], ['rc-email', email]];
+   var filled = false;
+   pairs.forEach(function (pair) {
+     if (!pair[1]) return;
+     var el = document.getElementById(pair[0]);
+     if (!el) return;
+     el.value = pair[1];
+     el.dispatchEvent(new Event('input', { bubbles: true }));
+     filled = true;
+   });
+   if (filled) {
+     var u = document.getElementById('rc-username');
+     if (u) { try { u.focus({ preventScroll: true }); u.scrollIntoView({ block: 'center' }); } catch (e) {} }
+   }
+ })();
 })();
