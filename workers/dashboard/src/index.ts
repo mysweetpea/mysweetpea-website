@@ -1513,7 +1513,7 @@ export default {
             },
             body: JSON.stringify({
               title: 'Username change request',
-              message: `${sess.username} -> ${desired}. Approve with: /rename ${sess.username} ${desired}`,
+              message: `${sess.username} wants to be ${desired}. Approve with: /rename ${sess.username}`,
               priority: 5,
             }),
           }).catch(() => {}));
