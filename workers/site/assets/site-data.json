@@ -16,9 +16,9 @@
       "category": "PASSWORDS",
       "keywords": "passwords manager vault credentials passkeys secrets 1password lastpass bitwarden",
       "blurb": "A password manager that keeps your passwords safe and creates strong passwords and fills them in automatically.",
-      "plain": "A safe place to store all your passwords — like a locked drawer for your digital life.",
+      "plain": "A safe place to store all your passwords \u2014 like a locked drawer for your digital life.",
       "replaces": "Think of it like LastPass or 1Password.",
-      "desc": "Vaultwarden is a password manager that remembers all your passwords so you do not have to. It creates strong, unique passwords for every website and fills them in automatically. Your vault is encrypted end-to-end — even we cannot see your passwords.",
+      "desc": "Vaultwarden is a password manager that remembers all your passwords so you do not have to. It creates strong, unique passwords for every website and fills them in automatically. Your vault is encrypted end-to-end \u2014 even we cannot see your passwords.",
       "monitorHint": 1,
       "garden": {
         "line": "Your passwords and passkeys, synced to every device.",
@@ -39,7 +39,7 @@
       "category": "ENCRYPTED CHAT",
       "keywords": "chat messaging element calls rooms matrix rooms chat app",
       "blurb": "A private, encrypted chat app. Message friends and create rooms without anyone watching.",
-      "plain": "A private chat app for messaging friends — nobody else can read your messages.",
+      "plain": "A private chat app for messaging friends \u2014 nobody else can read your messages.",
       "replaces": "Think of it like Discord or Slack, but private.",
       "desc": "Matrix is a private, encrypted chat system. Element is the app you use to access it. Create rooms, send messages, share files, all encrypted.",
       "monitorHint": 2,
@@ -61,8 +61,8 @@
       "tierLabel": "Sweet Pea",
       "category": "DOCS & WIKIS",
       "keywords": "notes docs documents wiki knowledge writing notion evernote",
-      "blurb": "Create documents, wikis, and whiteboards — all private.",
-      "plain": "A place to write notes, build wikis, and sketch ideas — all kept private.",
+      "blurb": "Create documents, wikis, and whiteboards \u2014 all private.",
+      "plain": "A place to write notes, build wikis, and sketch ideas \u2014 all kept private.",
       "replaces": "Think of it like Notion and Miro in one.",
       "desc": "AFFiNE is a free alternative to Notion. Create documents, wikis, whiteboards, and knowledge bases. All your notes are stored privately on our server.",
       "monitorHint": 3,
@@ -85,7 +85,7 @@
       "category": "WATCH TOGETHER",
       "keywords": "watch together parties friends sync anime anilist",
       "blurb": "Watch movies and shows together with friends in real-time.",
-      "plain": "Watch movies and shows together with friends in real-time — everyone sees the same scene.",
+      "plain": "Watch movies and shows together with friends in real-time \u2014 everyone sees the same scene.",
       "replaces": "Think of it like a shared remote for your watch party.",
       "desc": "KoalaSync lets you watch movies and shows together with friends in real-time. Works with Jellyfin, YouTube, and other video sites.",
       "monitorHint": 4,
@@ -106,10 +106,10 @@
       "tierLabel": "Sweet Pea",
       "category": "MEDIA",
       "keywords": "media server movies tv shows streaming watch netflix hulu crunchyroll anime video",
-      "blurb": "Movies, shows and anime — on your phone, TV and browser.",
+      "blurb": "Movies, shows and anime \u2014 on your phone, TV and browser.",
       "plain": "Watch movies, shows and anime on any device",
       "replaces": "Think of it like Netflix, Hulu, Crunchyroll combined into one",
-      "desc": "Moonfin is the app you watch on. Movies, shows and anime, all in one place — on your phone, your TV, or in the browser. It picks up where you left off on every device, so you can start something on the couch and finish it on the bus.",
+      "desc": "Moonfin is the app you watch on. Movies, shows and anime, all in one place \u2014 on your phone, your TV, or in the browser. It picks up where you left off on every device, so you can start something on the couch and finish it on the bus.",
       "monitorHint": 65,
       "garden": {
         "line": "Movies, shows and anime. This is your stream, your rules.",
@@ -132,7 +132,7 @@
       "blurb": "Live TV and sports channels, free.",
       "plain": "Live TV and sports, without a cable box",
       "replaces": "Cable TV and sports packages",
-      "desc": "Jellyfin is a free, open-source media server. Here it runs the live TV and sports side of the garden — free channels and live events, streamed to whatever screen you are in front of. No cable box, no sports package, no contract.",
+      "desc": "Jellyfin is a free, open-source media server. Here it runs the live TV and sports side of the garden \u2014 free channels and live events, streamed to whatever screen you are in front of. No cable box, no sports package, no contract.",
       "monitorHint": 5,
       "garden": {
         "line": "Live TV and sports, no cable box.",
@@ -152,10 +152,10 @@
       "tierLabel": "Sweet Pea",
       "category": "FILES",
       "keywords": "files storage cloud drive documents sync share dropbox google drive",
-      "blurb": "Files, calendar, and contacts — your private Google Workspace.",
-      "plain": "Your private place for files, calendar, and contacts — like a personal Google Workspace.",
+      "blurb": "Files, calendar, and contacts \u2014 your private Google Workspace.",
+      "plain": "Your private place for files, calendar, and contacts \u2014 like a personal Google Workspace.",
       "replaces": "Think of it like Google Drive, but private.",
-      "desc": "Nextcloud is your private Google Workspace replacement. Sync files across devices, share documents, manage your calendar and contacts — all stored on our own hardware.",
+      "desc": "Nextcloud is your private Google Workspace replacement. Sync files across devices, share documents, manage your calendar and contacts \u2014 all stored on our own hardware.",
       "monitorHint": 7,
       "garden": {
         "line": "Your files, calendar and contacts that sync everywhere.",
@@ -164,24 +164,24 @@
     },
     {
       "key": "photos",
-      "name": "Photos",
-      "shortName": "Photos",
-      "icon": "/assets/icons/photos.svg",
-      "iconAlt": "Photos",
+      "name": "Immich",
+      "shortName": "Immich",
+      "icon": "/assets/icons/immich.svg",
+      "iconAlt": "Immich",
       "shot": "/assets/screenshots/photos.webp",
-      "github": "https://github.com/pulsejet/memories",
-      "url": "https://cloud.mysweetpea.cc/apps/photos/",
+      "github": "https://github.com/immich-app/immich",
+      "url": "https://photos.mysweetpea.cc",
       "tier": "sweetpea",
       "tierLabel": "Sweet Pea",
       "category": "PHOTOS",
-      "keywords": "photos videos pictures backup memories camera google photos timeline albums",
-      "blurb": "Your photo and video library — like Google Photos, on your own server.",
-      "plain": "Back up your photos and videos privately, browse them by day, and revisit old memories.",
+      "keywords": "photos videos pictures camera roll timeline albums immich google photos backup memories",
+      "blurb": "Your photo and video library \u2014 like Google Photos, on your own server.",
+      "plain": "Browse every photo and video from any device \u2014 by day, by place, by the people in them.",
       "replaces": "Think of it like Google Photos, but private.",
-      "desc": "Photos is your private Google Photos replacement. Your camera roll backs up automatically from your phone, and everything is browsable by date and place — stored on our own hardware.",
-      "monitorHint": 7,
+      "desc": "Immich is your private photo library. It reads the photos in your Nextcloud space, so there is only ever one copy of each picture \u2014 on your phone, tablet or in the browser, signed in with your MySweetPea account. Photos you add in Nextcloud (your Immich Media folder) appear here automatically.",
+      "monitorHint": 74,
       "garden": {
-        "line": "Your photos, backed up on our own hardware.",
+        "line": "Your photo library, browsable from any device.",
         "replaces": "Google Photos"
       }
     },
@@ -199,7 +199,7 @@
       "category": "AI",
       "keywords": "ai chat assistant chatbot llm chatgpt models local",
       "blurb": "A private AI chat interface with multiple available models.",
-      "plain": "A private AI chat assistant — your conversations aren't logged or trained on.",
+      "plain": "A private AI chat assistant \u2014 your conversations aren't logged or trained on.",
       "replaces": "Think of it like ChatGPT, but private.",
       "desc": "Open WebUI is a private AI chat interface running entirely on our own hardware. Chat with open-source models without your conversations ever leaving our servers.",
       "monitorHint": 9,
@@ -247,7 +247,7 @@
       "name": "Neko",
       "icon": "/assets/icons/neko.svg",
       "iconAlt": "Neko",
-      "blurb": "Virtual browser in the cloud — watch together.",
+      "blurb": "Virtual browser in the cloud \u2014 watch together.",
       "keywords": "watch together movies friends browser streaming parties"
     },
     {
@@ -263,7 +263,7 @@
       "name": "Pingvin Share",
       "icon": "/assets/icons/pingvin.svg",
       "iconAlt": "Pingvin Share",
-      "blurb": "Private file sharing — send big photos and videos without accounts or size limits.",
+      "blurb": "Private file sharing \u2014 send big photos and videos without accounts or size limits.",
       "keywords": "file share upload transfer wetransfer drop send files photos videos"
     },
     {
@@ -271,7 +271,7 @@
       "name": "Kavita",
       "icon": "/assets/icons/kavita.svg",
       "iconAlt": "Kavita",
-      "blurb": "Family library for books, comics, and manga — progress synced on every device.",
+      "blurb": "Family library for books, comics, and manga \u2014 progress synced on every device.",
       "keywords": "books reading comics manga epub pdf cbz library reader kindle"
     }
   ],
@@ -364,7 +364,7 @@
       "key": "website",
       "name": "mysweetpea-website",
       "url": "https://github.com/mysweetpea/mysweetpea-website",
-      "desc": "The site, the dashboard, the workers behind them — written in the open."
+      "desc": "The site, the dashboard, the workers behind them \u2014 written in the open."
     }
   ],
   "siteFacts": {
