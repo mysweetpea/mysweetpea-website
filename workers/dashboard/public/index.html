@@ -2556,6 +2556,7 @@ const GUIDES = {
     name: 'Immich',
     url: 'https://photos.mysweetpea.cc',
     plain: 'Your photo and video library \u2014 timeline, albums and memories, on your own hardware.',
+    note: 'Immich only shows the photos that are in your Nextcloud "Immich Media" folder \u2014 it never copies, moves or stores files, and uploads are switched off here. Add or delete photos in Nextcloud: deleting inside Immich only hides the item from Immich and leaves the file in Nextcloud. Albums, favorites and people live in Immich only.',
     steps: [
       { title: 'Open Immich', text: 'Go to photos.mysweetpea.cc and click "Login with Authentik".', url: 'https://photos.mysweetpea.cc', btn: 'Open photos' },
       { title: 'Sign in', text: 'Use your MySweetPea account \u2014 you land back in your library.' },
@@ -2841,6 +2842,9 @@ function guideDetailHtml(key) {
   let h = '<div class="svc-guide-title">' + esc(g.name) + '</div><p class="svc-guide-intro">' + esc(g.plain) + '</p>';
   if (svcDev(key)) {
     h += '<p class="gp-devnote"><span aria-hidden="true">\u25CB</span> Still being built — these steps are written down here, but the service is not open to every member yet.</p>';
+  }
+  if (g.note) {
+    h += '<p class="gp-devnote"><span aria-hidden="true">\u24D8</span> ' + esc(g.note) + '</p>';
   }
   const plats = PLATFORMS[key];
   if (plats && plats.length) {
