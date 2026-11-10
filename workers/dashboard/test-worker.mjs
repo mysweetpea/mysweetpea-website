@@ -136,13 +136,14 @@ try {
   kv.map.set('sess:one', JSON.stringify(validSession())); kv.map.set('sess:two', JSON.stringify(second));
   Object.assign(env, { AIOS_UUID: 'service', AIOS_PASSWORD: 'pw', MOONBASE_ADMIN_TOKEN: 'admin', MOONBASE_MOUNT: 'https://aiostreams.mysweetpea.cc/jellyfin/config/mount' });
   const mediaAuth = [];
+  const provBodies = [];
   fetchImpl = async (url, options = {}) => {
     const u = String(url);
     if (u.includes('auth.example')) return Response.json({ user: { groups: [{ name: 'sweetpea' }] } });
-    if (u.endsWith('/Moonfin/Admin/Provision')) return Response.json({ pin: '123456' });
+    if (u.endsWith('/Moonfin/Admin/Provision')) { provBodies.push(JSON.parse(String(options.body || '{}'))); return Response.json({ pin: '123456' }); }
     if (u.endsWith('/Users/AuthenticateByName')) {
       const body = JSON.parse(String(options.body || '{}'));
-      const token = u.includes('/config/mount/') ? (body.Username === 'Second' ? 'member-2' : 'member-1') : 'service-token';
+      const token = u.includes('/config/mount/') ? (body.Username === 'second' ? 'member-2' : 'member-1') : 'service-token';
       return Response.json({ AccessToken: token });
     }
     if (u.endsWith('/UserViews')) return Response.json({ Items: [{ Id: 'trend', Name: 'Trending Movies' }] });
@@ -159,6 +160,9 @@ try {
   assert.equal((await two.json()).items[0].name, 'Second movie');
   assert.equal(mediaAuth.length, 2, 'each member needs their own upstream query');
   assert.equal(mediaAuth.every(a => a.includes('member-')), true);
+  // Persona names are LOGIN names, never display names — a display-name persona
+  // would split a member's watch history in two.
+  assert.deepEqual(provBodies.map((b) => b.name), ['member', 'second']);
 
   console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media');
 } finally {

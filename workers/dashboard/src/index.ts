@@ -37,6 +37,7 @@ export interface Env {
   OPENWEBUI_STATS_B64?: string; // so webui.db snapshot, base64 (users+chats only)
   GOTIFY_REFERRAL_TOKEN?: string; // referral pings -> Gotify app 14 'Referrals'
   REFERRAL_FEED_TOKEN?: string;   // lets the Telegram bot read the pending queue (no session)
+  BOT_ADMIN_TOKEN?: string;       // Gardener bot: username-change inbox + resolve (no session)
   GOTIFY_BUG_TOKEN?: string; // user bug reports -> Gotify 'Bugs' app (PC alert-poller -> Paperclip)
   // Media access ("generate pin"): the dashboard provisions the member's
   // Moonfin persona on demand instead of the redeem workflow emailing a PIN.
@@ -238,6 +239,31 @@ async function listReferrals(env: Env, by?: string): Promise<any[]> {
   return records
     .filter((rec) => rec && (!by || rec.by === by))
     .sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
+}
+
+/* ── username change requests ─────────────────────────────────────────────
+   A member asks for a new login name from the dashboard; nothing changes
+   until the owner approves it from the Gardener bot (see /api/bot/* below). */
+const UN_RE = /^[a-z0-9][a-z0-9._-]{2,29}$/;
+
+async function listUsernameRequests(env: Env): Promise<any[]> {
+  // ponytail: prefix scan — pending requests are a handful at most.
+  const listed = await env.SESSIONS.list({ prefix: 'ureq:' });
+  const recs = await Promise.all(listed.keys.map(async (k) => {
+    try { return JSON.parse((await env.SESSIONS.get(k.name)) || 'null'); }
+    catch { return null; }
+  }));
+  return recs
+    .filter((r) => r && r.status === 'pending')
+    .sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
+}
+
+async function usernameTaken(env: Env, username: string): Promise<boolean> {
+  const r = await authentikFetch(env, env.AUTHENTIK_ADMIN_TOKEN,
+    `/api/v3/core/users/?username=${encodeURIComponent(username)}`);
+  if (!r.ok) throw new Error('authentik ' + r.status);
+  const d = await authentikResults(r);
+  return d.some((u: any) => String(u.username || '').toLowerCase() === username.toLowerCase());
 }
 
 async function requireSession(request: Request, env: Env): Promise<{ sess: SessionData; sid: string } | Response> {
@@ -517,7 +543,10 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   } catch { /* fall through to the no-tier error below */ }
   if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
 
-  const username = String(sess.username || '').toLowerCase();
+  const ownName = String(sess.username || '').toLowerCase();
+  // A renamed member keeps the Moonfin persona they started with, so their
+  // watch history survives (the bot records this mapping in /rename).
+  const username = (await env.SESSIONS.get('unmap:' + ownName)) || ownName;
   if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) {
     return { ok: false, error: 'your username cannot be used for media access', status: 400 };
   }
@@ -530,7 +559,10 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
         'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
         'user-agent': 'msp-dashboard/1.0',
       },
-      body: JSON.stringify({ username, name: sess.name || username, tier }),
+      // Persona name = the login name, for everyone. Using the display name
+      // here would mint "Faraz" alongside the existing "sweetpea" persona and
+      // silently start a second, empty watch history.
+      body: JSON.stringify({ username, name: username, tier }),
     });
   } catch {
     return { ok: false, error: 'media service is unreachable right now', status: 502 };
@@ -542,10 +574,10 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   }
   const pin = d && d.pin ? String(d.pin) : '';
   if (!pin) return { ok: false, error: 'no pin came back — try again in a moment', status: 502 };
-  // ⚠️ The sign-in NAME is the persona's name, NOT the authentik username.
+  // ⚠️ The sign-in NAME is the persona's name, NOT the authentik display name.
   // parseSignIn treats any non-uuid username on a mount as the persona name,
-  // and personaByName matches on `name`. We provision with sess.name.
-  return { ok: true, pin, name: String(sess.name || username).trim(), isAdmin };
+  // and personaByName matches on `name`; we provision with the login name.
+  return { ok: true, pin, name: String(username).trim(), isAdmin };
 }
 
 /* Base URL + auth header scoped to ONE member, for per-user rows.
@@ -624,10 +656,10 @@ async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string;
     who = await provisionMember(env, sess);
   }
   if (!who.ok) return null;
-  // The owner watches as the config account itself (bare lane, uuid+password),
-  // so their persona is empty. Their real watching lives on the service
-  // identity — use it, or every personal row reads empty for them.
-  if (who.isAdmin) return aiosSrc(env);
+  /* Everyone — the owner included — reads their own persona. The owner used to
+     fall back to the config account (service key), which surfaced the legacy
+     "MySweetPea" watch history instead of their identik account. Fixed Nov 10
+     2026 by request: the older plays were declared acceptable to lose. */
   try {
     const r = await fetch(env.MOONBASE_MOUNT + '/Users/AuthenticateByName', {
       method: 'POST',
@@ -1156,6 +1188,34 @@ export default {
         .map((r) => ({ id: r.id, name: r.name, service: r.service, note: r.note, byName: r.byName, at: r.at }));
       return json({ referrals: pending });
     }
+    // Gardener bot lane for username-change requests (no session, own token).
+    if (path === '/api/bot/username-requests' && request.method === 'GET') {
+      if (!env.BOT_ADMIN_TOKEN || request.headers.get('x-msp-internal') !== env.BOT_ADMIN_TOKEN) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      return json({ requests: await listUsernameRequests(env) });
+    }
+    if (path === '/api/bot/username-requests/resolve' && request.method === 'POST') {
+      if (!env.BOT_ADMIN_TOKEN || request.headers.get('x-msp-internal') !== env.BOT_ADMIN_TOKEN) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      let body: any;
+      try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+      const username = typeof body?.username === 'string' ? body.username : '';
+      const status = body?.status === 'done' || body?.status === 'denied' ? body.status : '';
+      if (!username || !status) return json({ error: 'bad payload' }, 400);
+      const raw = await env.SESSIONS.get('ureq:' + username);
+      if (!raw) return json({ error: 'not found' }, 404);
+      const rec = JSON.parse(raw);
+      rec.status = status;
+      rec.resolvedAt = Date.now();
+      await env.SESSIONS.put('ureq:' + username, JSON.stringify(rec), { expirationTtl: 30 * 86400 });
+      if (status === 'done' && typeof body?.newUsername === 'string') {
+        const nu = body.newUsername.trim().toLowerCase();
+        if (UN_RE.test(nu)) await env.SESSIONS.put('unmap:' + nu, username); // persona stays put
+      }
+      return json({ ok: true });
+    }
     if (path === '/api/referral/status' && request.method === 'PATCH') {
       // Owner-only status flip (internal header, like the ingest route).
       if (request.headers.get('x-msp-internal') !== env.MSP_INTERNAL_HEADER) {
@@ -1411,6 +1471,54 @@ export default {
         const now = Date.now();
         await env.SESSIONS.put(`audit:${sess.sub}:${now}`, JSON.stringify({ t: now, event: 'password_changed' }), { expirationTtl: 90 * 86400 });
         return json({ ok: true });
+      }
+
+      // Username change request. The member only asks; the rename happens when
+      // the owner approves it from the Gardener bot, so a typo can never lock
+      // someone out of their account.
+      if (path === '/api/username/request' && request.method === 'GET') {
+        const mine = (await listUsernameRequests(env)).find((r) => r.username === sess.username);
+        return json({ request: mine ? { desired: mine.desired, at: mine.at } : null });
+      }
+      if (path === '/api/username/request' && request.method === 'POST') {
+        let body: { desired?: unknown } = {};
+        try { body = await request.json() as typeof body; } catch {}
+        const desired = typeof body.desired === 'string' ? body.desired.trim().toLowerCase() : '';
+        if (!UN_RE.test(desired)) {
+          return json({ error: 'Use 3-30 characters: lowercase letters, digits, dot, dash or underscore.' }, 400);
+        }
+        if (desired === String(sess.username || '').toLowerCase()) {
+          return json({ error: 'That is already your username.' }, 400);
+        }
+        const rl = `rl:un:${sess.sub}`;
+        const n = (parseInt((await env.SESSIONS.get(rl)) || '0', 10) || 0) + 1;
+        await env.SESSIONS.put(rl, String(n), { expirationTtl: 86400 });
+        if (n > 5) return json({ error: 'Too many requests today — try again tomorrow.' }, 429);
+        let taken = false;
+        try { taken = await usernameTaken(env, desired); }
+        catch { return json({ error: 'Could not check that username right now — try again in a minute.' }, 502); }
+        if (taken) return json({ error: 'That username is already taken.' }, 409);
+
+        const rec = {
+          username: sess.username, name: sess.name, email: sess.email,
+          desired, at: Date.now(), status: 'pending',
+        };
+        await env.SESSIONS.put('ureq:' + sess.username, JSON.stringify(rec), { expirationTtl: 30 * 86400 });
+        if (env.GOTIFY_REFERRAL_TOKEN) {
+          ctx.waitUntil(fetch('https://gotify.mysweetpea.cc/message', {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json', 'user-agent': 'Mozilla/5.0',
+              'X-gotify-Key': env.GOTIFY_REFERRAL_TOKEN,
+            },
+            body: JSON.stringify({
+              title: 'Username change request',
+              message: `${sess.username} -> ${desired}. Approve with: /rename ${sess.username} ${desired}`,
+              priority: 5,
+            }),
+          }).catch(() => {}));
+        }
+        return json({ ok: true, desired });
       }
 
       if (path === '/api/sessions') {

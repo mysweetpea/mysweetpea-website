@@ -3157,7 +3157,7 @@ function mspSessionBanner() {
     '<div style="flex:1;min-width:220px">' +
     '<div class="row"><div class="left"><b>Display name</b><span id="acct-name">' + esc(me.name || me.username) + '</span></div></div>' +
     '<div class="row"><div class="left"><b>Email</b><span id="acct-email">' + esc(me.email) + '</span></div></div>' +
-    '<div class="row"><div class="left"><b>Username</b><span class="dim">@' + esc(me.username) + ' &middot; Usernames cannot be changed.</span></div></div>' +
+    '<div class="row"><div class="left"><b>Username</b><span class="dim">@' + esc(me.username) + ' &middot; You can request a change below.</span></div></div>' +
     '</div>' +
     '<button class="mini primary" onclick="openProfileModal()">Edit profile</button>' +
     '</div></section>' +
@@ -3172,6 +3172,15 @@ function mspSessionBanner() {
     '<div class="pw-ok" id="pw-ok" aria-live="polite" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Password updated &mdash; use it next time you sign in.</div>' +
     '<div class="pwf-actions"><a class="pwf-adv" href="#" onclick="ceremony(\'password\',\'Password change\');return false">Advanced options</a>' +
     '<button type="submit" form="pwf" class="sgf-submit" id="pw-save" disabled>Update password</button></div></section>' +
+    '<section class="card" id="sec-username" style="--i:2"><p class="eyebrow">Username</p><h3>Change username</h3>' +
+    '<p class="dim" style="margin-bottom:14px">Your username is the name you sign in with everywhere. Send a request and it is approved by hand — you will get an email the moment it changes.</p>' +
+    '<form id="unf" class="pwf" novalidate>' +
+    '<div><label for="un-input">New username</label><input type="text" id="un-input" name="username" autocomplete="off" spellcheck="false" maxlength="30" placeholder="lowercase letters, digits, dot, dash, underscore"/></div>' +
+    '</form>' +
+    '<div class="merr" id="un-err" aria-live="polite" style="margin-top:8px"></div>' +
+    '<div class="pw-ok" id="un-ok" aria-live="polite" hidden>Request sent — I will email you once it is approved.</div>' +
+    '<div class="pwf-actions"><span class="dim" id="un-state" style="margin-right:auto;font-size:13px"></span>' +
+    '<button type="submit" form="unf" class="sgf-submit" id="un-send">Request change</button></div></section>' +
     '<section class="card" id="sec-spirit" style="--i:2"><p class="eyebrow">Behind the garden</p><h3>The spirit of MySweetPea</h3>' +
     '<p class="dim">The little spirit tending the garden &mdash; drawn by us, for you.</p>' +
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
@@ -3860,6 +3869,64 @@ function mspSessionBanner() {
         err.textContent = 'Password change failed.';
         btn.disabled = false;
       }
+    });
+  })();
+  // ===== username change request (the owner approves it from the Gardener bot) =====
+  (function () {
+    const form = document.getElementById('unf');
+    if (!form) return;
+    const inp = document.getElementById('un-input');
+    const btn = document.getElementById('un-send');
+    const err = document.getElementById('un-err');
+    const ok = document.getElementById('un-ok');
+    const state = document.getElementById('un-state');
+    let posting = false;
+    const render = (req) => {
+      if (req && req.desired) {
+        state.textContent = 'Requested: @' + req.desired + ' — waiting for approval';
+        inp.disabled = true;
+        btn.disabled = true;
+      } else {
+        state.textContent = '';
+        inp.disabled = false;
+        btn.disabled = false;
+      }
+    };
+    fetch('/api/username/request').then((r) => r.json()).then((d) => render(d && d.request)).catch(() => {});
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (posting) return;
+      err.textContent = '';
+      ok.hidden = true;
+      const desired = (inp.value || '').trim().toLowerCase();
+      if (!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(desired)) {
+        err.textContent = 'Use 3-30 characters: lowercase letters, digits, dot, dash or underscore.';
+        return;
+      }
+      posting = true;
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      try {
+        const r = await fetch('/api/username/request', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ desired }),
+        });
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && d.ok) {
+          ok.hidden = false;
+          render({ desired: d.desired });
+          toast('Username change requested.', { ok: true });
+        } else {
+          err.textContent = d.error || 'Request failed.';
+          btn.disabled = false;
+        }
+      } catch {
+        err.textContent = 'Request failed.';
+        btn.disabled = false;
+      }
+      posting = false;
+      btn.textContent = 'Request change';
     });
   })();
   // ===== PHASE 5: MEDIA ROWS (rendered into every .media-sec slot: Home + Media tabs) =====
