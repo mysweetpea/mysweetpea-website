@@ -2386,8 +2386,8 @@ function beatStrip(beats) {
   return out;
 }
 // ===== PHASE 10: SETUP GUIDES — data from main site services.html + pure render helpers =====
-const GUIDE_ICONS = { moonfin: '/icons/moonfin.svg', jellyfin: '/icons/jellyfin.svg', nextcloud: '/icons/nextcloud.svg', immich: '/icons/immich.svg', vaultwarden: '/icons/vaultwarden.svg', matrix: '/icons/matrix.svg', koalasync: '/icons/koalasync.svg', openwebui: '/icons/openwebui.svg', affine: '/icons/affine.svg' };
-const GUIDE_ORDER = ['moonfin', 'jellyfin', 'nextcloud', 'immich', 'vaultwarden', 'matrix', 'affine', 'openwebui', 'koalasync'];
+const GUIDE_ICONS = { moonfin: '/icons/moonfin.svg', jellyfin: '/icons/jellyfin.svg', nextcloud: '/icons/nextcloud.svg', photos: '/icons/photos.svg', vaultwarden: '/icons/vaultwarden.svg', matrix: '/icons/matrix.svg', koalasync: '/icons/koalasync.svg', openwebui: '/icons/openwebui.svg', affine: '/icons/affine.svg' };
+const GUIDE_ORDER = ['moonfin', 'jellyfin', 'nextcloud', 'photos', 'vaultwarden', 'matrix', 'affine', 'openwebui', 'koalasync'];
 const GUIDE_COLORS = [
   { fg: 'var(--primary-bright)', bg: 'var(--v-soft)' },
   { fg: 'var(--sage)',           bg: 'rgba(163,201,182,.15)' },
@@ -2450,10 +2450,10 @@ const DL_PLATFORMS = {
     { p: 'android', url: 'https://nextcloud.com/install/' },
     { p: 'desktop', url: 'https://nextcloud.com/install/' },
   ],
-  immich: [
-    { p: 'ios', url: 'https://immich.app/' },
-    { p: 'android', url: 'https://immich.app/' },
-    { p: 'web', url: 'https://immich.app/' },
+  photos: [
+    { p: 'ios', url: 'https://nextcloud.com/install/' },
+    { p: 'android', url: 'https://nextcloud.com/install/' },
+    { p: 'web', url: 'https://nextcloud.com/install/' },
   ],
   matrix: [
     { p: 'ios', url: 'https://element.io/download' },
@@ -2552,14 +2552,14 @@ const GUIDES = {
       { title: 'Get the app (optional)', text: 'Install the Nextcloud app to sync files on your phone.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
     ],
   },
-  immich: {
-    name: 'Immich',
-    url: 'https://photos.mysweetpea.cc',
-    plain: 'Private photo backup — searchable and safe.',
+  photos: {
+    name: 'Photos',
+    url: 'https://cloud.mysweetpea.cc/apps/photos/',
+    plain: 'Your photo and video library, on your own hardware.',
     steps: [
-      { title: 'Open Immich', text: 'Go to photos.mysweetpea.cc and click "Continue with OAuth".', url: 'https://photos.mysweetpea.cc', btn: 'Open photos' },
-      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in Immich.' },
-      { title: 'Back up your phone', text: 'Install the Immich app, sign in, and turn on backup.', url: 'https://immich.app/', btn: 'Get the app' },
+      { title: 'Open Photos', text: 'Go to photos.mysweetpea.cc and click "Continue with OAuth".', url: 'https://cloud.mysweetpea.cc/apps/photos/', btn: 'Open photos' },
+      { title: 'Sign in', text: 'Use your MySweetPea account — you land back in Photos.' },
+      { title: 'Back up your phone', text: 'Install the Nextcloud app, sign in, and turn on auto-upload for your camera roll.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
     ],
   },
   openwebui: {
@@ -2680,17 +2680,17 @@ const PLATFORMS = {
       { title: 'Calendar & contacts (optional)', text: 'For calendar/contacts on Android: install DAVx⁵, then tap "Sync calendars & contacts" in the Nextcloud app.', url: 'https://f-droid.org/packages/at.bitfire.davdroid/', btn: 'Get DAVx⁵' },
     ] },
   ],
-  immich: [
+  photos: [
     { p: 'web', label: 'Web browser', glyph: 'web' },
     { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
-      { title: 'Get the Immich app', text: 'Install Immich from the App Store.', url: 'https://immich.app/', btn: 'Get the app' },
+      { title: 'Get the Nextcloud app', text: 'Install the Nextcloud app from the App Store.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
       { title: 'Point it at your server', text: 'Server: photos.mysweetpea.cc — sign in with your MySweetPea account.', url: '', btn: '' },
-      { title: 'Turn on backup', text: 'Turn on backup — every photo lands at home automatically.', url: '', btn: '' },
+      { title: 'Turn on backup', text: 'In the app settings turn on auto-upload for your camera roll — every photo lands at home.', url: '', btn: '' },
     ] },
     { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
-      { title: 'Get the Immich app', text: 'Install Immich from the Play Store.', url: 'https://immich.app/', btn: 'Get the app' },
+      { title: 'Get the Nextcloud app', text: 'Install the Nextcloud app from the Play Store.', url: 'https://nextcloud.com/install/', btn: 'Get the app' },
       { title: 'Point it at your server', text: 'Server: photos.mysweetpea.cc — sign in with your MySweetPea account.', url: '', btn: '' },
-      { title: 'Turn on backup', text: 'Turn on backup for your camera roll — done.', url: '', btn: '' },
+      { title: 'Turn on backup', text: 'In the app settings turn on auto-upload for your camera roll — done.', url: '', btn: '' },
     ] },
   ],
   vaultwarden: [
@@ -3422,7 +3422,7 @@ function mspSessionBanner() {
     renderStatsCharts(s);
     if (!svc) return;
     let h = '';
-    h += statSection('Immich', [['Photos', s.photos], ['Videos', s.videos], ['Storage', s.usage_mb == null ? null : fmtStorage(s.usage_mb)]]);
+    h += statSection('Photos', [['Photos', s.photos], ['Videos', s.videos], ['Storage', s.usage_mb == null ? null : fmtStorage(s.usage_mb)]]);
     h += statSection('Accounts', [['Members', s.users], ['Active sessions', s.sessions]]);
     // In-cluster services (KV snapshots pushed by the cluster; absent = '—')
     h += statSection('Nextcloud', [['Files', s.nc_files], ['Shares', s.nc_shares], ['Activity (30d)', s.nc_activity]]);
@@ -3929,7 +3929,7 @@ function mspSessionBanner() {
     { key: 'moonfin',     name: 'Moonfin',     url: 'https://aiostreams.mysweetpea.cc/jellyfin/', blurb: 'Movies, shows & anime', icon: '/icons/moonfin.svg', cat: 'media', mon: ['moonfin', 'aiostreams'], noWeb: true },
     { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Live TV & Sports', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin'], dev: true },
     { key: 'nextcloud',   name: 'Nextcloud',   url: 'https://cloud.mysweetpea.cc',   blurb: 'Files & calendar', icon: '/icons/nextcloud.svg', cat: 'cloud', mon: ['nextcloud', 'cloud'] },
-    { key: 'immich',      name: 'Immich',      url: 'https://photos.mysweetpea.cc',  blurb: 'Photo library', icon: '/icons/immich.svg',  cat: 'cloud', mon: ['immich', 'photos'], dev: true },
+    { key: 'photos',      name: 'Photos',      url: 'https://cloud.mysweetpea.cc/apps/photos/',  blurb: 'Photo & video library', icon: '/icons/photos.svg',  cat: 'cloud', mon: ['nextcloud'], dev: false },
     { key: 'vaultwarden', name: 'Vaultwarden', url: 'https://vault.mysweetpea.cc',   blurb: 'Passwords', icon: '/icons/vaultwarden.svg', cat: 'cloud', mon: ['vaultwarden', 'vault'] },
     { key: 'matrix',      name: 'Element',     url: 'https://chat.mysweetpea.cc',    blurb: 'Matrix chat', icon: '/icons/matrix.svg',    cat: 'tools', mon: ['element', 'matrix', 'chat'], dev: true },
     { key: 'affine',      name: 'AFFiNE',      url: 'https://notes.mysweetpea.cc',   blurb: 'Docs, wikis & whiteboards', icon: '/icons/affine.svg', cat: 'tools', mon: ['affine', 'notes'], dev: true },
@@ -5109,7 +5109,7 @@ function relFuture(v) {
   var MSP_SVC_KW = {
     'Jellyfin':    'netflix media server movies tv shows streaming plex watch',
     'Nextcloud':   'google drive files storage documents calendar contacts sync dropbox',
-    'Immich':      'google photos photos pictures videos backup library memories',
+    'Photos':      'google photos photos pictures videos backup library memories',
     'Vaultwarden': '1password lastpass passwords vault credentials bitwarden',
     'Element':     'matrix chat messaging discord slack element call rooms',
     'AFFiNE':      'notion evernote notes docs documents wiki knowledge whiteboard',
@@ -5119,7 +5119,7 @@ function relFuture(v) {
   var MSP_GUIDE_KW = {
     'jellyfin':    'apps install download moonfin client setup tv phone',
     'nextcloud':   'files app sync client setup davx5',
-    'immich':      'photos app mobile upload setup',
+    'photos':      'photos app mobile upload setup',
     'vaultwarden': 'bitwarden app extension setup passwords',
     'matrix':      'element app login setup chat',
     'affine':      'notes app setup',
@@ -5327,8 +5327,8 @@ function relFuture(v) {
   // at load time). Runs only when signed in: #upd-bell only exists post-gate.
   (function () {
     'use strict';
-    var UPD_ICONS = { 'vaultwarden': '/icons/vaultwarden.svg', 'matrix': '/icons/matrix.svg', 'affine': '/icons/affine.svg', 'koalasync': '/icons/koalasync.svg', 'jellyfin': '/icons/jellyfin.svg', 'seerr': '/icons/seerr.svg', 'nextcloud': '/icons/nextcloud.svg', 'immich': '/icons/immich.svg', 'open-webui': '/icons/openwebui.svg' };
-    var UPD_NAME_KEY = { 'Vaultwarden': 'vaultwarden', 'Element': 'matrix', 'AFFiNE': 'affine', 'KoalaSync': 'koalasync', 'Jellyfin': 'jellyfin', 'Seerr': 'seerr', 'Nextcloud': 'nextcloud', 'Immich': 'immich', 'Open WebUI': 'open-webui' };
+    var UPD_ICONS = { 'vaultwarden': '/icons/vaultwarden.svg', 'matrix': '/icons/matrix.svg', 'affine': '/icons/affine.svg', 'koalasync': '/icons/koalasync.svg', 'jellyfin': '/icons/jellyfin.svg', 'seerr': '/icons/seerr.svg', 'nextcloud': '/icons/nextcloud.svg', 'photos': '/icons/photos.svg', 'open-webui': '/icons/openwebui.svg' };
+    var UPD_NAME_KEY = { 'Vaultwarden': 'vaultwarden', 'Element': 'matrix', 'AFFiNE': 'affine', 'KoalaSync': 'koalasync', 'Jellyfin': 'jellyfin', 'Seerr': 'seerr', 'Nextcloud': 'nextcloud', 'Photos': 'photos', 'Open WebUI': 'open-webui' };
     var updData = null;
     var UPD_HIDDEN = ['seerr'];
     var updWaitFor = function (sel) {
