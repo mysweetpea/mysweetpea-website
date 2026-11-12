@@ -59,7 +59,7 @@
         asciiLogo.className = 'ascii-logo';
         function asciiLogoSrc() {
             asciiLogo.src = document.documentElement.getAttribute('data-theme') === 'light'
-                ? '/assets/icons/seal-ink.png' : '/assets/icons/seal-field.png';
+                ? '/assets/icons/seal-field-light.png' : '/assets/icons/seal-field.png';
         }
         asciiLogoSrc();
         /* keep the logo on-theme across mid-session toggles */

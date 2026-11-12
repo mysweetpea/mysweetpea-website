@@ -1495,6 +1495,8 @@
     (function () {
     'use strict';
     var SWAPS = [
+        '/assets/icons/seal-mark.png',
+        '/assets/icons/seal-field.png',
         '/assets/icons/affine2.svg',
         '/assets/icons/feature-open-v2.svg',
         '/assets/icons/feature-free-v2.svg',

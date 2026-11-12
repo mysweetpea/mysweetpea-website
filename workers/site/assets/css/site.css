@@ -8060,7 +8060,6 @@ body[data-page='status'] .status-line.is-down .line-name { color: var(--error); 
 
 /* Logo mark: lift the dark disc off the light bg with a soft contact shadow +
    a faint teal halo so petals read crisp (no structural SVG changes) */
-[data-theme='light'] .msb { filter: brightness(0.5) saturate(1.5) drop-shadow(0 2px 5px rgba(27, 43, 49, 0.28)); }
 
 /* Hero glow: make the breathing aura actually visible on light */
 [data-theme='light'] .hero::before {
@@ -9110,3 +9109,8 @@ body[data-page]:not([data-page='home']) .hero img.logo {
     border-color: rgba(47, 107, 78, 0.22);
     border-top-color: #2F6B4E;
 }
+
+/* === Seal mark (2026-11-12): the seal is a square stamp asset — round the
+   corners so it reads as a stamp on every page, never a pasted square. === */
+img.logo { border-radius: 18%; }
+[data-theme='light'] img.logo { border-radius: 0; filter: none; }
