@@ -391,6 +391,9 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .gate-links{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;font-size:.82rem;flex-wrap:wrap}
 .gate-alt{color:var(--text-dim);text-decoration:underline;text-underline-offset:3px;transition:color .2s}
 .gate-alt:hover{color:var(--gold)}
+.gate-join{margin-top:10px;font-size:.9rem}
+.gate-join a{color:var(--primary);font-weight:600}
+.gate-join a:hover{color:var(--gold)}
 .b-go.loading{opacity:.75;cursor:progress}
 .sgf-submit.loading{opacity:.75;cursor:progress}
 .pwf-actions{display:flex;justify-content:flex-end;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
@@ -2919,7 +2922,7 @@ function mspSessionBanner() {
   }
   if (me) mspAuthed = true;
   if (!me) {
-    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="/icons/seal.png" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
+    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="/icons/seal.png" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links gate-join"><span>New here?</span><a href="https://mysweetpea.cc/form.html" data-msp-site="/form.html" class="gate-alt">Get access</a></div><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
     return;
   }
   try { if (window.mspPwGate) window.mspPwGate(me.username); } catch (e) {}
