@@ -545,6 +545,7 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .dash-footer .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;max-width:1100px;margin:0 auto 26px}
 .dash-footer .footer-brand p{margin:12px 0 14px;max-width:34ch;line-height:1.6;color:var(--text-dim)}
 .dash-footer .footer-brand .nav-logo{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--text);font-size:1.02rem}
+.dash-footer .footer-brand .nav-logo img{border-radius:7px;flex:0 0 auto}
 .dash-footer .footer-status{display:inline-flex;align-items:center;gap:8px;color:var(--text-dim);font-size:.8rem;white-space:nowrap}
 .dash-footer .footer-status .status-dot{width:9px;height:9px;border-radius:50%;background:#58d68d;box-shadow:0 0 8px rgba(88,214,141,.7);display:inline-block}
 .dash-footer .footer-status.down .status-dot{background:var(--error);box-shadow:0 0 8px rgba(217,140,140,.7)}
@@ -566,6 +567,9 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{border-radius:va
 .hm-avatar{position:relative;width:82px;height:82px;border-radius:50%;background:linear-gradient(135deg,var(--v-soft),rgba(69,214,200,.2));display:flex;align-items:center;justify-content:center;font-family:'Fraunces','Inter',Georgia,serif;font-size:1.7rem;font-weight:600;color:var(--primary-bright);box-shadow:0 10px 30px rgba(139,126,246,.35),0 0 0 4px rgba(151,146,255,.09),inset 0 0 0 1px var(--border-primary);flex:none;cursor:pointer;overflow:visible}
 .hm-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .hm-id{min-width:210px}
+.hm-id-head{display:flex;align-items:center;gap:14px;min-width:0}
+.hm-seal{width:46px;height:46px;border-radius:11px;flex:0 0 auto;box-shadow:0 6px 18px rgba(139,126,246,.3)}
+@media(max-width:560px){.hm-seal{display:none}}
 .hm-greet{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:2.05rem;letter-spacing:0;line-height:1.1;margin:0}
 .hm-sub{color:var(--text-dim);font-size:.84rem;margin-top:3px}
 .hm-date{color:var(--text-faint);font-size:.72rem;margin-top:2px;font-variant-numeric:tabular-nums}
@@ -1756,7 +1760,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
 <canvas id="petalCanvas" aria-hidden="true"></canvas>
-<div id="app"><div class="card" id="gate"><a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" data-msp-site-img="/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-check"><span class="gate-dot" aria-hidden="true"></span>Checking your session…</p></div></div>
+<div id="app"><div class="card" id="gate"><a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="/icons/seal.png" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-check"><span class="gate-dot" aria-hidden="true"></span>Checking your session…</p></div></div>
 <div id="modal" role="dialog" aria-modal="true" aria-hidden="true"><div class="mcard" id="mbody" tabindex="-1"></div></div>
 <div id="toasts" aria-live="polite"></div>
 <div class="pal-backdrop" id="pal">
@@ -2915,7 +2919,7 @@ function mspSessionBanner() {
   }
   if (me) mspAuthed = true;
   if (!me) {
-    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="https://mysweetpea.cc/logo.svg" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
+    gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="/icons/seal.png" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
     return;
   }
   try { if (window.mspPwGate) window.mspPwGate(me.username); } catch (e) {}
@@ -3051,7 +3055,7 @@ function mspSessionBanner() {
     '<div class="tabpanel" id="panel-home" role="tabpanel" aria-labelledby="tab-home">' +
     '<div class="hm-banner" style="--i:0"><div class="hm-banner-row">' +
     '<div class="hm-avatar" id="hero-avatar" role="button" tabindex="0" aria-label="Change profile picture" onclick="openAvatarModal()" title="Change profile picture">' + avatarInner() + CAM + '</div>' +
-    '<div class="hm-id"><h2 class="hm-greet"><span id="hm-greet-word"></span><span id="hero-name">' + esc(me.name || me.username) + '</span></h2>' +
+    '<div class="hm-id"><div class="hm-id-head"><img class="hm-seal" src="/icons/seal.png" alt="" width="46" height="46"><h2 class="hm-greet"><span id="hm-greet-word"></span><span id="hero-name">' + esc(me.name || me.username) + '</span></h2></div>' +
     '<div class="hm-sub" id="hero-sub">' + esc(me.email) + ' &middot; @' + esc(me.username) + '</div>' +
     '<div class="hm-date" id="hm-date"></div>' +
     '<div class="tier-line" id="hero-tier"></div></div>' +
@@ -3188,7 +3192,7 @@ function mspSessionBanner() {
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
-    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/logo.svg" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; <span id="foot-year">2026</span> MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
+    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/seal.png" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; <span id="foot-year">2026</span> MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
     '<div class="dlg-h"><h3>Recommend a friend</h3><button type="button" class="dlg-x" id="rf-close" aria-label="Close">✕</button></div>' +
     '<p class="dim sgf-note">Vouch for someone to get garden access. We will reach out to them after we review — you will see the status here.</p>' +
     '<div id="rf-list" class="rf-list" hidden></div>' +
@@ -5401,7 +5405,7 @@ function relFuture(v) {
   // at load time). Runs only when signed in: #upd-bell only exists post-gate.
   (function () {
     'use strict';
-    var UPD_ICONS = { 'vaultwarden': '/icons/vaultwarden.svg', 'matrix': '/icons/matrix.svg', 'affine': '/icons/affine.svg', 'koalasync': '/icons/koalasync.svg', 'jellyfin': '/icons/jellyfin.svg', 'seerr': '/icons/seerr.svg', 'nextcloud': '/icons/nextcloud.svg', 'photos': '/icons/immich.svg', 'open-webui': '/icons/openwebui.svg' };
+    var UPD_ICONS = { 'vaultwarden': '/icons/vaultwarden.svg', 'matrix': '/icons/matrix.svg', 'affine': '/icons/affine.svg', 'koalasync': '/icons/koalasync.svg', 'jellyfin': '/icons/jellyfin.svg', 'seerr': '/icons/seerr.svg', 'nextcloud': '/icons/nextcloud.svg', 'photos': '/icons/immich.svg', 'immich': '/icons/immich.svg', 'open-webui': '/icons/openwebui.svg' };
     var UPD_NAME_KEY = { 'Vaultwarden': 'vaultwarden', 'Element': 'matrix', 'AFFiNE': 'affine', 'KoalaSync': 'koalasync', 'Jellyfin': 'jellyfin', 'Seerr': 'seerr', 'Nextcloud': 'nextcloud', 'Photos': 'photos', 'Immich': 'photos', 'Open WebUI': 'open-webui' };
     var updData = null;
     var UPD_HIDDEN = ['seerr'];
