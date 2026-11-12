@@ -75,6 +75,7 @@
     transform: translate(-50%, -50%);
     width: clamp(120px, 17vw, 200px);
     height: auto;
+    border-radius: 18%;
     filter: drop-shadow(0 0 32px rgba(94, 184, 168, 0.5)) drop-shadow(0 10px 34px rgba(0, 0, 0, 0.55));
     z-index: 2;
     animation: asciiLogoBreath 7s ease-in-out infinite;

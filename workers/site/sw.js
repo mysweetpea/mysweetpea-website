@@ -4,7 +4,7 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-ha0bbc74e';
+const CACHE = 'mysweetpea-h026c54b0';
 const CORE = [
         '/assets/js/services-page.js?v=hde7d3914',
         '/assets/js/site-data.js?v=h312b8e0f',
@@ -20,13 +20,13 @@ const CORE = [
   '/',
   '/index.html',
   '/assets/css/fonts.css?v=h6b17b99d',
-  '/assets/css/site.css?v=hfded513a',
-  '/assets/css/premium.css?v=hf831a15e',
+  '/assets/css/site.css?v=hcee77f41',
+  '/assets/css/premium.css?v=hbdf5f0a7',
   '/assets/css/home.css?v=hb17db558',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',
-  '/assets/js/site.js?v=h899e544e',
-  '/assets/js/premium.js?v=h84a6809b',
+  '/assets/js/site.js?v=h15f8f845',
+  '/assets/js/premium.js?v=h15262fda',
   '/assets/js/home-page.js?v=h4d3b5fa6',
   '/assets/js/lenis.min.js?v=h1375bb5f',
   '/assets/js/lenis-init.js?v=h3379bccf',
@@ -44,9 +44,9 @@ const CORE = [
   '/assets/screenshots/nextcloud.webp',
   '/assets/screenshots/immich.webp',
   '/assets/screenshots/openwebui.webp',
-  '/logo.svg',
-  '/logo-light.svg',
-  '/logo-favicon.svg',
+  '/assets/icons/seal-field.png',
+  '/assets/icons/seal-mark.png',
+  '/assets/icons/seal-favicon.png',
   '/assets/icons/feature-open-v2.svg',
   '/assets/icons/feature-free-v2.svg',
   '/assets/icons/feature-community-v2.svg',

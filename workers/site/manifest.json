@@ -1,20 +1,24 @@
 {
-  "name": "MySweetPea — Self-Hosted Services",
+  "name": "MySweetPea \u2014 Self-Hosted Services",
   "short_name": "MySweetPea",
-  "description": "Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions — community funded.",
+  "description": "Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions \u2014 community funded.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0C1316",
   "theme_color": "#0C1316",
-  "categories": ["productivity", "utilities", "social"],
+  "categories": [
+    "productivity",
+    "utilities",
+    "social"
+  ],
   "lang": "en",
   "icons": [
     {
-      "src": "/logo-favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/assets/icons/seal-favicon.png",
+      "sizes": "48x48",
+      "type": "image/png",
       "purpose": "any"
     },
     {
@@ -41,19 +45,34 @@
       "name": "Get Access",
       "short_name": "Get Access",
       "url": "/form.html",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Services",
       "short_name": "Services",
       "url": "/services.html",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Status",
       "short_name": "Status",
       "url": "/status.html",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }

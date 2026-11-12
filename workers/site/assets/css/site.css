@@ -8060,7 +8060,7 @@ body[data-page='status'] .status-line.is-down .line-name { color: var(--error); 
 
 /* Logo mark: lift the dark disc off the light bg with a soft contact shadow +
    a faint teal halo so petals read crisp (no structural SVG changes) */
-[data-theme='light'] .msb { filter: brightness(0.85) saturate(1.3) drop-shadow(0 2px 5px rgba(27, 43, 49, 0.28)) drop-shadow(0 0 10px rgba(94, 184, 168, 0.25)); }
+[data-theme='light'] .msb { filter: brightness(0.5) saturate(1.5) drop-shadow(0 2px 5px rgba(27, 43, 49, 0.28)); }
 
 /* Hero glow: make the breathing aura actually visible on light */
 [data-theme='light'] .hero::before {

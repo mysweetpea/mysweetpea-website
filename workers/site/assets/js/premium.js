@@ -58,7 +58,8 @@
         var asciiLogo = document.createElement('img');
         asciiLogo.className = 'ascii-logo';
         function asciiLogoSrc() {
-            asciiLogo.src = document.documentElement.getAttribute('data-theme') === 'light' ? '/logo-light.svg' : '/logo.svg';
+            asciiLogo.src = document.documentElement.getAttribute('data-theme') === 'light'
+                ? '/assets/icons/seal-ink.png' : '/assets/icons/seal-field.png';
         }
         asciiLogoSrc();
         /* keep the logo on-theme across mid-session toggles */

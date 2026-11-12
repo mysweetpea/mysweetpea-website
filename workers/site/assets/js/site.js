@@ -1495,7 +1495,6 @@
     (function () {
     'use strict';
     var SWAPS = [
-        '/logo.svg',
         '/assets/icons/affine2.svg',
         '/assets/icons/feature-open-v2.svg',
         '/assets/icons/feature-free-v2.svg',
