@@ -1495,8 +1495,6 @@
     (function () {
     'use strict';
     var SWAPS = [
-        '/assets/icons/seal-mark.png',
-        '/assets/icons/seal-field.png',
         '/assets/icons/affine2.svg',
         '/assets/icons/feature-open-v2.svg',
         '/assets/icons/feature-free-v2.svg',
@@ -1514,6 +1512,9 @@
     function applyThemeAssets() {
         var light = document.documentElement.getAttribute('data-theme') === 'light';
         document.querySelectorAll('img').forEach(function (img) {
+            /* the footer sits over the always-dark portal layer, so its seal
+               must stay the dark stamp tile in both themes */
+            if (img.closest('.page-footer')) return;
             var raw = img.getAttribute('src') || '';
             if (!raw || raw.indexOf('data:') === 0) return;
             var path;

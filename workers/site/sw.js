@@ -4,7 +4,7 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-h5c6ffb61';
+const CACHE = 'mysweetpea-h1914a7fe';
 const CORE = [
         '/assets/js/services-page.js?v=hde7d3914',
         '/assets/js/site-data.js?v=h312b8e0f',
@@ -20,13 +20,13 @@ const CORE = [
   '/',
   '/index.html',
   '/assets/css/fonts.css?v=h6b17b99d',
-  '/assets/css/site.css?v=hf0263860',
-  '/assets/css/premium.css?v=h44326b48',
+  '/assets/css/site.css?v=ha2ab9af8',
+  '/assets/css/premium.css?v=h2e175b89',
   '/assets/css/home.css?v=hb17db558',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',
-  '/assets/js/site.js?v=h61481dcc',
-  '/assets/js/premium.js?v=h42d93a72',
+  '/assets/js/site.js?v=h958e37a2',
+  '/assets/js/premium.js?v=hade6b530',
   '/assets/js/home-page.js?v=h4d3b5fa6',
   '/assets/js/lenis.min.js?v=h1375bb5f',
   '/assets/js/lenis-init.js?v=h3379bccf',
@@ -45,7 +45,6 @@ const CORE = [
   '/assets/screenshots/immich.webp',
   '/assets/screenshots/openwebui.webp',
   '/assets/icons/seal-field.png',
-  '/assets/icons/seal-mark.png',
   '/assets/icons/seal-favicon.png',
   '/assets/icons/feature-open-v2.svg',
   '/assets/icons/feature-free-v2.svg',

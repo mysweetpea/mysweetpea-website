@@ -9114,3 +9114,6 @@ body[data-page]:not([data-page='home']) .hero img.logo {
    corners so it reads as a stamp on every page, never a pasted square. === */
 img.logo { border-radius: 18%; }
 [data-theme='light'] img.logo { border-radius: 0; filter: none; }
+
+/* nav + footer seal = same stamp tile as the hero (2026-11-12) */
+img.msb { border-radius: 18%; }
