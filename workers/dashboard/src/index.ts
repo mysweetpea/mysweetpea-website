@@ -322,7 +322,7 @@ async function requireSession(request: Request, env: Env): Promise<{ sess: Sessi
       await env.SESSIONS.delete(`sess:${sid}`);
       return json({ error: 'session expired; sign in again' }, 401);
     }
-    await kvPutBestEffort(env, `sess:${sid}`, JSON.stringify(fresh), 180 * 86400);
+    await kvPutBestEffort(env, `sess:${sid}`, JSON.stringify(fresh), 270 * 86400);
     sess = fresh;
   }
   try {
@@ -1097,7 +1097,7 @@ export default {
         email: meData.user.email,
         created: Date.now(),
       };
-      await env.SESSIONS.put(`sess:${sid}`, JSON.stringify(sess), { expirationTtl: 180 * 86400 });
+      await env.SESSIONS.put(`sess:${sid}`, JSON.stringify(sess), { expirationTtl: 270 * 86400 });
       // audit
       const audit = { t: Date.now(), event: 'login', ip: request.headers.get('cf-connecting-ip') || '' };
       await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify(audit), { expirationTtl: 90 * 86400 });
@@ -1165,7 +1165,7 @@ export default {
       if (!sid) return json({ ok: false, error: 'token expired' }, 401);
       await env.SESSIONS.delete('land:' + token);
       const headers = new Headers({ 'content-type': 'application/json', 'cache-control': 'no-store' });
-      headers.append('set-cookie', `${COOKIE}=${sid}; Domain=.mysweetpea.cc; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=15552000`);
+      headers.append('set-cookie', `${COOKIE}=${sid}; Domain=.mysweetpea.cc; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=23328000`);
       return new Response(JSON.stringify({ ok: true }), { status: 200, headers });
     }
 
@@ -1503,7 +1503,7 @@ export default {
           const doc = JSON.parse(raw) as SessionData;
           if (updates.name) doc.name = updates.name;
           if (updates.email) doc.email = updates.email;
-          await env.SESSIONS.put(`sess:${sid}`, JSON.stringify(doc), { expirationTtl: 180 * 86400 });
+          await env.SESSIONS.put(`sess:${sid}`, JSON.stringify(doc), { expirationTtl: 270 * 86400 });
         }
 
         const now = Date.now();
