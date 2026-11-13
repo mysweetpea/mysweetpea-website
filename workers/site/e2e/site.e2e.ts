@@ -58,5 +58,5 @@ test('status page reports real Kuma monitors, never 0 of 0', async ({ app, brows
 
 test('agent: every service on the services page is named and reachable', async ({ app, agent }) => {
   await app.open('/services');
-  await agent.assert('The Services page shows the services MySweetPea offers, each card naming the service and its purpose (for example Moonfin for films and shows, Nextcloud for files). Every card has a visible action. No card shows a placeholder such as "undefined", "NaN" or an empty title.');
+  await agent.assert('The Services page shows the services MySweetPea offers, each card naming the service and its purpose (for example Moonfin for films and shows, Nextcloud for files). Every currently available service card has a visible action. Cards explicitly marked Coming Soon, Planned or Queued are not launchable and do not need an action. No card shows a placeholder such as "undefined", "NaN" or an empty title.');
 });
