@@ -9117,3 +9117,42 @@ img.logo { border-radius: 18%; }
 
 /* nav + footer seal = same stamp tile as the hero (2026-11-12) */
 img.msb { border-radius: 18%; }
+
+/* ==== Home: "How you get in" step band (replaces "Why MySweetPea?" 2026-11-13) ==== */
+.steps-band {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 34px 0 0;
+    padding: 0;
+    list-style: none;
+    max-width: 1000px;
+}
+.steps-band li {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 20px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    min-width: 0;
+}
+.steps-band .steps-n {
+    font-family: var(--t-font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    color: var(--sage);
+    opacity: 0.9;
+}
+.steps-band strong { color: var(--text); font-size: 1.02rem; font-weight: 600; }
+.steps-band em { font-style: normal; color: var(--text-faint); font-size: 0.92rem; line-height: 1.5; }
+.steps-cta { margin: 26px 0 0; display: flex; justify-content: center; }
+@media (max-width: 820px) {
+    .steps-band { grid-template-columns: 1fr; }
+    .steps-band li { padding: 18px 18px; }
+}
+[data-theme='light'] .steps-band li {
+    border-color: rgba(16, 40, 36, 0.10);
+    background: rgba(255, 255, 255, 0.62);
+}
