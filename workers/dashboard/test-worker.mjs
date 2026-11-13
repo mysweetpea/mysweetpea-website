@@ -24,6 +24,7 @@ const env = {
   AUTHENTIK_CLIENT_ID: 'client',
   MSP_INTERNAL_HEADER: 'internal',
   APP_URL: 'https://dashboard.mysweetpea.cc',
+  BOT_ADMIN_TOKEN: 'bot',
 };
 const jwt = exp => `x.${Buffer.from(JSON.stringify({ iat: exp - 900, exp })).toString('base64url')}.x`;
 const validSession = () => ({ at: 'not-a-jwt', rt: 'refresh', sub: 'user-1', username: 'member', name: 'Member', email: 'member@example.com', created: Date.now() });
@@ -195,7 +196,38 @@ try {
   // would split a member's watch history in two.
   assert.deepEqual(provBodies.map((b) => b.name), ['member', 'second']);
 
-  console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media');
+  // Vaultwarden request lane: member asks, Gardener sees it once, member closes it.
+  kv.map.clear(); cacheStore.clear();
+  kv.map.set('sess:vault', JSON.stringify(validSession()));
+  fetchImpl = async () => memberMe();
+  let vault = await worker.handle(request('/api/vault', { headers: cookie('vault') }), env, ctx);
+  assert.equal((await vault.json()).request, null);
+  vault = await worker.handle(request('/api/vault/request', {
+    method: 'POST', headers: { ...cookie('vault'), origin: env.APP_URL, 'content-type': 'application/json' }, body: '{}',
+  }), env, ctx);
+  assert.equal(vault.status, 200);
+  assert.equal((await vault.json()).request.status, 'pending');
+  vault = await worker.handle(request('/api/bot/vault-requests', { headers: { 'x-msp-internal': 'bot' } }), env, ctx);
+  const queue = await vault.json();
+  assert.equal(queue.requests.length, 1);
+  assert.equal(queue.requests[0].email, 'member@example.com');
+  vault = await worker.handle(request('/api/bot/vault-requests/notified', {
+    method: 'POST', headers: { 'x-msp-internal': 'bot', 'content-type': 'application/json' },
+    body: JSON.stringify({ id: queue.requests[0].id }),
+  }), env, ctx);
+  assert.equal(vault.status, 200);
+  vault = await worker.handle(request('/api/bot/vault-requests', { headers: { 'x-msp-internal': 'bot' } }), env, ctx);
+  assert.equal((await vault.json()).requests.length, 0, 'notified request must not repeat');
+  vault = await worker.handle(request('/api/vault/accept', {
+    method: 'POST', headers: { ...cookie('vault'), origin: env.APP_URL, 'content-type': 'application/json' }, body: '{}',
+  }), env, ctx);
+  assert.equal((await vault.json()).request.status, 'done');
+  vault = await worker.handle(request('/api/vault', { headers: cookie('vault') }), env, ctx);
+  assert.equal((await vault.json()).request.status, 'done');
+  vault = await worker.handle(request('/api/bot/vault-requests'), env, ctx);
+  assert.equal(vault.status, 403, 'vault bot lane must be token-gated');
+
+  console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media, vault request lane');
 } finally {
   globalThis.fetch = realFetch;
   globalThis.caches = realCaches;

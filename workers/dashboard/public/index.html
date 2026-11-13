@@ -283,6 +283,17 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .svc-guide-body p{margin:0;font-size:.88rem;line-height:1.55}
 .svc-guide-btn{display:inline-block;margin-top:9px;background:transparent;border:1px solid rgba(151,146,255,.4);color:var(--primary-bright);text-decoration:none;font-size:.8rem;font-weight:600;padding:5px 14px;border-radius:99px;transition:.35s cubic-bezier(.4,0,.2,1)}
 .svc-guide-btn:hover{border-color:var(--gold);color:var(--gold)}
+/* Vaultwarden invitation request — member-initiated, owner sends the invite. */
+.vw-card{margin:2px 0 16px;padding:15px 17px;border:1px solid var(--border);border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--v-soft),transparent 62%),var(--card);box-shadow:var(--e1)}
+.vw-cap{margin:0 0 5px!important;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.58rem!important;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--primary-bright)}
+.vw-card p{margin:0 0 10px;font-size:.84rem;line-height:1.5;color:var(--text-dim)}
+.vw-card p:last-child{margin-bottom:0}
+.vw-btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 16px;border:1px solid var(--border-primary);border-radius:99px;background:var(--v-soft);color:var(--text);font:inherit;font-size:.8rem;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+.vw-btn:hover{border-color:var(--sage);color:var(--sage)}
+.vw-btn:disabled{opacity:.55;cursor:wait}
+.vw-link{display:inline-flex;align-items:center;min-height:38px;padding:0 16px;border:1px solid var(--border-primary);border-radius:99px;color:var(--sage);font-size:.8rem;font-weight:600;text-decoration:none}
+.vw-link:hover{border-color:var(--sage);color:var(--text)}
+.vw-fine{margin-top:9px!important;font-size:.72rem!important;color:var(--text-faint)!important}
 @media(max-width:760px){.svc-guide{grid-template-columns:minmax(0,1fr)}.svc-guide-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;max-width:100%}.svc-guide-chip{width:100%;min-width:0;padding:8px 10px;font-size:.8rem;white-space:nowrap;overflow:hidden}.svc-guide-chip span:not(.gp-count){overflow:hidden;text-overflow:ellipsis}.svc-guide-chip .svc-guide-ico{width:20px;height:20px;flex:none}.svc-guide-chip .gp-count{font-size:.6rem;padding:0 5px;flex:none}.svc-guide-detail,.svc-guide>*{min-width:0;max-width:100%}.svc-guide .card,.svc-guide #guide-body,.svc-guide .gp-steps{min-width:0;max-width:100%}.svc-guide pre,.svc-guide .ripple-strip{max-width:100%;overflow-x:clip}}
 /* ---- phase 12: get-started onboarding + suggest a service ---- */
 .ob-card{border-color:rgba(217,168,108,.20);background:linear-gradient(160deg,rgba(217,168,108,.05),transparent 45%),var(--card)}
@@ -2845,10 +2856,49 @@ function gpPillHtml(pl, on) {
   return '<button type="button" class="gp-pill' + (on ? ' active' : '') + '" data-gp="' + esc(pl.p) + '" role="tab" aria-selected="' + (on ? 'true' : 'false') + '">' +
     (glyph ? '<span class="gp-glyph" aria-hidden="true">' + glyph + '</span>' : '') + esc(pl.label) + '</button>';
 }
+/* Vaultwarden setup is member-initiated: the dashboard records the ask, the
+   owner sends the invitation from Vaultwarden, then the member marks it done. */
+let vaultReq = null;
+let vaultLoaded = false;
+function vaultCardHtml() {
+  if (!vaultLoaded) {
+    return '<div class="vw-card" id="vw-card" aria-live="polite"><p class="vw-cap">Password manager</p><p>Checking your setup status&hellip;</p></div>';
+  }
+  const r = vaultReq;
+  if (r && r.status === 'done') {
+    return '<div class="vw-card" id="vw-card" aria-live="polite"><p class="vw-cap">Password manager</p>' +
+      '<p>Your Vaultwarden setup is marked complete. Open it to manage your passwords.</p>' +
+      '<a class="vw-link" href="https://vault.mysweetpea.cc" target="_blank" rel="noopener">Open Vaultwarden</a></div>';
+  }
+  if (r && r.status === 'pending') {
+    return '<div class="vw-card" id="vw-card" aria-live="polite"><p class="vw-cap">Password manager</p>' +
+      '<p>Request sent. Watch your email for <b>Join MySweetPea</b>. After you accept the invitation, mark it here.</p>' +
+      '<button type="button" class="vw-btn" data-vw="accept">I&rsquo;ve accepted the invitation</button>' +
+      '<p class="vw-fine">The owner sends it to your account email; it may take up to a day.</p></div>';
+  }
+  return '<div class="vw-card" id="vw-card" aria-live="polite"><p class="vw-cap">Password manager</p>' +
+    '<p>Request an invitation to the MySweetPea password manager. You&rsquo;ll sign in with your MySweetPea account and create a separate master password.</p>' +
+    '<button type="button" class="vw-btn" data-vw="request">Request setup</button>' +
+    '<p class="vw-fine">If you forget the master password later, the owner can reset it through organization recovery.</p></div>';
+}
+function vaultSwapCard() {
+  const el = document.getElementById('vw-card');
+  if (el) el.outerHTML = vaultCardHtml();
+}
+async function vaultRefresh() {
+  try {
+    const r = await fetch('/api/vault');
+    const d = await r.json();
+    vaultReq = (d && d.request) || null;
+  } catch (e) { vaultReq = null; }
+  vaultLoaded = true;
+  vaultSwapCard();
+}
 function guideDetailHtml(key) {
   const g = GUIDES[key];
   if (!g) return '';
   let h = '<div class="svc-guide-title">' + esc(g.name) + '</div><p class="svc-guide-intro">' + esc(g.plain) + '</p>';
+  if (key === 'vaultwarden') h += vaultCardHtml();
   if (svcDev(key)) {
     h += '<p class="gp-devnote"><span aria-hidden="true">\u25CB</span> Still being built — these steps are written down here, but the service is not open to every member yet.</p>';
   }
@@ -4656,6 +4706,7 @@ function mspSessionBanner() {
       guideSel = key;
       guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === key ? 'true' : 'false'));
       guideBody.innerHTML = guideDetailHtml(key);
+      if (key === 'vaultwarden') vaultRefresh();
       const dd = document.getElementById('m-guide-dd');
       if (dd) {
         const lab = document.getElementById('m-guide-sum-t');
@@ -4713,6 +4764,30 @@ function mspSessionBanner() {
       if (!id || id === guidePlatSel[guideSel]) return;
       guidePlatSel[guideSel] = id;
       guideBody.innerHTML = guideDetailHtml(guideSel);
+    });
+    // Vaultwarden request controls are delegated so they survive card swaps.
+    guideBody.addEventListener('click', async (e) => {
+      const btn = e.target && e.target.closest ? e.target.closest('[data-vw]') : null;
+      if (!btn || btn.disabled) return;
+      const action = btn.getAttribute('data-vw');
+      btn.disabled = true;
+      const old = btn.textContent;
+      btn.textContent = action === 'accept' ? 'Saving…' : 'Sending…';
+      try {
+        const r = await fetch(action === 'accept' ? '/api/vault/accept' : '/api/vault/request', {
+          method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d && d.error ? d.error : 'Could not send request');
+        vaultReq = (d && d.request) || { status: action === 'accept' ? 'done' : 'pending', at: Date.now() };
+        vaultLoaded = true;
+        vaultSwapCard();
+        toast(action === 'accept' ? 'Marked complete — your password manager is ready' : 'Request sent — watch your email for Join MySweetPea');
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = old;
+        toast((err && err.message) ? err.message : 'Could not send request');
+      }
     });
   }
   // ===== PHASE 12 + 14: ONBOARDING wiring (dismiss + guide/contact jumps) + contact copy =====

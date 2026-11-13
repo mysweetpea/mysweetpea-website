@@ -80,6 +80,20 @@ interface BugRecord {
   status?: string;
 }
 
+// A member asks the owner for a Vaultwarden organization invitation. The
+// dashboard cannot send it: Vaultwarden requires an owner/admin session.
+interface VaultRequest {
+  id: string;
+  sub: string;
+  username: string;
+  name?: string;
+  email: string;
+  at: number;
+  status: 'pending' | 'done';
+  notified?: boolean;
+  acceptedAt?: number;
+}
+
 const COOKIE = 'msp_dash_session';
 const REFERRAL_STATUSES_OK = new Set(['pending', 'approved', 'declined', 'created']);
 const SCOPES = 'openid profile email offline_access goauthentik.io/api';
@@ -255,6 +269,23 @@ async function listUsernameRequests(env: Env): Promise<any[]> {
   }));
   return recs
     .filter((r) => r && r.status === 'pending')
+    .sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
+}
+
+async function getVaultRequest(env: Env, sub: string): Promise<VaultRequest | null> {
+  try { return JSON.parse((await env.SESSIONS.get('vaultreq:' + sub)) || 'null'); }
+  catch { return null; }
+}
+
+async function listVaultRequests(env: Env): Promise<VaultRequest[]> {
+  // ponytail: prefix scan — one record per member; the bot lane filters notified.
+  const listed = await env.SESSIONS.list({ prefix: 'vaultreq:' });
+  const recs = await Promise.all(listed.keys.map(async (k) => {
+    try { return JSON.parse((await env.SESSIONS.get(k.name)) || 'null'); }
+    catch { return null; }
+  }));
+  return recs
+    .filter((r): r is VaultRequest => !!r)
     .sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
 }
 
@@ -1238,6 +1269,33 @@ export default {
       }
       return json({ ok: true });
     }
+    // Gardener bot lane for Vaultwarden setup requests. The bot cannot invite:
+    // Vaultwarden needs an owner/admin session. It just tells the owner whom to
+    // invite, then marks the request notified so it does not repeat.
+    if (path === '/api/bot/vault-requests' && request.method === 'GET') {
+      if (!env.BOT_ADMIN_TOKEN || request.headers.get('x-msp-internal') !== env.BOT_ADMIN_TOKEN) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      const requests = (await listVaultRequests(env))
+        .filter((r) => !r.notified)
+        .slice(0, 20)
+        .map((r) => ({ id: r.id, name: r.name || r.username, email: r.email, at: r.at }));
+      return json({ requests });
+    }
+    if (path === '/api/bot/vault-requests/notified' && request.method === 'POST') {
+      if (!env.BOT_ADMIN_TOKEN || request.headers.get('x-msp-internal') !== env.BOT_ADMIN_TOKEN) {
+        return json({ error: 'forbidden' }, 403);
+      }
+      let body: any;
+      try { body = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+      const id = typeof body?.id === 'string' ? body.id : '';
+      if (!id) return json({ error: 'bad id' }, 400);
+      const found = (await listVaultRequests(env)).find((r) => r.id === id);
+      if (!found) return json({ error: 'not found' }, 404);
+      found.notified = true;
+      await env.SESSIONS.put('vaultreq:' + found.sub, JSON.stringify(found), { expirationTtl: 90 * 86400 });
+      return json({ ok: true });
+    }
     if (path === '/api/referral/status' && request.method === 'PATCH') {
       // Owner-only status flip (internal header, like the ingest route).
       if (request.headers.get('x-msp-internal') !== env.MSP_INTERNAL_HEADER) {
@@ -1541,6 +1599,37 @@ export default {
           }).catch(() => {}));
         }
         return json({ ok: true, desired });
+      }
+
+      // Vaultwarden invitation request. The member asks; the owner sends the
+      // invitation from Vaultwarden, then the member marks acceptance here.
+      if (path === '/api/vault' && request.method === 'GET') {
+        const rec = await getVaultRequest(env, sess.sub);
+        return json({ request: rec ? { status: rec.status, at: rec.at, acceptedAt: rec.acceptedAt || null } : null });
+      }
+      if (path === '/api/vault/request' && request.method === 'POST') {
+        if (!sess.email) return json({ error: 'No email address on this account.' }, 400);
+        const existing = await getVaultRequest(env, sess.sub);
+        if (existing) return json({ ok: true, request: { status: existing.status, at: existing.at } });
+        const rec: VaultRequest = {
+          id: crypto.randomUUID().slice(0, 8),
+          sub: sess.sub,
+          username: sess.username,
+          name: sess.name,
+          email: sess.email,
+          at: Date.now(),
+          status: 'pending',
+        };
+        await env.SESSIONS.put('vaultreq:' + sess.sub, JSON.stringify(rec), { expirationTtl: 90 * 86400 });
+        return json({ ok: true, request: { status: rec.status, at: rec.at } });
+      }
+      if (path === '/api/vault/accept' && request.method === 'POST') {
+        const rec = await getVaultRequest(env, sess.sub);
+        if (!rec) return json({ error: 'No request found.' }, 404);
+        rec.status = 'done';
+        rec.acceptedAt = Date.now();
+        await env.SESSIONS.put('vaultreq:' + sess.sub, JSON.stringify(rec), { expirationTtl: 90 * 86400 });
+        return json({ ok: true, request: { status: rec.status, at: rec.at, acceptedAt: rec.acceptedAt } });
       }
 
       if (path === '/api/sessions') {
