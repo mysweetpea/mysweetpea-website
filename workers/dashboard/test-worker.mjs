@@ -30,6 +30,9 @@ const validSession = () => ({ at: 'not-a-jwt', rt: 'refresh', sub: 'user-1', use
 const request = (path, options = {}) => new Request('https://dashboard.mysweetpea.cc' + path, options);
 const cookie = sid => ({ cookie: `msp_dash_session=${sid}` });
 let fetchImpl = async () => { throw new Error('unexpected fetch'); };
+const memberMe = (groups = ['sweetpea'], active = true) => Response.json({
+  user: { pk: 'user-1', username: 'member', name: 'Member', email: 'member@example.com', is_active: active, groups: groups.map(name => ({ name })) },
+});
 const realFetch = globalThis.fetch;
 globalThis.fetch = (...args) => fetchImpl(...args);
 
@@ -44,6 +47,7 @@ try {
   assert.equal(kv.map.has('sess:expired'), false, 'dead session must be deleted');
 
   // A sibling origin is same-site, but it is not the dashboard origin.
+  fetchImpl = async () => memberMe();
   kv.map.clear(); cacheStore.clear(); kv.map.set('sess:valid', JSON.stringify(validSession()));
   res = await worker.handle(request('/api/referral', {
     method: 'POST', headers: { ...cookie('valid'), origin: 'https://other.mysweetpea.cc', 'content-type': 'text/plain' },
@@ -60,7 +64,10 @@ try {
   // Two cold callers share one upstream Authentik request.
   kv.map.clear(); cacheStore.clear(); kv.map.set('sess:valid', JSON.stringify(validSession()));
   let authCalls = 0;
-  fetchImpl = async () => { authCalls++; await new Promise(r => setTimeout(r, 30)); return Response.json({ results: [] }); };
+  fetchImpl = async url => {
+    if (String(url).endsWith('/core/users/me/')) return memberMe();
+    authCalls++; await new Promise(r => setTimeout(r, 30)); return Response.json({ results: [] });
+  };
   const [r1, r2] = await Promise.all([
     worker.handle(request('/api/sessions', { headers: cookie('valid') }), env, ctx),
     worker.handle(request('/api/sessions', { headers: cookie('valid') }), env, ctx),
@@ -72,7 +79,10 @@ try {
   // Upstream failures must not overwrite the cache as a successful session list.
   kv.map.clear(); cacheStore.clear(); kv.map.set('sess:valid', JSON.stringify(validSession()));
   let failedCalls = 0;
-  fetchImpl = async () => { failedCalls++; return Response.json({ results: [] }, { status: 500 }); };
+  fetchImpl = async url => {
+    if (String(url).endsWith('/core/users/me/')) return memberMe();
+    failedCalls++; return Response.json({ results: [] }, { status: 500 });
+  };
   await worker.handle(request('/api/sessions', { headers: cookie('valid') }), env, ctx);
   await worker.handle(request('/api/sessions', { headers: cookie('valid') }), env, ctx);
   assert.equal(failedCalls, 2, 'failed upstream responses must be retried, not cached');
@@ -90,12 +100,33 @@ try {
   assert.equal(tokenCalls, 0, 'unbound callbacks must not reach token exchange');
 
   // Referral history must come from the records themselves, not a lossy index.
+  fetchImpl = async () => memberMe();
   kv.map.clear();
   kv.map.set('sess:valid', JSON.stringify(validSession()));
   kv.map.set('referral:a', JSON.stringify({ id: 'a', by: 'user-1', status: 'pending', at: 1 }));
   kv.map.set('referral:b', JSON.stringify({ id: 'b', by: 'user-2', status: 'pending', at: 2 }));
   const referrals = await worker.handle(request('/api/referral', { headers: cookie('valid') }), env, ctx);
   assert.deepEqual((await referrals.json()).referrals.map(r => r.id), ['a']);
+
+  // Existing dashboard sessions are re-authorized briefly and revoked on group loss.
+  kv.map.clear(); cacheStore.clear(); kv.map.set('sess:valid', JSON.stringify(validSession()));
+  let entitlementCalls = 0;
+  fetchImpl = async () => { entitlementCalls++; return memberMe(); };
+  for (let i = 0; i < 2; i++) {
+    const allowed = await worker.handle(request('/api/referral', { headers: cookie('valid') }), env, ctx);
+    assert.equal(allowed.status, 200);
+  }
+  assert.equal(entitlementCalls, 1, 'positive entitlement must use the five-minute cache');
+  cacheStore.clear();
+  fetchImpl = async () => memberMe(['other']);
+  res = await worker.handle(request('/api/referral', { headers: cookie('valid') }), env, ctx);
+  assert.equal(res.status, 401, 'group revocation must invalidate an existing session');
+  assert.equal(kv.map.has('sess:valid'), false);
+  kv.map.set('sess:valid', JSON.stringify(validSession()));
+  fetchImpl = async () => Response.json({}, { status: 500 });
+  res = await worker.handle(request('/api/referral', { headers: cookie('valid') }), env, ctx);
+  assert.equal(res.status, 503, 'identity outages must not look like revocation');
+  assert.equal(kv.map.has('sess:valid'), true, 'temporary outage must not delete the session');
 
   // The real interstitial + cookie completes a legitimate login round-trip.
   kv.map.clear(); cacheStore.clear();
@@ -139,7 +170,7 @@ try {
   const provBodies = [];
   fetchImpl = async (url, options = {}) => {
     const u = String(url);
-    if (u.includes('auth.example')) return Response.json({ user: { groups: [{ name: 'sweetpea' }] } });
+    if (u.includes('auth.example')) return Response.json({ user: { is_active: true, groups: [{ name: 'sweetpea' }] } });
     if (u.endsWith('/Moonfin/Admin/Provision')) { provBodies.push(JSON.parse(String(options.body || '{}'))); return Response.json({ pin: '123456' }); }
     if (u.endsWith('/Users/AuthenticateByName')) {
       const body = JSON.parse(String(options.body || '{}'));

@@ -276,11 +276,9 @@ async function requireSession(request: Request, env: Env): Promise<{ sess: Sessi
   let sess: SessionData;
   try { sess = JSON.parse(raw) as SessionData; }
   catch { await env.SESSIONS.delete(`sess:${sid}`); return json({ error: 'unauthorized' }, 401); }
-  // Refresh when the access token is past half its lifetime (JWT exp/iat),
-  // NOT on a fixed wall-clock timer. Dashboard provider tokens last 24h, so
-  // this is ~1 refresh/day per active session instead of ~144. If the token
-  // cannot be parsed (not a JWT), fall back to a 12h cap so the refresh rate
-  // stays bounded either way.
+  // Refresh when the access token is past half its lifetime (JWT exp/iat).
+  // The dashboard provider's one-hour tokens refresh about every 30 minutes.
+  // If the token is not a JWT, use a bounded 12-hour fallback.
   const refreshAt = accessTokenRefreshAt(sess.at);
   const stale = refreshAt > 0
     ? Date.now() >= refreshAt
@@ -294,7 +292,15 @@ async function requireSession(request: Request, env: Env): Promise<{ sess: Sessi
       return json({ error: 'session expired; sign in again' }, 401);
     }
     await kvPutBestEffort(env, `sess:${sid}`, JSON.stringify(fresh), 180 * 86400);
-    return { sess: fresh, sid };
+    sess = fresh;
+  }
+  try {
+    if (!(await sessionEntitlementValid(env, sess))) {
+      await env.SESSIONS.delete(`sess:${sid}`);
+      return json({ error: 'access revoked; sign in again' }, 401);
+    }
+  } catch {
+    return json({ error: 'identity provider temporarily unavailable' }, 503);
   }
   return { sess, sid };
 }
@@ -437,13 +443,29 @@ async function cacheDeleteJson(key: string): Promise<void> {
   }
 }
 
+// Re-check active membership at most once per five minutes per member. Positive
+// results use the unmetered Cache API; revoked sessions are deleted, while an
+// Authentik outage fails closed for the request without destroying the session.
+async function sessionEntitlementValid(env: Env, sess: SessionData): Promise<boolean> {
+  const key = 'cache:authz:' + String(sess.sub || '');
+  if ((await cacheGetJson(key)) === 'yes') return true;
+  const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
+  if (r.status === 401 || r.status === 403) return false;
+  if (!r.ok) throw new Error('authentik entitlement check ' + r.status);
+  const d = await r.json() as any;
+  const u = d && d.user ? d.user : d;
+  const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
+  if (u?.is_active !== true || !(names.includes('sweetpea') || names.includes('seedling'))) return false;
+  await cachePutJson(key, 'yes', 300);
+  return true;
+}
+
 // When should this access token be refreshed? Read the JWT exp/iat claims
 // (the signature is NOT verified here — authentik validates the token
 // server-side on every API call; this is scheduling only). Refresh once half
-// the token's lifetime has elapsed: ~1 refresh per 12h on the 24h tokens the
-// dashboard provider now mints, and any old 15-minute token is re-minted
-// once, immediately. This replaced a fixed "every 10 minutes" timer that
-// cost ~144 KV writes per active session per day.
+// the token's lifetime has elapsed, regardless of the provider's configured
+// lifetime. This replaced a fixed "every 10 minutes" timer that cost ~144 KV
+// writes per active session per day.
 function accessTokenRefreshAt(token: string): number {
   try {
     const part = token.split('.')[1];
