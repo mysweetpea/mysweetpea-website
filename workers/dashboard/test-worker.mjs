@@ -211,6 +211,14 @@ try {
   const queue = await vault.json();
   assert.equal(queue.requests.length, 1);
   assert.equal(queue.requests[0].email, 'member@example.com');
+  vault = await worker.handle(request('/api/vault/accept', {
+    method: 'POST', headers: { ...cookie('vault'), origin: env.APP_URL, 'content-type': 'application/json' }, body: '{}',
+  }), env, ctx);
+  assert.equal((await vault.json()).request.status, 'done');
+  // A member can mark accepted before the owner sees the request; it must still
+  // reach the owner because status and notification are separate concerns.
+  vault = await worker.handle(request('/api/bot/vault-requests', { headers: { 'x-msp-internal': 'bot' } }), env, ctx);
+  assert.equal((await vault.json()).requests.length, 1);
   vault = await worker.handle(request('/api/bot/vault-requests/notified', {
     method: 'POST', headers: { 'x-msp-internal': 'bot', 'content-type': 'application/json' },
     body: JSON.stringify({ id: queue.requests[0].id }),
@@ -218,10 +226,6 @@ try {
   assert.equal(vault.status, 200);
   vault = await worker.handle(request('/api/bot/vault-requests', { headers: { 'x-msp-internal': 'bot' } }), env, ctx);
   assert.equal((await vault.json()).requests.length, 0, 'notified request must not repeat');
-  vault = await worker.handle(request('/api/vault/accept', {
-    method: 'POST', headers: { ...cookie('vault'), origin: env.APP_URL, 'content-type': 'application/json' }, body: '{}',
-  }), env, ctx);
-  assert.equal((await vault.json()).request.status, 'done');
   vault = await worker.handle(request('/api/vault', { headers: cookie('vault') }), env, ctx);
   assert.equal((await vault.json()).request.status, 'done');
   vault = await worker.handle(request('/api/bot/vault-requests'), env, ctx);
