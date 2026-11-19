@@ -41,9 +41,12 @@ export interface Env {
   GOTIFY_BUG_TOKEN?: string; // user bug reports -> Gotify 'Bugs' app (PC alert-poller -> Paperclip)
   // Media access ("generate pin"): the dashboard provisions the member's
   // Moonfin persona on demand instead of the redeem workflow emailing a PIN.
-  // MOONBASE_MOUNT is the full picker URL the member pastes into Moonfin
-  // (https://<host>/jellyfin/<config-uuid>/<encpw>) — PIN sign-in only works
-  // on the mount path, never on the bare /jellyfin address.
+  // MOONBASE_MOUNT holds the per-device mount TOKEN only (the 'eyJ...' blob),
+  // not a URL. ALWAYS compose it through fullMount(env) — origin + /jellyfin/
+  // <config-uuid>/<token>. PIN sign-in only works on that mount path, never on
+  // the bare /jellyfin address. (Concatenating the secret directly produced an
+  // invalid URL, the fetch threw, and every personal media row + stat silently
+  // blanked for every member — fixed Nov 19 2026.)
   MOONBASE_ADMIN_TOKEN?: string;
   MOONBASE_MOUNT?: string;
   GITHUB_TOKEN?: string; // optional — homelab-k8s is public; token only lifts the 60/hr anon limit
@@ -714,7 +717,7 @@ async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string;
      "MySweetPea" watch history instead of their identik account. Fixed Nov 10
      2026 by request: the older plays were declared acceptable to lose. */
   try {
-    const r = await fetch(env.MOONBASE_MOUNT + '/Users/AuthenticateByName', {
+    const r = await fetch(fullMount(env) + '/Users/AuthenticateByName', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-emby-authorization': AIOS_UA },
       body: JSON.stringify({ Username: who.name, Pw: who.pin }),
@@ -1276,8 +1279,19 @@ export default {
       if (!env.BOT_ADMIN_TOKEN || request.headers.get('x-msp-internal') !== env.BOT_ADMIN_TOKEN) {
         return json({ error: 'forbidden' }, 403);
       }
-      const requests = (await listVaultRequests(env))
-        .filter((r) => !r.notified)
+      /* Gardener polls this every 120s. A KV LIST per poll burned 720 of the
+         free tier's 1,000 lists/day (the "50% of your KV limit" email). Reads
+         are 100k/day, so the idle path is a single GET on a marker key that
+         /api/vault/request sets. Test-and-clear BEFORE listing: a request that
+         lands mid-poll re-sets the marker and can never be missed, and the
+         marker is restored while anything is still un-notified so a failed
+         Telegram send retries on the next poll. */
+      if (!(await env.SESSIONS.get('vault-inbox'))) return json({ requests: [] });
+      await env.SESSIONS.delete('vault-inbox');
+      const all = await listVaultRequests(env);
+      const pending = all.filter((r) => !r.notified);
+      if (pending.length) await kvPutBestEffort(env, 'vault-inbox', '1', 90 * 86400);
+      const requests = pending
         .slice(0, 20)
         .map((r) => ({ id: r.id, name: r.name || r.username, email: r.email, at: r.at }));
       return json({ requests });
@@ -1354,6 +1368,32 @@ export default {
           user.tier = groupNames.includes('sweetpea') ? 'sweetpea'
                     : groupNames.includes('seedling') ? 'seedling'
                     : 'seedling';
+          /* Still on the emailed temporary password? authentik stamps
+             password_change_date on EVERY set_password, including the admin
+             call that creates the account, so an account that never changed it
+             has password_change_date within seconds of date_joined while anyone
+             who has changed it is minutes-to-months later. Covers every change
+             path (dashboard, authentik settings, recovery) with no flag to sync.
+             /core/users/me/ exposes neither field, so this is one admin-token
+             read per profile refresh (60s cache). Fail-safe: any error leaves
+             temp_password false, so the gate stays quiet rather than accusing a
+             member who already changed it.
+             ponytail: 120s window; changing it inside 2 min of redeeming reads
+             as done (harmless). Explicit attribute flag if it ever misfires. */
+          let tempFlag = false;
+          try {
+            const pk = Number(user.pk);
+            if (pk && env.AUTHENTIK_ADMIN_TOKEN) {
+              const ar = await authentikFetch(env, env.AUTHENTIK_ADMIN_TOKEN, `/api/v3/core/users/${pk}/`);
+              if (ar.ok) {
+                const a = await ar.json() as any;
+                const joined = Date.parse(String(a?.date_joined || ''));
+                const changed = Date.parse(String(a?.password_change_date || ''));
+                if (isFinite(joined) && isFinite(changed)) tempFlag = (changed - joined) < 120000;
+              }
+            }
+          } catch { /* keep false */ }
+          user.temp_password = tempFlag;
           try {
             const m = await env.SESSIONS.get(`avm:${sess.sub}`);
             if (m) {
@@ -1621,6 +1661,9 @@ export default {
           status: 'pending',
         };
         await env.SESSIONS.put('vaultreq:' + sess.sub, JSON.stringify(rec), { expirationTtl: 90 * 86400 });
+        // Wake the bot's poll loop (see /api/bot/vault-requests). Deliberately
+        // NOT prefixed 'vaultreq:' — that prefix is listed as records.
+        await kvPutBestEffort(env, 'vault-inbox', '1', 90 * 86400);
         return json({ ok: true, request: { status: rec.status, at: rec.at } });
       }
       if (path === '/api/vault/accept' && request.method === 'POST') {

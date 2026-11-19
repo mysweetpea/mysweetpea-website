@@ -72,3 +72,76 @@ body {
 @media (max-width: 640px) {
     .proof-stat .proof-label { font-size: 0.72rem; letter-spacing: 0.09em; }
 }
+
+
+/* ==========================================================================
+   MICRO-LABEL FLOOR + MOBILE TAP TARGETS (2026-11-19 member-readiness audit)
+
+   Measured across all 14 pages at 390px and 1097px: 54 label classes rendered
+   between 7.5px and 10.9px. Owner decision: raise everything under 11px to an
+   11px floor and leave anything already >= 11px exactly as it is.
+
+   WHY THIS FILE: type-tokens.css is a generated shadow layer that restates
+   type declarations with !important, and it loads AFTER site/premium/home.
+   hermes-type.css loads after type-tokens on every page, so an !important rule
+   here wins. The nine selectors that type-tokens also claims are repeated at
+   its EXACT specificity so the later position breaks the tie; everything else
+   only competes with non-important rules, which !important beats outright.
+   home.css (index) and donate.css (support) load after this file but carry no
+   !important, so they cannot override the floor.
+   ========================================================================== */
+
+/* --- 1. the nine declarations type-tokens.css also restates --- */
+body[data-page='form'] .form-label,
+body[data-page='suggest'] .form-label,
+body[data-page='suggest'] .req-tag,
+body[data-page='suggest'] .opt-tag,
+body[data-page='form'] .req-tag,
+body[data-page='form'] .opt-tag,
+body[data-page='form'] .uc-icon,
+.crypto-soon,
+.form-tier-label,
+.compare-table .compare-soon-tag,
+.uc-icon,
+.filter-btn .f-count,
+.filter-btn .f-soon { font-size: 11px !important; }
+
+/* --- 2. everything else measured under 11px --- */
+.hb-uptime, .g-side-name, .g-idx, .g-replaces, .g-altname, .g-vs, .g-ev,
+.what-pill, .what-mono, .sec-eyebrow .n, .record .l, .record .s,
+.g-src a, .g-links a, .vb-link, .vb-note, .vb-note em, .gw-card .gw-kicker,
+.tb-tag, .tb-morelist, .led-k, .tier-flag, .tier-period2, .tier-subnote,
+.hiw-selective-eyebrow, .hiw-included-label, .pc-eyebrow,
+.line-idx, .line-cat, .line-lat, .badge-label, .sc-uptime, .sc-checks,
+.status-summary-meta b, #summary-pct,
+.coH-row .k, .coH-k, .coH-line,
+.tier-divider .chip, .dn-soon-pill, .dn-card-foot, .dn-why-point .pt-label,
+.cl2-cat, .cl2-axis-tick, .cl2-count, .cl2-wk-toggle, .cl2-tag,
+.cl2-fgroup-label, .cl2-legend-item .lg-count,
+.form-label.glass-text, .slabel i, .lmeta .right, #lcount,
+.about-x-bl, .about-x-tag, .about-x-live-txt, .about-x-tk-state,
+.about-x-mf-head span, .success-eta { font-size: 11px !important; }
+
+/* The "+N more services" list is a long run-on string; at 11px it must wrap
+   inside its tile instead of pushing the tile wider. */
+.tb-morelist { overflow-wrap: anywhere; white-space: normal; }
+
+/* --- 3. mobile tap targets ---------------------------------------------
+   Inline prose links ("Questions? Contact us") are exempt under WCAG 2.2
+   target-size; these are standalone pill/action links that measured 20-24px
+   tall on a phone. Padding only — no visual weight change on desktop. */
+@media (max-width: 767.98px) {
+  .gh-link { padding: 7px 11px; }
+  .about-x-mf-link { display: inline-block; padding: 7px 2px; }
+}
+
+/* --- 4. changelog activity graph: 30 bars shared ~350px, so each button was
+   10px wide — untappable. Give every column a real target and let the chart
+   scroll, which is the standard mobile pattern for a dense time series. */
+@media (max-width: 767.98px) {
+  body[data-page='changelog'] .cl2-graph {
+    overflow-x: auto; overflow-y: hidden; gap: 4px;
+    scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  }
+  body[data-page='changelog'] .cl2-col { flex: 0 0 26px; min-width: 26px; }
+}

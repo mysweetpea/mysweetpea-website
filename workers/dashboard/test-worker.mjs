@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import worker from './src/index.ts';
 
 class MemoryKV {
-  constructor() { this.map = new Map(); }
-  async get(key) { return this.map.get(key) ?? null; }
+  constructor() { this.map = new Map(); this.lists = 0; this.reads = 0; }
+  async get(key) { this.reads++; return this.map.get(key) ?? null; }
   async put(key, value) { this.map.set(key, String(value)); }
   async delete(key) { this.map.delete(key); }
-  async list({ prefix = '' } = {}) { return { keys: [...this.map.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })), list_complete: true, cursor: null }; }
+  async list({ prefix = '' } = {}) { this.lists++; return { keys: [...this.map.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })), list_complete: true, cursor: null }; }
 }
 const kv = new MemoryKV();
 const cacheStore = new Map();
@@ -163,18 +163,24 @@ try {
   assert.equal([...kv.map.keys()].filter(k => k.startsWith('sess:')).length, 1);
 
   // Two members must not share the unplayed feed or a persona token cache.
+  // ⚠️ MOONBASE_MOUNT holds the TOKEN ONLY in production (see fullMount). The
+  // fixture used to hold a whole URL, which is exactly why a refactor that
+  // changed the secret's shape passed CI while every member's personal rows
+  // blanked in prod. Keep it token-shaped.
   kv.map.clear(); cacheStore.clear();
   const second = { ...validSession(), sub: 'user-2', username: 'second', name: 'Second' };
   kv.map.set('sess:one', JSON.stringify(validSession())); kv.map.set('sess:two', JSON.stringify(second));
-  Object.assign(env, { AIOS_UUID: 'service', AIOS_PASSWORD: 'pw', MOONBASE_ADMIN_TOKEN: 'admin', MOONBASE_MOUNT: 'https://aiostreams.mysweetpea.cc/jellyfin/config/mount' });
+  Object.assign(env, { AIOS_UUID: 'service', AIOS_PASSWORD: 'pw', MOONBASE_ADMIN_TOKEN: 'admin', MOONBASE_MOUNT: 'config/mount' });
   const mediaAuth = [];
   const provBodies = [];
+  const personaLogins = [];
   fetchImpl = async (url, options = {}) => {
     const u = String(url);
     if (u.includes('auth.example')) return Response.json({ user: { is_active: true, groups: [{ name: 'sweetpea' }] } });
     if (u.endsWith('/Moonfin/Admin/Provision')) { provBodies.push(JSON.parse(String(options.body || '{}'))); return Response.json({ pin: '123456' }); }
     if (u.endsWith('/Users/AuthenticateByName')) {
       const body = JSON.parse(String(options.body || '{}'));
+      if (body.Username !== 'service') personaLogins.push(u);
       const token = u.includes('/config/mount/') ? (body.Username === 'second' ? 'member-2' : 'member-1') : 'service-token';
       return Response.json({ AccessToken: token });
     }
@@ -195,6 +201,12 @@ try {
   // Persona names are LOGIN names, never display names — a display-name persona
   // would split a member's watch history in two.
   assert.deepEqual(provBodies.map((b) => b.name), ['member', 'second']);
+  // The persona sign-in MUST be an absolute URL on the composed mount path.
+  // Concatenating the raw token secret produced 'config/mount/Users/...' —
+  // an invalid URL that threw, was swallowed, and blanked every personal row.
+  assert.equal(personaLogins.length, 2, 'each member signs in once');
+  assert.equal(personaLogins.every((u) => /^https:\/\/aiostreams\.mysweetpea\.cc\/jellyfin\/service\/config\/mount\/Users\/AuthenticateByName$/.test(u)), true,
+    'persona login must use fullMount(env), not the raw secret: ' + personaLogins.join(' | '));
 
   // Vaultwarden request lane: member asks, Gardener sees it once, member closes it.
   kv.map.clear(); cacheStore.clear();
@@ -231,7 +243,64 @@ try {
   vault = await worker.handle(request('/api/bot/vault-requests'), env, ctx);
   assert.equal(vault.status, 403, 'vault bot lane must be token-gated');
 
-  console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media, vault request lane');
+  // KV list quota: Gardener polls the vault inbox every 120s. An idle poll must
+  // cost a READ, never a LIST (lists are capped at 1,000/day, reads at 100,000).
+  assert.equal(kv.map.has('vault-inbox'), false, 'marker must be cleared once nothing is pending');
+  kv.lists = 0;
+  for (let i = 0; i < 10; i++) {
+    const idle = await worker.handle(request('/api/bot/vault-requests', { headers: { 'x-msp-internal': 'bot' } }), env, ctx);
+    assert.equal((await idle.json()).requests.length, 0);
+  }
+  assert.equal(kv.lists, 0, '10 idle polls must not LIST KV (this is the 720-lists/day quota bug)');
+  // A new request re-arms the marker, and an un-notified request keeps it armed
+  // so a failed Telegram send retries on the next poll.
+  kv.map.delete('vaultreq:user-1');
+  vault = await worker.handle(request('/api/vault/request', {
+    method: 'POST', headers: { ...cookie('vault'), origin: env.APP_URL, 'content-type': 'application/json' }, body: '{}',
+  }), env, ctx);
+  assert.equal(vault.status, 200);
+  assert.equal(kv.map.has('vault-inbox'), true, 'creating a request must arm the poll marker');
+  for (let i = 0; i < 2; i++) {
+    vault = await worker.handle(request('/api/bot/vault-requests', { headers: { 'x-msp-internal': 'bot' } }), env, ctx);
+    assert.equal((await vault.json()).requests.length, 1, 'un-notified request must survive repeated polls');
+    assert.equal(kv.map.has('vault-inbox'), true, 'marker stays armed while anything is un-notified');
+  }
+
+  // Temporary-password gate signal: authentik stamps password_change_date on
+  // creation too, so "changed within 120s of joining" == still on the emailed
+  // temp password. The gate must be quiet for everyone else, and quiet on error.
+  kv.map.clear(); cacheStore.clear();
+  env.AUTHENTIK_ADMIN_TOKEN = 'admin-token';
+  kv.map.set('sess:pw', JSON.stringify({ ...validSession(), sub: 'pw-user' }));
+  const pwMe = () => Response.json({ user: { pk: 42, username: 'member', name: 'Member', email: 'm@example.com', is_active: true, groups: [{ name: 'sweetpea' }] } });
+  const adminUser = (joined, changed) => Response.json({ pk: 42, date_joined: joined, password_change_date: changed });
+  const askMe = async () => {
+    cacheStore.clear();
+    const r = await worker.handle(request('/api/me', { headers: cookie('pw') }), env, ctx);
+    return (await r.json()).temp_password;
+  };
+  fetchImpl = async (url) => {
+    const u = String(url);
+    if (u.endsWith('/core/users/me/')) return pwMe();
+    if (u.endsWith('/core/users/42/')) return adminUser('2026-11-19T10:00:00Z', '2026-11-19T10:00:04Z');
+    throw new Error('unexpected pw fetch ' + u);
+  };
+  assert.equal(await askMe(), true, 'password set at creation = still temporary');
+  fetchImpl = async (url) => {
+    const u = String(url);
+    if (u.endsWith('/core/users/me/')) return pwMe();
+    if (u.endsWith('/core/users/42/')) return adminUser('2026-11-19T10:00:00Z', '2026-11-19T10:09:00Z');
+    throw new Error('unexpected pw fetch ' + u);
+  };
+  assert.equal(await askMe(), false, 'a real password change must silence the gate');
+  fetchImpl = async (url) => {
+    const u = String(url);
+    if (u.endsWith('/core/users/me/')) return pwMe();
+    return Response.json({ detail: 'nope' }, { status: 500 });
+  };
+  assert.equal(await askMe(), false, 'an admin-read failure must fail safe (no false accusation)');
+
+  console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media, mount-path persona login, vault request lane + KV list quota, temp-password signal');
 } finally {
   globalThis.fetch = realFetch;
   globalThis.caches = realCaches;

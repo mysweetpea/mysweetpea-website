@@ -2975,7 +2975,7 @@ function mspSessionBanner() {
     gate.innerHTML = '<a data-msp-site="/" href="https://mysweetpea.cc" style="display:block;color:inherit;text-decoration:none"><img class="gate-logo" src="/icons/seal.png" alt="MySweetPea logo"/></a><p class="gate-eyebrow">MySweetPea</p><h1 class="gate-h">The garden, from anywhere.</h1><p class="gate-sub">One sign-in for your media, notes, passwords and chat — self-hosted, ad-free, members-only.</p><a class="btn gate-cta" href="/auth/login">Sign in with MySweetPea</a><div class="gate-links gate-join"><span>New here?</span><a href="https://mysweetpea.cc/form.html" data-msp-site="/form.html" class="gate-alt">Get access</a></div><div class="gate-links"><a href="/auth/ceremony?f=recovery" class="gate-alt">Forgot your password?</a><span aria-hidden="true">&middot;</span><a href="mailto:support@mysweetpea.cc" data-msp-email="1" class="gate-alt">Need a hand?</a></div><p class="gate-foot">Members only &middot; invites via recommendation</p>';
     return;
   }
-  try { if (window.mspPwGate) window.mspPwGate(me.username); } catch (e) {}
+  try { if (me.temp_password=*** && window.mspPwGate) window.mspPwGate(me.username); } catch (e) {}
   const initialsOf = (n, u) => (n || u || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
   const CAM = '<span class="av-badge"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>';
   const avatarInner = () => (me.has_avatar && me.avatar_ts ? '<img src="/api/avatar?v=' + me.avatar_ts + '" alt="Profile picture"/>' : esc(initialsOf(me.name, me.username)));
@@ -4056,6 +4056,11 @@ function mspSessionBanner() {
      fragment found in a monitor's name matches), cat = services-grid
      filter category. SV_CATS / HM_DOT_MATCH / graft MATCH used to
      duplicate subsets of this by display name; they are DERIVED below. ===== */
+  /* `dev: true` = owner has not finished testing it for member use. It renders
+     IN DEVELOPMENT and makes the card non-launchable HERE, while the marketing
+     site still lists the service as live (it works and is reachable). That
+     difference is deliberate — owner decision Nov 19 2026 — do not "sync" them.
+     KoalaSync graduated off the flag the same day. */
   const SERVICES = [
     { key: 'moonfin',     name: 'Moonfin',     url: 'https://aiostreams.mysweetpea.cc/jellyfin/', blurb: 'Movies, shows & anime', icon: '/icons/moonfin.svg', cat: 'media', mon: ['moonfin', 'aiostreams'], noWeb: true },
     { key: 'jellyfin',    name: 'Jellyfin',    url: 'https://media.mysweetpea.cc',   blurb: 'Live TV & Sports', icon: '/icons/jellyfin.svg',   cat: 'media', mon: ['jellyfin'], dev: true },
@@ -4065,7 +4070,7 @@ function mspSessionBanner() {
     { key: 'matrix',      name: 'Element',     url: 'https://chat.mysweetpea.cc',    blurb: 'Matrix chat', icon: '/icons/matrix.svg',    cat: 'tools', mon: ['element', 'matrix', 'chat'], dev: true },
     { key: 'affine',      name: 'AFFiNE',      url: 'https://notes.mysweetpea.cc',   blurb: 'Docs, wikis & whiteboards', icon: '/icons/affine.svg', cat: 'tools', mon: ['affine', 'notes'], dev: true },
     { key: 'openwebui',   name: 'Open WebUI',  url: 'https://ai.mysweetpea.cc',      blurb: 'AI assistants', icon: '/icons/openwebui.svg', cat: 'ai', mon: ['webui', 'open web', 'ai'] },
-    { key: 'koalasync',   name: 'KoalaSync',   url: 'https://sync.mysweetpea.cc',    blurb: 'Watch parties, in sync', icon: '/icons/koalasync.svg', cat: 'media', mon: ['koala', 'sync'], dev: true },
+    { key: 'koalasync',   name: 'KoalaSync',   url: 'https://sync.mysweetpea.cc',    blurb: 'Watch parties, in sync', icon: '/icons/koalasync.svg', cat: 'media', mon: ['koala', 'sync'] },
   ];
   /* name -> entry view (matchers + future consumers) */
   const SVC_BY_NAME = {};

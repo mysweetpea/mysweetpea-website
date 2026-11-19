@@ -63,7 +63,7 @@
         if (!window.MSP) return;
         window.MSP.data().then(function (d) {
             if (!d) return;
-            var nS = d.services.length, nR = (d.repos || []).length;
+            var nS = d.services.length, nR = (d.siteFacts && d.siteFacts.publicRepos) || (d.repos || []).length;
             var stats = document.querySelectorAll('.about-x-bignum .about-x-bn');
             stats.forEach(function (bn) {
                 var lbl = bn.querySelector('.about-x-bl');

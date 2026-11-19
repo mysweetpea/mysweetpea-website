@@ -176,6 +176,22 @@ def main():
             save(SW, new_sw)
     report.append('sw.js CACHE -> %s' % sha8(all_hashes.encode()))
 
+    # ---- 3b. every SW precache entry must exist on disk ----
+    # cache.addAll() is ATOMIC: one 404 rejects the whole install, the worker
+    # never activates, and the site silently loses offline + stale-while-
+    # revalidate with no console error on the page. A renamed screenshot
+    # (immich.webp -> photos.webp) killed the SW for 10 days before an audit
+    # caught it, so the release gate now checks the list against the disk.
+    core_block = new_sw.split(b'const CORE = [', 1)[1].split(b'];', 1)[0]
+    core_entries = re.findall(rb"'([^']+)'", core_block)
+    for raw in core_entries:
+        entry = raw.decode('utf-8').split('?')[0]
+        leaf = 'index.html' if entry in ('/', '') else entry.lstrip('/')
+        if not os.path.isfile(os.path.join(SITE, leaf)):
+            problems.append('sw.js precache entry missing on disk: %s '
+                            '(one 404 kills the entire service worker)' % entry)
+    report.append('sw.js precache: %d entries exist on disk' % len(core_entries))
+
     # ---- 4. validations ----
     js_files = [os.path.join(SITE, 'assets', 'js', f) for f in os.listdir(os.path.join(SITE, 'assets', 'js')) if f.endswith('.js')]
     js_files.append(SW)

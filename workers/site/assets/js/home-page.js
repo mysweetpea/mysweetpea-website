@@ -147,18 +147,12 @@
       if (pill && pill.textContent.indexOf('services live') !== -1) {
         pill.textContent = n + '/' + n + ' services live';
       }
-      var nr = (d.repos || []).length || (d.siteFacts && d.siteFacts.publicRepos) || 0;
+      var nr = (d.siteFacts && d.siteFacts.publicRepos) || (d.repos || []).length || 0;
       if (nr) {
         var rp = Array.prototype.slice.call(document.querySelectorAll('.what-pill')).find(function (p2) {
           return p2.textContent.indexOf('public repos') !== -1;
         });
         if (rp) rp.textContent = nr + ' public repos you can see for yourself';
-        /* record band '2' tile (Public repos) */
-        var rec = Array.prototype.slice.call(document.querySelectorAll('.record .v')).find(function (v2) {
-          var l2 = v2.parentElement && v2.parentElement.querySelector('.l');
-          return l2 && /public repos/i.test(l2.textContent);
-        });
-        if (rec) rec.textContent = String(nr);
       }
     }).catch(function(){});
   }
