@@ -1965,6 +1965,45 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 <script>
+/* Moonfin gained a real browser player in AIOStreams v2.38: the mount path
+   serves /web/ (hash routing, /item/$itemId), signs members in with their
+   display name + PIN, and plays the H.264 sources the edge filter already
+   selects for browsers. Tapping a title used to open the setup guide because
+   no web client existed; that premise is gone. Verified E2E with a throwaway
+   persona: sign-in -> #/item/<id> renders the title page with a Play button.
+   Resolved at CLICK time so it works whether or not the PIN card has loaded,
+   and falls back to the guide for a member with no media access yet. */
+(function () {
+  function mount() {
+    var el = document.getElementById('mp-server');
+    var m = el ? el.textContent : '';
+    if (!m) {
+      try {
+        for (var i = 0; i < sessionStorage.length; i++) {
+          var k = sessionStorage.key(i);
+          if (k && k.indexOf('msp_pin_v2:') === 0) {
+            var c = JSON.parse(sessionStorage.getItem(k) || 'null');
+            if (c && c.mount) { m = c.mount; break; }
+          }
+        }
+      } catch (e) { /* private mode */ }
+    }
+    return String(m || '').trim().replace(/\/+$/, '');
+  }
+  window.mspItemHref = function (id) {
+    var m = mount();
+    if (!m || !id) return '#guides/moonfin';
+    return m + '/web/#/item/' + encodeURIComponent(id);
+  };
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[data-msp-item]') : null;
+    if (!a) return;
+    var href = window.mspItemHref(a.getAttribute('data-msp-item'));
+    if (href && href !== a.getAttribute('href')) { e.preventDefault(); window.location.href = href; }
+  });
+})();
+</script>
+<script>
 'use strict';
 /* ===== Deployment config adoption (/api/config) ============================
    The worker exposes public-safe config (site origin, support email, media
@@ -2377,21 +2416,6 @@ function relTime(v) {
   if (sec < 86400) return Math.floor(sec / 3600) + 'h ago';
   return new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
-function countUp(el, target, dur) {
-  if (!el) return;
-  if (target == null) { el.textContent = '—'; return; }
-  let reduce = false;
-  try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-  if (reduce || dur === 0) { el.textContent = String(target); return; }
-  const t0 = performance.now();
-  const span = dur || 900;
-  const step = (t) => {
-    const p = Math.min(1, (t - t0) / span);
-    el.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
-    if (p < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
 function sortMonitors(mons) {
   return (mons || []).slice().sort((a, b) =>
     ((a && a.current ? 0 : 1) - (b && b.current ? 0 : 1)) ||
@@ -2407,12 +2431,6 @@ function groupMonitors(mons) {
     out[idx[g]].mons.push(m);
   });
   return out;
-}
-function uptimeRows(mons) {
-  const rows = [];
-  groupMonitors(mons).forEach((g) => { sortMonitors(g.mons).forEach((m) => rows.push({ group: g.name, m: m })); });
-  sortMonitors((mons || []).filter((m) => !(m && typeof m.group === 'string' && m.group))).forEach((m) => rows.push({ group: '', m: m }));
-  return rows;
 }
 function beatStrip(beats) {
   const arr = (Array.isArray(beats) ? beats : []).map((b) => (b ? 1 : 0)).slice(-40);
@@ -3502,7 +3520,6 @@ function mspSessionBanner() {
   function renderStats(s) {
     const kpi = document.getElementById('stats-kpi');
     const svc = document.getElementById('stats-services');
-    const pvTotal = (s.photos == null && s.videos == null) ? null : ((s.photos || 0) + (s.videos || 0));
     if (kpi) {
       kpi.innerHTML =
       kpiTile('Movies watched', s.movies, KPI_ICONS.film) +
@@ -3633,7 +3650,7 @@ function mspSessionBanner() {
     const total = list.reduce((a, x) => a + (Number(x.playCount) || 0), 0);
     // all-tied rows make "33% of top plays" noise, not information
     const flat = list.length > 1 && list.every((x) => (Number(x.playCount) || 0) === (Number(list[0].playCount) || 0));
-    const JF_ITEM_URL = '#guides/moonfin';   // no Moonfin web client exists — send members to Services
+    const JF_ITEM_URL = '#guides/moonfin';   // fallback for no-JS / no media access; data-msp-item upgrades it
     const h3 = card.querySelector('h3');
     if (h3) h3.textContent = flat ? 'Recently watched' : 'Most watched';
     card.setAttribute('aria-label', flat ? 'Recently watched' : 'Most watched, all time');
@@ -3641,7 +3658,7 @@ function mspSessionBanner() {
       const plays = Number(x.playCount) || 0;
       const share = Math.round((plays / total) * 100);
       const art = (x && x.img) ? '<img class="st-row-art" loading="lazy" alt="" src="' + esc(x.img) + '"/>' : '<span class="st-row-art st-row-fallback hm-g' + (i % 3) + '">' + esc(String(x.name || '?').trim().charAt(0).toUpperCase()) + '</span>';
-      return '<a class="st-row" href="' + JF_ITEM_URL + '">' +
+      return '<a class="st-row" href="' + JF_ITEM_URL + '" data-msp-item="' + esc(x.id || '') + '">' +
         (flat ? '' : '<span class="st-rank">' + (i + 1) + '</span>') + art +
         '<span class="st-row-main"><span class="st-row-title">' + esc(x.name || 'Untitled') + '</span>' +
         '<span class="st-row-bar"><i style="width:' + Math.max(4, Math.round((plays / max) * 100)) + '%"></i></span></span>' +
@@ -4010,7 +4027,7 @@ function mspSessionBanner() {
   (async () => {
     /* No per-item web viewer exists on this server — the card opens the
        AIOStreams app itself rather than a dead #!/item route. */
-    const JF_ITEM = '#guides/moonfin';   // poster/genre taps land on Services
+    const JF_ITEM = '#guides/moonfin';   // fallback; data-msp-item opens the title in the web player
     const g2 = async (u, force) => {
       const d = await apiGet(u, 15000, force);
       if (d && Array.isArray(d.items)) d.items = validObjects(d.items);
@@ -4019,7 +4036,7 @@ function mspSessionBanner() {
     };
     const posterCard = (it, o) => {
       const pct = Math.max(0, Math.min(100, Number(it.progressPct) || 0));
-      let h = '<a class="mitem" href="' + JF_ITEM + '">';
+      let h = '<a class="mitem" href="' + JF_ITEM + '" data-msp-item="' + esc(it.id || '') + '">';
       if (o.badge && it.type) h += '<span class="mtype">' + esc(it.type) + '</span>';
       h += '<span class="mposter-wrap"><span class="mposter-fb hm-g0" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/></span>';
@@ -4042,7 +4059,7 @@ function mspSessionBanner() {
       const loading = () => { host.innerHTML = SKEL + SKEL; };
       const build = async (force) => {
       const [cont, mp, be, fr, ge] = await Promise.all([g2('/api/media/continue', force), g2('/api/media/mostplayed', force), g2('/api/media/recommend', force), g2('/api/media/unplayed', force), g2('/api/media/genres', force)]);
-      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '">' +
+      const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '" data-msp-item="' + esc(it.id || '') + '">' +
         '<span class="mposter-wrap"><span class="mposter-fb hm-g' + ((i || 0) % 3) + '" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
         '<div class="mtitle">' + esc(it.seriesName || it.name || '') + '</div>' +
@@ -4119,7 +4136,6 @@ function mspSessionBanner() {
   /* Services with no web client (Moonfin — its URL just lands on the
      AIOStreams login) open their setup guide instead of a dead end. One rule,
      one helper: every renderer that links a service uses svcLinkAttrs. */
-  const svcHref = (s) => (s && s.noWeb && GUIDES[s.key]) ? '#guides/' + s.key : mspCfgUrl(s.url);
   const svcLinkAttrs = (s) => (s && s.noWeb && GUIDES[s.key])
     ? 'href="#guides/' + s.key + '"'
     : 'href="' + esc(mspCfgUrl(s.url)) + '" target="_blank" rel="noopener noreferrer"';
@@ -4427,17 +4443,9 @@ function mspSessionBanner() {
   window.svUpsum();
   // ===== AURORA HOME (hm*) — Home tab rebuild (Home-11 "Everything", .oc-tmp/mockups/home.html) =====
   const hmJF = () => ((window.MSP_CFG && window.MSP_CFG.moonfin) || 'https://aiostreams.mysweetpea.cc') + '/jellyfin';
-  const hmJF_ITEM = '#guides/moonfin';   // no Moonfin web client — see Services
+  const hmJF_ITEM = '#guides/moonfin';   // fallback; data-msp-item opens the title in the web player
   const hmBackdrop = (id, w) => hmJF() + '/Items/' + encodeURIComponent(String(id == null ? '' : id)) + '/Images/Backdrop?fillWidth=' + (w || 400) + '&quality=70';
   const hmGreetingWord = () => { const h = new Date().getHours(); return (h < 5 ? 'Good night,' : h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,'); };
-  function hmJourney(level) {
-    let h = '';
-    for (let i = 1; i <= 4; i++) {
-      if (i > 1) h += '<span class="hm-jl' + (i <= level ? ' on' : '') + '"></span>';
-      h += '<span class="hm-jd' + (i < level ? ' done' : (i === level ? ' now' : '')) + '"></span>';
-    }
-    return '<span class="hm-journey" aria-hidden="true">' + h + '</span>';
-  }
   async function hmLoadBanner() {
     const gw = document.getElementById('hm-greet-word');
     if (gw) gw.textContent = hmGreetingWord() + ' ';
@@ -4488,10 +4496,11 @@ function mspSessionBanner() {
       '<span class="hm-kicker">' + (kicker || 'Continue watching') + '</span>' +
       '<span class="hm-hero-title">' + esc(title) + '</span>' +
       (subBits.length ? '<span class="hm-hero-meta">' + esc(subBits.filter(Boolean).join(' · ')) + '</span>' : '') +
-      '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Setup guide</span>' +
+      '</span><span class="hm-hero-side"><span class="hm-play"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>Watch now</span>' +
       (pct ? '<span class="hm-pl">' + pct + '% watched</span>' : '') + '</span></span>' +
       '<span class="hm-prog"><i style="width:' + pct + '%"></i></span>';
     host.href = hmJF_ITEM;
+    if (hmHeroId) host.setAttribute('data-msp-item', hmHeroId); else host.removeAttribute('data-msp-item');
     host.hidden = false;
   }
   function hmLoadServices() {
@@ -4665,7 +4674,7 @@ function mspSessionBanner() {
     const initial = esc(String((it && it.name) || '?').trim().charAt(0).toUpperCase() || '?');
     const sub = (it && it.seriesName) ? it.seriesName : String((it && it.type) || '');
     const rating = (it && it.rating != null) ? Number(it.rating).toFixed(1) : null;
-    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + '">' +
+    return '<a class="hm-card hm-pcard" href="' + hmJF_ITEM + '" data-msp-item="' + esc(it.id || '') + '">' +
       '<span class="hm-poster hm-g' + (i % 3) + '"><span class="hm-poster-init">' + initial + '</span>' +
       ((it && it.img) ? '<img loading="lazy" alt="" src="' + esc(String(it.img)) + '" onerror="this.remove()">' : '') +
       (rating ? '<span class="hm-pbadge hm-rate-badge">' + rating + '</span>' : '<span class="hm-pbadge">NEW</span>') + '</span>' +
@@ -4699,7 +4708,7 @@ function mspSessionBanner() {
     const pct = Math.max(0, Math.min(100, Number(it && it.progressPct) || 0));
     /* the title is the show now, so the sub-line is the episode (or the type for a film) */
     const sub = (it && it.seriesName) ? String(it.name || '') : String((it && it.type) || '');
-    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + '">' +
+    return '<a class="hm-card hm-wide" href="' + hmJF_ITEM + '" data-msp-item="' + esc(it.id || '') + '">' +
       '<img class="hm-wide-art" loading="lazy" alt="" src="' + esc(hmBackdrop(it && it.id, 480)) + '" onerror="this.style.display=\'none\'">' +
       '<span class="hm-wide-glow"></span>' +
       '<span class="hm-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg></span>' +

@@ -45,5 +45,41 @@ for (const [name, src] of targets) {
 }
 console.log('  ok   no redaction artifacts in code');
 
+/* The item-link resolver decides where a poster tap goes: the web player when
+   the member's mount address is known, the setup guide otherwise. Run its real
+   source against a stub DOM so a regression in either branch fails here. */
+{
+  const src = blocks.find((b) => b.includes('window.mspItemHref'));
+  if (!src) bad('mspItemHref resolver block not found');
+  else {
+    const run = (mountText, cacheMount) => {
+      const store = new Map(cacheMount ? [['msp_pin_v2:u', JSON.stringify({ mount: cacheMount })]] : []);
+      const sandbox = {
+        document: { getElementById: (id) => (id === 'mp-server' && mountText != null ? { textContent: mountText } : null),
+                    addEventListener: () => {} },
+        sessionStorage: { length: store.size, key: (i) => [...store.keys()][i], getItem: (k) => store.get(k) ?? null },
+        window: {}, encodeURIComponent,
+      };
+      sandbox.window = sandbox;
+      const fn = new Function('document', 'sessionStorage', 'window', 'encodeURIComponent', src);
+      fn(sandbox.document, sandbox.sessionStorage, sandbox.window, encodeURIComponent);
+      return sandbox.window.mspItemHref;
+    };
+    const M = 'https://x.example/jellyfin/uuid/eyJtok';
+    const cases = [
+      ['dom mount', run(M, null)('abc'), M + '/web/#/item/abc'],
+      ['cache mount', run('', M)('abc'), M + '/web/#/item/abc'],
+      ['trailing slash', run(M + '/', null)('abc'), M + '/web/#/item/abc'],
+      ['no mount -> guide', run('', null)('abc'), '#guides/moonfin'],
+      ['no id -> guide', run(M, null)(''), '#guides/moonfin'],
+      ['id encoded', run(M, null)('a/b'), M + '/web/#/item/a%2Fb'],
+    ];
+    for (const [name, got, want] of cases) {
+      if (got !== want) bad(`mspItemHref ${name}: got ${got}, want ${want}`);
+    }
+    console.log(`  ok   mspItemHref: ${cases.length} resolver cases`);
+  }
+}
+
 if (fail) { console.error(`\nFAIL — ${fail} syntax problem(s)`); process.exit(1); }
-console.log('\nPASS dashboard syntax: inline blocks, tour.js, no redaction artifacts');
+console.log('\nPASS dashboard syntax: inline blocks, tour.js, no redaction artifacts, item-link resolver');
