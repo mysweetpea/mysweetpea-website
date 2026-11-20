@@ -284,26 +284,6 @@
     })();
 
     /* ---------------- derived helpers ---------------- */
-    /* uptimeAvg: mean 24h uptime across ALL public services.
-       Honesty rule (kept from the old hand-rolled pages): a partial set
-       means monitor IDs drifted — return null so callers keep their static
-       value / degrade honestly instead of showing a plausible-but-wrong
-       average. */
-    function uptimeAvg() {
-        return Promise.all([hbPromise, monitorsPromise]).then(function (r) {
-            var j = r[0], mon = r[1];
-            var keys = Object.keys(mon.byKey);
-            if (!keys.length || !j.uptimeList) return null;
-            var sum = 0, n = 0;
-            for (var i = 0; i < keys.length; i++) {
-                var v = j.uptimeList[mon.byKey[keys[i]] + '_24'];
-                if (typeof v === 'number' && v >= 0 && v <= 1) { sum += v; n++; }
-            }
-            if (n !== keys.length) return null;
-            return Math.round((sum / n) * 1000) / 10; /* one decimal, e.g. 99.9 */
-        }).catch(function () { return null; });
-    }
-
     /* ---------------- chrome reconcile (nav/footer repo links + aria-current) ----------------
        Static chrome ships in every page (SEO/no-JS). At runtime:
        - every <a data-gh-repo="<key>"> adopts the validated repo URL from
@@ -407,6 +387,5 @@
         },
         monitors: function () { return monitorsPromise; },
         heartbeat: function () { return hbPromise; },
-        uptimeAvg: uptimeAvg
     };
 })();

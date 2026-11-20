@@ -76,52 +76,6 @@
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMotion);
   else initMotion();
 
-/* uptime tile: paints the "Measured uptime · last 24 hours" record tile.
-   (The garden live line was removed 2026-09; the Kuma fetch stays because the
-   tile still needs it — do not restore a live line without re-adding painters.)
-   Kuma contract: uptimeList["<id>_24"] = fraction 0..1 across monitors 1-9.
-   Runs inside the same DOM-ready contract as initMotion (defer scripts
-   always execute after the DOM is parsed, but this keeps one pattern). */
-  function initLive(){
-    var recUptime = document.getElementById('recUptime');
-    if (!recUptime) return;
-    /* 10s budget covers the WHOLE exchange (headers + body). AbortController
-       when present; otherwise a losing Promise.race rejects us out of a hung
-       fetch — the tile must never silently sit on its static default. */
-    var aborter = ('AbortController' in window) ? new AbortController() : null;
-    var abortTimer = setTimeout(function(){ if (aborter) aborter.abort(); }, 10000);
-    function clearAbort(){ clearTimeout(abortTimer); }
-    function paintUnavailable(){
-      /* honesty rule: the tile must not keep pretending — mark it so the
-         count-up never re-aims at the stale 99.9 default. data-count AND
-         textContent both: an animation already in flight re-reads data-count
-         on its final frame, and a not-yet-started one reads it at start. */
-      recUptime.removeAttribute('data-count');
-      recUptime.textContent = '—';
-    }
-    /* Live avg via MSP (single shared fetch + runtime monitor resolution).
-       MSP.uptimeAvg() keeps the old honesty rule: partial monitor set =>
-       null => static value stays, never a plausible-but-wrong average. */
-    var p = (window.MSP ? window.MSP.uptimeAvg() : Promise.reject(new Error('MSP missing')))
-      .then(function(avg){
-        clearAbort();
-        if (avg != null) {
-          var s = avg.toFixed(1);
-          recUptime.setAttribute('data-count', s);
-          recUptime.textContent = s;   /* paint live value (count-up may re-read data-count on final frame) */
-        } else {
-          console.warn('[msp] uptime tile: partial monitor set — keeping static value');
-        }
-      })
-      .catch(function(err){ clearAbort(); console.warn('[msp] uptime tile fetch failed:', err && err.message ? err.message : err); paintUnavailable(); });
-    /* belt-and-braces: if AbortController is unsupported the fetch itself can
-       hang forever — race the chain against a hard 10s timeout. (With
-       AbortController the abort already rejects p; this race is harmless.) */
-    var timeout = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error('timeout')); }, 10000); });
-    Promise.race([p, timeout]).catch(function(err){
-      if (err && err.message === 'timeout') paintUnavailable();
-    });
-  }
   /* === Dynamic service count (home proof-stat + what-pill) ================
      Markup ships data-count="9" / "9/9 services live" as the SEO static. At
      runtime we re-aim them at the validated service list so adding a service
@@ -156,7 +110,5 @@
       }
     }).catch(function(){});
   }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLive);
-  else initLive();
   syncCounts();
 })();

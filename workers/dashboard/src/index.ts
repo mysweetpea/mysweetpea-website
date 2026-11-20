@@ -21,7 +21,6 @@ export interface Env {
   JELLYFIN_URL: string;
   AIOS_UUID: string;
   AIOS_PASSWORD: string;
-  JELLYFIN_API_KEY: string;
 
   IMMICH_URL: string;
   IMMICH_API_KEY: string;
@@ -1708,8 +1707,8 @@ export default {
         // the cluster (svc-stats:<key>) — the worker cannot reach
         // cluster-internal hosts, and public origins sit behind BFM.
         const out: Record<string, unknown> = {
-          movies: null, series: null, episodes: null, songs: null, boxsets: null, jf_resume: null,
-          jf_watch_hours: null, jf_resume_titles: null, jf_top_title: null, jf_played_titles: null, jf_periods: null,
+          movies: null, series: null, episodes: null, jf_resume: null,
+          jf_watch_hours: null, jf_top_title: null, jf_played_titles: null, jf_periods: null,
           photos: null, videos: null, usage_mb: null,
           users: null, sessions: null,
           nc_files: null, nc_shares: null, nc_activity: null,
@@ -1781,9 +1780,6 @@ export default {
                   }
                 }
               } catch {}
-              out.movies = movieIds.size;
-              out.episodes = episodeIds.size;
-              out.series = seriesIds.size;
               // in progress: its partial position still counts as watched time
               let resumeTicks = 0;
               try {
@@ -1801,6 +1797,14 @@ export default {
                     // lands in `all` too, unless it is already in the played
                     // list (a re-watch in progress).
                     if (it && it.Id && seenIds.has(String(it.Id))) continue;
+                    /* Started counts as watched: the hero's 'titles' and the
+                       watch-hours figure already include in-progress items, so
+                       counting only fully-played ones here made the KPI tiles
+                       read '0 episodes' next to '2 titles'. Owner decision. */
+                    if (it && it.Type === 'Episode') {
+                      if (it.SeriesId) seriesIds.add(String(it.SeriesId));
+                      if (it.Id) episodeIds.add(String(it.Id));
+                    } else if (it && it.Type === 'Movie' && it.Id) movieIds.add(String(it.Id));
                     const lp = it && it.UserData ? it.UserData.LastPlayedDate : null;
                     const ts = lp ? Date.parse(String(lp)) : NaN;
                     const key = String((it && (it.SeriesId || it.Id)) || '');
@@ -1812,11 +1816,13 @@ export default {
                     }
                   }
                   out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : items.length;
-                  out.jf_resume_titles = items.length;
                   const top = items[0];
                   out.jf_top_title = top ? (String(top.SeriesName || top.Name || '').trim() || null) : null;
                 }
               } catch {}
+              out.movies = movieIds.size;
+              out.episodes = episodeIds.size;
+              out.series = seriesIds.size;
               const hrs = (t: number) => (t > 0 ? Math.round((t / 3.6e10) * 10) / 10 : 0); // .NET ticks are 100ns
               out.jf_watch_hours = hrs(buckets.all.ticks);
               out.jf_played_titles = buckets.all.titles.size;

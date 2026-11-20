@@ -72,13 +72,6 @@ body[data-page='home'] .g-src a{color:var(--text-faint);text-decoration:none}
 body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:underline}
 
 /* ON THE RECORD — proof band */
-.record-band{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;max-width:1140px;margin:0 auto;padding:0 20px}
-.record{border:1px solid var(--border);background:var(--card-bg);border-radius:18px;padding:30px 26px}
-.record .v{font-family:var(--t-font-display,'Instrument Serif',Georgia,serif);font-size:clamp(2.4rem,5vw,3.6rem);font-weight:400;line-height:1;color:var(--text);letter-spacing:-.01em}
-.record .v small{font-size:.45em;color:var(--text-dim)}
-.record .l{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-top:12px}
-.record a.s{display:inline-block;margin-top:8px;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.6rem;letter-spacing:.12em;color:var(--text-faint);text-decoration:none;border-bottom:1px dotted var(--text-faint)}
-.record a.s:hover{color:var(--sage);border-color:var(--sage)}
 /* THE GARDENER — keystone medallion echo from services dividers */
 .gardener{max-width:820px;margin:0 auto;padding:0 20px;display:flex;gap:24px;align-items:flex-start}
 .gardener .med{flex:0 0 52px;width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%, rgba(143,175,181,.28), rgba(143,175,181,.08));border:1px solid var(--primary);box-shadow:0 0 18px rgba(143,175,181,.35), inset 0 0 10px rgba(143,175,181,.18);display:flex;align-items:center;justify-content:center;font-size:1.15rem;color:var(--sage)}
@@ -148,11 +141,6 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
 /* 3c. card index numerals */
 .g-idx{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.6rem;letter-spacing:.12em;color:var(--text-faint);margin-right:8px;font-weight:400}
 /* 4. record tiles: instrument-panel craft + hover */
-.record{position:relative;overflow:hidden;transition:transform .3s ease, border-color .3s ease}
-.record::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(163,201,182,.55),transparent);opacity:.8}
-.record::after{content:'';position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 0%, rgba(163,201,182,.07), transparent 60%);pointer-events:none}
-.record:hover{transform:translateY(-3px);border-color:rgba(163,201,182,.35)}
-.record .v{font-variant-numeric:tabular-nums}
 /* 5. gardener medallion breathe */
 @keyframes medBreathe{0%,100%{box-shadow:0 0 18px rgba(143,175,181,.35), inset 0 0 10px rgba(143,175,181,.18)}50%{box-shadow:0 0 30px rgba(143,175,181,.55), inset 0 0 14px rgba(143,175,181,.3)}}
 .gardener .med{animation:medBreathe 5s ease-in-out infinite}
@@ -168,7 +156,7 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
   .vine-divider.reveal-grow::before,.vine-divider.reveal-grow::after{transform:scaleX(1);transition:none}
   .sec-eyebrow::before{transform:scaleX(1);transition:none}
   .gardener .med{animation:none}
-  .record,.faq-wrap details,.faq-wrap summary{transition:none}
+  .faq-wrap details,.faq-wrap summary{transition:none}
   .faq-wrap details[open] .a{animation:none}
   body[data-page='home'] .garden-row{transition-delay:0s !important}
   body[data-page='home'] .g-caret{transition:none}
@@ -185,7 +173,6 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
 .features-section{overflow-x:clip}
 .features-section::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:520px;height:220px;background:radial-gradient(ellipse at center,rgba(143,175,181,.07),transparent 70%);pointer-events:none;z-index:0}
 /* 6. record tiles: count-up numerals get tabular-nums so width doesn't jitter */
-.record .v{font-variant-numeric:tabular-nums}
 /* 7. eyebrow rule draw animation is handled by .reveal on .sec-eyebrow (already wired);
       keep FAQ + gardener untouched */
 @media (prefers-reduced-motion: reduce){
@@ -196,7 +183,7 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
 /* Reveal transitions already opacity/transform-only (compositor-friendly).
    1. Promote the animated surfaces so transforms don't repaint neighbors
       (rows/vines/records each get their own layer only while transitioning). */
-body[data-page='home'] .garden-row, .record, .vine-divider, .hero-steps li { will-change: transform, opacity; }
+body[data-page='home'] .garden-row, .vine-divider, .hero-steps li { will-change: transform, opacity; }
 /* Drop the hint after the entrance window to free memory: JS toggles a class
    on load-complete; CSS keeps it simple — browsers GC will-change after paint
    quiesce, so the static hint is acceptable (22 petals + 9 rows = trivial). */
@@ -221,21 +208,6 @@ html { scroll-behavior: auto; }
 .g-idx{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.56rem;color:var(--text-faint);
   letter-spacing:.08em;margin-right:6px;vertical-align:2px}
 
-/* ── 03 On the Record: instrument-panel cards ── */
-.record{position:relative;background:linear-gradient(165deg,rgba(143,175,181,.055),rgba(143,175,181,.015));
-  border:1px solid var(--border);border-radius:14px;padding:20px 20px 16px;
-  transition:transform .25s var(--ease-premium, ease),border-color .25s ease,box-shadow .25s ease}
-.record::before{content:'';position:absolute;top:0;left:16px;right:16px;height:2px;border-radius:2px;
-  background:linear-gradient(90deg,transparent,rgba(143,175,181,.55),transparent);
-  box-shadow:0 0 10px rgba(143,175,181,.35)}
-.record:hover{transform:translateY(-3px);border-color:var(--border-primary);
-  box-shadow:0 10px 24px rgba(0,0,0,.30)}
-.record .v{font-family:var(--t-font-display,'Instrument Serif',Georgia,serif);
-  font-size:2.1rem;line-height:1.05;color:var(--text);letter-spacing:-.01em}
-.record .v small{font-size:1.05rem;color:var(--sage);margin-left:2px}
-.record .l{margin-top:6px}
-.record .s{margin-top:10px}
-
 /* ── 04 The Gardener: feature card treatment ── */
 .gardener{background:linear-gradient(165deg,rgba(143,175,181,.05),rgba(143,175,181,.012));
   border:1px solid var(--border);border-radius:16px;padding:26px 26px 22px;
@@ -255,12 +227,8 @@ html { scroll-behavior: auto; }
 .about-x-prose{max-width:64ch}
 .about-x-prow p{line-height:1.65}
 
-@media (max-width:1020px){ .record-band{grid-template-columns:repeat(2,1fr)} }
 @media (max-width:760px){
-  .record-band{grid-template-columns:1fr}
   .gardener{padding:20px 16px 18px}
-  .record{padding:16px 14px 13px}
-  .record .v{font-size:1.7rem}
 }
 
 /* ===== LIGHT THEME — dark-first tints that need a light variant (manual switch) ===== */
@@ -324,8 +292,8 @@ body[data-page='home'] .gw-card-alt .vb-body{color:var(--text-dim)}
 /* OCR r1: reduced-motion must cover every later-added transition (source order beats
    the earlier reduce block — same-specificity later declarations would win). */
 @media (prefers-reduced-motion: reduce){
-  body[data-page='home'] .vb-card,body[data-page='home'] .gw-card,body[data-page='home'] .record{transition:none}
-  body[data-page='home'] .vb-card:hover,body[data-page='home'] .gw-card:hover,body[data-page='home'] .record:hover{transform:none}
+  body[data-page='home'] .vb-card,body[data-page='home'] .gw-card{transition:none}
+  body[data-page='home'] .vb-card:hover,body[data-page='home'] .gw-card:hover{transform:none}
 }
 
 /* OCR r1: light-theme tints for the new sections (dark-first rgba tints wash out
@@ -362,22 +330,14 @@ body[data-page='home'] .g-contrast strong{color:var(--sage)}
 /* spacing moved from inline styles (OCR round) */
 .vb-grid { margin-top: 34px; }
 .gw-grid { margin-top: 34px; }
-.record-band { margin-top: 34px; }
 
 /* --- record band systematize (2026-09 round) --------------------------------- */
 /* Cards were ragged: unequal heights, links floating at 4 different baselines.
    Equal-height stretch + link pinned to a shared bottom seam. */
-.record{display:flex;flex-direction:column}
 /* a.s selector matches the base rule's specificity (0,2,1) so margin-top:auto
    actually wins over the base rule's margin-top:8px — this pins every link
    to the same bottom seam. */
-.record a.s{
-    margin-top:auto;
-    padding-top:12px;
-    border-top:1px solid rgba(197,213,216,0.08); /* glass-pane footer seam */
-}
 /* lining figures so future live values don't shift width */
-.record .v .cnt{font-variant-numeric:tabular-nums}
 
 /* --- home polish (2026-09-30 round) ------------------------------------------- */
 /* Installer card mono meta strip (instrument grammar under the button). */

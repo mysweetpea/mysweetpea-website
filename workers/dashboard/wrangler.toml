@@ -17,7 +17,6 @@ id = "8fdd1c40796c413ebbd479c42c90ef44"
 AUTH_ISSUER = "https://auth.mysweetpea.cc/application/o"
 AUTH_BASE = "https://auth.mysweetpea.cc"
 APP_URL = "https://dashboard.mysweetpea.cc"
-# Seerr origin (non-secret; the API key is a Worker secret: SEERR_API_KEY)
 # SPA deployment config (/api/config): site + contact, env-overridable
 MAIN_SITE_URL = "https://mysweetpea.cc"
 SUPPORT_EMAIL = "support@mysweetpea.cc"

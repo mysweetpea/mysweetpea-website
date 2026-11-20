@@ -1476,7 +1476,9 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #sv-spot .btn{order:6;width:100%;justify-content:center;align-self:auto;margin-top:2px}
  #sv-spot .sv-refresh{top:12px;right:12px}
  /* 8. glance orbs on mobile: row scroll, not wrapped stacks */
- #panel-services .sv-glance .sv-orbs{flex-wrap:nowrap;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none}
+ /* Right-edge fade = the scroll cue. A hidden scrollbar with hard-cut content
+    reads as broken; this is the same mask the home rails already use. */
+ #panel-services .sv-glance .sv-orbs{flex-wrap:nowrap;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%)}
  #panel-services .sv-glance .sv-orb{width:54px;height:54px;flex:0 0 54px;display:flex;align-items:center;justify-content:center}
  #panel-services .sv-glance .sv-orb img{width:32px;height:32px}
  #panel-services .sv-glance .sv-orbs::-webkit-scrollbar{display:none}
@@ -1485,7 +1487,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #panel-services .sv-card .top{gap:9px}
  #panel-services .sv-card .meta{padding-top:9px;margin-top:2px}
  /* 10. filter row mobile: single-line scroll like glance orbs */
- #panel-services .sv-glance .sv-toolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+ #panel-services .sv-glance .sv-toolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%)}
  #panel-services .sv-glance .sv-toolbar::-webkit-scrollbar{display:none}
  #panel-services .sv-glance .sv-fchip{flex:none}
 }
@@ -1770,7 +1772,23 @@ a.hm-req{text-decoration:none;color:var(--text)}
 .mp-play svg{width:56px;height:56px;padding:14px;border-radius:999px;color:#08090F;
   background:rgba(242,244,250,.94);box-shadow:0 8px 24px rgba(0,0,0,.45)}
 </style>
+<style>
+/* Media-tab loading / empty / error states (audit polish, Nov 20 2026).
+   Top-level block on purpose: a rule appended inside an existing @media block
+   silently never applies on desktop. */
+.md-skel-t{height:18px;width:42%;margin-bottom:14px}
+.md-skel-r{height:150px;border-radius:12px}
+.md-state{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:26px 22px}
+.md-state-t{margin:0;font-size:1.02rem;font-weight:600;color:var(--text)}
+.md-state-s{margin:0;font-size:.9rem;line-height:1.55;color:var(--text-dim);max-width:52ch}
+.md-state .btn{margin-top:4px}
+.skip-link{position:absolute;top:-60px;left:16px;z-index:200;background:var(--primary);color:var(--bg);padding:10px 18px;border-radius:10px;font-weight:600;text-decoration:none;transition:top .2s ease}
+.skip-link:focus-visible{top:12px}
+@media (prefers-reduced-motion: reduce){.skel{animation:none}}
+</style>
+
 </head><body>
+<a href="#main" class="skip-link">Skip to content</a>
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
 <canvas id="petalCanvas" aria-hidden="true"></canvas>
@@ -1930,9 +1948,9 @@ document.addEventListener('click', function (e) {
    first await does not exist yet when the later <script> blocks run. */
 (function () {
   var cache = new Map();
-  window.apiGet = function (url, ttlMs) {
+  window.apiGet = function (url, ttlMs, force) {
     var ttl = ttlMs || 20000;
-    var hit = cache.get(url);
+    var hit = force ? null : cache.get(url);
     if (hit) {
       if (hit.p) return hit.p;
       if (Date.now() - hit.at < ttl) return Promise.resolve(hit.data);
@@ -2342,7 +2360,7 @@ function mergeStats(d) {
   const s = (d && typeof d === 'object') ? d : {};
   const num = (v) => (typeof v === 'number' && isFinite(v) ? v : null);
   return { movies: num(s.movies), series: num(s.series), photos: num(s.photos), sessions: num(s.sessions),
-    episodes: num(s.episodes), songs: num(s.songs), boxsets: num(s.boxsets), users: num(s.users),
+    episodes: num(s.episodes), users: num(s.users),
     videos: num(s.videos), usage_mb: num(s.usage_mb), jf_resume: num(s.jf_resume),
     jf_watch_hours: num(s.jf_watch_hours), jf_played_titles: num(s.jf_played_titles),
     nc_files: num(s.nc_files), nc_shares: num(s.nc_shares), nc_activity: num(s.nc_activity),
@@ -3104,7 +3122,7 @@ function mspSessionBanner() {
     '<a class="dh-row dh-out" href="/auth/logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg><span>Sign out</span></a>' +
     '</div>' +
     '</div></div>' +
-    '<main class="grid">' +
+    '<main class="grid" id="main">' +
     '<div class="tabpanel" id="panel-home" role="tabpanel" aria-labelledby="tab-home">' +
     '<div class="hm-banner" style="--i:0"><div class="hm-banner-row">' +
     '<div class="hm-avatar" id="hero-avatar" role="button" tabindex="0" aria-label="Change profile picture" onclick="openAvatarModal()" title="Change profile picture">' + avatarInner() + CAM + '</div>' +
@@ -3511,8 +3529,8 @@ function mspSessionBanner() {
     if (!sec || !host) return;
     const pos = (v) => (typeof v === 'number' && isFinite(v) && v > 0 ? v : null);
     const movies = pos(s && s.movies), episodes = pos(s && s.episodes), photos = pos(s && s.photos);
-    const series = pos(s && s.series), boxsets = pos(s && s.boxsets);
-    if (movies == null && episodes == null && photos == null && series == null && boxsets == null) { sec.hidden = true; host.innerHTML = ''; return; }
+    const series = pos(s && s.series);
+    if (movies == null && episodes == null && photos == null && series == null) { sec.hidden = true; host.innerHTML = ''; return; }
     sec.hidden = false;
     // Leaves only: a movie or an episode is one thing WATCHED; a series is a
     // container, so adding it to the same total double-counts (0 movies + 3
@@ -3993,8 +4011,8 @@ function mspSessionBanner() {
     /* No per-item web viewer exists on this server — the card opens the
        AIOStreams app itself rather than a dead #!/item route. */
     const JF_ITEM = '#guides/moonfin';   // poster/genre taps land on Services
-    const g2 = async (u) => {
-      const d = await apiGet(u, 15000);
+    const g2 = async (u, force) => {
+      const d = await apiGet(u, 15000, force);
       if (d && Array.isArray(d.items)) d.items = validObjects(d.items);
       if (d && Array.isArray(d.genres)) d.genres = validObjects(d.genres);
       return d;
@@ -4018,7 +4036,12 @@ function mspSessionBanner() {
     (async () => {
       const host = document.getElementById('sec-media-m');
       if (!host) return;
-      const [cont, mp, be, fr, ge] = await Promise.all([g2('/api/media/continue'), g2('/api/media/mostplayed'), g2('/api/media/recommend'), g2('/api/media/unplayed'), g2('/api/media/genres')]);
+      /* The tab used to stay blank until all five fetches resolved, and stayed
+         blank forever if they failed — no skeleton, no explanation, no retry. */
+      const SKEL = '<section class="card" aria-hidden="true"><div class="skel md-skel-t"></div><div class="skel md-skel-r"></div></section>';
+      const loading = () => { host.innerHTML = SKEL + SKEL; };
+      const build = async (force) => {
+      const [cont, mp, be, fr, ge] = await Promise.all([g2('/api/media/continue', force), g2('/api/media/mostplayed', force), g2('/api/media/recommend', force), g2('/api/media/unplayed', force), g2('/api/media/genres', force)]);
       const deepCard = (it, chipHtml, i) => '<a class="mitem" href="' + JF_ITEM + '">' +
         '<span class="mposter-wrap"><span class="mposter-fb hm-g' + ((i || 0) % 3) + '" aria-hidden="true">' + esc(String(it.name || '?').trim().charAt(0).toUpperCase()) + '</span>' +
         '<img class="mposter" loading="lazy" alt="" src="' + esc(it.img) + '"/>' + (chipHtml || '') + '</span>' +
@@ -4046,7 +4069,21 @@ function mspSessionBanner() {
         if (moodChips.length) out += '<section class="card md-browse"><p class="eyebrow">Browse</p><h3>Moods <span class="md-browse-or">&amp;</span> genres</h3><div class="m-genre-row md-mood">' + moodChips.map(m2 => '<a class="m-genre md-mood-chip" href="' + genreUrl() + '" title="' + esc(m2[1]) + '">' + esc(m2[0]) + '</a>').join('') + '</div>' + genreRow + '</section>';
         else out += '<section class="card"><p class="eyebrow">Browse</p><h3>Genres</h3>' + genreRow + '</section>';
       }
-      host.innerHTML = out;
+      if (out) { host.innerHTML = out; return; }
+      /* Nothing to show: say why, and offer a retry that bypasses the cache
+         (apiGet stores failures too, so a plain re-run would repeat them). */
+      const failed = [cont, mp, be, fr, ge].every((x) => !x);
+      host.innerHTML = '<section class="card md-state"><p class="md-state-t">' +
+        (failed ? 'Your media rows could not load.' : 'Nothing to show here yet.') + '</p>' +
+        '<p class="md-state-s">' + (failed
+          ? 'The media server did not answer. Your place in everything is safe — try again in a moment.'
+          : 'Start watching something in Moonfin and your rows will fill in here.') + '</p>' +
+        '<button type="button" class="btn" id="md-retry">Try again</button></section>';
+      const rb = document.getElementById('md-retry');
+      if (rb) rb.addEventListener('click', () => { loading(); build(true); });
+      };
+      loading();
+      build();
     })();
   })();
   // ===== SERVICES LAUNCHER =====
