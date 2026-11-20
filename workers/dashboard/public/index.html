@@ -1995,11 +1995,30 @@ document.addEventListener('click', function (e) {
     if (!m || !id) return '#guides/moonfin';
     return m + '/web/#/item/' + encodeURIComponent(id);
   };
+  window.mspPlayerHome = function () {
+    var m = mount();
+    return m ? m + '/web/' : null;
+  };
   document.addEventListener('click', function (e) {
-    var a = e.target && e.target.closest ? e.target.closest('a[data-msp-item]') : null;
-    if (!a) return;
-    var href = window.mspItemHref(a.getAttribute('data-msp-item'));
-    if (href && href !== a.getAttribute('href')) { e.preventDefault(); window.location.href = href; }
+    var t = e.target && e.target.closest ? e.target : null;
+    if (!t) return;
+    var a = t.closest('a[data-msp-item]');
+    if (a) {
+      var href = window.mspItemHref(a.getAttribute('data-msp-item'));
+      if (href && href !== a.getAttribute('href')) { e.preventDefault(); window.location.href = href; }
+      return;
+    }
+    /* The bare /jellyfin root is the OPERATOR sign-in (config UUID + password),
+       which a member cannot use. Every guide/chip link to it must land on the
+       member's own mount player instead. Matched by path so it survives an
+       origin rewrite and never touches a mount URL (those have more path). */
+    var b = t.closest('a[href]');
+    if (!b) return;
+    var u = b.getAttribute('href') || '';
+    if (/\/jellyfin\/?$/.test(u)) {
+      var home = window.mspPlayerHome();
+      if (home) { e.preventDefault(); window.location.href = home; }
+    }
   });
 })();
 </script>
@@ -2573,7 +2592,7 @@ const GUIDES = {
     plain: 'Movies, shows and anime — on your phone, TV and browser.',
     steps: [
       { title: 'Copy your address', text: 'Open the Media tab in this dashboard. The \u201cYour Moonfin Password\u201d card at the top shows a long server address and your password — tap Copy address.' },
-      { title: 'Watch in your browser', text: 'No install needed: this sign-in page works in any browser.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
+      { title: 'Watch in your browser', text: 'No install needed — pick your name, enter your Moonfin password, and watch. Use the address from the Media tab [[from here]] if you are asked for it.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
       { title: 'Or install the app', text: 'Moonfin is also an app for your phone, tablet and TV. Pick your device below for the exact steps.' },
       { title: 'Add the server', text: 'In Moonfin choose Add Server, then Server Address. Paste the long link you copied \u2014 do not type it, it carries your account key. Tap Connect and Moonfin finds MySweetPea.' },
       { title: 'Sign in', text: 'Tap Continue, then pick your own name on the \u201cWho\u2019s watching?\u201d screen. Moonfin asks for your password next \u2014 copy it from the Media tab and paste it in.' },

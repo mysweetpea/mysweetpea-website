@@ -78,6 +78,23 @@ console.log('  ok   no redaction artifacts in code');
       if (got !== want) bad(`mspItemHref ${name}: got ${got}, want ${want}`);
     }
     console.log(`  ok   mspItemHref: ${cases.length} resolver cases`);
+    /* The bare-root interception must catch the operator sign-in page and
+       never a member mount URL (those carry uuid/token path segments). */
+    const re = /\/jellyfin\/?$/;
+    const roots = [
+      ['https://aiostreams.mysweetpea.cc/jellyfin', true],
+      ['https://aiostreams.mysweetpea.cc/jellyfin/', true],
+      ['https://aiostreams.mysweetpea.cc/jellyfin/uuid/eyJtok', false],
+      ['https://aiostreams.mysweetpea.cc/jellyfin/uuid/eyJtok/web/', false],
+      ['https://other.example/jellyfin/', true],
+      ['#guides/moonfin', false],
+    ];
+    for (const [u, want] of roots) {
+      if (re.test(u) !== want) bad(`bare-root regex ${u}: got ${re.test(u)}, want ${want}`);
+    }
+    const home = run(M, null);
+    if (typeof home !== 'function') bad('mspPlayerHome missing');
+    console.log(`  ok   bare-root interception: ${roots.length} URL cases`);
   }
 }
 
