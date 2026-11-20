@@ -153,6 +153,14 @@
         navLinks.classList.toggle('nav-open', open);
         navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         document.body.classList.toggle('menu-open', open);
+        /* Move focus INTO the overlay on open. The Tab trap below listens on
+           navLinks, so while focus sits on the toggle/body the first few Tabs
+           walk the page content behind the overlay before the trap catches
+           them. Focusing the first control makes the trap hold from Tab #1. */
+        if (open) {
+            var first = navLinks.querySelector('a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])');
+            if (first) first.focus();
+        }
     }
     if (navToggle && navLinks) {
         navToggle.addEventListener('click', function () {

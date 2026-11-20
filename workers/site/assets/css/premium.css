@@ -3266,9 +3266,13 @@ body[data-page='redeem'] .redeem-callout .btn:hover { border-color: var(--primar
         -webkit-backdrop-filter: blur(26px) saturate(1.35);
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.28s ease, visibility 0.28s;
+        /* visibility is discrete: delaying it on OPEN keeps the overlay
+           un-focusable for the whole fade, so setMenu()'s first.focus() was a
+           no-op and the Tab trap missed the first three stops. Show it at once
+           and only delay the hide, so the fade-out still plays. */
+        transition: opacity 0.28s ease, visibility 0s linear 0.28s;
     }
-    .mn-menu.nav-open { opacity: 1; visibility: visible; }
+    .mn-menu.nav-open { opacity: 1; visibility: visible; transition: opacity 0.28s ease, visibility 0s; }
     body.menu-open { overflow: hidden; }
     /* never let flex children shrink (a shrunken child scrolls oddly and can
        clip its own content); overflow scrolls instead */
