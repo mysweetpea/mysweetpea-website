@@ -293,7 +293,10 @@
             g.appendChild(col);
         });
         if (cap) {
-            cap.textContent = 'Hover a day for detail \u00B7 click it to jump to that week';
+            /* No hover on a touch screen — the bars still jump on tap. */
+            cap.textContent = window.matchMedia('(hover: none)').matches
+                ? 'Tap a day to jump to that week'
+                : 'Hover a day for detail \u00B7 click it to jump to that week';
             if (!active.all) cap.textContent = 'Filtered view \u2014 graph shows matching changes only. ' + cap.textContent;
             defaultCaption = cap.textContent;   /* restored when a tooltip hides */
         }
