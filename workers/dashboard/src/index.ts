@@ -1828,7 +1828,8 @@ export default {
             })(),
             (async () => {
               try {
-                const r = await fetch(env.IMMICH_URL + '/api/server/statistics', { headers: { 'x-api-key': env.IMMICH_API_KEY } });
+                const r = await fetch(env.IMMICH_URL + '/api/server/statistics',
+                  { headers: { 'x-api-key': env.IMMICH_API_KEY, 'user-agent': 'Mozilla/5.0' } });
                 if (r.ok) {
                   const d = await r.json() as any;
                   out.photos = d.photos ?? null;
