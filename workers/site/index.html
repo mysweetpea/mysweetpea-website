@@ -56,7 +56,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <link rel="stylesheet" href="/assets/css/premium.css?v=hf2be90dc">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=h6e396228">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=h512175c8">
-    <link rel="stylesheet" href="/assets/css/home.css?v=h3c8f9d29">
+    <link rel="stylesheet" href="/assets/css/home.css?v=h0610066e">
 <link rel="canonical" href="https://mysweetpea.cc/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MySweetPea","url":"https://mysweetpea.cc","logo":"https://mysweetpea.cc/icon-512.png","description":"Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions — community funded.","email":"support@mysweetpea.cc","sameAs":["https://github.com/mysweetpea"]}</script>
 </head>
@@ -569,22 +569,32 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <p class="sec-eyebrow reveal"><span class="n">04</span> Two doors</p>
             <h2 class="section-title glass-text reveal">One account here &mdash; or the whole garden at home.</h2>
             <p class="section-subtitle reveal reveal-delay-1">MySweetPea provides services you can run yourself. You can have the garden with one sign-up and every service just works, or everything here can be taken home, free, whenever you want.</p>
-            <div class="gw-grid">
-                <article class="gw-card reveal">
-                    <p class="gw-kicker">the easy door</p>
-                    <span class="vb-ico"><img src="/assets/icons/icon-ui-key.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
-                    <h3 class="vb-title">One account, everything included</h3>
-                    <p class="vb-body">Sign up once and all provided services open: photos that stay yours like Google Photos, movies that stream like Netflix, passwords that sync like 1Password. One login, one contribution, continuous updates, backups and monitoring. MySweetPea handles everything for you.</p>
-                    <a class="cta-btn gw-btn" href="/form.html" data-keywords="request invite signup access join account gateway">Request access</a>
+            <div class="gw-fork" aria-hidden="true">
+                <span class="gw-hub">Same garden</span>
+                <svg viewBox="0 0 600 88" preserveAspectRatio="none">
+                    <path d="M300 24 V40 C300 64 148 58 148 88"/>
+                    <path d="M300 40 C300 64 452 58 452 88"/>
+                    <circle cx="148" cy="87" r="3"/><circle cx="452" cy="87" r="3"/>
+                </svg>
+            </div>
+            <div class="gw-doors">
+                <article class="gw-door reveal">
+                    <div class="gw-arch" aria-hidden="true"><span class="gw-glow"></span><span class="gw-leaf"></span><span class="gw-threshold"></span><img src="/assets/icons/icon-ui-key.svg" alt=""></div>
+                    <div class="gw-passrow"><b>Member pass</b><span class="gw-chip">Hosted</span></div>
+                    <h3 class="gw-t">One account, everything included</h3>
+                    <p class="gw-c">Sign up once and all provided services open: photos that stay yours like Google Photos, movies that stream like Netflix, passwords that sync like 1Password. One login, one contribution, continuous updates, backups and monitoring. MySweetPea handles everything for you.</p>
+                    <a class="cta-btn gw-cta" href="/form.html" data-keywords="request invite signup access join account gateway">Request access</a>
                     <p class="gw-note">the easy door is selective, not first-come &mdash; every request is read by a human.</p>
+                    <div class="gw-stub"><span>1 login</span><span class="gw-bars" aria-hidden="true"></span></div>
                 </article>
-                <article class="gw-card gw-card-alt reveal reveal-delay-1">
-                    <p class="gw-kicker">the same door, at home</p>
-                    <span class="vb-ico"><img src="/assets/icons/icon-ui-leaf.svg" alt="" width="24" height="24" loading="lazy" decoding="async"></span>
-                    <h3 class="vb-title">Run the whole garden yourself</h3>
-                    <p class="vb-body">The exact setup this garden runs on ships as a free, open-source installer created by MySweetPea: a guided wizard, 54+ apps. Any hardware you have can become your own home server. No GitHub account needed, your data never leaves your house, and the heavy lifting is a single command.</p>
-                    <a class="cta-btn cta-btn-ghost gw-btn" href="https://github.com/mysweetpea/mysweetpea-homelab" data-gh-repo="homelab" rel="noopener" data-keywords="installer self host selfhost download github homelab diy own hardware">Get the installer</a>
-                    <p class="gw-note">free and open source — the same setup this garden runs on, nothing hidden.</p>
+                <article class="gw-door gw-door-alt reveal reveal-delay-1">
+                    <div class="gw-arch gw-dim" aria-hidden="true"><span class="gw-glow"></span><span class="gw-leaf"></span><span class="gw-threshold"></span><img src="/assets/icons/icon-ui-leaf.svg" alt=""></div>
+                    <div class="gw-passrow"><b>Installer pass</b><span class="gw-chip">Self-hosted</span></div>
+                    <h3 class="gw-t">Run the whole garden yourself</h3>
+                    <p class="gw-c">The exact setup this garden runs on ships as a free, open-source installer created by MySweetPea: a guided wizard, 54+ apps. Any hardware you have can become your own home server. No GitHub account needed, your data never leaves your house, and the heavy lifting is a single command.</p>
+                    <a class="cta-btn cta-btn-ghost gw-cta" href="https://github.com/mysweetpea/mysweetpea-homelab" data-gh-repo="homelab" rel="noopener" data-keywords="installer self host selfhost download github homelab diy own hardware">Get the installer</a>
+                    <p class="gw-note">free and open source &mdash; the same setup this garden runs on, nothing hidden.</p>
+                    <div class="gw-stub"><span>54+ apps</span><span class="gw-bars" aria-hidden="true"></span></div>
                 </article>
             </div>
             <p class="vb-note reveal">both doors lead to the same place: your data, under your control, and moving between them is one standard-format export away.</p>
