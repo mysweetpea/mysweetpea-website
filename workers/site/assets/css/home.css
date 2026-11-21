@@ -31,34 +31,42 @@ body[data-page='home'] .what-sep{color:var(--text-faint)}
   body[data-page='home'] .what-pill{font-size:.5rem;letter-spacing:.04em;padding:6px 8px;white-space:nowrap}
 }
 
-/* ===== GARDEN — expandable exposure rows (button + hidden region, no <details>) ===== */
-body[data-page='home'] .garden-rows{max-width:1080px;margin:34px auto 0;padding:0 20px}
+/* ===== GARDEN — watch cards (button + hidden region, no <details>) =====
+   Two-column card wall: each card's face is the corporate twin next to ours.
+   Opening a card gives it the full row (CSS only — the JS already toggles .open). */
+body[data-page='home'] .garden-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;max-width:1080px;margin:30px auto 0;padding:0 20px;align-items:start}
 /* .garden-row carries the reveal stagger itself (--d inline in markup); the full
    transition list + .visible delay-list mirror the old garden-card pattern —
    premium.css:1925 `.js .reveal.visible` would otherwise flatten both (documented trap). */
-body[data-page='home'] .garden-row{border:1px solid var(--border);border-radius:var(--radius-sm,12px);background:var(--card-bg);overflow:hidden;transition:opacity .7s ease,transform .7s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease !important}
+body[data-page='home'] .garden-row{position:relative;border:1px solid var(--border);border-radius:16px;background:var(--card-bg);overflow:hidden;transition:opacity .7s ease,transform .7s ease,border-color .25s ease,background .25s ease,box-shadow .25s ease !important}
 body[data-page='home'] .garden-row.visible{transition-delay:var(--d,0s),var(--d,0s),0s,0s,0s !important /* slots 1-2 = opacity,transform */}
-body[data-page='home'] .garden-row + .garden-row{margin-top:10px}
 body[data-page='home'] .garden-row:hover,body[data-page='home'] .garden-row.open{border-color:var(--border-primary)}
-body[data-page='home'] .g-row-head{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:16px;width:100%;min-height:44px;padding:14px 18px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+body[data-page='home'] .garden-row.open{grid-column:1/-1}
+body[data-page='home'] .g-row-head{display:grid;grid-template-columns:auto auto auto auto minmax(0,1fr);grid-template-areas:"twin arr ico idx caret" "who who who who who" "alt alt alt alt alt";align-items:center;gap:10px 12px;width:100%;min-height:44px;padding:16px 18px 14px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
 body[data-page='home'] .g-row-head:focus-visible{outline:2px solid var(--primary-bright);outline-offset:-2px}
-body[data-page='home'] .g-row-head .g-idx{margin-right:0;vertical-align:baseline}
+body[data-page='home'] .g-idx{grid-area:idx;justify-self:end;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.62rem;letter-spacing:.14em;color:var(--text-faint)}
 body[data-page='home'] .g-row-head:hover .g-idx,body[data-page='home'] .garden-row.open .g-idx{color:var(--sage)}
-body[data-page='home'] .g-ico{flex:none;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(143,175,181,.06);border:1px solid var(--border)}
-body[data-page='home'] .g-ico img{width:40px;height:40px;content-visibility:auto}
-body[data-page='home'] .g-who{display:flex;flex-direction:column;gap:2px;min-width:0}
-body[data-page='home'] .g-name{font-weight:600;font-size:.95rem;letter-spacing:.01em;color:var(--text)}
-body[data-page='home'] .g-line{font-size:.8rem;line-height:1.5;color:var(--text-dim)}
-body[data-page='home'] .g-alt{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
-body[data-page='home'] .g-replaces{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
-body[data-page='home'] .g-altname{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.68rem;letter-spacing:.02em;color:var(--gold,#D9A86C);transition:color .25s ease}
+body[data-page='home'] .g-twin-chip{grid-area:twin;position:relative;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(217,140,140,.08);border:1px solid rgba(217,140,140,.28);transition:border-color .25s ease,background .25s ease}
+body[data-page='home'] .g-twin-chip::before{content:'';width:22px;height:22px;background:var(--text-faint);-webkit-mask:var(--tw) center/contain no-repeat;mask:var(--tw) center/contain no-repeat;transition:background .25s ease}
+body[data-page='home'] .garden-row:hover .g-twin-chip,body[data-page='home'] .garden-row.open .g-twin-chip{border-color:rgba(217,140,140,.5);background:rgba(217,140,140,.13)}
+body[data-page='home'] .garden-row:hover .g-twin-chip::before,body[data-page='home'] .garden-row.open .g-twin-chip::before{background:var(--text)}
+body[data-page='home'] .g-arrow{grid-area:arr;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.7rem;color:var(--text-faint);letter-spacing:-.05em}
+body[data-page='home'] .g-ico{grid-area:ico;width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(143,175,181,.06);border:1px solid var(--border)}
+body[data-page='home'] .g-ico img{width:36px;height:36px;content-visibility:auto}
+body[data-page='home'] .g-who{grid-area:who;display:flex;flex-direction:column;gap:2px;min-width:0}
+body[data-page='home'] .g-name{font-weight:600;font-size:1rem;letter-spacing:.01em;color:var(--text)}
+body[data-page='home'] .g-line{font-size:.82rem;line-height:1.5;color:var(--text-dim)}
+body[data-page='home'] .g-alt{grid-area:alt;display:flex;flex-direction:row;align-items:baseline;gap:8px;justify-self:start;text-align:left;white-space:normal}
+body[data-page='home'] .g-replaces{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+body[data-page='home'] .g-altname{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.02em;color:var(--gold,#D9A86C);transition:color .25s ease}
 body[data-page='home'] .garden-row.open .g-altname{color:var(--text)}
-body[data-page='home'] .g-caret{flex:none;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--border);font-size:.55rem;line-height:1;color:var(--text-faint);transition:transform .25s ease,color .25s ease,border-color .25s ease,background .25s ease}
+body[data-page='home'] .g-caret{grid-area:caret;justify-self:end;display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1px solid var(--border);color:var(--text-faint);transition:transform .25s ease,color .25s ease,border-color .25s ease,background .25s ease}
 body[data-page='home'] .garden-row.open .g-caret{transform:rotate(90deg);color:var(--sage);border-color:var(--border-primary);background:rgba(143,175,181,.08)}
 body[data-page='home'] .g-row-head:hover .g-caret{border-color:var(--border-primary);color:var(--text-dim)}
+html:not([data-theme="light"]) body[data-page='home'] .g-inv{filter:invert(1) brightness(1.3)}
 /* exposure panel: `hidden` toggles display; the fade-in is a plain animation that
    restarts every time the element re-enters the render tree (no JS class juggling) */
-body[data-page='home'] .g-exposure{padding:0 18px 16px}
+body[data-page='home'] .g-exposure{padding:0 18px 18px}
 body[data-page='home'] .g-exposure-inner{border-left:2px solid rgba(217,140,140,.35);padding:12px 4px 4px 18px}
 body[data-page='home'] .g-exposure:not([hidden]) .g-exposure-inner{animation:gxIn .25s ease}
 @keyframes gxIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -70,6 +78,15 @@ body[data-page='home'] .g-contrast strong{color:var(--sage)}
 body[data-page='home'] .g-src{margin:12px 0 0;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.62rem;letter-spacing:.04em;color:var(--text-faint);overflow-wrap:break-word}
 body[data-page='home'] .g-src a{color:var(--text-faint);text-decoration:none}
 body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:underline}
+/* the opened card gets the wide layout: sins in two columns, nothing capped at 68ch */
+body[data-page='home'] .garden-row.open .g-sins{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 26px;max-width:none}
+body[data-page='home'] .garden-row.open .g-contrast{max-width:none}
+@media (max-width:900px){
+  body[data-page='home'] .garden-rows{grid-template-columns:1fr}
+  body[data-page='home'] .garden-row.open .g-sins{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+}
 
 /* ON THE RECORD — proof band */
 /* THE GARDENER — keystone medallion echo from services dividers */
@@ -88,20 +105,10 @@ body[data-page='home'] .g-src a:hover{color:var(--text-dim);text-decoration:unde
 .faq-wrap summary .pm{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.95rem;color:var(--text-faint);transition:transform .2s}
 .faq-wrap details[open] summary .pm{transform:rotate(45deg);color:var(--sage)}
 .faq-wrap details .a{padding:0 4px 22px;font-size:.92rem;line-height:1.7;color:var(--text-dim);max-width:62ch}
-/* responsive — what-is grid stacks; garden rows compact (icon 32px, alt tag under the
-   name line, caret stays). No overflow at 390px: minmax(0,1fr) caps the who column,
-   pills/URLs wrap, and the full row head remains the >=44px tap target. */
+/* responsive — what-is grid stacks; the garden card grid collapses to one column at 900px
+   (watch-cards block above owns the row layout). */
 @media(max-width:760px){
   body[data-page='home'] .what-grid{grid-template-columns:1fr;gap:26px}
-  body[data-page='home'] .g-row-head{grid-template-columns:auto auto minmax(0,1fr) auto;grid-template-areas:"idx ico who caret" ". . alt alt";gap:10px 12px;row-gap:8px;padding:13px 14px}
-  body[data-page='home'] .g-row-head .g-idx{grid-area:idx}
-  body[data-page='home'] .g-ico{grid-area:ico;width:36px;height:36px}
-  body[data-page='home'] .g-ico img{width:32px;height:32px}
-  body[data-page='home'] .g-who{grid-area:who}
-  body[data-page='home'] .g-alt{grid-area:alt;flex-direction:row;align-items:baseline;gap:8px;justify-self:start;text-align:left}
-  body[data-page='home'] .g-caret{grid-area:caret}
-  body[data-page='home'] .g-exposure{padding:0 14px 14px}
-  body[data-page='home'] .g-exposure-inner{padding-left:14px}
   body[data-page='home'] .what-pill{white-space:normal}
 }
 @media(max-width:640px){
