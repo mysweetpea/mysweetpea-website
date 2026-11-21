@@ -123,6 +123,22 @@ body[data-page='form'] .uc-icon,
 .about-x-bl, .about-x-tag, .about-x-live-txt, .about-x-tk-state,
 .about-x-mf-head span, .success-eta { font-size: 11px !important; }
 
+/* --- 2b. floor holes found by the 2026-11-20 render sweep: eight classes the
+   Nov-19 pass missed (home eyebrow + def-term, about token, services mystery
+   tag, status meta, changelog legend, form legend, redeem check item).
+   Same rule as above: only classes measured under 11px, never shrink larger. */
+.sec-eyebrow,
+body[data-page='home'] .what-def dt,
+.about-x-tk,
+.mystery-tag,
+body[data-page='status'] .status-summary small,
+body[data-page='status'] .status-summary time,
+body[data-page='status'] .status-summary-meta,
+body[data-page='changelog'] .cl2-legend-item,
+.access-choice-legend,
+.uc-item,
+body[data-page='form'] .uc-item { font-size: 11px !important; }
+
 /* The "+N more services" list is a long run-on string; at 11px it must wrap
    inside its tile instead of pushing the tile wider. */
 .tb-morelist { overflow-wrap: anywhere; white-space: normal; }

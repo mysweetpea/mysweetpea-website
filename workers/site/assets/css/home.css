@@ -359,3 +359,162 @@ body[data-page='home'] .g-contrast strong{color:var(--sage)}
 }
 /* Tighten the bloom-to-eyebrow dead zone (hero art bottom margin). */
 .ascii-hero { margin-bottom: -8px; }
+
+/* ===== SECTION 00 — the garden plate (A×C field guide, 2026-11-21) =====
+   Plate = engraved specimen; the copy is broken into three short columns so no
+   block reads as a wall. All motion is CSS and gated: vines only draw once the
+   section is visible, and everything collapses under prefers-reduced-motion. */
+
+body[data-page='home'] .wg-band{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:44px;align-items:center;max-width:1080px;margin:30px auto 0;padding:0 20px}
+body[data-page='home'] .wg-plate-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:400px;justify-self:center;margin:0}
+body[data-page='home'] .wg-plate{position:relative;width:100%;aspect-ratio:1;border-radius:50%;overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(163,201,182,.10),transparent 58%),
+    radial-gradient(circle at 50% 48%,rgba(19,30,34,.92),rgba(12,19,22,.7) 70%,rgba(12,19,22,0) 72%),
+    var(--bg)}
+[data-theme="light"] body[data-page='home'] .wg-plate{background:
+    radial-gradient(circle at 50% 50%,rgba(78,122,104,.10),transparent 58%),
+    radial-gradient(circle at 50% 48%,rgba(250,253,250,.96),rgba(231,237,234,.5) 70%,rgba(231,237,234,0) 72%),
+    var(--bg)}
+
+body[data-page='home'] .wg-plate .wg-ring{position:absolute;border-radius:50%;border:1px solid rgba(143,175,181,.18);inset:0}
+body[data-page='home'] .wg-plate .wg-outer{inset:2%;border-color:rgba(143,175,181,.24)}
+body[data-page='home'] .wg-plate .wg-mid{inset:13%;border-color:rgba(143,175,181,.12)}
+body[data-page='home'] .wg-plate .wg-dash{inset:7%;border:1px dashed rgba(163,201,182,.24);animation:wgspin 80s linear infinite}
+body[data-page='home'] .wg-plate .wg-dash2{inset:16%;border:1px dotted rgba(143,175,181,.24);animation:wgspin 110s linear infinite reverse}
+[data-theme="light"] body[data-page='home'] .wg-plate .wg-outer{border-color:rgba(51,86,95,.34)}
+[data-theme="light"] body[data-page='home'] .wg-plate .wg-mid{border-color:rgba(51,86,95,.20)}
+[data-theme="light"] body[data-page='home'] .wg-plate .wg-dash{border-color:rgba(78,122,104,.35)}
+@keyframes wgspin{to{transform:rotate(360deg)}}
+
+body[data-page='home'] .wg-ticks{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body[data-page='home'] .wg-ticks circle{fill:none;stroke:rgba(143,175,181,.28);stroke-width:1;stroke-dasharray:1 7;vector-effect:non-scaling-stroke}
+[data-theme="light"] body[data-page='home'] .wg-ticks circle{stroke:rgba(51,86,95,.32)}
+
+body[data-page='home'] .wg-vines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body[data-page='home'] .wg-vines path{fill:none;stroke:rgba(163,201,182,.42);stroke-width:1.3;stroke-linecap:round;vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:0}
+[data-theme="light"] body[data-page='home'] .wg-vines path{stroke:rgba(78,122,104,.5)}
+html.js body[data-page='home'] .wg-plate-wrap:not(.visible) .wg-vines path{stroke-dashoffset:1}
+html.js body[data-page='home'] .wg-plate-wrap.visible .wg-vines path{animation:wgdraw 2.4s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(var(--i)*.08s + .25s)}
+@keyframes wgdraw{to{stroke-dashoffset:0}}
+
+body[data-page='home'] .wg-comet-orbit{position:absolute;inset:7%;animation:wgspin 30s linear infinite;pointer-events:none}
+body[data-page='home'] .wg-comet{position:absolute;top:-3px;left:50%;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--sage);box-shadow:0 0 14px rgba(163,201,182,.85)}
+
+body[data-page='home'] .wg-core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:32%;aspect-ratio:1;display:grid;place-items:center}
+body[data-page='home'] .wg-halo{position:absolute;inset:-7%;border-radius:50%;border:1px solid rgba(163,201,182,.32);animation:wgbreathe 7s ease-in-out infinite}
+body[data-page='home'] .wg-halo2{position:absolute;inset:-16%;border-radius:50%;border:1px solid rgba(163,201,182,.10)}
+body[data-page='home'] .wg-core img{width:100%;height:100%;border-radius:50%;box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 0 1px rgba(238,242,243,.10)}
+@keyframes wgbreathe{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.05);opacity:1}}
+
+body[data-page='home'] .wg-spec{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;display:grid;place-items:center;
+  background:linear-gradient(180deg,rgba(30,45,50,.96),rgba(16,26,30,.96));border:1px solid rgba(143,175,181,.24);
+  box-shadow:0 10px 24px rgba(0,0,0,.4);animation:wgbob 8s ease-in-out infinite;animation-delay:calc(var(--i)*.55s)}
+[data-theme="light"] body[data-page='home'] .wg-spec{background:linear-gradient(180deg,#FCFDFC,#EFF4F1);border-color:rgba(51,86,95,.18);box-shadow:0 10px 22px rgba(27,43,49,.12)}
+body[data-page='home'] .wg-spec img{width:24px;height:24px;object-fit:contain}
+body[data-page='home'] .wg-spec::before{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(163,201,182,.14)}
+body[data-page='home'] .wg-spec span{position:absolute;right:-3px;bottom:-3px;width:15px;height:15px;border-radius:50%;background:var(--sage);color:#0C1316;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:9px;line-height:15px;text-align:center;font-weight:500}
+html.js body[data-page='home'] .wg-plate-wrap:not(.visible) .wg-spec{opacity:0}
+html.js body[data-page='home'] .wg-plate-wrap.visible .wg-spec{animation:wgbob 8s ease-in-out infinite, wgpop .6s cubic-bezier(.2,.8,.3,1.2) both;animation-delay:calc(var(--i)*.55s),calc(var(--i)*.06s + .5s)}
+@keyframes wgbob{0%,100%{translate:0 0}50%{translate:0 -5px}}
+@keyframes wgpop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+body[data-page='home'] .wg-s0{left:50%;top:10%}
+body[data-page='home'] .wg-s1{left:80.6%;top:24.3%}
+body[data-page='home'] .wg-s2{left:89.4%;top:56.9%}
+body[data-page='home'] .wg-s3{left:75.7%;top:80.6%}
+body[data-page='home'] .wg-s4{left:50%;top:90%}
+body[data-page='home'] .wg-s5{left:24.3%;top:80.6%}
+body[data-page='home'] .wg-s6{left:10.6%;top:56.9%}
+body[data-page='home'] .wg-s7{left:19.4%;top:24.3%}
+body[data-page='home'] .wg-s8{left:35%;top:11.5%}
+
+/* koalasync / matrix / vaultwarden are black-art marks — flip them in dark mode only */
+html:not([data-theme="light"]) body[data-page='home'] .wg-inv{filter:invert(1) brightness(1.65) contrast(1.15)}
+
+body[data-page='home'] .wg-cap{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint);display:flex;align-items:center;gap:10px;text-align:center}
+body[data-page='home'] .wg-cap::before,body[data-page='home'] .wg-cap::after{content:'';height:1px;width:34px;background:linear-gradient(90deg,transparent,var(--border-primary))}
+body[data-page='home'] .wg-cap::after{background:linear-gradient(90deg,var(--border-primary),transparent)}
+
+/* plate key */
+body[data-page='home'] .wg-key-label{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin-bottom:16px}
+body[data-page='home'] .wg-legend{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(5,auto);grid-auto-flow:column;gap:9px 18px;justify-content:start;justify-items:start;list-style:none}
+body[data-page='home'] .wg-legend li{display:flex;align-items:center;gap:7px;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
+body[data-page='home'] .wg-legend .n{width:15px;height:15px;border-radius:50%;background:rgba(163,201,182,.16);border:1px solid rgba(163,201,182,.4);color:var(--sage);font-size:9px;line-height:13px;text-align:center}
+body[data-page='home'] .wg-legend img{width:14px;height:14px}
+
+/* three-column spread */
+body[data-page='home'] .wg-spread{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;max-width:1080px;margin:34px auto 0;padding:0 20px;border-top:1px solid var(--border)}
+body[data-page='home'] .wg-col{position:relative;padding:24px 26px 6px}
+body[data-page='home'] .wg-col+.wg-col{border-left:1px solid var(--border)}
+body[data-page='home'] .wg-col::before{content:'';position:absolute;left:26px;top:0;width:26px;height:1px;background:var(--sage);opacity:.4}
+body[data-page='home'] .wg-glyph{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;
+  background:rgba(163,201,182,.08);border:1px solid rgba(163,201,182,.26);margin-bottom:12px}
+body[data-page='home'] .wg-glyph img{width:16px;height:16px}
+body[data-page='home'] .wg-spread .what-lead{font-size:1rem;line-height:1.7;margin:0}
+body[data-page='home'] .wg-p{margin:0;font-size:.88rem;line-height:1.7;color:var(--text-dim)}
+body[data-page='home'] .wg-cmp{margin:12px 0 0;display:grid;gap:9px;list-style:none}
+body[data-page='home'] .wg-cmp li{display:flex;align-items:center;gap:11px;font-size:.84rem;line-height:1.45;color:var(--text)}
+body[data-page='home'] .wg-mini{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;
+  background:linear-gradient(180deg,rgba(30,45,50,.9),rgba(16,26,30,.9));border:1px solid var(--border)}
+[data-theme="light"] body[data-page='home'] .wg-mini{background:linear-gradient(180deg,#FCFDFC,#EFF4F1)}
+body[data-page='home'] .wg-mini img{width:17px;height:17px;object-fit:contain}
+body[data-page='home'] .wg-ticket{position:relative;display:flex;align-items:center;margin-top:14px;padding:13px 15px;border-radius:14px;overflow:hidden;
+  border:1px dashed rgba(163,201,182,.38);background:linear-gradient(120deg,rgba(163,201,182,.07),transparent 60%)}
+[data-theme="light"] body[data-page='home'] .wg-ticket{border-color:rgba(78,122,104,.4);background:linear-gradient(120deg,rgba(78,122,104,.07),transparent 60%)}
+body[data-page='home'] .wg-ticket::after{content:'';position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;
+  background:url('/assets/icons/seal-field.png') center/contain no-repeat;opacity:.07;transform:rotate(12deg)}
+body[data-page='home'] .wg-ticket p{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:.69rem;line-height:1.7;letter-spacing:.06em;color:var(--text-dim);position:relative;z-index:1}
+
+/* in plain terms */
+body[data-page='home'] .wg-plain{max-width:1080px;margin:38px auto 0;padding:0 20px}
+body[data-page='home'] .wg-plain-inner{border-radius:22px;overflow:hidden;border:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(19,30,34,.7),rgba(15,24,28,.55));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+[data-theme="light"] body[data-page='home'] .wg-plain-inner{background:linear-gradient(180deg,rgba(250,253,250,.92),rgba(240,246,242,.8))}
+body[data-page='home'] .wg-plain-head{display:grid;grid-template-columns:1fr;gap:10px;padding:26px 30px 22px}
+body[data-page='home'] .wg-plain-title{display:flex;align-items:center;gap:12px;margin:0}
+body[data-page='home'] .wg-plain-title .wg-glyph{width:40px;height:40px;border-radius:12px;margin:0}
+body[data-page='home'] .wg-plain-title .wg-glyph img{width:18px;height:18px}
+body[data-page='home'] .wg-intro{position:relative;padding-left:16px;max-width:80ch;margin:0 0 0 0;font-size:.88rem;line-height:1.75;color:var(--text-dim)}
+body[data-page='home'] .wg-intro::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:2px;border-radius:2px;background:linear-gradient(180deg,var(--sage),transparent)}
+body[data-page='home'] .wg-cells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--border);margin:0}
+body[data-page='home'] .wg-cell{position:relative;padding:18px 22px 20px;border-left:1px solid var(--border)}
+body[data-page='home'] .wg-cell:first-child{border-left:0}
+body[data-page='home'] .wg-cell::after{content:'';position:absolute;left:22px;top:0;width:24px;height:1px;background:var(--sage);opacity:.35}
+body[data-page='home'] .wg-k{display:flex;align-items:center;gap:9px}
+body[data-page='home'] .wg-k img{width:15px;height:15px;opacity:.9}
+body[data-page='home'] .wg-cell dt{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage)}
+body[data-page='home'] .wg-cell dd{margin:7px 0 0;font-size:.84rem;line-height:1.6;color:var(--text)}
+
+@media (max-width:900px){
+  body[data-page='home'] .wg-band{grid-template-columns:1fr;gap:26px}
+  body[data-page='home'] .wg-plate-wrap{max-width:360px}
+  body[data-page='home'] .wg-key{justify-self:center;text-align:center}
+  body[data-page='home'] .wg-legend{justify-content:center;justify-items:start}
+  body[data-page='home'] .wg-spread{grid-template-columns:1fr;border-top:0;margin-top:26px}
+  body[data-page='home'] .wg-col{padding:0 0 22px}
+  body[data-page='home'] .wg-col+.wg-col{border-left:0;border-top:1px solid var(--border);padding-top:22px}
+  body[data-page='home'] .wg-col::before{display:none}
+  body[data-page='home'] .wg-plain{margin-top:28px}
+  body[data-page='home'] .wg-cells{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body[data-page='home'] .wg-cell:nth-child(3){border-left:0}
+  body[data-page='home'] .wg-cell{border-top:1px solid var(--border)}
+  body[data-page='home'] .wg-cell:nth-child(-n+2){border-top:0}
+}
+@media (max-width:560px){
+  body[data-page='home'] .wg-plate-wrap{max-width:300px}
+  body[data-page='home'] .wg-spec{width:36px;height:36px;margin:-18px 0 0 -18px}
+  body[data-page='home'] .wg-spec img{width:20px;height:20px}
+  body[data-page='home'] .wg-spec span{width:13px;height:13px;line-height:13px;font-size:8px}
+  body[data-page='home'] .wg-plain-head{padding:22px 18px 18px}
+  body[data-page='home'] .wg-cell{padding:14px 14px 16px}
+  body[data-page='home'] .wg-cell::after{left:14px}
+  body[data-page='home'] .wg-cell dd{font-size:.8rem}
+  body[data-page='home'] .wg-legend{gap:8px 14px}
+  body[data-page='home'] .wg-ticket{padding:12px 13px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  body[data-page='home'] .wg-plate *{animation:none!important}
+  body[data-page='home'] .wg-vines path{stroke-dashoffset:0!important}
+  html.js body[data-page='home'] .wg-plate-wrap:not(.visible) .wg-spec{opacity:1}
+}
