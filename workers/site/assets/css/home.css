@@ -525,3 +525,59 @@ body[data-page='home'] .wg-cell dd{margin:7px 0 0;font-size:.84rem;line-height:1
   body[data-page='home'] .wg-vines path{stroke-dashoffset:0!important}
   html.js body[data-page='home'] .wg-plate-wrap:not(.visible) .wg-spec{opacity:1}
 }
+
+/* ===== 02 "How you get in" — access voucher (rail inside the receipt, 2026-11-21) =====
+   Receipt anatomy in the site's own ink: glass card, perforated edges, sage mono,
+   seal watermark, barcode. The journey rail is the voucher's left spine. */
+body[data-page='home'] .voucher{position:relative;max-width:640px;margin:36px auto 0;padding:26px 30px 30px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(24,38,43,.82),rgba(16,26,30,.88));border:1px solid var(--border);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 28px 60px rgba(0,0,0,.45)}
+[data-theme="light"] body[data-page='home'] .voucher{background:linear-gradient(180deg,rgba(252,254,252,.9),rgba(240,246,242,.9));box-shadow:0 24px 50px rgba(27,43,49,.12)}
+/* perforated top + bottom edges: bites in the page colour */
+body[data-page='home'] .voucher::before,body[data-page='home'] .voucher::after{content:'';position:absolute;left:0;right:0;height:11px;pointer-events:none;
+  background:radial-gradient(circle at 5.5px 0,var(--bg) 5.5px,transparent 6px) 0 0/11px 11px repeat-x}
+body[data-page='home'] .voucher::before{top:0}
+body[data-page='home'] .voucher::after{bottom:0;transform:rotate(180deg)}
+body[data-page='home'] .v-stamp{position:absolute;right:20px;top:62px;width:92px;height:92px;border-radius:50%;opacity:.14;transform:rotate(9deg);
+  background:url('/assets/icons/seal-field.png') center/contain no-repeat;pointer-events:none}
+body[data-page='home'] .v-ring{position:absolute;right:40px;top:82px;width:52px;height:52px;border-radius:50%;border:1px dashed rgba(163,201,182,.3);opacity:.7;pointer-events:none}
+
+body[data-page='home'] .v-head{position:relative;display:flex;justify-content:space-between;align-items:baseline;padding-bottom:10px;border-bottom:1px solid var(--border-primary)}
+body[data-page='home'] .v-brand{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.24em;color:var(--text-dim)}
+body[data-page='home'] .v-kind{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.2em;color:var(--text-faint)}
+
+body[data-page='home'] .v-rows{position:relative;margin-top:8px}
+body[data-page='home'] .v-rows::before{content:'';position:absolute;left:21px;top:20px;bottom:20px;width:1px;
+  background:repeating-linear-gradient(180deg,rgba(163,201,182,.4) 0 6px,transparent 6px 13px)}
+body[data-page='home'] .v-row{position:relative;display:grid;grid-template-columns:44px minmax(0,1fr);gap:16px;align-items:start;padding:16px 0;border-bottom:1px dashed var(--border)}
+body[data-page='home'] .v-row:last-child{border-bottom:0}
+body[data-page='home'] .v-node{position:relative;z-index:1;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--sage);
+  background:radial-gradient(circle at 50% 35%,rgba(163,201,182,.14),rgba(12,19,22,.9));border:1px solid rgba(163,201,182,.3);box-shadow:0 0 0 5px #132126}
+[data-theme="light"] body[data-page='home'] .v-node{background:radial-gradient(circle at 50% 35%,rgba(78,122,104,.12),#FBFDFB);box-shadow:0 0 0 5px #F4F8F5}
+body[data-page='home'] .v-node svg,body[data-page='home'] .v-node img{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+body[data-page='home'] .v-n{position:absolute;left:-2px;top:-12px;padding:0 4px;background:#132126;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.14em;color:var(--text-faint)}
+[data-theme="light"] body[data-page='home'] .v-n{background:#F4F8F5}
+body[data-page='home'] .v-body{padding-top:2px;min-width:0}
+body[data-page='home'] .v-t{display:block;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:13px;letter-spacing:.06em;color:var(--text)}
+body[data-page='home'] .v-d{display:block;margin-top:4px;font-size:.86rem;line-height:1.55;color:var(--text-dim)}
+
+body[data-page='home'] .v-total{display:flex;justify-content:space-between;align-items:baseline;margin-top:6px;padding-top:14px;border-top:1px solid var(--border-primary);
+  font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.16em;color:var(--text-dim)}
+body[data-page='home'] .v-total b{font-size:14px;letter-spacing:.06em;color:var(--text)}
+body[data-page='home'] .v-bars{margin-top:16px;height:26px;opacity:.5;
+  background:repeating-linear-gradient(90deg,var(--sage) 0 2px,transparent 2px 5px,var(--sage) 5px 6px,transparent 6px 11px,var(--sage) 11px 14px,transparent 14px 18px)}
+body[data-page='home'] .v-foot{margin-top:8px;text-align:center;font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.2em;color:var(--text-faint)}
+
+@media (max-width:560px){
+  body[data-page='home'] .voucher{padding:22px 18px 24px}
+  body[data-page='home'] .v-stamp{width:64px;height:64px;right:14px;top:16px}
+  body[data-page='home'] .v-ring{display:none}
+  body[data-page='home'] .v-row{grid-template-columns:34px minmax(0,1fr);gap:12px}
+  body[data-page='home'] .v-node{width:34px;height:34px}
+  body[data-page='home'] .v-node svg,body[data-page='home'] .v-node img{width:15px;height:15px}
+  body[data-page='home'] .v-rows::before{left:16px}
+  body[data-page='home'] .v-brand,body[data-page='home'] .v-kind{font-size:11px;letter-spacing:.14em}
+}
+@media (prefers-reduced-motion:reduce){
+  body[data-page='home'] .voucher{backdrop-filter:none;-webkit-backdrop-filter:none}
+}
