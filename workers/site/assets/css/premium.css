@@ -3964,7 +3964,7 @@ body.menu-open .top-nav { opacity: .35; }
   display: flex; align-items: baseline; gap: 8px; padding: 12px 2px 4px;
   font-family: var(--t-font-mono, ui-monospace, monospace);
   font-size: 9.5px; letter-spacing: .22em; text-transform: uppercase;
-  color: rgba(143,175,181,.55);
+  color: #8FA9AE;
 }
 #mn-menu .mn-gl span:last-child { display: none; }
 #mn-menu .mn-group .mn-row {
