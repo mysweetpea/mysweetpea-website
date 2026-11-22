@@ -148,6 +148,24 @@
     /* === Mobile hamburger navigation === */
     var navToggle = document.querySelector('.nav-toggle');
     var navLinks = document.getElementById('mn-menu') || document.getElementById('nav-links');
+
+    /* Omarchy-style sheet: Status joins the primary rows, the theme control sits
+       beside Close, GitHub moves into the action row. Reordering here keeps all
+       16 pages on one source instead of editing every inlined copy. */
+    (function reorderMenu() {
+        var mn = document.getElementById('mn-menu');
+        if (!mn || mn.dataset.sheet) return;
+        mn.dataset.sheet = '1';
+        var status = mn.querySelector('a[href="/status.html"]');
+        var primary = mn.querySelector('.mn-primary');
+        if (status && primary) { status.className = 'mn-link'; primary.appendChild(status); }
+        var theme = mn.querySelector('.mn-theme');
+        var head = mn.querySelector('.mn-head');
+        if (theme && head) head.insertBefore(theme, head.querySelector('.mn-x'));
+        var gh = mn.querySelector('a[href="https://github.com/mysweetpea"]');
+        var foot = mn.querySelector('.mn-foot');
+        if (gh && foot) { gh.className = 'mn-gh'; foot.insertBefore(gh, foot.querySelector('.mn-cta')); }
+    })();
     /* Single open/close path: aria state + body scroll lock stay in sync. */
     function setMenu(open) {
         navLinks.classList.toggle('nav-open', open);
