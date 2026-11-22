@@ -1694,6 +1694,68 @@ body[data-page='about'] .view-switcher#about-switcher { max-width: 1100px; paddi
 .about-x-fs-v b { color: var(--text); font-weight: var(--t-fw-medium); }
 .about-x-ok { color: var(--sage); }
 
+/* ==== Open Source panel — split repo list (2026-11-22) ==== */
+body[data-page='about'] .about-x-oss {
+    display: grid; grid-template-columns: 0.8fr 1.2fr; column-gap: 48px; align-items: start;
+    padding-top: 64px;
+}
+body[data-page='about'] .about-x-oss .about-x-shead {
+    grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px; border-bottom: 2px solid var(--border); margin-bottom: 0;
+}
+body[data-page='about'] .about-x-oss .about-x-shead h2 { order: -1;
+    font-size: clamp(2rem, 3.8vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; }
+body[data-page='about'] .about-x-oss .about-x-idx { color: var(--text-faint); }
+body[data-page='about'] .about-x-oss > .about-x-lead {
+    grid-column: 1; grid-row: 2 / span 4; margin: 26px 0 0; max-width: 44ch;
+    font-size: 14.4px; line-height: 1.8; color: var(--text-dim);
+}
+body[data-page='about'] .about-x-oss > .about-x-lead::before {
+    content: 'Repositories'; display: block; margin-bottom: 12px;
+    font-family: var(--t-font-mono); font-size: 9.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--text-faint);
+}
+body[data-page='about'] .about-x-oss .github-link.about-x-repo {
+    grid-column: 2; display: flex; align-items: center; gap: 14px;
+    padding: 16px 0; margin: 0; border: 0; border-bottom: 1px solid var(--border); border-radius: 0;
+    background: none; text-decoration: none; transform: none; box-shadow: none;
+    transition: background 0.2s ease;
+}
+body[data-page='about'] .about-x-oss .github-link.about-x-repo:first-of-type {
+    margin-top: 26px; border-top: 1px solid var(--border);
+}
+body[data-page='about'] .about-x-oss .github-link.about-x-repo:hover {
+    background: rgba(163, 201, 182, 0.04); transform: none; border-color: var(--border);
+}
+body[data-page='about'] .about-x-oss .about-x-repo .github-icon {
+    width: 30px; height: 30px; flex: none; color: var(--text-faint); background: none; border: 0;
+}
+body[data-page='about'] .about-x-oss .about-x-repo .github-icon svg { width: 20px; height: 20px; }
+body[data-page='about'] .about-x-oss .about-x-repo .info { flex: 1; min-width: 0; }
+body[data-page='about'] .about-x-oss .about-x-repo .repo {
+    font-family: var(--t-font-display); font-size: 1.1rem; letter-spacing: -0.01em; color: var(--text);
+}
+body[data-page='about'] .about-x-oss .about-x-repo .desc {
+    font-size: 12.8px; line-height: 1.55; color: var(--text-dim); margin-top: 4px;
+}
+body[data-page='about'] .about-x-oss .about-x-repo .about-x-arrow { color: var(--sage); margin: 0; }
+body[data-page='about'] .about-x-oss .about-x-trust-grid {
+    grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px;
+    margin-top: 28px; padding-top: 18px; border-top: 1px solid var(--border);
+}
+body[data-page='about'] .about-x-oss .about-x-trust {
+    display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none;
+    font-size: 12.5px; color: var(--text-dim);
+}
+body[data-page='about'] .about-x-oss .about-x-trust .about-x-dot { width: 6px; height: 6px; }
+@media (max-width: 880px) {
+    body[data-page='about'] .about-x-oss { grid-template-columns: 1fr; }
+    body[data-page='about'] .about-x-oss > .about-x-lead { grid-row: auto; max-width: none; }
+    body[data-page='about'] .about-x-oss .github-link.about-x-repo:first-of-type { margin-top: 22px; }
+    body[data-page='about'] .about-x-oss .about-x-trust-grid { grid-template-columns: 1fr; }
+    body[data-page='about'] .about-x-oss .about-x-shead { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
 /* ==== Section 03 — cost manifest, split ledger (2026-11-22) ==== */
 body[data-page='about'] .about-x-blk:nth-of-type(4) {
     display: grid; grid-template-columns: 0.8fr 1.2fr; column-gap: 48px; align-items: start;
