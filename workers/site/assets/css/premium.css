@@ -1756,6 +1756,54 @@ body[data-page='about'] .about-x-oss .about-x-trust .about-x-dot { width: 6px; h
     body[data-page='about'] .about-x-oss .about-x-shead { flex-direction: column; align-items: flex-start; gap: 8px; }
 }
 
+/* ==== Closing CTA — refined card (2026-11-22) ==== */
+body[data-page='about'] .cta-section { max-width: 980px; margin: 0 auto 80px; padding: 24px; text-align: left; }
+body[data-page='about'] .cta-card {
+    padding: clamp(34px, 5vw, 60px); border-radius: 24px; overflow: hidden; position: relative;
+    border: 1px solid var(--border);
+    background:
+        radial-gradient(680px 320px at 18% 0%, rgba(163, 201, 182, 0.14), transparent 70%),
+        radial-gradient(520px 300px at 100% 100%, rgba(143, 175, 181, 0.10), transparent 70%),
+        linear-gradient(180deg, var(--card-bg), rgba(10, 16, 19, 0.55));
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+}
+body[data-page='about'] .cta-card .cta-seal {
+    position: absolute; right: -40px; bottom: -56px; width: 300px; height: auto;
+    opacity: 0.10; pointer-events: none; user-select: none;
+}
+body[data-page='about'] .cta-card .cta-kick {
+    position: relative; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px;
+    font-family: var(--t-font-mono); font-size: 10px; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--sage);
+}
+body[data-page='about'] .cta-card .cta-kick::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--sage);
+    box-shadow: 0 0 8px rgba(163, 201, 182, 0.7);
+}
+body[data-page='about'] .cta-card h2 {
+    position: relative; font-family: var(--t-font-display); font-weight: 400;
+    font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.02; letter-spacing: -0.025em; margin: 0 0 16px;
+}
+body[data-page='about'] .cta-card p {
+    position: relative; max-width: 52ch; margin: 0 0 28px; font-size: 15px; line-height: 1.75; color: var(--text-dim);
+}
+body[data-page='about'] .cta-card .cta-btn {
+    position: relative; display: inline-flex; align-items: center; gap: 8px;
+    padding: 15px 26px; border-radius: 13px; font-size: 14px; font-weight: 600;
+    background: var(--sage); color: #08120E; border: 0; text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+[data-theme="light"] body[data-page='about'] .cta-card .cta-btn { color: #fff; }
+body[data-page='about'] .cta-card .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(163, 201, 182, 0.22); }
+body[data-page='about'] .cta-card .portal-hint { position: relative; }
+@media (max-width: 760px) {
+    body[data-page='about'] .cta-section { padding: 20px 16px 0; }
+    body[data-page='about'] .cta-card { padding: 30px 22px; }
+    body[data-page='about'] .cta-card .cta-seal { width: 210px; right: -46px; bottom: -40px; opacity: 0.08; }
+    body[data-page='about'] .cta-card .cta-btn { width: 100%; justify-content: center; }
+}
+
 /* ==== Section 03 — cost manifest, split ledger (2026-11-22) ==== */
 body[data-page='about'] .about-x-blk:nth-of-type(4) {
     display: grid; grid-template-columns: 0.8fr 1.2fr; column-gap: 48px; align-items: start;
