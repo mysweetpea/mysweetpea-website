@@ -316,27 +316,28 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
             }
         });
 
-/* Services hero — pinned scroll reveal of the nine services (2026-11-22) */
+/* Services hero — scroll reveal of the nine services (2026-11-22)
+   The hold is CSS position:sticky (compositor-driven); JS only flips classes at scroll thresholds. */
 (function () {
     var pin = document.querySelector('.so-pin');
-    var hero = document.getElementById('services-hero');
     var orbit = document.querySelector('.so-orbit');
-    if (!pin || !hero || !orbit) return;
-    var reduce = matchMedia('(prefers-reduced-motion: reduce)');
-    var start = 0, travel = 1, ticking = false;
+    if (!pin || !orbit) return;
+    var nodes = [].slice.call(orbit.querySelectorAll('.so-node'));
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        orbit.classList.add('open');
+        nodes.forEach(function (n) { n.classList.add('out'); });
+        return;
+    }
+    var travel = 1, ticking = false;
     function measure() {
-        start = pin.getBoundingClientRect().top + scrollY;
-        travel = Math.max(1, pin.offsetHeight - hero.offsetHeight);
+        var hero = document.getElementById('services-hero');
+        travel = Math.max(1, pin.offsetHeight - (hero ? hero.offsetHeight : 0));
     }
     function frame() {
         ticking = false;
-        if (reduce.matches) { orbit.style.setProperty('--p', 1); hero.style.transform = 'none'; return; }
-        var y = scrollY - start;
-        if (y < 0) y = 0; else if (y > travel) y = travel;
-        hero.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
-        var raw = y / travel;
-        var p = raw <= 0.04 ? 0 : (raw - 0.04) / 0.96;
-        orbit.style.setProperty('--p', (p < 0 ? 0 : p > 1 ? 1 : p).toFixed(4));
+        var p = -pin.getBoundingClientRect().top / travel;
+        orbit.classList.toggle('open', p > 0.02);
+        for (var i = 0; i < nodes.length; i++) nodes[i].classList.toggle('out', p > 0.10 + i * 0.0875);
     }
     function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(frame); }
     addEventListener('scroll', onScroll, { passive: true });
