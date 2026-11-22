@@ -3997,6 +3997,9 @@ body.menu-open .top-nav { opacity: .35; }
 [data-theme='light'] #mn-menu .mn-search { border-bottom-color: rgba(46,92,70,.16); }
 [data-theme='light'] #mn-menu .mn-foot { border-top-color: rgba(46,92,70,.2); }
 [data-theme='light'] #mn-menu .mn-cta { color: #F7FAF8; }
+[data-theme='light'] #mn-menu .mn-gl { color: rgba(46,92,70,.72); }
+[data-theme='light'] #mn-menu .mn-group .mn-row,
+[data-theme='light'] #mn-menu .mn-search { color: #4A635B; }
 
 @media (prefers-reduced-motion: reduce) {
   #mn-menu .mn-link[href="/status.html"]::before { animation: none; }
