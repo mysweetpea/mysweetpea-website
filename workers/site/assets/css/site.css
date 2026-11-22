@@ -9156,3 +9156,58 @@ img.msb { border-radius: 18%; }
     border-color: rgba(16, 40, 36, 0.10);
     background: rgba(255, 255, 255, 0.62);
 }
+
+/* ===== Services hero — orbiting services, scroll reveal (2026-11-22) ===== */
+body[data-page='services'] .so-pin{position:relative;height:175vh}
+body[data-page='services'] #services-hero{position:relative;z-index:1;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:24px;text-align:center;will-change:transform}
+body[data-page='services'] .so-k{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-faint);margin:0 0 12px}
+body[data-page='services'] .so-orbit{position:relative;width:340px;height:340px;margin:52px auto 26px;border-radius:50%;
+  --r:170px;--p:1;display:block}
+.js body[data-page='services'] .so-orbit{--p:0}
+body[data-page='services'] .so-haze{position:absolute;left:50%;top:50%;width:300px;height:300px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,rgba(163,201,182,.16),transparent 68%);opacity:calc(.25 + .75 * var(--p))}
+body[data-page='services'] .so-ring{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(163,201,182,.28);
+  transform:rotate(calc(var(--p) * 42deg)) scale(calc(.2 + .8 * var(--p)));opacity:calc(.08 + .92 * var(--p));pointer-events:none}
+body[data-page='services'] .so-ring2{position:absolute;inset:52px;border-radius:50%;border:1px solid rgba(143,175,181,.1);opacity:calc(.1 + .9 * var(--p));pointer-events:none}
+body[data-page='services'] .so-node{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px;border-radius:13px;display:grid;place-items:center;
+  --q:clamp(0,calc((var(--p) - var(--sd)) / .45),1);
+  transform:rotate(var(--a)) translateY(calc(-1 * var(--r) * var(--q))) rotate(calc(-1 * var(--a))) scale(calc(.42 + .58 * var(--q)));
+  background:linear-gradient(180deg,rgba(30,46,51,.98),rgba(14,23,27,.98));border:1px solid rgba(143,175,181,.22);
+  box-shadow:0 calc(2px + 8px * var(--q)) calc(6px + 16px * var(--q)) rgba(0,0,0,calc(.18 + .34 * var(--q))),inset 0 1px 0 rgba(255,255,255,.06);
+  filter:blur(calc(1.6px - 1.6px * var(--q)));z-index:1}
+[data-theme="light"] body[data-page='services'] .so-node{background:linear-gradient(180deg,#fff,#F1F6F3);border-color:rgba(51,86,95,.18);
+  box-shadow:0 calc(2px + 8px * var(--q)) calc(6px + 16px * var(--q)) rgba(27,43,49,calc(.1 + .16 * var(--q))),inset 0 1px 0 #fff}
+body[data-page='services'] .so-node img{width:24px;height:24px;object-fit:contain;opacity:calc(.25 + .75 * var(--q))}
+body[data-page='services'] .so-node::after{content:'';position:absolute;inset:-6px;border-radius:16px;border:1px solid rgba(163,201,182,.22);opacity:calc(.55 * var(--q))}
+body[data-page='services'] .so-n1{--a:0deg;--sd:0}
+body[data-page='services'] .so-n2{--a:40deg;--sd:.02}
+body[data-page='services'] .so-n3{--a:80deg;--sd:.04}
+body[data-page='services'] .so-n4{--a:120deg;--sd:.06}
+body[data-page='services'] .so-n5{--a:160deg;--sd:.08}
+body[data-page='services'] .so-n6{--a:200deg;--sd:.10}
+body[data-page='services'] .so-n7{--a:240deg;--sd:.12}
+body[data-page='services'] .so-n8{--a:280deg;--sd:.14}
+body[data-page='services'] .so-n9{--a:320deg;--sd:.16}
+body[data-page='services'] .so-core{position:absolute;left:50%;top:50%;width:112px;height:112px;border-radius:50%;display:grid;place-items:center;z-index:3;
+  transform:translate(-50%,-50%) scale(calc(1.04 - .05 * var(--p)));
+  background:radial-gradient(circle at 50% 32%,rgba(163,201,182,.2),rgba(12,19,22,.97) 68%);border:1px solid rgba(163,201,182,.42);
+  box-shadow:0 0 44px rgba(163,201,182,.2),inset 0 0 18px rgba(163,201,182,.08)}
+body[data-page='services'] .so-core img{width:84px;height:84px}
+body[data-page='services'] .so-core::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(163,201,182,.3);animation:so-pulse 4.2s ease-out infinite}
+@keyframes so-pulse{0%{transform:scale(1);opacity:.45}70%{transform:scale(1.28);opacity:0}100%{opacity:0}}
+@media (max-width:640px){
+  body[data-page='services'] .so-pin{height:160vh}
+  body[data-page='services'] .so-orbit{width:260px;height:260px;--r:132px;margin:40px auto 22px}
+  body[data-page='services'] .so-node{width:37px;height:37px;margin:-18.5px;border-radius:11px;filter:none}
+  body[data-page='services'] .so-node img{width:20px;height:20px}
+  body[data-page='services'] .so-core{width:88px;height:88px}
+  body[data-page='services'] .so-core img{width:62px;height:62px}
+  body[data-page='services'] .so-haze{width:240px;height:240px}
+}
+@media (prefers-reduced-motion:reduce){
+  body[data-page='services'] .so-pin{height:auto}
+  body[data-page='services'] #services-hero{min-height:0;transform:none!important}
+  body[data-page='services'] .so-node{filter:none}
+  body[data-page='services'] .so-core::after{animation:none}
+}

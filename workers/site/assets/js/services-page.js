@@ -316,3 +316,30 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
             }
         });
 
+/* Services hero — pinned scroll reveal of the nine services (2026-11-22) */
+(function () {
+    var pin = document.querySelector('.so-pin');
+    var hero = document.getElementById('services-hero');
+    var orbit = document.querySelector('.so-orbit');
+    if (!pin || !hero || !orbit) return;
+    var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    var start = 0, travel = 1, ticking = false;
+    function measure() {
+        start = pin.getBoundingClientRect().top + scrollY;
+        travel = Math.max(1, pin.offsetHeight - hero.offsetHeight);
+    }
+    function frame() {
+        ticking = false;
+        if (reduce.matches) { orbit.style.setProperty('--p', 1); hero.style.transform = 'none'; return; }
+        var y = scrollY - start;
+        if (y < 0) y = 0; else if (y > travel) y = travel;
+        hero.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+        var raw = y / travel;
+        var p = raw <= 0.04 ? 0 : (raw - 0.04) / 0.96;
+        orbit.style.setProperty('--p', (p < 0 ? 0 : p > 1 ? 1 : p).toFixed(4));
+    }
+    function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(frame); }
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', function () { measure(); onScroll(); });
+    measure(); frame();
+})();

@@ -53,7 +53,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/instrument-serif.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=h6b17b99d">
-    <link rel="stylesheet" href="/assets/css/site.css?v=he31c15e7">
+    <link rel="stylesheet" href="/assets/css/site.css?v=h7f8a349e">
     <link rel="stylesheet" href="/assets/css/premium.css?v=hf2be90dc">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=h6e396228">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=h512175c8">
@@ -126,11 +126,25 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
 
 <main id="main-content" class="content-wrapper">
+        <div class="so-pin">
         <div class="hero" id="services-hero">
-            <img src="/assets/icons/seal-field.png" alt="" class="hero-watermark" aria-hidden="true" loading="lazy" decoding="async">
-            <img src="/assets/icons/seal-field.png" alt="MySweetPea logo" class="logo" width="160" height="160">
+            <p class="so-k">Nine services &middot; one login</p>
+            <div class="so-orbit" aria-hidden="true">
+                <span class="so-haze"></span><span class="so-ring"></span><span class="so-ring2"></span>
+                <span class="so-node so-n1" title="Moonfin"><img src="/assets/icons/moonfin.svg" alt=""></span>
+                <span class="so-node so-n2" title="Jellyfin"><img src="/assets/icons/jellyfin.svg" alt=""></span>
+                <span class="so-node so-n3" title="Nextcloud"><img src="/assets/icons/nextcloud.svg" alt=""></span>
+                <span class="so-node so-n4" title="Immich"><img src="/assets/icons/immich.svg" alt=""></span>
+                <span class="so-node so-n5" title="Open WebUI"><img src="/assets/icons/openwebui.svg" alt=""></span>
+                <span class="so-node so-n6" title="Vaultwarden"><img src="/assets/icons/vaultwarden.svg" alt=""></span>
+                <span class="so-node so-n7" title="Matrix"><img src="/assets/icons/matrix.svg" alt=""></span>
+                <span class="so-node so-n8" title="AFFiNE"><img src="/assets/icons/affine2.svg" alt=""></span>
+                <span class="so-node so-n9" title="KoalaSync"><img src="/assets/icons/koalasync.svg" alt=""></span>
+                <span class="so-core"><img src="/assets/icons/seal-field.png" alt="MySweetPea"></span>
+            </div>
             <h1 class="glass-text">Services</h1>
-            <p class="hero-sub pop-text">Everything runs privately — no subscriptions, no ads, no tracking.</p>
+            <p class="hero-sub pop-text">Everything runs privately &mdash; no subscriptions, no ads, no tracking.</p>
+        </div>
         </div>
 
         <div class="view-switcher" id="services-switcher">
@@ -282,7 +296,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <script src="/assets/js/site.js?v=h0cba0f2e" defer></script>
     <script src="/assets/js/site-data.js?v=hd1d5f0b6" defer></script>
     <script src="/assets/js/premium.js?v=hade6b530" defer></script>
-    <script src="/assets/js/services-page.js?v=hde7d3914" defer></script>
+    <script src="/assets/js/services-page.js?v=h86eb6a90" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
