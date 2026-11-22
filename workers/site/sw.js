@@ -4,7 +4,7 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-hc653462b';
+const CACHE = 'mysweetpea-h30ae8334';
 const CORE = [
         '/assets/js/services-page.js?v=h561f514a',
         '/assets/js/site-data.js?v=hd1d5f0b6',
@@ -21,7 +21,7 @@ const CORE = [
   '/index.html',
   '/assets/css/fonts.css?v=h6b17b99d',
   '/assets/css/site.css?v=hf86fa0c4',
-  '/assets/css/premium.css?v=h96412a44',
+  '/assets/css/premium.css?v=hb3b5fbd6',
   '/assets/css/home.css?v=hc1b42bc8',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',
