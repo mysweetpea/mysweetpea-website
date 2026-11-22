@@ -1243,18 +1243,6 @@
 (function () {
     'use strict';
 
-    function syncFaqAnswer(question, open) {
-        var answer = document.getElementById(question.getAttribute('aria-controls'));
-        if (answer) {
-            answer.hidden = false; // native inertness + CSS max-height preserve the close animation
-            answer.inert = !open;
-            answer.setAttribute('aria-hidden', String(!open));
-        }
-    }
-    document.querySelectorAll('.faq-question[aria-controls]').forEach(function (question) {
-        syncFaqAnswer(question, question.getAttribute('aria-expanded') === 'true');
-    });
-
     document.addEventListener('click', function (event) {
         /* event.target can be document/documentElement/text (synthetic
            dispatch) — guard before dereferencing .closest. */
@@ -1273,14 +1261,6 @@
         if (action === 'back-to-top') {
             event.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
-        if (action === 'toggle-faq') {
-            var item = el.parentElement;
-            if (!item) return; /* malformed branch must not kill the shared bus */
-            var open = item.classList.toggle('open');
-            el.setAttribute('aria-expanded', String(open));
-            syncFaqAnswer(el, open);
             return;
         }
         if (action === 'close-modal') {

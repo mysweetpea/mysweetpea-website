@@ -266,28 +266,16 @@ test('share copy reports success only after a fulfilled write or verified fallba
   assert.equal(await shareResult(null, false), 'Copy failed');
 });
 
-test('FAQ answers synchronize inertness and visibility without killing animation', () => {
-  const src = read('assets/js/site.js');
-  const start = src.indexOf('(function () {', src.indexOf('v45: Global click delegation'));
-  const block = src.slice(start, src.indexOf('\n/* ====', start));
-  const item = element(); item.className = 'faq-item';
-  const question = element('button'); question.parentElement = item;
-  question.attrs = { 'data-action': 'toggle-faq', 'aria-controls': 'answer', 'aria-expanded': 'false' };
-  const answer = element(); answer.hidden = false;
-  const document = {
-    querySelectorAll: () => [question], getElementById: () => answer,
-    addEventListener(type, fn) { this.click = fn; }
-  };
-  vm.runInNewContext(block, { document, window: {}, CustomEvent: function () {} });
-  assert.equal(answer.hidden, false);
-  assert.equal(answer.inert, true);
-  assert.equal(answer.getAttribute('aria-hidden'), 'true');
-  document.click({ target: { closest: () => question } });
-  assert.equal(answer.hidden, false);
-  assert.equal(answer.inert, false);
-  assert.equal(answer.getAttribute('aria-hidden'), 'false');
-  assert.equal(question.getAttribute('aria-expanded'), 'true');
-  document.click({ target: { closest: () => question } });
-  assert.equal(answer.inert, true);
-  assert.equal(answer.getAttribute('aria-hidden'), 'true');
+test('every FAQ is the shared native-details card', () => {
+  const pages = ['index.html', 'services.html', 'support.html'];
+  for (const p of pages) {
+    const html = read(p);
+    assert.ok(html.includes('faq-wrap fq-cards'), p + ': missing shared FAQ wrapper');
+    assert.ok(!/faq-item|faq-question|toggle-faq/.test(html), p + ': old accordion markup still present');
+    const cards = (html.match(/<details class="reveal"><summary><span class="fq-n">/g) || []).length;
+    assert.ok(cards >= 4, p + ': expected numbered detail cards, found ' + cards);
+  }
+  assert.ok(/\.faq-wrap\.fq-cards summary\{/.test(read('assets/css/premium.css')), 'shared FAQ styles missing from premium.css');
+  assert.ok(!read('assets/css/home.css').includes('.fq-cards'), 'home.css must not keep page-scoped FAQ styles');
+  assert.ok(!read('assets/js/site.js').includes('toggle-faq'), 'site.js still carries the retired accordion handler');
 });
