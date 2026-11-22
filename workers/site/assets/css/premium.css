@@ -2929,32 +2929,89 @@ body[data-page='form'] .tier-form-panel .form-submit.ready:not([disabled]) {
    Token-driven only — site.css [data-theme] blocks redefine the tokens,
    so no scheme queries and no hardcoded hex here. Self-contained: no
    rule in this block affects pre-existing about content. */
-.about-x-ana-copy .about-x-lead + .about-x-lead { margin-top: 14px; }
-.about-x-ana { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
-.about-x-ana-item { position: relative; overflow: hidden; background: var(--card-bg);
-    border: 1px solid var(--border-primary); border-radius: 14px; padding: 18px 20px;
-    transition: border-color .3s ease, transform .3s ease, box-shadow .3s ease; }
-.about-x-ana-item::before { content: ''; position: absolute; top: 0; left: 14px; right: 14px;
-    height: 2px; border-radius: 2px;
-    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sage) 45%, transparent), transparent); }
-.about-x-ana-item:hover { border-color: var(--sage);
-    box-shadow: 0 0 18px color-mix(in srgb, var(--sage) 14%, transparent);
-    transform: translateY(-2px); }
-.about-x-ana-from { display: inline-flex; align-items: center; gap: 7px;
-    font-family: var(--t-font-mono); color: var(--text-faint);
-    font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; }
-.about-x-ana-from::after { content: '\2192'; color: var(--sage); font-size: 0.85rem; }
-.about-x-ana-to { display: block; color: var(--text); font-weight: 600; margin: 6px 0 7px;
-    font-size: 1.02rem; letter-spacing: .01em; }
-.about-x-ana-note { display: block; color: var(--text-faint); font-size: 0.85rem; line-height: 1.55; }
-.about-x-ana + .about-x-prows { margin-top: 26px; }
-/* P·00 'plain terms' row stands alone — frame it as a definition card */
-.about-x-ana + .about-x-prows { border: 1px solid var(--border-primary); border-radius: 14px;
-    background: var(--card-bg); padding: 4px 18px; }
-.about-x-ana + .about-x-prows .about-x-prow { padding: 18px 0; }
-@media (max-width: 760px) { .about-x-ana + .about-x-prows { padding: 2px 14px; } }
+/* ==== Section 00 — ledger (2026-11-22): headline left / index right, two-column
+   prose with a drop cap, the three swaps as numbered ledger rows, and the
+   plain-terms definition as a framed panel. Scoped to the first block so the
+   remaining sections keep their current header grammar until they get their turn. */
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-shead {
+    display: flex; flex-direction: row-reverse; align-items: baseline; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px; border-bottom: 2px solid var(--border); margin-bottom: 0;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-idx { color: var(--text-faint); }
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-shead h2 {
+    font-size: clamp(2rem, 3.8vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; max-width: 20ch;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-copy {
+    columns: 2; column-gap: 44px; margin-top: 30px;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-copy .about-x-lead {
+    max-width: none; font-size: 14.6px; line-height: 1.78; color: var(--text-dim);
+    margin: 0 0 16px; break-inside: avoid;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-copy .about-x-lead + .about-x-lead { margin-top: 0; }
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-copy .about-x-lead:first-child {
+    font-size: 15.4px; color: var(--text);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-copy .about-x-lead:first-child::first-letter {
+    font-family: var(--t-font-display); font-size: 3.2em; line-height: 0.8; float: left;
+    padding: 4px 10px 0 0; color: var(--sage);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana {
+    display: block; margin-top: 34px; border-top: 1px solid var(--border); counter-reset: sw;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-item {
+    display: grid; grid-template-columns: 44px 200px 150px 1fr;
+    gap: 0 18px; align-items: center;
+    background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0;
+    padding: 16px 0; overflow: visible; transform: none; box-shadow: none;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-item::before {
+    counter-increment: sw; content: counter(sw, decimal-leading-zero);
+    position: static; width: auto; height: auto; background: none; border-radius: 0;
+    font-family: var(--t-font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-faint);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-item:hover {
+    border-color: var(--border); box-shadow: none; transform: none;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-from {
+    font-family: var(--t-font-display); font-size: 1.5rem; letter-spacing: -0.01em;
+    text-transform: none; color: var(--text-faint);
+    text-decoration: line-through; text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--text-faint) 55%, transparent);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-from::after { display: none; }
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-to {
+    display: inline; font-family: var(--t-font-display); font-weight: 400;
+    font-size: 1.5rem; letter-spacing: -0.01em; color: var(--text); margin: 0;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-to::before {
+    content: '\2192'; color: var(--sage); margin-right: 14px; font-style: normal;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-note {
+    display: block; font-size: 12.5px; line-height: 1.5; color: var(--text-faint); text-align: right;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana + .about-x-prows {
+    margin-top: 34px; padding: 24px 26px; border: 1px solid var(--border); border-radius: 16px;
+    background: var(--card-bg);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow {
+    display: grid; grid-template-columns: 220px 1fr; gap: 30px; align-items: start;
+    padding: 0; border: 0;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-pno { font-size: 10px; margin-bottom: 6px; display: block; }
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow h3 { font-size: 1.15rem; font-family: var(--t-font-display); }
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow p { font-size: 13.6px; line-height: 1.75; color: var(--text-dim); margin-top: 8px; }
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow:hover { background: none; }
+
 @media (max-width: 900px) {
-    .about-x-ana { grid-template-columns: 1fr; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-shead { flex-direction: column; align-items: flex-start; gap: 8px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-copy { columns: 1; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-item { grid-template-columns: 28px 1fr; gap: 4px 12px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-from { grid-column: 2; font-size: 1.25rem; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-to { grid-column: 2; font-size: 1.25rem; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana-note { grid-column: 2; text-align: left; margin-top: 2px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow { grid-template-columns: 1fr; gap: 6px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-ana + .about-x-prows { padding: 20px; }
 }
 
 /* === Light theme: form-page dark-tint islands -> green-tinted glass === */
