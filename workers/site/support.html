@@ -55,7 +55,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 <link rel="preload" as="font" type="font/woff2" href="/assets/fonts/archivo-var.woff2" crossorigin>
                     <link rel="stylesheet" href="/assets/css/fonts.css?v=h6b17b99d">
     <link rel="stylesheet" href="/assets/css/site.css?v=hf86fa0c4">
-    <link rel="stylesheet" href="/assets/css/premium.css?v=h36aa8800">
+    <link rel="stylesheet" href="/assets/css/premium.css?v=hfbe462f7">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=h6e396228">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=h512175c8">
 <link rel="stylesheet" href="/assets/css/donate.css?v=h6ad33ac1">
@@ -225,27 +225,12 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <section class="dn-section reveal" aria-labelledby="dn-faq-h">
         <div class="faq-header"><span class="eyebrow">Questions</span><h2 class="section-title glass-text" id="dn-faq-h">FAQ</h2></div>
-        <div class="faq-section">
-            <div class="faq-item">
-                <button class="faq-question" type="button" id="sup-faq-q-1" aria-expanded="false" aria-controls="sup-faq-a-1" data-action="toggle-faq">Where does my donation actually go? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-1" role="region" aria-labelledby="sup-faq-q-1"><p>Straight into the hardware it runs on — server nodes, electricity, bandwidth, and the domain. Anything past running costs goes toward new services. There are no salaries: MySweetPea is one gardener, and the books (infrastructure costs) are public in the <a href="https://github.com/mysweetpea/mysweetpea-homelab" data-gh-repo="homelab" target="_blank" rel="noopener noreferrer">homelab repository</a>.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question" type="button" id="sup-faq-q-2" aria-expanded="false" aria-controls="sup-faq-a-2" data-action="toggle-faq">Why don't you accept credit cards? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-2" role="region" aria-labelledby="sup-faq-q-2"><p>We prioritize privacy. Card payments route your identity through payment processors and create a paper trail linking you to this garden. Crypto (Monero especially) keeps your giving anonymous — no KYC, no chargebacks, no third party in between.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question" type="button" id="sup-faq-q-3" aria-expanded="false" aria-controls="sup-faq-a-3" data-action="toggle-faq">Is my donation anonymous? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-3" role="region" aria-labelledby="sup-faq-q-3"><p>Yes. Monero is anonymous by default — sender, receiver, and amount are all hidden. Bitcoin is pseudonymous: the address is public but not linked to you. We never ask for a name or email alongside a donation.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question" type="button" id="sup-faq-q-4" aria-expanded="false" aria-controls="sup-faq-a-4" data-action="toggle-faq">Can I get a refund? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-4" role="region" aria-labelledby="sup-faq-q-4"><p>Crypto donations are irreversible by design — that is what protects your privacy. If something genuinely went wrong, write to <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a> and a human will read it.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question" type="button" id="sup-faq-q-5" aria-expanded="false" aria-controls="sup-faq-a-5" data-action="toggle-faq">When do crypto wallets go live? <span class="arrow"><img src="/assets/icons/icon-ui-chevron-down.svg" alt="" width="16" height="16" loading="lazy" decoding="async" aria-hidden="true"></span></button>
-                <div class="faq-answer" id="sup-faq-a-5" role="region" aria-labelledby="sup-faq-q-5"><p>Soon. Wallet addresses are being set up carefully — once they're live they appear right on this page with click-to-copy. Until then, starring the repos on GitHub or sharing the garden with a friend helps just as much.</p></div>
-            </div>
+        <div class="faq-wrap fq-cards">
+            <details class="reveal"><summary><span class="fq-n">01</span><span>Where does my donation actually go?</span><span class="pm">+</span></summary><div class="a">Straight into the hardware it runs on — server nodes, electricity, bandwidth, and the domain. Anything past running costs goes toward new services. There are no salaries: MySweetPea is one gardener, and the books (infrastructure costs) are public in the <a href="https://github.com/mysweetpea/mysweetpea-homelab" data-gh-repo="homelab" target="_blank" rel="noopener noreferrer">homelab repository</a>.</div></details>
+            <details class="reveal"><summary><span class="fq-n">02</span><span>Why don't you accept credit cards?</span><span class="pm">+</span></summary><div class="a">We prioritize privacy. Card payments route your identity through payment processors and create a paper trail linking you to this garden. Crypto (Monero especially) keeps your giving anonymous — no KYC, no chargebacks, no third party in between.</div></details>
+            <details class="reveal"><summary><span class="fq-n">03</span><span>Is my donation anonymous?</span><span class="pm">+</span></summary><div class="a">Yes. Monero is anonymous by default — sender, receiver, and amount are all hidden. Bitcoin is pseudonymous: the address is public but not linked to you. We never ask for a name or email alongside a donation.</div></details>
+            <details class="reveal"><summary><span class="fq-n">04</span><span>Can I get a refund?</span><span class="pm">+</span></summary><div class="a">Crypto donations are irreversible by design — that is what protects your privacy. If something genuinely went wrong, write to <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a> and a human will read it.</div></details>
+            <details class="reveal"><summary><span class="fq-n">05</span><span>When do crypto wallets go live?</span><span class="pm">+</span></summary><div class="a">Soon. Wallet addresses are being set up carefully — once they're live they appear right on this page with click-to-copy. Until then, starring the repos on GitHub or sharing the garden with a friend helps just as much.</div></details>
         </div>
     </section>
 </main>
