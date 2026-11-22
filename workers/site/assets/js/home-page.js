@@ -9,6 +9,15 @@
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hasIO = 'IntersectionObserver' in window;
 
+  /* garden film: reduced-motion users get a settled frame, never the loop */
+  var film = document.querySelector('.pl-disc video');
+  if (film && reduce) {
+    film.removeAttribute('autoplay');
+    film.setAttribute('preload', 'auto');
+    film.addEventListener('loadeddata', function(){ try { film.pause(); film.currentTime = 4; } catch(e){} });
+    try { film.pause(); } catch(e){}
+  }
+
   /* grow-lines: observe vines + eyebrows (skipped when IO unsupported —
      the accordion below must never depend on animation features) */
   if (hasIO) { var io = new IntersectionObserver(function(entries){
