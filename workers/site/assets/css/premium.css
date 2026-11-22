@@ -1694,6 +1694,88 @@ body[data-page='about'] .view-switcher#about-switcher { max-width: 1100px; paddi
 .about-x-fs-v b { color: var(--text); font-weight: var(--t-fw-medium); }
 .about-x-ok { color: var(--sage); }
 
+/* ==== Section 03 — cost manifest, split ledger (2026-11-22) ==== */
+body[data-page='about'] .about-x-blk:nth-of-type(4) {
+    display: grid; grid-template-columns: 0.8fr 1.2fr; column-gap: 48px; align-items: start;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-shead {
+    grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between;
+    gap: 24px; padding-bottom: 22px; border-bottom: 2px solid var(--border); margin-bottom: 0;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-shead h2 { order: -1;
+    font-size: clamp(2rem, 3.8vw, 3rem); line-height: 1.05; letter-spacing: -0.02em; max-width: 22ch; }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-idx { color: var(--text-faint); }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-tag { display: none; }
+body[data-page='about'] .about-x-blk:nth-of-type(4) > .about-x-lead {
+    grid-column: 1; grid-row: 2; margin: 26px 0 0; max-width: 44ch;
+    font-size: 14.6px; line-height: 1.8; color: var(--text-dim);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) > .about-x-lead::before {
+    content: 'The manifest'; display: block; margin-bottom: 12px;
+    font-family: var(--t-font-mono); font-size: 9.5px; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--text-faint);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-manifest {
+    grid-column: 2; grid-row: 2 / span 2; margin: 30px 0 0; border: 0; border-top: 1px solid var(--border);
+    border-radius: 0; background: none; font-family: inherit;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-head { display: none; }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-row {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: baseline;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-item {
+    font-family: var(--t-font-mono); font-size: 11.5px; letter-spacing: 0.05em; color: var(--text);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-dots {
+    display: block; height: 0; border-bottom: 1px dotted rgba(143, 175, 181, 0.35);
+    transform: translateY(-4px);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-val {
+    font-family: var(--t-font-mono); font-size: 11.5px; letter-spacing: 0.05em;
+    color: var(--text-faint); text-align: right; white-space: nowrap;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-total {
+    display: flex; align-items: center; justify-content: space-between; gap: 18px;
+    padding: 18px 0 0; margin-top: 2px; border-top: 2px solid var(--border); border-bottom: 0;
+    font-family: inherit; font-size: inherit;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-t {
+    font-family: var(--t-font-mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--sage);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-v {
+    display: flex; gap: 10px; align-items: center;
+    font-family: var(--t-font-mono); font-size: 11px; letter-spacing: 0.05em;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-link {
+    display: inline-flex; align-items: center; padding: 10px 16px; border-radius: 12px;
+    border: 1px solid var(--border); color: var(--text); text-decoration: none;
+    font-family: var(--t-font-sans); font-size: 13px; font-weight: 600; letter-spacing: 0;
+    transition: border-color 0.2s ease;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-link:last-child {
+    background: var(--sage); border-color: var(--sage); color: #08120E;
+}
+[data-theme="light"] body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-link:last-child { color: #fff; }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-link:hover { border-color: var(--sage); }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-note {
+    grid-column: 1; grid-row: 3; margin: 22px 0 0; max-width: 44ch;
+    font-size: 12.8px; line-height: 1.6; color: var(--text-faint);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-note b { color: var(--text); font-weight: 600; }
+
+@media (max-width: 880px) {
+    body[data-page='about'] .about-x-blk:nth-of-type(4) { grid-template-columns: 1fr; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) > .about-x-lead { grid-row: auto; max-width: none; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-manifest { grid-row: auto; margin-top: 24px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-note { grid-row: auto; max-width: none; margin-top: 16px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-row { grid-template-columns: 1fr auto; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-dots { display: none; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-total { flex-direction: column; align-items: flex-start; gap: 12px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-shead { flex-direction: column; align-items: flex-start; gap: 8px; }
+}
+
 /* ==== Section 02 — principles as icon cards (2026-11-22) ==== */
 body[data-page='about'] .about-x-blk:nth-of-type(3) .about-x-shead {
     display: flex; align-items: baseline; justify-content: space-between;
