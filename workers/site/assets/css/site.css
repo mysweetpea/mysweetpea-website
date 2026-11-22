@@ -9161,7 +9161,7 @@ img.msb { border-radius: 18%; }
    Motion is CSS transitions on transform/opacity only (compositor-safe);
    JS just flips classes at scroll thresholds + holds the hero with translate3d. */
 body[data-page='services']{overflow-x:clip}   /* clip (not hidden) so position:sticky works inside */
-body[data-page='services'] .so-pin{position:relative;height:150vh}
+body[data-page='services'] .so-pin{position:relative;height:175vh}
 body[data-page='services'] #services-hero{position:sticky;top:0;z-index:1;min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:24px;text-align:center}
 body[data-page='services'] .so-k{font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--text-faint);margin:0 0 12px}
@@ -9182,7 +9182,7 @@ body[data-page='services'] .so-node{position:absolute;left:50%;top:50%;width:44p
   transform:rotate(var(--a)) translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a))) scale(1);opacity:1;
   background:linear-gradient(180deg,rgba(30,46,51,.98),rgba(14,23,27,.98));border:1px solid rgba(143,175,181,.22);
   box-shadow:0 6px 18px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.06);
-  transition:transform .52s cubic-bezier(.16,1,.3,1),opacity .34s ease;transition-delay:calc(var(--sd) * 2.2s);
+  transition:transform .52s cubic-bezier(.16,1,.3,1),opacity .34s ease;transition-delay:calc(var(--sd) * 1.2s);
   will-change:transform,opacity;z-index:1}
 .js body[data-page='services'] .so-node{transform:scale(.4);opacity:0}
 .js body[data-page='services'] .so-node.out{transform:rotate(var(--a)) translateY(calc(-1 * var(--r))) rotate(calc(-1 * var(--a))) scale(1);opacity:1}
@@ -9210,7 +9210,7 @@ body[data-page='services'] .so-core img{width:84px;height:84px}
 body[data-page='services'] .so-core::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(163,201,182,.3);animation:so-pulse 4.2s ease-out infinite}
 @keyframes so-pulse{0%{transform:scale(1);opacity:.45}70%{transform:scale(1.28);opacity:0}100%{opacity:0}}
 @media (max-width:640px){
-  body[data-page='services'] .so-pin{height:140vh}
+  body[data-page='services'] .so-pin{height:155vh}
   body[data-page='services'] .so-orbit{width:260px;height:260px;--r:132px;margin:40px auto 22px}
   body[data-page='services'] .so-node{width:37px;height:37px;margin:-18.5px;border-radius:11px}
   body[data-page='services'] .so-node img{width:20px;height:20px}

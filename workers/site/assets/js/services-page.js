@@ -328,16 +328,17 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
         nodes.forEach(function (n) { n.classList.add('out'); });
         return;
     }
-    var travel = 1, ticking = false;
+    var travel = 1, start = 0, ticking = false;
     function measure() {
         var hero = document.getElementById('services-hero');
         travel = Math.max(1, pin.offsetHeight - (hero ? hero.offsetHeight : 0));
+        start = pin.getBoundingClientRect().top + scrollY;
     }
     function frame() {
         ticking = false;
-        var p = -pin.getBoundingClientRect().top / travel;
+        var p = (scrollY - start) / travel;
         orbit.classList.toggle('open', p > 0.02);
-        for (var i = 0; i < nodes.length; i++) nodes[i].classList.toggle('out', p > 0.10 + i * 0.0875);
+        for (var i = 0; i < nodes.length; i++) nodes[i].classList.toggle('out', p > 0.05 + i * 0.0625);
     }
     function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(frame); }
     addEventListener('scroll', onScroll, { passive: true });
