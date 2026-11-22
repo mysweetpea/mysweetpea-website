@@ -165,6 +165,36 @@
         var gh = mn.querySelector('a[href="https://github.com/mysweetpea"]');
         var foot = mn.querySelector('.mn-foot');
         if (gh && foot) { gh.className = 'mn-gh'; foot.insertBefore(gh, foot.querySelector('.mn-cta')); }
+        /* search becomes the first utility row */
+        var search = mn.querySelector('.mn-search');
+        var groups = mn.querySelectorAll('.mn-group');
+        if (search && groups.length) {
+            search.className = 'mn-row mn-search-row';
+            groups[0].insertBefore(search, groups[0].firstChild);
+        }
+        /* the nine marks + the duotone art */
+        if (!mn.querySelector('.mn-ics')) {
+            var lab = document.createElement('div');
+            lab.className = 'mn-ics-l';
+            lab.textContent = 'The garden · 9 services';
+            var ics = document.createElement('div');
+            ics.className = 'mn-ics';
+            ['moonfin','jellyfin','nextcloud','immich','openwebui','vaultwarden','matrix','affine2','koalasync']
+                .forEach(function (name) {
+                    var a = document.createElement('a');
+                    a.className = 'mn-ic';
+                    a.href = '/services.html';
+                    a.innerHTML = '<img src="/assets/icons/' + name + '.svg" alt="" loading="lazy" decoding="async">';
+                    ics.appendChild(a);
+                });
+            if (foot) { foot.parentNode.insertBefore(lab, foot); foot.parentNode.insertBefore(ics, foot); }
+            var art = document.createElement('img');
+            art.className = 'mn-art';
+            art.src = '/assets/icons/seal-field.png';
+            art.alt = '';
+            art.setAttribute('aria-hidden', 'true');
+            mn.insertBefore(art, mn.firstChild);
+        }
     })();
     /* Single open/close path: aria state + body scroll lock stay in sync. */
     function setMenu(open) {
