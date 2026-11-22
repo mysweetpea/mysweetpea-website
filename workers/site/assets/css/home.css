@@ -700,3 +700,26 @@ body[data-page='home'] .gk-links a:hover{color:var(--primary-bright)}
   body[data-page='home'] .gk-meta{align-items:flex-start}
 }
 @media (prefers-reduced-motion:reduce){body[data-page='home'] .gk-seal::before{animation:none}}
+
+/* ===== 06 FAQ — question cards (2026-11-21) ===== */
+body[data-page='home'] .faq-wrap.fq-cards{max-width:760px;margin:32px auto 0;padding:0;display:grid;gap:10px}
+body[data-page='home'] .faq-wrap.fq-cards details{border:1px solid var(--border);border-top:1px solid var(--border);border-radius:14px;overflow:hidden;padding:0;
+  background:linear-gradient(180deg,rgba(24,38,43,.6),rgba(16,26,30,.72));transition:border-color .2s ease,box-shadow .2s ease}
+[data-theme="light"] body[data-page='home'] .faq-wrap.fq-cards details{background:linear-gradient(180deg,rgba(252,254,252,.95),rgba(240,246,242,.95))}
+body[data-page='home'] .faq-wrap.fq-cards details:hover{background:linear-gradient(180deg,rgba(28,44,49,.66),rgba(18,29,33,.78))}
+body[data-page='home'] .faq-wrap.fq-cards details[open]{border-color:rgba(163,201,182,.4);box-shadow:0 14px 30px rgba(0,0,0,.28)}
+body[data-page='home'] .faq-wrap.fq-cards summary{display:grid;grid-template-columns:46px minmax(0,1fr) 30px;align-items:center;gap:12px;padding:18px 20px;
+  font-family:var(--t-font-sans,Inter,system-ui,sans-serif);font-size:1.02rem;font-weight:500;color:var(--text)}
+body[data-page='home'] .faq-wrap.fq-cards .fq-n{width:46px;height:26px;border-radius:7px;display:grid;place-items:center;border:1px solid rgba(163,201,182,.28);
+  font-family:var(--t-font-mono,ui-monospace,monospace);font-size:11px;letter-spacing:.1em;color:var(--sage);font-variant-numeric:tabular-nums}
+body[data-page='home'] .faq-wrap.fq-cards .pm{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(143,175,181,.25);
+  font-family:var(--t-font-mono,ui-monospace,monospace);font-size:14px;color:var(--text-faint);transition:transform .2s ease,color .2s ease,border-color .2s ease}
+body[data-page='home'] .faq-wrap.fq-cards details[open] .pm{transform:rotate(45deg);color:var(--sage);border-color:rgba(163,201,182,.5)}
+body[data-page='home'] .faq-wrap.fq-cards details .a{margin:0 20px 20px 78px;padding:0 0 18px;font-size:.9rem;line-height:1.7;max-width:none}
+@media (max-width:640px){
+  body[data-page='home'] .faq-wrap.fq-cards{gap:8px}
+  body[data-page='home'] .faq-wrap.fq-cards summary{grid-template-columns:38px minmax(0,1fr) 26px;gap:10px;padding:15px 14px;font-size:.95rem}
+  body[data-page='home'] .faq-wrap.fq-cards .fq-n{width:38px;height:24px;font-size:10px}
+  body[data-page='home'] .faq-wrap.fq-cards .pm{width:26px;height:26px;font-size:12px}
+  body[data-page='home'] .faq-wrap.fq-cards details .a{margin:0 14px 16px 62px;font-size:.87rem}
+}
