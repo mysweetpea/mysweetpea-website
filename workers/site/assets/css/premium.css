@@ -4120,8 +4120,9 @@ body.menu-open .top-nav { opacity: .35; }
 /* Vaultwarden's own mark is black art, so on a dark surface it disappeared.
    It is the ONLY service icon that needs flipping: matrix.svg is Element
    green (inverting gave magenta) and koalasync.svg is a grey koala on a
-   transparent field (inverting gave the white plate). The .g-inv / .wg-inv
-   classes on those images are now inert on purpose. */
-html:not([data-theme='light']) body[data-page='home'] img[src$="/vaultwarden.svg"] {
+   transparent field (inverting gave the white plate). Unscoped from the home
+   page — the mark is black art in every card, on every page. The .g-inv /
+   .wg-inv classes on those images are now inert on purpose. */
+html:not([data-theme='light']) img[src$="/vaultwarden.svg"] {
   filter: invert(1) brightness(1.3);
 }
