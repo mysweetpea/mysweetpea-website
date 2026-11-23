@@ -109,7 +109,7 @@ body[data-page='form'] .uc-icon,
 /* --- 2. everything else measured under 11px --- */
 .hb-uptime, .g-side-name, .g-idx, .g-replaces, .g-altname, .g-vs, .g-ev,
 .what-pill, .what-mono, .sec-eyebrow .n,
-.g-src a, .g-links a, .vb-link, .vb-note, .vb-note em, .gw-card .gw-kicker,
+.g-src a, .vb-link, .vb-note, .vb-note em,
 .tb-tag, .tb-morelist, .led-k, .tier-flag, .tier-period2, .tier-subnote,
 .hiw-selective-eyebrow, .hiw-included-label, .pc-eyebrow,
 .line-idx, .line-cat, .line-lat, .badge-label, .sc-uptime, .sc-checks,

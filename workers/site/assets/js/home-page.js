@@ -108,7 +108,22 @@
       });
       var pill = document.querySelector('.what-pill');
       if (pill && pill.textContent.indexOf('services live') !== -1) {
-        pill.textContent = n + '/' + n + ' services live';
+        /* Reuse the page's shared monitors/heartbeat promises — no extra fetch.
+           Status 1 = confirmed up; 0 down, 2 pending, 3 maintenance. */
+        Promise.all([window.MSP.monitors(), window.MSP.heartbeat()]).then(function (r) {
+          var byKey = (r[0] && r[0].byKey) || {};
+          var hb = (r[1] && r[1].heartbeatList) || {};
+          if (!Object.keys(byKey).length || !Object.keys(hb).length) return;
+          var up = 0;
+          d.services.forEach(function (svc) {
+            var id = byKey[svc.key];
+            var beats = id == null ? null : hb[String(id)];
+            if (beats && beats.length && beats[beats.length - 1].status === 1) up++;
+          });
+          pill.textContent = up + '/' + n + ' services live';
+        }).catch(function () {
+          pill.setAttribute('title', 'Live status temporarily unavailable');
+        });
       }
       var nr = (d.siteFacts && d.siteFacts.publicRepos) || (d.repos || []).length || 0;
       if (nr) {
