@@ -8,6 +8,12 @@ The manual ?v= sweep is RETIRED. From `workers/site/`:
 python deploy.py        # bake + hash-version every pin + regenerate sw.js + gates
 # gates: node --check all JS, control-byte scan, JSON parse, CSP drift reminder
 # then: git add/commit/push + npx wrangler deploy (both still manual)
+# If npx wrangler fails with "ETARGET / No matching version found", the registry
+# is advertising a release whose tarball is not published yet. Pin the version
+# that is already in the npx cache instead of waiting:
+#   npx --yes wrangler@4.166.0 deploy
+# A successful deploy is not live yet: Workers assets take ~1-2 min to
+# propagate, so verify with a second fetch before calling it stale.
 ```
 
 How it works:

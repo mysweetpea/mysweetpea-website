@@ -3319,6 +3319,9 @@ body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow {
     display: grid; grid-template-columns: 220px 1fr; gap: 30px; align-items: start;
     padding: 0; border: 0;
 }
+/* Without this the paragraph auto-placed into row 2 of the 220px LABEL column:
+   a narrow slab of text under "P·00" with two thirds of the row empty. */
+body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow p { grid-column: 2; }
 body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-pno { font-size: 10px; margin-bottom: 6px; display: block; }
 body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow h3 { font-size: 1.15rem; font-family: var(--t-font-display); }
 body[data-page='about'] .about-x-blk:nth-of-type(1) .about-x-prow p { font-size: 13.6px; line-height: 1.75; color: var(--text-dim); margin-top: 8px; }
@@ -4132,6 +4135,7 @@ body[data-page='about'] .about-x-hero h1,
 body[data-page='about'] .about-x-title { text-wrap: balance; }
 body[data-page='about'] .about-x-hero-sub,
 body[data-page='about'] .about-x-lead,
+body[data-page='about'] .about-x-prow p,
 body[data-page='about'] .about-x-mf-note { text-wrap: pretty; }
 
 /* Vaultwarden's own mark is black art, so on a dark surface it disappeared.
