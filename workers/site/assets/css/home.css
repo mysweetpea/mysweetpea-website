@@ -198,3 +198,7 @@ body[data-page='home'] .what-sep{display:none}
 @media (prefers-reduced-motion:reduce){
   body[data-page='home'] .pl-r1,body[data-page='home'] .pl-r2{animation:none}
 }
+
+/* gardener medallion — see premium.css note */
+body[data-page='home'] .gk-seal img{width:72%;height:72%;opacity:1;filter:brightness(0) invert(1)}
+[data-theme='light'] body[data-page='home'] .gk-seal img{filter:brightness(0)}

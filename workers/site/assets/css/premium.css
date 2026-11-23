@@ -4147,3 +4147,24 @@ body[data-page='about'] .about-x-mf-note { text-wrap: pretty; }
 html:not([data-theme='light']) img[src$="/vaultwarden.svg"] {
   filter: invert(1) brightness(1.3);
 }
+
+/* ===== Seal as a MARK, not a stamp (2026-11-23) =====
+   seal-field.png is the black-ink cat on a teal rounded SQUARE. Dropped into a
+   circular medallion it reads as a square badge floating in a ring — the ink
+   even reaches r=287/512, so a circular crop would clip the ears instead.
+   seal-ink.png is the same art keyed to transparent ink; these rules size it to
+   fit inside the ring and give it the ink colour the surface needs.
+   Every other seal use (nav .msb, .mn-seal tile, inner-page .logo, hero
+   watermarks) keeps the field stamp and is untouched. */
+
+/* 05 The Gardener: 128px ring, dashed inner ring at 112; ink peaks at r=287/512
+   of its own box, so 72% of the medallion keeps the ears inside the ring at
+   every breakpoint (128->92px, 84->60px). */
+body[data-page='home'] .gk-seal img { width: 72%; height: 72%; opacity: 1;
+    filter: brightness(0) invert(1); }
+[data-theme='light'] body[data-page='home'] .gk-seal img { filter: brightness(0); }
+
+/* services hero: .so-core is a dark disc in BOTH themes (rgba(12,19,22,.97)),
+   so the ink stays light; 75% of the disc keeps it inside at 112 and 88px. */
+body[data-page='services'] .so-core img { width: 75%; height: 75%; opacity: 1;
+    filter: brightness(0) invert(1); }
