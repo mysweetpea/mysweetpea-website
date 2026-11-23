@@ -1147,6 +1147,17 @@
             else if (media.indexOf('dark') !== -1) { sawMedia = true; if (!light) m.setAttribute('content', COLORS.dark); }
             else sawUnscoped = true;
         });
+        /* A saved theme can disagree with the OS preference, and the browser
+           picks a meta by its `media` query — not by data-theme — so a
+           saved-dark visitor on a light OS got light chrome over a dark page.
+           Retarget the metas at the ACTIVE scheme (media "not all" is valid
+           and never matches), which keeps the no-JS OS-preference behaviour
+           for the pre-hydration paint. */
+        metas.forEach(function (m) {
+            var media = m.getAttribute('media') || '';
+            if (!media) return;
+            m.setAttribute('media', (media.indexOf('light') !== -1) === light ? 'all' : 'not all');
+        });
         if (sawUnscoped) {
             /* mixed page (scoped + unscoped metas): keep the unscoped one on
                the active color so non-media-aware readers stay correct */

@@ -56,7 +56,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
     <link rel="stylesheet" href="/assets/css/premium.css?v=h3255343f">
     <link rel="stylesheet" href="/assets/css/type-tokens.css?v=h6e396228">
     <link rel="stylesheet" href="/assets/css/hermes-type.css?v=hea1914d2">
-    <link rel="stylesheet" href="/assets/css/home.css?v=h13e4c28b">
+    <link rel="stylesheet" href="/assets/css/home.css?v=hfdc9c574">
 <link rel="canonical" href="https://mysweetpea.cc/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MySweetPea","url":"https://mysweetpea.cc","logo":"https://mysweetpea.cc/icon-512.png","description":"Private, self-hosted alternatives to the services you use every day. No ads, no tracking, no subscriptions — community funded.","email":"support@mysweetpea.cc","sameAs":["https://github.com/mysweetpea"]}</script>
 </head>
@@ -144,9 +144,9 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <a href="/services.html" class="hero-btn hero-btn-secondary" data-keywords="apps features what is offered services list">See Available Services</a>
             </div>
             <div class="hero-proof" role="region" aria-label="MySweetPea at a glance">
-                <div class="proof-stat"><span class="proof-value" data-count="1" data-suffix="">0</span><span class="proof-label">Gardener behind it all</span></div>
+                <div class="proof-stat"><span class="proof-value" data-count="1" data-suffix="">1</span><span class="proof-label">Gardener behind it all</span></div>
                 <div class="proof-divider" aria-hidden="true"></div>
-                <div class="proof-stat"><span class="proof-value" data-count="9" data-suffix="">0</span><span class="proof-label">Public services</span></div>
+                <div class="proof-stat" data-proof="services"><span class="proof-value" data-count="9" data-suffix="">9</span><span class="proof-label">Public services</span></div>
                 <div class="proof-divider" aria-hidden="true"></div>
                 <div class="proof-stat"><span class="proof-value" data-count="0" data-suffix="">0</span><span class="proof-label">Ads, trackers or subscriptions</span></div>
             </div>
@@ -168,7 +168,6 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <span class="pl-vig" aria-hidden="true"></span>
                     </div>
                 </div>
-                <figcaption class="pl-cap">specimen no. 00 &middot; the private garden</figcaption>
             </figure>
 
             <ul class="pl-key reveal reveal-delay-2" aria-label="Plate key">
@@ -213,15 +212,15 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                         <p class="what-card-intro wg-intro">MySweetPea runs on self-hosted, open-source services. This means all of the services offered by MySweetPea run on my own hardware (self-hosting) instead of rented hardware from a big cloud company that would track your usage. It also means each service is auditable (open-source): you can view whether the service you're using tracks you or builds a profile on you — unlike proprietary services, where you can't see what they're up to.</p>
                     </div>
                     <dl class="wg-cells">
-                        <div class="wg-cell"><span class="wg-k"><img src="/assets/icons/icon-ui-leaf.svg" alt=""><dt>it is</dt></span><dd>Continuously growing services that need only 1 login</dd></div>
-                        <div class="wg-cell"><span class="wg-k"><img src="/assets/icons/icon-ui-cross.svg" alt=""><dt>it is not</dt></span><dd>a company, a startup, or a free tier with a catch</dd></div>
-                        <div class="wg-cell"><span class="wg-k"><img src="/assets/icons/icon-ui-key.svg" alt=""><dt>you pay</dt></span><dd>one time with everything included forever. No sudden upcharges or hidden fees</dd></div>
-                        <div class="wg-cell"><span class="wg-k"><img src="/assets/icons/icon-ui-globe.svg" alt=""><dt>you can</dt></span><dd>view the code that powers this website and the offered services</dd></div>
+                        <div class="wg-cell"><dt class="wg-k"><img src="/assets/icons/icon-ui-leaf.svg" alt="">it is</dt><dd>Continuously growing services that need only 1 login</dd></div>
+                        <div class="wg-cell"><dt class="wg-k"><img src="/assets/icons/icon-ui-cross.svg" alt="">it is not</dt><dd>a company, a startup, or a free tier with a catch</dd></div>
+                        <div class="wg-cell"><dt class="wg-k"><img src="/assets/icons/icon-ui-key.svg" alt="">you pay</dt><dd>one time with everything included forever. No sudden upcharges or hidden fees</dd></div>
+                        <div class="wg-cell"><dt class="wg-k"><img src="/assets/icons/icon-ui-globe.svg" alt="">you can</dt><dd>view the code that powers this website and the offered services</dd></div>
                     </dl>
                 </div>
             </aside>
             <div class="what-proof reveal reveal-delay-2" role="region" aria-label="MySweetPea in five facts">
-                <span class="what-pill">9/9 services live</span>
+                <span class="what-pill" data-pill="services-live">9/9 services live</span>
                 <span class="what-sep" aria-hidden="true">·</span>
                 <span class="what-pill">0 ads &amp; trackers</span>
                 <span class="what-sep" aria-hidden="true">·</span>
@@ -229,7 +228,7 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
                 <span class="what-sep" aria-hidden="true">·</span>
                 <span class="what-pill">1 gardener who answers to your questions</span>
                 <span class="what-sep" aria-hidden="true">·</span>
-                <span class="what-pill">6 public repos you can see for yourself</span>
+                <span class="what-pill" data-pill="repos">6 public repos you can see for yourself</span>
             </div>
         </section>
 
@@ -241,14 +240,14 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
             <p class="section-subtitle reveal reveal-delay-1">The same comfort and polish you're used to. Open any card to see what its corporate twin does with your data.</p>
             <div class="garden-rows" id="gardenRows">
                 <div class="garden-row reveal" style="--d:0ms">
-                    <button type="button" class="g-row-head" aria-expanded="false" aria-controls="gx-jellyfin" id="gxt-jellyfin">
+                    <button type="button" class="g-row-head" aria-expanded="false" aria-controls="gx-moonfin" id="gxt-jellyfin">
                         <span class="g-idx">01</span><span class="g-twin-chip g-twin-netflix" aria-hidden="true"></span><span class="g-arrow" aria-hidden="true">&rarr;</span>
                         <span class="g-ico"><img src="/assets/icons/moonfin.svg" alt="" width="40" height="40" loading="lazy" decoding="async"></span>
                         <span class="g-who"><span class="g-name">Moonfin</span><span class="g-line">Your movies, shows and animes. This is your stream, your rules.</span></span>
                         <span class="g-alt"><span class="g-replaces">replaces</span><span class="g-altname">Netflix</span></span>
                         <span class="g-caret" aria-hidden="true"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M3.5 1.5 7 5 3.5 8.5"/></svg></span>
                     </button>
-                    <div class="g-exposure" id="gx-jellyfin" role="region" aria-labelledby="gxt-jellyfin" hidden>
+                    <div class="g-exposure" id="gx-moonfin" role="region" aria-labelledby="gxt-jellyfin" hidden>
                         <div class="g-exposure-inner">
                             <div class="g-duel" aria-hidden="true">
                                 <span class="g-side g-side-corp"><span class="g-twin-logo g-twin-netflix"></span><span class="g-side-name">Netflix + Hulu, Disney+</span></span>
@@ -675,10 +674,10 @@ html[data-theme="light"]{background:#E7EDEA;color-scheme:light}
 
     <script src="/assets/js/lenis.min.js?v=h1375bb5f" defer></script>
     <script src="/assets/js/lenis-init.js?v=h3379bccf" defer></script>
-    <script src="/assets/js/site.js?v=h7832ccb5" defer></script>
+    <script src="/assets/js/site.js?v=h7cf488b7" defer></script>
     <script src="/assets/js/site-data.js?v=h571226e8" defer></script>
     <script src="/assets/js/premium.js?v=hade6b530" defer></script>
-    <script src="/assets/js/home-page.js?v=h6f74360a" defer></script>
+    <script src="/assets/js/home-page.js?v=h8c93af7a" defer></script>
     <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {

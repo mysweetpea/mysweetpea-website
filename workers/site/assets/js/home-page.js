@@ -6,7 +6,7 @@
 (function(){
   'use strict';
   function initMotion(){
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   var hasIO = 'IntersectionObserver' in window;
 
   /* garden film: reduced-motion users get a settled frame, never the loop */
@@ -29,35 +29,8 @@
     document.querySelectorAll('.vine-divider.reveal-grow, .sec-eyebrow.reveal, .step, .reveal').forEach(function(el){ el.classList.add('visible'); });
   }
 
-  /* count-up numerals in record tiles */
-  function animateCount(el){
-    var target = parseFloat(el.getAttribute('data-count'));
-    var dec = parseInt(el.getAttribute('data-dec') || '0', 10);
-    var suffix = el.getAttribute('data-suffix') || '';
-    if (!isFinite(target)) { el.textContent = (el.getAttribute('data-count') || '') + suffix; return; }
-    if (reduce || !(target > 0)) { el.textContent = target.toFixed(dec) + suffix; return; }
-    var t0 = null, dur = 1100;
-    function step(ts){
-      var current = parseFloat(el.getAttribute('data-count'));
-      if (!isFinite(current)) return;
-      target = current;
-      if(!t0) t0 = ts;
-      var p = Math.min((ts - t0)/dur, 1);
-      var eased = 1 - Math.pow(1-p, 4);
-      el.textContent = (target*eased).toFixed(dec) + suffix;
-      if(p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-  if (hasIO) {
-    var cio = new IntersectionObserver(function(entries){
-      entries.forEach(function(e){ if(e.isIntersecting){ animateCount(e.target); cio.unobserve(e.target); } });
-    }, {threshold:.4});
-    document.querySelectorAll('.record .cnt').forEach(function(el){ cio.observe(el); });
-  } else {
-    /* paint final values directly when IO is unavailable */
-    document.querySelectorAll('.record .cnt').forEach(function(el){ animateCount(el); });
-  }
+  /* count-ups live in premium.js (.proof-value[data-count]); the .record/.cnt
+     block that used to sit here observed markup no page contains. */
 
   /* garden exposure rows: one delegated listener, rows toggle independently.
      The head is a real <button> so keyboard (Enter/Space) works natively; the
@@ -99,17 +72,19 @@
         var nine = tile.querySelector('.proof-value[data-count]');
         var lab = tile.querySelector('.proof-label');
         if (!nine || !lab) return;
-        if (!/public services/i.test(lab.textContent)) return;
+        if (tile.getAttribute('data-proof') !== 'services' && !/public services/i.test(lab.textContent)) return;
         nine.setAttribute('data-count', String(n));
         /* if the count-up already fired (text is a finished number, not the
-           initial 0), repaint directly — data-count alone won't re-run it */
+           initial 0), repaint directly — data-count alone won't re-run it.
+           Keep the tile's suffix: a bare String(n) turned "9+" into "12". */
         var t = parseFloat(nine.textContent);
-        if (isFinite(t) && t > 0) nine.textContent = String(n);
+        if (isFinite(t) && t > 0) nine.textContent = String(n) + (nine.getAttribute('data-suffix') || '');
       });
-      var pill = document.querySelector('.what-pill');
-      if (pill && pill.textContent.indexOf('services live') !== -1) {
+      var pill = document.querySelector('[data-pill="services-live"]') || document.querySelector('.what-pill');
+      if (pill && (pill.getAttribute('data-pill') === 'services-live' || pill.textContent.indexOf('services live') !== -1)) {
         /* Reuse the page's shared monitors/heartbeat promises — no extra fetch.
            Status 1 = confirmed up; 0 down, 2 pending, 3 maintenance. */
+        if (!window.MSP.monitors || !window.MSP.heartbeat) return;
         Promise.all([window.MSP.monitors(), window.MSP.heartbeat()]).then(function (r) {
           var byKey = (r[0] && r[0].byKey) || {};
           var hb = (r[1] && r[1].heartbeatList) || {};
@@ -117,7 +92,7 @@
           var up = 0;
           d.services.forEach(function (svc) {
             var id = byKey[svc.key];
-            var beats = id == null ? null : hb[String(id)];
+            var beats = (id === null || id === undefined) ? null : hb[String(id)];
             if (beats && beats.length && beats[beats.length - 1].status === 1) up++;
           });
           pill.textContent = up + '/' + n + ' services live';
@@ -127,9 +102,7 @@
       }
       var nr = (d.siteFacts && d.siteFacts.publicRepos) || (d.repos || []).length || 0;
       if (nr) {
-        var rp = Array.prototype.slice.call(document.querySelectorAll('.what-pill')).find(function (p2) {
-          return p2.textContent.indexOf('public repos') !== -1;
-        });
+        var rp = document.querySelector('[data-pill="repos"]');
         if (rp) rp.textContent = nr + ' public repos you can see for yourself';
       }
     }).catch(function(){});

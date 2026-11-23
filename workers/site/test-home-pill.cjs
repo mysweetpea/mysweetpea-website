@@ -14,14 +14,17 @@ for (let i = src.indexOf('{', start); i < src.length; i++) {
 const fnSrc = src.slice(start, end);
 
 async function pillWith(heartbeat, monitors) {
-  const pill = { textContent: '9/9 services live', setAttribute() { this.title = arguments[1]; } };
+  const pill = { textContent: '9/9 services live', attrs: {},
+    getAttribute(n) { return this.attrs[n] === undefined ? null : this.attrs[n]; },
+    setAttribute(n, v) { this.attrs[n] = v; if (n === 'title') this.title = v; } };
+  pill.attrs['data-pill'] = 'services-live';
   const doc = {
     querySelectorAll(sel) {
       if (sel === '.proof-stat') return [];           // skip the count-up branch
       if (sel === '.what-pill') return [];
       return [];
     },
-    querySelector(sel) { return sel === '.what-pill' ? pill : null; },
+    querySelector(sel) { return sel === '[data-pill="services-live"]' || sel === '.what-pill' ? pill : null; },
   };
   const MSP = {
     data: () => Promise.resolve({ services: [{ key: 'a' }, { key: 'b' }, { key: 'c' }], siteFacts: {} }),

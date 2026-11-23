@@ -84,27 +84,6 @@ function response(data) {
   return { ok: true, text: () => Promise.resolve(JSON.stringify(data)) };
 }
 
-test('home count-up reads the live target on its final frame', () => {
-  const src = read('assets/js/home-page.js');
-  const start = src.indexOf('  function animateCount');
-  const end = src.indexOf('  if (hasIO)', start);
-  assert.ok(start >= 0 && end > start, 'home count-up extraction boundaries must exist');
-  const fn = src.slice(start, end);
-  const frames = [];
-  const ctx = {
-    window: { matchMedia: () => ({ matches: false }) },
-    requestAnimationFrame: fn => frames.push(fn)
-  };
-  vm.runInNewContext(`var reduce = false; ${fn}; this.animateCount = animateCount;`, ctx);
-  const el = element();
-  el.attrs = { 'data-count': '99.9', 'data-dec': '1', 'data-suffix': '%' };
-  ctx.animateCount(el);
-  frames.shift()(100);
-  el.attrs['data-count'] = '98.7';
-  frames.shift()(1200);
-  assert.equal(el.textContent, '98.7%');
-});
-
 test('reconciled service cards reveal, join animation cleanup, and update every tier count', async () => {
   const src = read('assets/js/services-page.js');
   const reconcile = src.slice(0, src.indexOf('/* === Tier dividers'));
