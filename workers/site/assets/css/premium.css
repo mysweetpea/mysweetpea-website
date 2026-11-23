@@ -4208,3 +4208,62 @@ body[data-page='about'] .cta-card p { max-width: 54ch; text-wrap: pretty; }
 @media (max-width: 760px) {
     body[data-page='about'] .cta-card .cta-seal { width: 150px; right: -24px; bottom: -26px; opacity: 0.14; }
 }
+
+/* ===== Cost manifest + Your part: ledger polish (2026-11-23 b) =====
+   Every .about-x-mf-row is its own grid, so `auto` sized the label column from
+   that row's text — the dotted leaders started at a different x on every line
+   and the column read as ragged. One fixed label column lines leaders and
+   values up; the total becomes a plate instead of a hairline over a flat
+   fill that stopped dead at both ends. */
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-row {
+    grid-template-columns: 146px minmax(0, 1fr) 126px; padding: 15px 0;
+}
+/* the value track is FIXED: with `auto` the last row's shorter value ("freely
+   given") shortened its own track, so that leader ran 30px longer than the
+   rest and its value started 30px further right. Left-aligned on a fixed
+   track, every leader ends on the same x and every value starts on it. */
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-val {
+    color: var(--text-dim); text-align: left;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-head {
+    display: grid; grid-template-columns: 146px minmax(0, 1fr) 126px;
+    padding: 0 0 11px;
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-head span:last-child { grid-column: 3; }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-v { gap: 12px; }
+
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-total {
+    display: flex; align-items: center; justify-content: space-between; gap: 18px;
+    margin: 18px 0 0; padding: 15px 18px; border: 0; border-radius: 14px;
+    background: linear-gradient(100deg, rgba(163, 201, 182, .11), rgba(143, 175, 181, .045));
+    box-shadow: inset 0 0 0 1px rgba(163, 201, 182, .17);
+}
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-t {
+    font-size: 11px; letter-spacing: 0.2em;
+}
+@media (max-width: 760px) {
+    /* label wraps, value stays right, no leaders (hidden by the <=880 rule);
+       the fixed 146px label column must collapse or the 3-track grid strands
+       the value in the 1fr track. */
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-row {
+        grid-template-columns: minmax(0, 1fr) 118px; padding: 13px 0;
+    }
+    /* same fixed value track on phones, or the last row's shorter value
+       starts 30px further right than the rest */
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-head {
+        grid-template-columns: minmax(0, 1fr) 118px;
+    }
+    /* desktop pins this label to track 3; on phones that is an implicit track */
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-head span:last-child {
+        grid-column: 2;
+    }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-total {
+        flex-direction: column; align-items: stretch; gap: 12px; padding: 14px 16px;
+    }
+    /* thumb targets: two full-width stacked buttons, not two pills spread
+       edge to edge in a 310px card */
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-v {
+        flex-direction: column; align-items: stretch; gap: 10px;
+    }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-link { justify-content: center; }
+}
