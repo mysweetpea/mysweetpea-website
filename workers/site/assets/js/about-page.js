@@ -25,11 +25,15 @@
         var dec = decimalsOf(el.getAttribute('data-count'));
         var t0 = performance.now();
         function tick(t) {
+            /* A dead feed removes data-count; stop painting instead of falling
+               back to the captured placeholder (that would repaint a fake 99.9
+               over the em dash markUnreachable just wrote). */
+            if (el.getAttribute('data-count') === null) return;
             var p = Math.min(1, (t - t0) / 1200);
             var v = 1 - Math.pow(1 - p, 3);
             // last frame re-reads data-count: the live-value fetch may have updated it mid-animation
             var tgt = p < 1 ? target : parseFloat(el.getAttribute('data-count'));
-            if (isNaN(tgt)) tgt = target;
+            if (isNaN(tgt)) return;
             if (p < 1) {
                 el.textContent = (v * tgt).toFixed(dec);
                 requestAnimationFrame(tick);
@@ -83,7 +87,7 @@
                 var cur = parseFloat(val.textContent);
                 if (isFinite(cur) && cur > 0 && cur !== target) val.textContent = String(target);
             });
-        }).catch(function () { });
+        }).catch(function (err) { console.warn('[msp] about facts: ' + (err && err.message ? err.message : 'unavailable')); });
     })();
 
     /* ---------- live uptime (monitor ids resolved at runtime via MSP) ---------- */
@@ -92,6 +96,9 @@
 
     var stateEl = document.getElementById('aboutUptimeState');
     var tickerEl = document.getElementById('aboutTickerState');
+    /* Explicit state instead of sniffing the rendered 'CHECKING' copy — a
+       wording change would have left the ticker on its placeholder forever. */
+    var tickerDone = false;
 
     function markUnreachable() {
         if (stateEl) {
@@ -124,6 +131,7 @@
             var pc = pctEl.parentElement && pctEl.parentElement.querySelector('small');
             if (pc) pc.hidden = true;
         }
+        tickerDone = true;
     }
 
     /* markup ships neutral (no dot-on, "CHECKING…"); this flips it to live
@@ -163,6 +171,11 @@
         .then(function (res) {
             var data = res[0], mons = res[1] || {};
             MONITOR_IDS = mons.byKey || {};
+            /* 'hint' = baked extraction-time IDs, never validated against the
+               live payload. A hint that happens to point at another monitor
+               passes the partial-set check and yields a plausible-but-wrong
+               average, so fail closed instead of showing it. */
+            if (mons && (mons.source === 'hint' || mons.source === 'none')) return Promise.reject(new Error('monitor map is unverified (' + mons.source + ')'));
             if (!data || !data.uptimeList || !pctEl || !Object.keys(MONITOR_IDS).length) return Promise.reject(new Error('no usable feed'));
             // uptimeList keys are "<monitorId>_24", values are fractions 0..1
             var pa = PageAvg(MONITOR_IDS, data.uptimeList);
@@ -183,21 +196,34 @@
                down NOW must say so. */
             var hbNow = data.heartbeatList || {}, downNow = 0, sawBeat = false;
             Object.keys(MONITOR_IDS).forEach(function (name) {
-                var beats = hbNow[String(MONITOR_IDS[name])] || [], last = null;
+                var beats = hbNow[String(MONITOR_IDS[name])] || [], last = null, lastT = -Infinity;
                 beats.forEach(function (b) {
-                    if (b && typeof b.status === 'number' && (!last || String(b.time) >= String(last.time))) last = b;
+                    if (!b || typeof b.status !== 'number') return;
+                    /* numeric compare: String() ordering breaks on epoch
+                       timestamps ("999" > "1000"), letting an older beat win
+                       and hiding a monitor that is down right now. */
+                    var t = Date.parse(b.time);
+                    if (isNaN(t)) t = Number(b.time);
+                    if (isNaN(t)) return;
+                    if (t >= lastT) { lastT = t; last = b; }
                 });
                 if (last) { sawBeat = true; if (last.status === 0) downNow++; }
             });
             /* success path lives INSIDE the success handler: the old trailing
                .then ran after .catch too, painting the LIVE badge on a FAILED
                fetch (catch-resolves-chain bug) */
+            if (!sawBeat) return Promise.reject(new Error('no usable heartbeat'));
             markVerified();
-            if (tickerEl && tickerEl.textContent.indexOf('CHECKING') !== -1) {
-                tickerEl.textContent = sawBeat
-                    ? (downNow === 0 ? 'ALL SYSTEMS OPERATIONAL · LIVE'
-                        : downNow + (downNow === 1 ? ' SERVICE DOWN · LIVE' : ' SERVICES DOWN · LIVE'))
-                    : 'STATUS UNAVAILABLE';
+            if (tickerEl && !tickerDone) {
+                tickerEl.textContent = downNow === 0
+                    ? 'ALL SYSTEMS OPERATIONAL · LIVE'
+                    : downNow + (downNow === 1 ? ' SERVICE DOWN · LIVE' : ' SERVICES DOWN · LIVE');
+            }
+            tickerDone = true;
+            /* markup ships the % hidden behind a neutral placeholder */
+            if (pctEl && pctEl.parentElement) {
+                var pc = pctEl.parentElement.querySelector('small');
+                if (pc) pc.hidden = false;
             }
         })
         .catch(function (err) {
