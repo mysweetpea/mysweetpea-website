@@ -199,6 +199,10 @@ body[data-page='home'] .what-sep{display:none}
   body[data-page='home'] .pl-r1,body[data-page='home'] .pl-r2{animation:none}
 }
 
-/* gardener medallion — see premium.css note */
-body[data-page='home'] .gk-seal img{width:72%;height:72%;opacity:1;filter:brightness(0) invert(1)}
-[data-theme='light'] body[data-page='home'] .gk-seal img{filter:brightness(0)}
+/* Gardener medallion = the nav seal, just round: black ink on the sage field
+   #87A6AB (sampled from seal-field.png) instead of a dark disc with white ink. */
+body[data-page='home'] .gk-seal{background:radial-gradient(circle at 50% 30%,#93B0B5,#87A6AB 72%);border-color:rgba(0,0,0,.14)}
+[data-theme='light'] body[data-page='home'] .gk-seal{background:radial-gradient(circle at 50% 30%,#93B0B5,#87A6AB 72%)}
+body[data-page='home'] .gk-seal img{width:72%;height:72%;opacity:1;filter:none}
+/* the dashed ring sat on the disc; over sage it needs to halo the edge */
+body[data-page='home'] .gk-seal::before{inset:-7px;border-color:rgba(163,201,182,.42)}

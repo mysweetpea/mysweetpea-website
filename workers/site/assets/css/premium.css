@@ -4157,14 +4157,12 @@ html:not([data-theme='light']) img[src$="/vaultwarden.svg"] {
    Every other seal use (nav .msb, .mn-seal tile, inner-page .logo, hero
    watermarks) keeps the field stamp and is untouched. */
 
-/* 05 The Gardener: 128px ring, dashed inner ring at 112; ink peaks at r=287/512
-   of its own box, so 72% of the medallion keeps the ears inside the ring at
-   every breakpoint (128->92px, 84->60px). */
-body[data-page='home'] .gk-seal img { width: 72%; height: 72%; opacity: 1;
-    filter: brightness(0) invert(1); }
-[data-theme='light'] body[data-page='home'] .gk-seal img { filter: brightness(0); }
+/* 05 The Gardener: 128px ring; ink peaks at r=287/512 of its own box, so 72%
+   of the medallion keeps the ears inside at every breakpoint (128->92, 84->60).
+   Disc = the sage field (#87A6AB, sampled from seal-field.png) with BLACK ink,
+   i.e. the nav seal made round, not a dark disc with white ink. */
+body[data-page='home'] .gk-seal img { width: 72%; height: 72%; opacity: 1; filter: none; }
 
-/* services hero: .so-core is a dark disc in BOTH themes (rgba(12,19,22,.97)),
-   so the ink stays light; 75% of the disc keeps it inside at 112 and 88px. */
-body[data-page='services'] .so-core img { width: 75%; height: 75%; opacity: 1;
-    filter: brightness(0) invert(1); }
+/* services hero: same sage field + black ink (75% of 112 = 84px, ink r=47<56). */
+body[data-page='services'] .so-core { background: radial-gradient(circle at 50% 30%, #93B0B5, #87A6AB 72%); border-color: rgba(0,0,0,.14); }
+body[data-page='services'] .so-core img { width: 75%; height: 75%; opacity: 1; filter: none; }
