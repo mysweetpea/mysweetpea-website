@@ -107,11 +107,17 @@ def main():
         print('FATAL: assets/site-data.json invalid: %s' % e)
         return 2
 
-    # ---- 1. bake fallback into site-data.js ----
+    # ---- 1. baked fallback into site-data.js ----
+    baked_literal = b'var BAKED = ' + json.dumps(
+        json.loads(raw_json.decode('utf-8')), separators=(',', ':'), ensure_ascii=True
+    ).encode('ascii') + b';'
+    if check_mode_only():
+        sd_now = load(DATA_JS)
+        if BAKE_START not in sd_now or BAKE_END not in sd_now or baked_literal not in sd_now:
+            problems.append('site-data.js baked fallback is stale/missing — run deploy.py')
+        elif ("var BAKED_HASH = '%s';" % sha8(raw_json)).encode() not in sd_now:
+            problems.append('site-data.js BAKED_HASH is stale — run deploy.py')
     if not check_mode_only():
-        baked_literal = b'var BAKED = ' + json.dumps(
-            json.loads(raw_json.decode('utf-8')), separators=(',', ':'), ensure_ascii=True
-        ).encode('ascii') + b';'
         sd = load(DATA_JS)
         if BAKE_START not in sd or BAKE_END not in sd:
             print('FATAL: site-data.js bake markers missing')
@@ -236,6 +242,7 @@ def main():
     print('  %d HTML pages, %d hashed assets, %d JS files checked' % (len(pages), len(asset_hash), len(js_files)))
     if changed_any and check_mode_only():
         print('  DRIFT: versioned files differ from disk hashes')
+        problems.append('version pins / sw.js CACHE drift — run deploy.py without --check')
     if problems:
         print('\nPROBLEMS (%d):' % len(problems))
         for p in problems:

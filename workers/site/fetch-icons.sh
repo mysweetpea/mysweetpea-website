@@ -11,7 +11,6 @@ for slug in vaultwarden matrix affine jellyfin nextcloud immich grafana promethe
 done
 
 echo "== selfh.st/icons =="
-curl -fsSL "https://cdn.jsdelivr.net/gh/selfhst/icons/svg/seerr.svg" -o "${ICON_DIR}/seerr.svg" && echo "  ✓ seerr.svg"
 curl -fsSL "https://cdn.jsdelivr.net/gh/selfhst/icons/svg/open-webui.svg" -o "${ICON_DIR}/openwebui.svg" && echo "  ✓ openwebui.svg (renamed)"
 
 echo "== koalasync =="

@@ -176,7 +176,8 @@
         if (!mn.querySelector('.mn-ics')) {
             var lab = document.createElement('div');
             lab.className = 'mn-ics-l';
-            lab.textContent = 'The garden · 9 services';
+            var baked = (window.MSP && window.MSP.baked) ? window.MSP.baked() : null;
+            lab.textContent = 'The garden · ' + (baked ? Object.keys(baked).length : 9) + ' services';
             var ics = document.createElement('div');
             ics.className = 'mn-ics';
             ['moonfin','jellyfin','nextcloud','immich','openwebui','vaultwarden','matrix','affine2','koalasync']
@@ -238,7 +239,7 @@
         });
 
         /* Focus trap: keep Tab cycling within the open mobile menu */
-        navLinks.addEventListener('keydown', function (event) {
+        document.addEventListener('keydown', function (event) {
             if (!navLinks.classList.contains('nav-open')) return;
             if (event.key !== 'Tab') return;
             var focusables = Array.prototype.slice.call(navLinks.querySelectorAll('a[href], button:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'));

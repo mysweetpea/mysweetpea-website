@@ -2,9 +2,9 @@
 # Replaces the per-request header block that used to live in the Worker.
 # Deploy-time validated by Cloudflare (_headers syntax errors fail the deploy).
 #
-# CSP uses build-time sha256 hashes of the inline scripts (bake_html.py computes
+# CSP uses build-time sha256 hashes of the inline scripts (rebuild_csp.py computes
 # them). If you edit inline JS in any .html file, re-run:
-#   python bake_html.py --check     -> prints the new hash list
+#   python rebuild_csp.py --check   -> prints the new hash list
 # and update the script-src line below.
 #
 # CORP strategy (learned live): the base /* rule carries NO CORP. A base-rule

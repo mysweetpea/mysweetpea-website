@@ -66,7 +66,8 @@ const worker = {
           let data = await res.json();
           // Paginate until the 30-day window is covered (guarded, max 3 pages).
           const cutoff = Date.now() - 30 * 86400000;
-          for (let page = 1; page < 3 && Array.isArray(data) && data.length === 100; page++) {
+          let pageCount = Array.isArray(data) ? data.length : 0;
+          for (let page = 1; page < 3 && pageCount === 100; page++) {
             const oldest = data[data.length - 1];
             const od = oldest && oldest.commit && oldest.commit.author && Date.parse(oldest.commit.author.date);
             if (!od || od < cutoff) break;
@@ -75,6 +76,7 @@ const worker = {
             const more = await res2.json();
             if (!Array.isArray(more) || more.length === 0) break;
             data = data.concat(more);
+            pageCount = more.length;
           }
           if (!Array.isArray(data)) { failedRepos++; return []; }
           return data.filter((c) => c && c.sha && c.commit && c.commit.author && c.commit.author.date).map((c) => ({
@@ -244,6 +246,7 @@ const worker = {
       // CSRF guard: same-origin browser submissions only (state-changing POST)
       const site = request.headers.get('Sec-Fetch-Site');
       const origin = request.headers.get('Origin');
+      if (!site && !origin) return new Response(JSON.stringify({ error: 'missing_origin' }), { status: 403, headers: JSON_HEADERS });
       if (site && site !== 'same-origin') return new Response(JSON.stringify({ error: 'cross_site_forbidden' }), { status: 403, headers: JSON_HEADERS });
       if (origin) { try { if (new URL(origin).host !== url.host) return new Response(JSON.stringify({ error: 'cross_site_forbidden' }), { status: 403, headers: JSON_HEADERS }); } catch { return new Response(JSON.stringify({ error: 'bad_origin' }), { status: 403, headers: JSON_HEADERS }); } }
       const state = await (async () => {
@@ -382,15 +385,16 @@ const worker = {
       } catch (e) {
         return new Response('upstream_unreachable', { status: 502 });
       }
-      if (!upstream.ok) return new Response('no avatar', { status: upstream.status });
+      if (!upstream.ok) return new Response('no avatar', { status: 404 });
       const ctype = upstream.headers.get('Content-Type') || '';
       // only relay actual images — never let an HTML error page render same-origin
-      const safeType = ctype.startsWith('image/') ? ctype : 'application/octet-stream';
+      const safeType = /^image\/(png|jpeg|webp|gif)\b/i.test(ctype) ? ctype : 'application/octet-stream';
       const buf = await upstream.arrayBuffer();
       return new Response(buf, {
         status: 200,
         headers: {
           'Content-Type': safeType,
+          'X-Content-Type-Options': 'nosniff',
           'Cache-Control': 'private, max-age=300'
         }
       });

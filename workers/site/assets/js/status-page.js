@@ -3,7 +3,6 @@
         var summary = document.getElementById('status-summary');
         var summaryText = summary ? summary.querySelector('strong') : null;
         var summaryTime = summary ? summary.querySelector('time') : null;
-        var rows = document.querySelectorAll('.status-line[data-service-key]');
 
         // Monitor key -> id resolution and the heartbeat payload both come
         // from MSP (site-data.js): ids are resolved at RUNTIME from the Kuma
@@ -300,7 +299,7 @@
                     summary.classList.remove('status-all-online');
                     summary.classList.add('status-degraded');
                 }
-                rows.forEach(function (card) {
+                document.querySelectorAll('.status-line[data-service-key]').forEach(function (card) {
                     var dot = card.querySelector('.status-dot');
                     if (dot) {
                         dot.classList.add('status-unknown');

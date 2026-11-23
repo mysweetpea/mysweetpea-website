@@ -94,9 +94,9 @@
             if (!s || typeof s !== 'object') return null;
             if (!KEY_RE.test(s.key) || seen[s.key]) return null;
             seen[s.key] = 1;
-            if (!safeText(s.name, 1, 60) || !safeText(s.blurb, 1, 200)) return false;
-            if (!safeAsset(s.icon) || !isStr(s.iconAlt, 1, 60)) return false;
-            if (typeof s.keywords !== 'string' || !KEYWORDS_RE.test(s.keywords)) return false;
+            if (!safeText(s.name, 1, 60) || !safeText(s.blurb, 1, 200)) return null;
+            if (!safeAsset(s.icon) || !isStr(s.iconAlt, 1, 60)) return null;
+            if (typeof s.keywords !== 'string' || !KEYWORDS_RE.test(s.keywords)) return null;
         }
         if (!Array.isArray(root.suggestCategories) || root.suggestCategories.length < 4 || root.suggestCategories.length > 16) return null;
         for (i = 0; i < root.suggestCategories.length; i++) {
