@@ -172,32 +172,11 @@
             search.className = 'mn-row mn-search-row';
             groups[0].insertBefore(search, groups[0].firstChild);
         }
-        /* the nine marks + the duotone art */
-        if (!mn.querySelector('.mn-ics')) {
-            var lab = document.createElement('div');
-            lab.className = 'mn-ics-l';
-            var baked = (window.MSP && window.MSP.baked) ? window.MSP.baked() : null;
-            lab.textContent = 'The garden · ' + (baked ? Object.keys(baked).length : 9) + ' services';
-            var ics = document.createElement('div');
-            ics.className = 'mn-ics';
-            ics.setAttribute('aria-hidden', 'true');
-            ['moonfin','jellyfin','nextcloud','immich','openwebui','vaultwarden','matrix','affine2','koalasync']
-                .forEach(function (name) {
-                    /* Decorative marks: spans, not nine unnamed links all
-                       pointing at /services.html (dead focus stops + a11y). */
-                    var s = document.createElement('span');
-                    s.className = 'mn-ic';
-                    s.innerHTML = '<img src="/assets/icons/' + name + '.svg" alt="" loading="lazy" decoding="async">';
-                    ics.appendChild(s);
-                });
-            if (foot) { foot.parentNode.insertBefore(lab, foot); foot.parentNode.insertBefore(ics, foot); }
-            var art = document.createElement('img');
-            art.className = 'mn-art';
-            art.src = '/assets/icons/seal-field.png';
-            art.alt = '';
-            art.setAttribute('aria-hidden', 'true');
-            mn.insertBefore(art, mn.firstChild);
-        }
+        /* aria-current on the row for the page you are on. */
+        var here = location.pathname.replace(/index\.html$/, '/');
+        mn.querySelectorAll('.mn-primary .mn-link').forEach(function (a) {
+            if (a.getAttribute('href') === here) a.setAttribute('aria-current', 'page');
+        });
     })();
     /* Single open/close path: aria state + body scroll lock stay in sync. */
     function setMenu(open) {

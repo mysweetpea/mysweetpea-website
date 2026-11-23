@@ -3914,11 +3914,6 @@ body.menu-open .top-nav { opacity: .35; }
   -webkit-backdrop-filter: blur(22px) saturate(1.35);
   backdrop-filter: blur(22px) saturate(1.35);
 }
-#mn-menu .mn-art {
-  position: absolute; top: 34%; right: -18%; width: 108%; height: auto; z-index: 0;
-  filter: grayscale(1) contrast(1.05) brightness(.9); opacity: .4; pointer-events: none;
-  transform: rotate(-6deg);
-}
 #mn-menu::after {
   content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background: var(--sage); mix-blend-mode: color; opacity: .38;
@@ -3930,7 +3925,7 @@ body.menu-open .top-nav { opacity: .35; }
     linear-gradient(180deg, rgba(12,19,22,.80) 0%, rgba(12,19,22,.78) 52%,
       rgba(12,19,22,.54) 74%, rgba(12,19,22,.2) 90%, rgba(12,19,22,.05) 100%);
 }
-#mn-menu > *:not(.mn-art) { position: relative; z-index: 2; }
+#mn-menu > * { position: relative; z-index: 2; }
 
 #mn-menu .mn-head { padding: 0 0 2px; gap: 0; }
 #mn-menu .mn-seal { display: none; }
@@ -3986,15 +3981,6 @@ body.menu-open .top-nav { opacity: .35; }
 #mn-menu .mn-search-row svg { width: 13px; height: 13px; }
 #mn-menu .mn-row .mn-arw { display: none; }
 
-#mn-menu .mn-ics-l {
-  margin: 26px 0 11px; font-family: var(--t-font-mono, ui-monospace, monospace); font-size: 10px;
-  letter-spacing: .22em; text-transform: uppercase; color: var(--text-faint);
-}
-#mn-menu .mn-ics { display: flex; gap: 16px; align-items: center; }
-#mn-menu .mn-ic { width: 26px; height: 26px; display: grid; place-items: center; }
-#mn-menu .mn-ic img { width: 100%; height: 100%; object-fit: contain;
-  filter: grayscale(1) brightness(3.4) opacity(.95); }
-
 #mn-menu .mn-foot {
   margin: 26px 0 0; padding: 0; border: 0;
   display: grid; grid-template-columns: 1.3fr .8fr 1fr; gap: 8px; align-items: center;
@@ -4021,13 +4007,10 @@ body.menu-open .top-nav { opacity: .35; }
     linear-gradient(180deg, rgba(231,237,234,.86) 0%, rgba(231,237,234,.82) 52%,
       rgba(231,237,234,.6) 74%, rgba(231,237,234,.24) 90%, rgba(231,237,234,.07) 100%);
 }
-[data-theme='light'] #mn-menu .mn-art { filter: grayscale(1) brightness(1.4); opacity: .22; }
-[data-theme='light'] #mn-menu .mn-brand span,
-[data-theme='light'] #mn-menu .mn-ics-l { color: var(--text-dim); }
+[data-theme='light'] #mn-menu .mn-brand span { color: var(--text-dim); }
 [data-theme='light'] #mn-menu .mn-link { border-color: rgba(46,92,70,.18); }
 [data-theme='light'] #mn-menu .mn-link::after { color: var(--text-dim); }
 [data-theme='light'] #mn-menu .mn-search-row { color: var(--text); border-color: rgba(46,92,70,.3); background: rgba(46,92,70,.05); }
-[data-theme='light'] #mn-menu .mn-ic img { filter: brightness(0) opacity(.75); }
 [data-theme='light'] #mn-menu .mn-theme,
 [data-theme='light'] #mn-menu .mn-x { border-color: rgba(46,92,70,.22); background: rgba(46,92,70,.06); }
 [data-theme='light'] #mn-menu .mn-gh { border-color: rgba(46,92,70,.26); color: var(--text); }
@@ -4041,45 +4024,76 @@ body.menu-open .top-nav { opacity: .35; }
    Scoped on #mn-menu; appended last so it wins over the hybrid block above.
    ========================================================================== */
 #mn-menu { overflow-x: hidden; }
-/* The square seal was width:108%; height:auto — at >=768px it grew to ~830px
-   tall and hung 300-650px past the viewport, inflating scrollHeight and
-   pushing the Get Access CTA off-screen behind a hidden scrollbar. */
-#mn-menu .mn-art {
-  top: 0; right: 0; width: 100%; height: 100%;
-  object-fit: contain; object-position: 50% 34%; transform: none;
-}
-/* Keep the sheet a readable column on tablets instead of stretching hairline
-   rows and 40px serif links to ~1000px. */
+
+/* ONE alignment axis. Auto margins without a width made every flex child
+   shrink to its own text, so head / links / groups / footer each sat on a
+   different left edge. width:100% fills the shared column and the auto
+   margins then only centre it on tablets. */
 #mn-menu > .mn-head,
 #mn-menu > .mn-primary,
 #mn-menu > .mn-group,
-#mn-menu > .mn-ics-l,
-#mn-menu > .mn-ics,
-#mn-menu > .mn-foot { max-width: 480px; margin-left: auto; margin-right: auto; }
+#mn-menu > .mn-foot { width: 100%; max-width: 480px; margin-left: auto; margin-right: auto; }
+
 /* 44px hit targets as real boxes (an overlapping pseudo overlay stole the
-   top 4px of the next row). Reclaim the height from generous margins so the
-   Get Access CTA stays above the fold on short/tablet viewports. */
+   top 4px of the next row). */
 #mn-menu .mn-theme, #mn-menu .mn-x { width: 44px; height: 44px; }
 #mn-menu .mn-group .mn-row, #mn-menu .mn-search-row { min-height: 44px; }
+
+/* Height budget. Keep the footer's margin-top:auto — it is what pins Get
+   Access to the bottom of the sheet; take the gap from padding instead. */
 #mn-menu > .mn-primary { margin-top: 16px; }
 #mn-menu > .mn-group { margin-top: 12px; }
-#mn-menu > .mn-ics-l { margin-top: 18px; margin-bottom: 8px; }
-#mn-menu > .mn-foot { margin-top: 18px; }
-/* Nine marks were 362px wide in a 280px phone content box = horizontal
-   scroll. Scale them with the viewport instead of clipping or wrapping. */
-#mn-menu .mn-ics { gap: clamp(6px, 2.4vw, 16px); }
-#mn-menu .mn-ic { width: clamp(20px, 6.8vw, 26px); height: clamp(20px, 6.8vw, 26px); flex: none; }
+#mn-menu > .mn-foot { margin-top: auto; padding-top: 18px; }
+
+/* The search row read as a plain label; strengthen the field affordance. */
+#mn-menu .mn-search-row { background: rgba(143, 175, 181, .10); }
+
+/* The 10px numerals were the only sub-contrast text left in the sheet. */
+#mn-menu .mn-link::after { color: var(--text-dim); }
+
 /* 40px serif rows on tablets eat the height budget; 10px padding is still a
    63px row, well above the 44px tap floor. */
 @media (min-width: 600px) and (max-width: 1023.98px) {
   #mn-menu .mn-link { padding-top: 10px; padding-bottom: 10px; }
   #mn-menu > .mn-primary { margin-top: 12px; }
-  #mn-menu > .mn-ics-l { margin-top: 12px; }
-  #mn-menu > .mn-foot { margin-top: 12px; }
 }
+
+/* Short phones (<=700px tall): the sheet was ~720px of content in a 640-667px
+   box, so Get Access sat under the fold behind a hidden scrollbar. */
+@media (max-height: 700px) {
+  #mn-menu {
+    padding-top: calc(10px + env(safe-area-inset-top));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  #mn-menu .mn-link { padding-top: 8px; padding-bottom: 8px; font-size: clamp(26px, 8vw, 32px); }
+  #mn-menu > .mn-primary { margin-top: 8px; }
+  #mn-menu > .mn-group { margin-top: 6px; }
+  #mn-menu > .mn-foot { padding-top: 12px; }
+}
+
+/* Active page marker. The sage dot was hardcoded on the Status link, so it
+   claimed "you are here" on every page AND pushed that label out of the
+   gutter. Mark the real page instead; the desktop nav already knows. */
+#mn-menu .mn-link[href="/status.html"]::before { content: none; }
+#mn-menu .mn-link[aria-current="page"] { color: var(--sage); }
+
+/* "Sign in" was 14px sentence case between two 11px mono uppercase buttons. */
+#mn-menu .mn-signin {
+  font-family: var(--t-font-mono, ui-monospace, monospace);
+  font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+}
+
+/* Strengthen the search row's field affordance — at .06 it read as a label. */
+#mn-menu .mn-search-row { border-color: rgba(143, 175, 181, .48); }
+
+/* The theme glyphs are a light gradient built for dark surfaces — on light
+   they nearly vanish. Darken them on light for BOTH the desktop toggle and
+   the sheet's (neither icon has a -light variant in site.js SWAPS). */
+[data-theme='light'] .theme-toggle img,
+[data-theme='light'] #mn-menu .mn-theme img { filter: brightness(.34) saturate(1.2); }
+
 /* Site-wide 11px label floor (hermes-type.css) never covered the sheet. */
 #mn-menu .mn-brand span,
-#mn-menu .mn-ics-l,
 #mn-menu .mn-link::after,
 #mn-menu .mn-cta,
 #mn-menu .mn-gh { font-size: 11px; }
