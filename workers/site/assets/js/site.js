@@ -180,13 +180,15 @@
             lab.textContent = 'The garden · ' + (baked ? Object.keys(baked).length : 9) + ' services';
             var ics = document.createElement('div');
             ics.className = 'mn-ics';
+            ics.setAttribute('aria-hidden', 'true');
             ['moonfin','jellyfin','nextcloud','immich','openwebui','vaultwarden','matrix','affine2','koalasync']
                 .forEach(function (name) {
-                    var a = document.createElement('a');
-                    a.className = 'mn-ic';
-                    a.href = '/services.html';
-                    a.innerHTML = '<img src="/assets/icons/' + name + '.svg" alt="" loading="lazy" decoding="async">';
-                    ics.appendChild(a);
+                    /* Decorative marks: spans, not nine unnamed links all
+                       pointing at /services.html (dead focus stops + a11y). */
+                    var s = document.createElement('span');
+                    s.className = 'mn-ic';
+                    s.innerHTML = '<img src="/assets/icons/' + name + '.svg" alt="" loading="lazy" decoding="async">';
+                    ics.appendChild(s);
                 });
             if (foot) { foot.parentNode.insertBefore(lab, foot); foot.parentNode.insertBefore(ics, foot); }
             var art = document.createElement('img');
@@ -199,6 +201,7 @@
     })();
     /* Single open/close path: aria state + body scroll lock stay in sync. */
     function setMenu(open) {
+        if (!navToggle || !navLinks) return;
         navLinks.classList.toggle('nav-open', open);
         navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
         document.body.classList.toggle('menu-open', open);
@@ -211,6 +214,9 @@
             if (first) first.focus();
         }
     }
+    /* The palette lives in a separate IIFE; give it the same close path so
+       aria-expanded, body scroll lock and focus never drift apart. */
+    window.mspSetMenu = setMenu;
     if (navToggle && navLinks) {
         navToggle.addEventListener('click', function () {
             setMenu(!navLinks.classList.contains('nav-open'));
@@ -257,14 +263,6 @@
                 event.preventDefault(); last.focus();
             } else if (!event.shiftKey && active === last) {
                 event.preventDefault(); first.focus();
-            }
-        });
-
-        /* Move focus into the menu when it opens */
-        navToggle.addEventListener('click', function () {
-            if (navLinks.classList.contains('nav-open')) {
-                var firstLink = navLinks.querySelector('a[href], button:not([disabled]), summary');
-                if (firstLink) firstLink.focus();
             }
         });
 
@@ -843,16 +841,19 @@
 
 
     /* === Search trigger buttons open the palette === */
-    document.querySelectorAll('.nav-search, .mn-search').forEach(function (btn) {
+    document.querySelectorAll('.nav-search, .mn-search, .mn-search-row').forEach(function (btn) {
         btn.addEventListener('click', function () {
             /* If opened from the mobile overlay, close it first so the palette
-               is the only overlay in the top layer. */
-            var mn = document.getElementById('mn-menu');
-            if (mn && mn.classList.contains('nav-open')) {
-                mn.classList.remove('nav-open');
-                document.body.classList.remove('menu-open');
+               is the only overlay in the top layer. Use the one shared close
+               path: reorderMenu() renames .mn-search to .mn-search-row, so the
+               old selector silently bound nothing and this row was dead. */
+            if (btn.closest('#mn-menu')) {
+                if (window.mspSetMenu) window.mspSetMenu(false);
+                /* cmdkOpen() remembers document.activeElement as its return
+                   target; leave it on the now-hidden search row and the
+                   palette closes with focus dropped on <body>. */
                 var tg = document.querySelector('.nav-toggle');
-                if (tg) tg.setAttribute('aria-expanded', 'false');
+                if (tg) tg.focus();
             }
             cmdkOpen();
         });
