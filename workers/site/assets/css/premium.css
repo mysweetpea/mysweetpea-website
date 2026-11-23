@@ -1640,7 +1640,11 @@ body[data-page] h2.glass-text:not(.section-title) {
     font-size: 9px; letter-spacing: 0.14em; color: var(--sage); text-transform: uppercase; margin: 0 0 12px; }
 
 @media (max-width: 760px) {
-    .about-x-rail { padding: 9px 18px; gap: 9px; font-size: 9px; }
+    /* nowrap + overflow:hidden silently clipped the third rail item below
+       ~340px ("9 services" was painted past the edge). Wrap instead. */
+    .about-x-rail { padding: 9px 18px; gap: 9px; font-size: 9px;
+        flex-wrap: wrap; white-space: normal; row-gap: 5px; }
+    .about-x-rsep { display: none; }
     .about-x-hero { padding: 34px 20px 0; }
     .about-x-ghost { width: 230px; height: 230px; }
     .about-x-bignum { grid-template-columns: 1fr; border-radius: 16px; margin-top: 28px; }
@@ -1877,9 +1881,12 @@ body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-note b { color: 
 @media (max-width: 880px) {
     body[data-page='about'] .about-x-blk:nth-of-type(4) { grid-template-columns: 1fr; }
     body[data-page='about'] .about-x-blk:nth-of-type(4) > .about-x-lead { grid-row: auto; max-width: none; }
-    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-manifest { grid-row: auto; margin-top: 24px; }
-    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-note { grid-row: auto; max-width: none; margin-top: 16px; }
-    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-row { grid-template-columns: 1fr auto; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-manifest { grid-column: 1; grid-row: auto; margin-top: 24px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-note { grid-column: 1; grid-row: auto; max-width: none; margin-top: 16px; }
+    /* minmax(0,1fr) + wrapping item: the old 1fr kept the item's min-content
+       (nowrap) width, so a 320px phone pushed the value column off-screen. */
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-row { grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+    body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-item { white-space: normal; }
     body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-dots { display: none; }
     body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-total { flex-direction: column; align-items: flex-start; gap: 12px; }
     body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-shead { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -4116,6 +4123,16 @@ body.menu-open .top-nav { opacity: .35; }
 /* Drawn arrows (U+2197 would render as the iOS emoji). */
 .gk-links a span svg { vertical-align: -1px; }
 .about-x-arrow { display: inline-flex; align-items: center; }
+
+/* Native line-breaking (rung 4, no JS): `balance` stops the section headings
+   leaving "is." alone on a second line under max-width:22ch, `pretty` stops
+   the hero subcopy stranding a single word. */
+body[data-page='about'] .about-x-shead h2,
+body[data-page='about'] .about-x-hero h1,
+body[data-page='about'] .about-x-title { text-wrap: balance; }
+body[data-page='about'] .about-x-hero-sub,
+body[data-page='about'] .about-x-lead,
+body[data-page='about'] .about-x-mf-note { text-wrap: pretty; }
 
 /* Vaultwarden's own mark is black art, so on a dark surface it disappeared.
    It is the ONLY service icon that needs flipping: matrix.svg is Element

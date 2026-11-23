@@ -114,6 +114,16 @@
             }
         }
         if (tickerEl) tickerEl.textContent = 'STATUS UNAVAILABLE';
+        /* Never leave the server-rendered 99.9 sitting next to "LIVE DATA
+           UNREACHABLE" — a plausible-looking number with no data behind it is
+           exactly the fake-liveness this file exists to avoid. Drop the
+           data-count too so a pending count-up cannot repaint it. */
+        if (pctEl) {
+            pctEl.removeAttribute('data-count');
+            pctEl.textContent = '\u2014';
+            var pc = pctEl.parentElement && pctEl.parentElement.querySelector('small');
+            if (pc) pc.hidden = true;
+        }
     }
 
     /* markup ships neutral (no dot-on, "CHECKING…"); this flips it to live

@@ -4,24 +4,24 @@
    without this the SW dropped every response header and pages served through it
    ran WITHOUT a Content-Security-Policy. */
 
-const CACHE = 'mysweetpea-h755de44c';
+const CACHE = 'mysweetpea-hee50819a';
 const CORE = [
         '/assets/js/services-page.js?v=h561f514a',
         '/assets/js/site-data.js?v=h571226e8',
         '/assets/site-data.json',
         '/assets/js/redeem-page.js?v=h38267321',
         '/assets/js/status-page.js?v=ha11d1f26',
-        '/assets/js/about-page.js?v=hb4a3842a',
+        '/assets/js/about-page.js?v=hd0980bcf',
         '/assets/js/form-page.js?v=hb5cbfe52',
         '/assets/js/changelog-page.js?v=hffd54142',
         '/assets/js/support-page.js?v=h32bcd4cc',
         '/assets/css/type-tokens.css?v=h6e396228',
-        '/assets/css/hermes-type.css?v=h011ee687',
+        '/assets/css/hermes-type.css?v=hea1914d2',
   '/',
   '/index.html',
   '/assets/css/fonts.css?v=h6b17b99d',
   '/assets/css/site.css?v=h2963fcfe',
-  '/assets/css/premium.css?v=hda8a2c64',
+  '/assets/css/premium.css?v=h0df74957',
   '/assets/css/home.css?v=h13e4c28b',
   '/assets/css/changelog.css?v=h4075bd81',
   '/assets/css/donate.css?v=h6ad33ac1',

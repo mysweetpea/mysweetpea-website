@@ -227,7 +227,7 @@ def main():
 
     # Behavioral regressions share the release gate; each runs in its own process.
     for test in ('test-worker.mjs', 'test-sw.js', 'test-public-interactions.cjs', 'test-site-data.cjs',
-                 'test-home-pill.cjs', 'test-seal-glyph.py'):
+                 'test-home-pill.cjs', 'test-about-uptime.cjs', 'test-seal-glyph.py'):
         if os.path.isfile(test):
             runner = sys.executable if test.endswith('.py') else 'node'
             tr = subprocess.run([runner, test], capture_output=True, text=True)
