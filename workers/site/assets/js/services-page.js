@@ -9,23 +9,25 @@
     window.MSP.data().then(function (d) {
         if (!d || !d.comingSoon) return;
         var cards = Array.prototype.slice.call(grid.querySelectorAll('.coming-soon-card'));
-        var i, j;
         /* adopt by name match */
         cards.forEach(function (card) {
             var h = card.querySelector('h3');
             var txt = h ? String(h.textContent).trim().toLowerCase() : '';
-            var match = null;
+            var j, match = null;
             for (j = 0; j < d.comingSoon.length; j++) {
                 if (d.comingSoon[j].name.toLowerCase() === txt) { match = d.comingSoon[j]; break; }
             }
             if (match) card.setAttribute('data-cs-key', match.key);
             else card.setAttribute('hidden', ''); /* retired */
         });
-        /* append missing */
-        var last = null;
-        d.comingSoon.forEach(function (cs) {
-            var existing = grid.querySelector('.coming-soon-card[data-cs-key="' + cs.key + '"]');
-            if (existing) { last = existing; return; }
+        /* append missing, in DATA order: place each new card directly before
+           the next already-present card, not blindly after the previous one
+           (with last=null on the first entry that appended A to the end of
+           [B,C] instead of in front of B). */
+        d.comingSoon.forEach(function (cs, idx) {
+            var existing = grid.querySelector('.coming-soon-card[data-cs-key="' +
+                (window.CSS && CSS.escape ? CSS.escape(cs.key) : String(cs.key).replace(/["\\]/g, '\\$&')) + '"]');
+            if (existing) return;
             var card = document.createElement('div');
             card.className = 'coming-soon-card reveal reveal-delay-1';
             card.setAttribute('data-tier', 'coming-soon');
@@ -59,9 +61,16 @@
             card.addEventListener('animationend', function (e) {
                 if (e.animationName === 'cardIn') card.style.animation = 'none';
             });
-            if (last && last.nextSibling) grid.insertBefore(card, last.nextSibling);
+            /* insert so the grid keeps DATA order: before the next card that
+               already exists in the skeleton, else at the end. */
+            var anchor = null;
+            for (var k = idx + 1; k < d.comingSoon.length && !anchor; k++) {
+                var nx = grid.querySelector('.coming-soon-card[data-cs-key="' +
+                    (window.CSS && CSS.escape ? CSS.escape(d.comingSoon[k].key) : d.comingSoon[k].key) + '"]');
+                if (nx) anchor = nx;
+            }
+            if (anchor) grid.insertBefore(card, anchor);
             else grid.appendChild(card);
-            last = card;
         });
         /* re-fill the queued chip now that the grid may have grown */
         var chip = document.getElementById('csQueued');
@@ -170,7 +179,7 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
             /* Open button deep-links to the dashboard Services tab; the
                origin follows the validated config (data- not hardcoded). */
             var openEl = document.getElementById('lightboxOpen');
-            if (openEl && window.MSP) {
+            if (openEl && window.MSP && window.MSP.bakedConfig) {
                 var cfg0 = window.MSP.bakedConfig();
                 if (cfg0.dashboardUrl) openEl.href = cfg0.dashboardUrl + '/#services';
             }
@@ -342,6 +351,13 @@ document.querySelectorAll('.services-grid .service-card, .coming-soon-grid .comi
     }
     function onScroll() { if (ticking) return; ticking = true; requestAnimationFrame(frame); }
     addEventListener('scroll', onScroll, { passive: true });
-    addEventListener('resize', function () { measure(); onScroll(); });
+    var rz = false;
+    addEventListener('resize', function () {
+        /* measure() reads layout; coalesce to one read per frame instead of
+           one per resize event (mobile address-bar show/hide fires a burst). */
+        if (rz) return;
+        rz = true;
+        requestAnimationFrame(function () { rz = false; measure(); onScroll(); });
+    });
     measure(); frame();
 })();
