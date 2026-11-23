@@ -68,6 +68,10 @@
         window.MSP.data().then(function (d) {
             if (!d) return;
             var nS = d.services.length, nR = (d.siteFacts && d.siteFacts.publicRepos) || (d.repos || []).length;
+            /* the hero status rail hard-coded "9 services" — it drifted the moment
+               a service was added or removed (same class as the plate badges) */
+            var railSvc = document.querySelector('[data-fact="rail-services"]');
+            if (railSvc) railSvc.textContent = nS + (nS === 1 ? ' service' : ' services');
             var stats = document.querySelectorAll('.about-x-bignum .about-x-bn');
             stats.forEach(function (bn) {
                 var lbl = bn.querySelector('.about-x-bl');

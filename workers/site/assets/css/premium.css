@@ -4166,3 +4166,45 @@ body[data-page='home'] .gk-seal img { width: 72%; height: 72%; opacity: 1; filte
 /* services hero: same sage field + black ink (75% of 112 = 84px, ink r=47<56). */
 body[data-page='services'] .so-core { background: radial-gradient(circle at 50% 30%, #93B0B5, #87A6AB 72%); border-color: rgba(0,0,0,.14); }
 body[data-page='services'] .so-core img { width: 75%; height: 75%; opacity: 1; filter: none; }
+
+/* ===== About: hero ghost, cost manifest, closing card (2026-11-23) =====
+   All appended so this block wins over the Nov-22 anchors AND over site.css's
+   blanket `img[src*="/assets/icons/"] { width:40px }`, which was beating
+   .about-x-ghost on specificity and shrinking the hero watermark to 40px. */
+
+/* --- hero ghost seal: a watermark you can actually see --------------------- */
+body[data-page='about'] .about-x-hero .about-x-ghost {
+    width: clamp(400px, 48vw, 540px);
+    height: clamp(400px, 48vw, 540px);
+    top: 33%; opacity: 0.16; filter: none;
+    -webkit-mask-image: radial-gradient(circle at 50% 46%, #000 48%, transparent 74%);
+    mask-image: radial-gradient(circle at 50% 46%, #000 48%, transparent 74%);
+}
+[data-theme='light'] body[data-page='about'] .about-x-hero .about-x-ghost { opacity: 0.12; }
+@media (max-width: 760px) {
+    body[data-page='about'] .about-x-hero .about-x-ghost { width: 300px; height: 300px; top: 34%; opacity: 0.12; }
+}
+
+/* --- cost manifest: give the value column a name -------------------------- */
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-head {
+    display: flex; justify-content: space-between; gap: 14px; padding: 0 0 10px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--t-font-mono); font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--text-faint);
+}
+/* the "·" between the two actions inherited .about-x-mf-v's gold — gold is the
+   Sweet Pea tier colour, not a separator */
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-v { color: var(--text-faint); }
+body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-total {
+    border-top: 1px solid var(--border); margin-top: 0; padding: 20px 0 2px;
+}
+
+/* --- closing card: the seal is a stamp pressed on the card ----------------- */
+body[data-page='about'] .cta-card .cta-seal {
+    width: 240px; right: -34px; bottom: -38px; opacity: 0.16;
+    transform: rotate(-8deg);
+}
+body[data-page='about'] .cta-card p { max-width: 54ch; text-wrap: pretty; }
+@media (max-width: 760px) {
+    body[data-page='about'] .cta-card .cta-seal { width: 150px; right: -24px; bottom: -26px; opacity: 0.14; }
+}
