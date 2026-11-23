@@ -181,16 +181,14 @@
             var pa = PageAvg(MONITOR_IDS, data.uptimeList);
             if (pa.avg == null) return Promise.reject(new Error('partial monitor set'));
             var avg = pa.avg; /* already one-decimal from PageAvg */
-            var s = avg.toFixed(1);   /* one decimal, matching "99.9" markup default */
-            if (pctFired || reducedMotion || !('IntersectionObserver' in window)) {
-                // animation already ran (or will never run): show the live value.
-                // data-count too — a count-up still in flight re-reads it on its final frame.
-                pctEl.setAttribute('data-count', s);
-                pctEl.textContent = s;
-            } else {
-                // not fired yet: aim the count-up at the real number
-                pctEl.setAttribute('data-count', s);
-            }
+            var s = avg.toFixed(1);   /* one decimal, matching the old static */
+            /* The tile ships with NO data-count so a 404'd script cannot leave
+               a fake number on screen. Consequence: the IntersectionObserver
+               above never watched it, so there is no count-up to aim — write
+               the value and settle it. Setting data-count here also stops a
+               later frame from re-animating it from zero. */
+            pctEl.setAttribute('data-count', s);
+            pctEl.textContent = s;
             /* Current status from the LATEST beat: the 24h average alone
                cannot license 'ALL SYSTEMS OPERATIONAL' — a monitor that is
                down NOW must say so. */
