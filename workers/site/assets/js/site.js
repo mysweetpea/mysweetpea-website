@@ -1487,6 +1487,10 @@
     var nav = document.querySelector('.top-nav');
     var label = document.getElementById('nav-account-label');
     if (!nav || !label) return;
+    /* The sheet has its own sign-in link; mirror the desktop chip into it so a
+       signed-in member never sees "Sign in" in the mobile menu. */
+    var menu = document.getElementById('mn-menu');
+    var menuIn = menu && menu.querySelector('.mn-signin');
 
     function sync() {
         /* Signed-in signal = the chip's aria-label, flipped by the inline nav
@@ -1495,6 +1499,9 @@
         var signedIn = (label.closest('a') || label.parentElement).
             getAttribute('aria-label') === 'Open your dashboard';
         nav.classList.toggle('nav-signed-in', signedIn);
+        if (!menu || !menuIn) return;
+        menu.classList.toggle('is-signed-in', signedIn);
+        menuIn.textContent = signedIn ? (label.textContent || 'Account') : 'Sign in';
     }
 
     new MutationObserver(sync).observe(label, { childList: true, characterData: true, subtree: true });

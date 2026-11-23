@@ -2212,7 +2212,15 @@ body[data-page='redeem'] .redeem-callout .btn { display: inline; background: non
     padding: 0; min-height: 0; color: var(--sage); font-weight: 600; white-space: normal; }
 body[data-page='redeem'] .redeem-callout .btn:hover, body[data-page='redeem'] .redeem-callout .btn:focus-visible {
     background: none; color: var(--primary-bright); transform: none; }
-body[data-page='redeem'] .redeem-callout .btn::after { content: " \2197"; font-size: .8em; }
+/* Drawn, not typed: the old rule used the north-east arrow glyph, which iOS
+   renders as its emoji. The mask keeps the arrow currentColor + theme-aware. */
+body[data-page='redeem'] .redeem-callout .btn::after {
+    content: ""; display: inline-block; width: .8em; height: .8em;
+    margin-left: .4em; vertical-align: -.06em; flex: none;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 11.5 11.5 4.5M6.2 4.5h5.3v5.3'/%3E%3C/svg%3E") center/contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.5 11.5 11.5 4.5M6.2 4.5h5.3v5.3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
 [data-theme="light"] body[data-page='redeem'] .redeem-callout strong { color: var(--text-dim); }
 
 /* 2) username chips: drop the bordered wrapper box, chips float freely */
@@ -4097,3 +4105,23 @@ body.menu-open .top-nav { opacity: .35; }
 #mn-menu .mn-link::after,
 #mn-menu .mn-cta,
 #mn-menu .mn-gh { font-size: 11px; }
+
+/* Signed in: the sheet's sign-in link shows the member's name and the Get
+   Access CTA retires — the desktop nav does exactly this via .nav-signed-in
+   (assets/js/site.js mirrors the chip's label here). */
+#mn-menu.is-signed-in .mn-cta { display: none; }
+#mn-menu.is-signed-in .mn-foot { grid-template-columns: auto minmax(0, 1fr); }
+#mn-menu.is-signed-in .mn-signin { justify-content: center; }
+
+/* Drawn arrows (U+2197 would render as the iOS emoji). */
+.gk-links a span svg { vertical-align: -1px; }
+.about-x-arrow { display: inline-flex; align-items: center; }
+
+/* Vaultwarden's own mark is black art, so on a dark surface it disappeared.
+   It is the ONLY service icon that needs flipping: matrix.svg is Element
+   green (inverting gave magenta) and koalasync.svg is a grey koala on a
+   transparent field (inverting gave the white plate). The .g-inv / .wg-inv
+   classes on those images are now inert on purpose. */
+html:not([data-theme='light']) body[data-page='home'] img[src$="/vaultwarden.svg"] {
+  filter: invert(1) brightness(1.3);
+}
