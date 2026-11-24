@@ -667,10 +667,9 @@
   function back() { dir = -1; if (idx > 0) go(idx - 1); }
 
   /* ── lifecycle ─────────────────────────────────────────────────────── */
-  function start(force) {
+  function start() {
     build();
-    if (!force && seen()) return;
-    // restarting an open tour used to overwrite escHandler/resizeHandler, so the
+    // Restarting an open tour used to overwrite escHandler/resizeHandler, so the
     // old pair could never be removed and every restart stacked another listener
     if (!root.hidden) finish();
     opener = document.activeElement;
@@ -756,8 +755,7 @@
   });
 
   window.mspTour = {
-    start: function () { start(true); },
-    auto: function () { start(false); },
+    start: start,
     reset: function () { try { localStorage.removeItem(KEY); } catch (e) {} },
     seen: seen,
     // read-only: what the tour is showing right now (used by the audits/e2e)

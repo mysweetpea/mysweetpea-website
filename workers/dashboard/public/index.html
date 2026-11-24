@@ -1409,14 +1409,14 @@ a.hm-req{text-decoration:none;color:var(--text)}
 #sec-uptime .strip .b.pad{background:rgba(151,146,255,.08)}
 #sec-uptime .up-row .dim{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--text-dim);border:1px solid var(--border);border-radius:99px;padding:2px 9px;font-variant-numeric:tabular-nums}
 #sec-uptime .up-more{grid-column:1/-1}
-#panel-services dialog#sg-dialog{margin:auto;border:1px solid var(--border-primary);border-radius:var(--radius);background:linear-gradient(150deg,var(--v-soft) 0%,transparent 45%),#12142A;color:var(--text);padding:24px 26px;max-width:640px;width:calc(100vw - 40px);box-shadow:var(--e2)}
-#panel-services dialog#sg-dialog::backdrop{background:rgba(8,9,15,.7);backdrop-filter:blur(4px)}
-#panel-services dialog#sg-dialog .dlg-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
-#panel-services dialog#sg-dialog h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:1.5rem;margin:0}
-#panel-services dialog#sg-dialog .dlg-x{border:0;background:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:8px}
-#panel-services dialog#sg-dialog .dlg-x:hover{color:var(--text);background:var(--v-soft)}
-#panel-services dialog#sg-dialog .sgf-note{display:block;margin:2px 0 14px}
-#panel-services dialog#sg-dialog .sgf-actions .sgf-note{display:none}
+dialog#sg-dialog{margin:auto;border:1px solid var(--border-primary);border-radius:var(--radius);background:linear-gradient(150deg,var(--v-soft) 0%,transparent 45%),#12142A;color:var(--text);padding:24px 26px;max-width:640px;width:calc(100vw - 40px);box-shadow:var(--e2)}
+dialog#sg-dialog::backdrop{background:rgba(8,9,15,.7);backdrop-filter:blur(4px)}
+dialog#sg-dialog .dlg-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+dialog#sg-dialog h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:1.5rem;margin:0}
+dialog#sg-dialog .dlg-x{border:0;background:none;color:var(--text-dim);font-size:1.1rem;cursor:pointer;padding:4px 8px;border-radius:8px}
+dialog#sg-dialog .dlg-x:hover{color:var(--text);background:var(--v-soft)}
+dialog#sg-dialog .sgf-note{display:block;margin:2px 0 14px}
+dialog#sg-dialog .sgf-actions .sgf-note{display:none}
 #panel-services .sv-foot-note{text-align:center;font-size:.72rem;color:var(--text-faint);margin-top:14px}
 #panel-services .sv-foot-note a{color:var(--sage)}
 #panel-services .bento1>#sv-spot,#panel-services .bento1 .sv-glance,#panel-services .sv-card{animation:svEIn .55s cubic-bezier(.16,1,.3,1) both}
@@ -1447,7 +1447,7 @@ a.hm-req{text-decoration:none;color:var(--text)}
  #sec-uptime .up-row .strip{grid-column:1/-1;order:3}
  #sec-uptime .up-row .dim{font-size:.56rem;padding:2px 8px}
  dialog#sg-dialog{padding:18px 16px}
- #panel-services .sgf, dialog#sg-dialog .sgf{grid-template-columns:1fr}
+ dialog#sg-dialog .sgf{grid-template-columns:1fr}
  dialog#sg-dialog .sgf-submit{width:100%}
  .sv-ghostbtn{order:5}
 }
@@ -1562,56 +1562,56 @@ a.hm-req{text-decoration:none;color:var(--text)}
 
 /* ===== SERVICES POLISH 3 — the suggest form itself (premium pass) ===== */
 /* composition: aurora bed + edge highlight + generous rhythm */
-#panel-services dialog#sg-dialog{margin:auto;padding:0;overflow:hidden;max-width:620px}
-#panel-services dialog#sg-dialog::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:var(--card-edge);z-index:1}
-#panel-services dialog#sg-dialog::after{content:'';position:absolute;inset:0;background:radial-gradient(420px 200px at 85% -10%,var(--v-soft),transparent 60%),radial-gradient(320px 180px at -10% 110%,var(--c-soft),transparent 55%);pointer-events:none}
-#panel-services dialog#sg-dialog > *{position:relative;z-index:1}
-#panel-services dialog#sg-dialog form.sgf{position:relative;z-index:1}
+dialog#sg-dialog{margin:auto;padding:0;overflow:hidden;max-width:620px}
+dialog#sg-dialog::before{content:'';position:absolute;inset:0 0 auto 0;height:1px;background:var(--card-edge);z-index:1}
+dialog#sg-dialog::after{content:'';position:absolute;inset:0;background:radial-gradient(420px 200px at 85% -10%,var(--v-soft),transparent 60%),radial-gradient(320px 180px at -10% 110%,var(--c-soft),transparent 55%);pointer-events:none}
+dialog#sg-dialog > *{position:relative;z-index:1}
+dialog#sg-dialog form.sgf{position:relative;z-index:1}
 /* header band: serif title + mono eyebrow, hairline under */
-#panel-services dialog#sg-dialog .dlg-h{padding:24px 28px 14px;border-bottom:1px solid var(--border);margin:0;align-items:center}
-#panel-services dialog#sg-dialog .dlg-h h3{font-size:1.75rem}
-#panel-services dialog#sg-dialog .dlg-h h3::after{content:'';display:block;width:44px;height:2px;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage));margin-top:8px}
-#panel-services dialog#sg-dialog .dlg-x{width:36px;height:36px;border-radius:11px;border:1px solid var(--border);font-size:.85rem;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .2s,color .2s}
-#panel-services dialog#sg-dialog .dlg-x:hover{transform:rotate(90deg)}
+dialog#sg-dialog .dlg-h{padding:24px 28px 14px;border-bottom:1px solid var(--border);margin:0;align-items:center}
+dialog#sg-dialog .dlg-h h3{font-size:1.75rem}
+dialog#sg-dialog .dlg-h h3::after{content:'';display:block;width:44px;height:2px;border-radius:99px;background:linear-gradient(90deg,var(--primary),var(--sage));margin-top:8px}
+dialog#sg-dialog .dlg-x{width:36px;height:36px;border-radius:11px;border:1px solid var(--border);font-size:.85rem;transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .2s,color .2s}
+dialog#sg-dialog .dlg-x:hover{transform:rotate(90deg)}
 /* lead: softer, half-width accent */
-#panel-services dialog#sg-dialog .sgf-note{padding:14px 28px 0;margin:0;font-size:.82rem;line-height:1.55}
+dialog#sg-dialog .sgf-note{padding:14px 28px 0;margin:0;font-size:.82rem;line-height:1.55}
 /* form body: padded, airier grid */
-#panel-services dialog#sg-dialog form.sgf{padding:16px 28px 24px;gap:16px 16px}
-#panel-services dialog#sg-dialog .sgf label{font-size:.8rem;margin-bottom:7px;display:flex;align-items:baseline}
+dialog#sg-dialog form.sgf{padding:16px 28px 24px;gap:16px 16px}
+dialog#sg-dialog .sgf label{font-size:.8rem;margin-bottom:7px;display:flex;align-items:baseline}
 /* inputs: taller, softer radius, inset + focus ring + hover border */
-#panel-services dialog#sg-dialog .sgf input,#panel-services dialog#sg-dialog .sgf select,#panel-services dialog#sg-dialog .sgf textarea{background:rgba(10,12,22,.55);border:1px solid rgba(151,146,255,.15);border-radius:12px;padding:12px 14px;font-size:.92rem;box-shadow:inset 0 1px 0 rgba(197,213,216,.05);transition:border-color .22s,box-shadow .22s,background .22s}
-#panel-services dialog#sg-dialog .sgf input:hover,#panel-services dialog#sg-dialog .sgf select:hover,#panel-services dialog#sg-dialog .sgf textarea:hover{border-color:rgba(151,146,255,.3)}
-#panel-services dialog#sg-dialog .sgf input:focus,#panel-services dialog#sg-dialog .sgf select:focus,#panel-services dialog#sg-dialog .sgf textarea:focus{border-color:var(--primary);background:rgba(10,12,22,.75);box-shadow:0 0 0 3px rgba(139,126,246,.16),inset 0 1px 0 rgba(197,213,216,.05);outline:none}
-#panel-services dialog#sg-dialog .sgf textarea{min-height:96px;resize:vertical}
-#panel-services dialog#sg-dialog .sgf select{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239BA1C7' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+dialog#sg-dialog .sgf input,dialog#sg-dialog .sgf select,dialog#sg-dialog .sgf textarea{background:rgba(10,12,22,.55);border:1px solid rgba(151,146,255,.15);border-radius:12px;padding:12px 14px;font-size:.92rem;box-shadow:inset 0 1px 0 rgba(197,213,216,.05);transition:border-color .22s,box-shadow .22s,background .22s}
+dialog#sg-dialog .sgf input:hover,dialog#sg-dialog .sgf select:hover,dialog#sg-dialog .sgf textarea:hover{border-color:rgba(151,146,255,.3)}
+dialog#sg-dialog .sgf input:focus,dialog#sg-dialog .sgf select:focus,dialog#sg-dialog .sgf textarea:focus{border-color:var(--primary);background:rgba(10,12,22,.75);box-shadow:0 0 0 3px rgba(139,126,246,.16),inset 0 1px 0 rgba(197,213,216,.05);outline:none}
+dialog#sg-dialog .sgf textarea{min-height:96px;resize:vertical}
+dialog#sg-dialog .sgf select{appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239BA1C7' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
 /* req/opt chips: refined mono badges */
-#panel-services dialog#sg-dialog .sgf .req,#panel-services dialog#sg-dialog .sgf .opt{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:600;letter-spacing:.14em;border-radius:99px;padding:2px 8px;margin-left:8px}
-#panel-services dialog#sg-dialog .sgf .req{color:var(--gold);background:rgba(217,168,108,.1);border:1px solid rgba(217,168,108,.25)}
-#panel-services dialog#sg-dialog .sgf .opt{color:var(--text-faint);background:rgba(151,146,255,.06);border:1px solid var(--border)}
+dialog#sg-dialog .sgf .req,dialog#sg-dialog .sgf .opt{font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:600;letter-spacing:.14em;border-radius:99px;padding:2px 8px;margin-left:8px}
+dialog#sg-dialog .sgf .req{color:var(--gold);background:rgba(217,168,108,.1);border:1px solid rgba(217,168,108,.25)}
+dialog#sg-dialog .sgf .opt{color:var(--text-faint);background:rgba(151,146,255,.06);border:1px solid var(--border)}
 /* hints: quieter */
-#panel-services dialog#sg-dialog .sgf .hint{font-size:.7rem;margin-top:6px;opacity:.85}
+dialog#sg-dialog .sgf .hint{font-size:.7rem;margin-top:6px;opacity:.85}
 /* actions: full hairline separation, gradient submit w/ press physics */
-#panel-services dialog#sg-dialog .sgf-actions{border-top:1px solid var(--border);margin-top:8px;padding-top:16px}
-#panel-services dialog#sg-dialog .sgf-submit{border-radius:12px;padding:13px 30px;font-size:.92rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--primary-dim));color:#fff;box-shadow:0 6px 22px rgba(139,126,246,.35);transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s,opacity .2s}
-#panel-services dialog#sg-dialog .sgf-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 28px rgba(139,126,246,.45)}
-#panel-services dialog#sg-dialog .sgf-submit:active:not(:disabled){transform:translateY(0) scale(.98)}
-#panel-services dialog#sg-dialog .sgf-submit:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
+dialog#sg-dialog .sgf-actions{border-top:1px solid var(--border);margin-top:8px;padding-top:16px}
+dialog#sg-dialog .sgf-submit{border-radius:12px;padding:13px 30px;font-size:.92rem;font-weight:700;background:linear-gradient(135deg,var(--primary),var(--primary-dim));color:#fff;box-shadow:0 6px 22px rgba(139,126,246,.35);transition:transform .22s cubic-bezier(.16,1,.3,1),box-shadow .22s,opacity .2s}
+dialog#sg-dialog .sgf-submit:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 9px 28px rgba(139,126,246,.45)}
+dialog#sg-dialog .sgf-submit:active:not(:disabled){transform:translateY(0) scale(.98)}
+dialog#sg-dialog .sgf-submit:disabled{opacity:.4;box-shadow:none;cursor:not-allowed}
 /* entrance animation (dialog itself) */
-#panel-services dialog#sg-dialog[open]{animation:sgDlgIn .32s cubic-bezier(.16,1,.3,1)}
+dialog#sg-dialog[open]{animation:sgDlgIn .32s cubic-bezier(.16,1,.3,1)}
 @keyframes sgDlgIn{from{opacity:0;transform:translateY(14px) scale(.97)}to{opacity:1;transform:none}}
-#panel-services dialog#sg-dialog::backdrop{animation:sgFade .25s ease}
+dialog#sg-dialog::backdrop{animation:sgFade .25s ease}
 @keyframes sgFade{from{opacity:0}to{opacity:1}}
 /* mobile */
 @media (max-width:768px){
- #panel-services dialog#sg-dialog{max-width:none;width:100vw;max-height:100vh;height:100dvh;border-radius:0;border:0}
- #panel-services dialog#sg-dialog .dlg-h{padding:18px 18px 12px}
- #panel-services dialog#sg-dialog .sgf-note{padding:12px 18px 0}
- #panel-services dialog#sg-dialog form.sgf{padding:14px 18px 20px;gap:13px}
- #panel-services dialog#sg-dialog .sgf-submit{width:100%}
+ dialog#sg-dialog{max-width:none;width:100vw;max-height:100vh;height:100dvh;border-radius:0;border:0}
+ dialog#sg-dialog .dlg-h{padding:18px 18px 12px}
+ dialog#sg-dialog .sgf-note{padding:12px 18px 0}
+ dialog#sg-dialog form.sgf{padding:14px 18px 20px;gap:13px}
+ dialog#sg-dialog .sgf-submit{width:100%}
 }
 @media (prefers-reduced-motion:reduce){
- #panel-services dialog#sg-dialog[open]{animation:none}
- #panel-services dialog#sg-dialog .dlg-x:hover{transform:none}
+ dialog#sg-dialog[open]{animation:none}
+ dialog#sg-dialog .dlg-x:hover{transform:none}
 }
 
 /* ===== SERVICES POLISH 4 — sort pill premium + 3-state cycle ===== */
@@ -1748,7 +1748,8 @@ a.hm-req{text-decoration:none;color:var(--text)}
 @media (max-width:560px){.mp-fig{flex:1 1 100%;max-width:100%}}
 /* premium layout: credentials+steps left, walkthrough right */
 .mp-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:1.75rem;align-items:start;margin-top:.4rem}
-@media (max-width:860px){.mp-grid{grid-template-columns:1fr}}
+.mp-grid>*{min-width:0}
+@media (max-width:860px){.mp-grid{grid-template-columns:minmax(0,1fr)}}
 .mp-panel{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
   border-radius:14px;padding:16px 18px;margin:0 0 14px}
 .mp-panel:last-of-type{margin-bottom:0}
@@ -1846,8 +1847,8 @@ body.pwg-lock{overflow:hidden}
     <p>We emailed you a <b>temporary password</b>. Replace it in the <b>Account</b> tab to secure your account.</p>
     <p class="pwg-warn"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Change it within <b>7 days</b>. Accounts still on a temporary password are <b>suspended after 14 days</b>.</span></p>
     <div class="pwg-row">
-      <button type="button" class="mp-btn mp-btn-primary" id="pwg-go">Change password</button>
-      <button type="button" class="mp-btn pwg-ghost" id="pwg-ok" disabled>Remind me later (5)</button>
+      <button type="button" class="mp-btn mp-btn-primary" id="pwg-go" disabled>Change password (8)</button>
+      <button type="button" class="mp-btn pwg-ghost" id="pwg-ok" disabled>Remind me later</button>
     </div>
   </div>
 </div>
@@ -1862,17 +1863,25 @@ window.mspPwGate = function (username) {
   if (!el || seen) return;
   el.hidden = false;
   document.body.classList.add('pwg-lock');
-  var ok = document.getElementById('pwg-ok'), n = 5;
+  var go = document.getElementById('pwg-go'), ok = document.getElementById('pwg-ok'), n = 8;
+  /* Both buttons stay dead for 8 seconds. The user clicked "Change password"
+     straight through the warning on the first test, so the read time is the
+     feature — the primary button counts down and then unlocks both. */
+  function paint() { go.textContent = n > 0 ? 'Change password (' + n + ')' : 'Change password'; }
+  paint();
   var t = setInterval(function () {
     n--;
-    ok.textContent = n > 0 ? 'Remind me later (' + n + ')' : 'Remind me later';
-    if (n <= 0) { clearInterval(t); ok.disabled = false; try { ok.focus(); } catch (e) {} }
+    paint();
+    if (n <= 0) {
+      clearInterval(t);
+      go.disabled = false; ok.disabled = false;
+      try { go.focus(); } catch (e) {}
+    }
   }, 1000);
   function close() {
     try { localStorage.setItem(KEY, '1'); } catch (e) {}
     el.hidden = true;
     document.body.classList.remove('pwg-lock');
-    if (window.mspTour) setTimeout(function () { try { window.mspTour.auto(); } catch (e) {} }, 300);
   }
   document.getElementById('pwg-go').addEventListener('click', function () {
     close();
@@ -3234,18 +3243,6 @@ function mspSessionBanner() {
     '<div class="sv-grid" id="svc-grid"></div>' +
     '<p class="sv-foot-note">Missing something? <a href="#" onclick="window.openSuggestDialog();return false;">Suggest a service</a> — members only, reviewed by a human.</p></section>' +
     '<section class="card" id="sec-uptime"><p class="eyebrow">Uptime</p><h3>Uptime — last 24h</h3><div class="skel"></div></section>' +
-    '<dialog id="sg-dialog">' +
-    '<div class="dlg-h"><h3>Missing something?</h3><button type="button" class="dlg-x" id="sg-close" aria-label="Close">✕</button></div>' +
-    '<p class="dim sgf-note"><b>Before you suggest:</b> we look for open source, self-hostable, privacy-focused, community-driven services — and we only add ones we don&rsquo;t already provide.</p>' +
-    '<form id="sgf" class="sgf" novalidate>' +
-    '<div><label for="sg-name">Service name<span class="req">required</span></label><input type="text" id="sg-name" maxlength="60" placeholder="e.g., Mastodon, Gitea" autocomplete="off"/><div class="hint" id="sg-name-hint">Please enter a service name (min 2 characters).</div></div>' +
-    '<div><label for="sg-url">Link<span class="opt">optional</span></label><input type="url" id="sg-url" maxlength="200" placeholder="https://github.com/..."/><div class="hint" id="sg-url-hint">Project website or GitHub repo, so we can evaluate it.</div></div>' +
-    '<div class="full"><label for="sg-category">Category<span class="req">required</span></label><select id="sg-category"><option value="">Select a category...</option><option value="media">Media &amp; Entertainment</option><option value="productivity">Productivity</option><option value="communication">Communication</option><option value="security">Security &amp; Privacy</option><option value="development">Development</option><option value="monitoring">Monitoring &amp; Analytics</option><option value="storage">File Storage &amp; Sync</option><option value="other">Other</option></select><div class="hint" id="sg-category-hint">Please select a category.</div></div>' +
-    '<div class="full"><label for="sg-reason">Why<span class="req">required</span></label><textarea id="sg-reason" maxlength="500" placeholder="Explain why this service would be valuable..."></textarea><div class="hint" id="sg-reason-hint">Please provide an explanation (min 10 characters).</div></div>' +
-    '<div><label for="sg-yourname">Your name<span class="opt">optional</span></label><input type="text" id="sg-yourname" maxlength="60" placeholder="Leave blank to submit anonymously." autocomplete="off"/></div>' +
-    '<div><label for="sg-youremail">Your email<span class="opt">optional</span></label><input type="email" id="sg-youremail" maxlength="120" placeholder="Only if you want us to follow up with you." autocomplete="off"/><div class="hint" id="sg-youremail-hint">Enter a valid email address, or leave this blank.</div></div>' +
-    '<div class="full sgf-actions"><button type="submit" class="sgf-submit" id="sg-submit" disabled>Send suggestion</button></div>' +
-    '</form></dialog>' +
     '' +
     '</div>' +
     '<div class="tabpanel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">' +
@@ -3316,7 +3313,20 @@ function mspSessionBanner() {
     '<div class="portal-embed"><figure class="portal-frame"><video id="spirit-video" autoplay muted loop playsinline preload="metadata" aria-label="The MySweetPea garden spirit, a small animated drawing"><source src="/videos/hermes-girl-orb.webm" type="video/webm"><source src="/videos/hermes-girl-orb.mp4" type="video/mp4"></video></figure></div></section>' +
     '<pre class="ripple-strip" id="ripple-strip" aria-hidden="true"></pre>' +
     '</div>' +
-    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/seal.png" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; <span id="foot-year">2026</span> MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer><dialog id="rf-dialog">' +
+    '</main><footer class="page-footer dash-footer"><div class="vine-divider" aria-hidden="true"></div><div class="footer-grid"><div class="footer-brand"><a data-msp-site="/" href="https://mysweetpea.cc" class="nav-logo"><img src="/icons/seal.png" alt="" width="28" height="28"><span>MySweetPea</span></a><p>One quiet place for everything in the garden &mdash; run at home, kept for the people who use it.</p><span class="footer-status" id="footerStatus"><span class="status-dot" aria-hidden="true"></span><span id="footerStatusText">&hellip;</span></span></div><div class="footer-col"><h4>Explore</h4><a data-msp-site="/services.html" href="https://mysweetpea.cc/services.html">Services</a><a data-msp-site="/pricing.html" href="https://mysweetpea.cc/pricing.html">How It Works</a><a data-msp-site="/status.html" href="https://mysweetpea.cc/status.html" data-msp-status="1">Status</a><a data-msp-site="/changelog.html" href="https://mysweetpea.cc/changelog.html">Changelog</a></div><div class="footer-col"><h4>Community</h4><a data-msp-site="/form.html" href="https://mysweetpea.cc/form.html">Get Access</a><a data-msp-site="/support.html" href="https://mysweetpea.cc/support.html">Donate</a><a data-msp-site="/suggest.html" href="https://mysweetpea.cc/suggest.html">Suggest a Service</a><a data-msp-site="/about.html" href="https://mysweetpea.cc/about.html">About</a></div><div class="footer-col"><h4>Support</h4><a data-goto="contact" href="#contact">Contact Us</a><a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a><a href="https://github.com/mysweetpea" target="_blank" rel="noopener noreferrer">GitHub</a></div></div><div class="footer-bottom"><p>&copy; <span id="foot-year">2026</span> MySweetPea. Privacy-first, self-hosted, community funded.</p><p class="footer-help">Need help? <a href="mailto:support@mysweetpea.cc" data-msp-email="1">support@mysweetpea.cc</a></p></div></footer>' +
+    '<dialog id=\"sg-dialog\">' +
+    '<div class=\"dlg-h\"><h3>Missing something?</h3><button type=\"button\" class=\"dlg-x\" id=\"sg-close\" aria-label=\"Close\">✕</button></div>' +
+    '<p class=\"dim sgf-note\"><b>Before you suggest:</b> we look for open source, self-hostable, privacy-focused, community-driven services — and we only add ones we don&rsquo;t already provide.</p>' +
+    '<form id=\"sgf\" class=\"sgf\" novalidate>' +
+    '<div><label for=\"sg-name\">Service name<span class=\"req\">required</span></label><input type=\"text\" id=\"sg-name\" maxlength=\"60\" placeholder=\"e.g., Mastodon, Gitea\" autocomplete=\"off\"/><div class=\"hint\" id=\"sg-name-hint\">Please enter a service name (min 2 characters).</div></div>' +
+    '<div><label for=\"sg-url\">Link<span class=\"opt\">optional</span></label><input type=\"url\" id=\"sg-url\" maxlength=\"200\" placeholder=\"https://github.com/...\"/><div class=\"hint\" id=\"sg-url-hint\">Project website or GitHub repo, so we can evaluate it.</div></div>' +
+    '<div class=\"full\"><label for=\"sg-category\">Category<span class=\"req\">required</span></label><select id=\"sg-category\"><option value=\"\">Select a category...</option><option value=\"media\">Media &amp; Entertainment</option><option value=\"productivity\">Productivity</option><option value=\"communication\">Communication</option><option value=\"security\">Security &amp; Privacy</option><option value=\"development\">Development</option><option value=\"monitoring\">Monitoring &amp; Analytics</option><option value=\"storage\">File Storage &amp; Sync</option><option value=\"other\">Other</option></select><div class=\"hint\" id=\"sg-category-hint\">Please select a category.</div></div>' +
+    '<div class=\"full\"><label for=\"sg-reason\">Why<span class=\"req\">required</span></label><textarea id=\"sg-reason\" maxlength=\"500\" placeholder=\"Explain why this service would be valuable...\"></textarea><div class=\"hint\" id=\"sg-reason-hint\">Please provide an explanation (min 10 characters).</div></div>' +
+    '<div><label for=\"sg-yourname\">Your name<span class=\"opt\">optional</span></label><input type=\"text\" id=\"sg-yourname\" maxlength=\"60\" placeholder=\"Leave blank to submit anonymously.\" autocomplete=\"off\"/></div>' +
+    '<div><label for=\"sg-youremail\">Your email<span class=\"opt\">optional</span></label><input type=\"email\" id=\"sg-youremail\" maxlength=\"120\" placeholder=\"Only if you want us to follow up with you.\" autocomplete=\"off\"/><div class=\"hint\" id=\"sg-youremail-hint\">Enter a valid email address, or leave this blank.</div></div>' +
+    '<div class=\"full sgf-actions\"><button type=\"submit\" class=\"sgf-submit\" id=\"sg-submit\" disabled>Send suggestion</button></div>' +
+    '</form></dialog>' +
+    '<dialog id="rf-dialog">' +
     '<div class="dlg-h"><h3>Recommend a friend</h3><button type="button" class="dlg-x" id="rf-close" aria-label="Close">✕</button></div>' +
     '<p class="dim sgf-note">Vouch for someone to get garden access. We will reach out to them after we review — you will see the status here.</p>' +
     '<div id="rf-list" class="rf-list" hidden></div>' +
@@ -4889,7 +4899,9 @@ function mspSessionBanner() {
       if (chip) chip.click();
     });
   }
-  // ===== TOUR wiring (tour.js): nav "?", account menu item, Get started card =====
+  // ===== TOUR wiring (tour.js): nav "?" and account menu item only. The tour
+  // is never auto-started — a first-run member is already reading the password
+  // gate, and the tour used to land on top of the change-password form.
   if (window.mspTour) {
     const tourOpen = document.getElementById('tour-open');
     if (tourOpen) tourOpen.addEventListener('click', () => window.mspTour.start());
@@ -4897,13 +4909,6 @@ function mspSessionBanner() {
     if (miTour) miTour.addEventListener('click', (e) => { e.preventDefault(); window.mspTour.start(); });
     const obTour = document.getElementById('ob-tour');
     if (obTour) obTour.addEventListener('click', () => window.mspTour.start());
-    // First run only. Delayed so the home rails have painted — otherwise the
-    // spotlight lands on an empty section. auto() self-checks the seen flag.
-    setTimeout(() => {
-      const gate = document.getElementById('pw-gate');
-      if (gate && !gate.hidden) return;   // the password gate starts the tour when dismissed
-      try { window.mspTour.auto(); } catch (e) {}
-    }, 1400);
   }
   const obContact = document.getElementById('ob-contact');
   if (obContact) obContact.addEventListener('click', () => setTab('contact'));
