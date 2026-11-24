@@ -21,8 +21,12 @@ let bad = 0;
 const targets = [...tour.matchAll(/target:\s*(['"`])([^'"`]+)\1/g)].map((m) => m[2]);
 if (!targets.length) { console.error('FAIL: no targets found — did the step shape change?'); process.exit(1); }
 for (const sel of [...new Set(targets)]) {
-  const id = sel.startsWith('#') ? sel.slice(1) : null;
-  const cls = sel.startsWith('.') ? sel.slice(1) : null;
+  // a target may be a compound selector (#id h3, #id > .card:first-child) —
+  // what this test proves is that the anchor it starts with exists in the
+  // markup, so normalise the first compound once and check only that
+  const head = sel.split(/[\s>+~]/)[0];
+  const id = head.startsWith('#') ? head.slice(1).replace(/[.:].*$/, '') : null;
+  const cls = head.startsWith('.') ? head.slice(1).replace(/[.:].*$/, '') : null;
   if (!id && !cls) { console.error('  FAIL unsupported selector: ' + sel); bad++; continue; }
   const ok = id
     ? html.includes('id="' + id + '"')

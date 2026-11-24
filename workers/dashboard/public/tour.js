@@ -44,19 +44,19 @@
       title: 'Welcome to MySweetPea',
       body: 'This is your dashboard — the home base for everything you have access to. Give me a minute and I will show you around.' },
 
-    { target: '#nav-toggle', doIt: true, nextLabel: 'I tapped it',
+    { target: '#nav-toggle', doIt: true, drawer: false, nextLabel: 'I tapped it',
       title: 'This button is how you get around',
       body: 'Tap it and your whole menu opens up. You will use this one a lot.' },
 
     { target: '.dh-panel', drawer: true,
       title: 'Everything lives in this menu',
-      body: 'Home, Media, Services, Stats, Guides and Contact. Tap any one to jump straight there.' },
+      body: 'Home, Media, Services, Statistics, Guides and Contact. Tap any one to jump straight there.' },
 
     { target: '.dh-chips', drawer: true,
       title: 'Your account and shortcuts',
       body: 'Your invite link for friends, plus quick ways to ask for help or report something broken.' },
 
-    { target: '#hm-hero', drawer: false, tab: 'home',
+    { target: '.hm-greet', drawer: false, tab: 'home',
       title: 'This is Home',
       body: 'Your services, what is new, and what you have been watching — all in one place.' },
 
@@ -68,11 +68,11 @@
       title: 'Media — where you watch',
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
-    { target: '#sec-pin',
+    { target: '#sec-pin h3',
       title: 'Your password, ready to copy',
       body: 'This card hands you two things: your Moonfin password and your server address. Copy password and Copy address put them on your clipboard \u2014 paste them into Moonfin, never type them. There is a 30-second walkthrough right below if you want to watch it done.' },
 
-    { target: '#sec-media-m',
+    { target: '#sec-media-m > .card:first-child',
       title: 'Browse or search',
       body: 'Everything you can watch, in rows — new arrivals, top rated, and by genre. Tap any poster to start watching.' },
 
@@ -134,7 +134,7 @@
       title: 'Your sections',
       body: 'Home, Media, Services, Stats, Guides and Contact. Click any one to jump straight there.' },
 
-    { target: '#hm-hero', tab: 'home',
+    { target: '.hm-banner', tab: 'home',
       title: 'This is Home',
       body: 'Your services, what is new, and what you have been watching — all in one place.' },
 
@@ -146,11 +146,11 @@
       title: 'Media — where you watch',
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
-    { target: '#sec-pin',
+    { target: '#sec-pin h3',
       title: 'Your password, ready to copy',
       body: 'This card hands you two things: your Moonfin password and your server address. Copy password and Copy address put them on your clipboard \u2014 paste them into Moonfin, never type them. There is a 30-second walkthrough right below if you want to watch it done.' },
 
-    { target: '#sec-media-m',
+    { target: '#sec-media-m > .card:first-child',
       title: 'Browse or search',
       body: 'Everything you can watch, in rows — new arrivals, top rated, and by genre. Click any poster to start watching.' },
 
@@ -202,7 +202,7 @@
       title: 'Your account',
       body: 'Password, sessions, your vault, and this tour again — it all lives behind your name up here.' },
 
-    { closeAcct: true, center: true,
+    { center: true,
       title: 'You are all set',
       body: 'That is the whole dashboard. Replay this whenever you like — from your account menu, or the ? up top.' },
   ];
@@ -217,9 +217,14 @@
   var seq = 0;        // guards against a stale async step finishing late
   var dir = 1;        // direction used when skipping an unavailable target
   var opener = null;
-  // Tab state is STICKY: a step without `tab` inherits the previous step's tab.
-  // Without this, stepping BACKWARD from a tab-switching step left the app on
-  // the wrong panel, so the next target was hidden and the tour looked broken.
+  // A step's tab is the nearest PRECEDING step that names one. Carrying a
+  // mutable "current tab" forward broke BACKWARD navigation: stepping back out
+  // of a tab-changing step left the app on the new tab, so the previous step's
+  // target was hidden and got skipped. Deriving it per index works both ways.
+  function tabFor(i) {
+    for (var k = i; k >= 0; k--) if (steps[k].tab) return steps[k].tab;
+    return 'home';
+  }
   var curTab = 'home', appliedTab = null;
 
   function isMobile() { return window.matchMedia(MOBILE_MQ).matches; }
@@ -242,7 +247,7 @@
       '  background:linear-gradient(165deg,rgba(30,26,60,.985),rgba(13,14,26,.995));',
       '  border:1px solid rgba(151,146,255,.30);box-shadow:0 24px 64px rgba(0,0,0,.58);',
       '  color:#e8e6f5;font-size:.92rem;line-height:1.5;will-change:transform,opacity}',
-      '.mst-card h3{margin:0 0 6px;font-size:1.02rem;font-weight:600;color:#fff;letter-spacing:.1px}',
+      '.mst-card h3{margin:0 0 6px;padding-right:52px;font-size:1.02rem;font-weight:600;color:#fff;letter-spacing:.1px}',
       '.mst-card p{margin:0 0 14px;color:#b9b6d0}',
       '.mst-row{display:flex;align-items:center;gap:8px}',
       '.mst-count{font-size:.74rem;letter-spacing:.6px;text-transform:uppercase;color:#8f8bb0;margin-right:auto}',
@@ -266,7 +271,9 @@
       '@media (max-width:760px){',
       '  .mst-card{left:0!important;right:0;bottom:0;top:auto!important;max-width:none;',
       '    border-radius:18px 18px 0 0;padding:20px 20px calc(18px + env(safe-area-inset-bottom))}',
-      '  .mst-skip{top:auto;bottom:calc(100% + 8px);right:14px}',
+      // Skip stays INSIDE the sheet. Floated above it, it landed on top of the
+      // highlighted drawer and read as part of the menu.
+      '  .mst-skip{top:10px;right:12px;bottom:auto}',
       '}',
     ].join('');
     document.head.appendChild(s);
@@ -314,6 +321,8 @@
   function showToast(label) {
     if (!toast) return;
     clearTimeout(toastTimer);
+    if (toastFade) { try { toastFade.cancel(); } catch (e) {} toastFade = null; }
+    toast.style.opacity = '';
     toast.textContent = label;
     toast.hidden = false;
     toast.style.transform = 'translateX(-50%)';
@@ -395,29 +404,62 @@
     });
   }
 
+  // The lowest edge a spotlight may reach: the bottom sheet on mobile, the
+  // viewport edge on desktop. ONE definition — the cutout, the "is it in view"
+  // test and the scroll target drifted apart when each had its own constant.
+  function bandBottom() {
+    return window.innerHeight - (isMobile() ? card.offsetHeight + 16 : 8);
+  }
+
   function cutoutFor(el) {
     if (!el) return null;
     var r = el.getBoundingClientRect();
     if (r.width <= 1 || r.height <= 1) return null;
-    return { x: r.left - PAD, y: r.top - PAD, w: r.width + PAD * 2, h: r.height + PAD * 2 };
+    // A target taller than the band would punch a hole over the whole viewport
+    // and the dim would vanish. Bound the box, and keep it OUT of the zone the
+    // card covers — an 8px hole behind an opaque card looks like no spotlight.
+    var bot = Math.min(r.bottom + PAD, bandBottom());
+    var top = Math.min(Math.max(r.top - PAD, 4), bot - 8);
+    return { x: r.left - PAD, y: top, w: r.width + PAD * 2, h: Math.max(bot - top, 8) };
   }
 
-  // wait until the target stops moving before tweening to it
-  function settle(el, cb, maxMs) {
-    var last = null, stable = 0, t0 = performance.now();
+  // Follow the target for as long as its step is up. The page is async — the
+  // drawer slides for 420ms, panels finish loading after they paint, images
+  // reflow — so a single measurement left the spotlight parked on a layout that
+  // no longer existed (off-screen, or under the bottom sheet). Re-places the
+  // card too. Only fires when the rect actually moved, so the normal tween
+  // still owns the motion.
+  var trackId = null;
+  function stopTrack() { cancelAnimationFrame(trackId); trackId = null; }
+  function track(el, my) {
+    stopTrack();
+    var key = function () {
+      var r = el && el.isConnected ? el.getBoundingClientRect() : null;
+      return r ? [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)].join(',') : 'none';
+    };
+    var last = key();   // arrive() just measured this exact rect — no re-tween
     (function loop() {
-      var r = el ? el.getBoundingClientRect() : null;
-      var key = r
-        ? [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)].join(',')
-        : 'none';
-      if (key === last) { if (++stable >= 2) return cb(); }
-      else { stable = 0; last = key; }
-      if (performance.now() - t0 > (maxMs || 1100)) return cb();
-      requestAnimationFrame(loop);
+      if (my !== seq) return;
+      var k = key();
+      if (k !== last) {
+        last = k;
+        if (reduceMotion()) { stage = cutoutFor(el); paintStage(stage); }
+        else tweenTo(cutoutFor(el), 160);
+        placeCard(el);   // no-ops on mobile, where the sheet positions itself
+      }
+      trackId = requestAnimationFrame(loop);
     })();
   }
 
   /* ── drawer + account helpers (reuse existing UI) ──────────────────── */
+  // Read the slide duration from the live style instead of hard-coding it, so
+  // a CSS change cannot put the measurement mid-slide again (and it is 0 under
+  // prefers-reduced-motion).
+  function drawerSlideMs() {
+    var p = document.querySelector('#dh-menu .dh-panel');
+    var d = p ? parseFloat(getComputedStyle(p).transitionDuration) : 0;
+    return isFinite(d) ? Math.min(Math.round(d * 1000), 600) : 0;
+  }
   function setDrawer(open) {
     var d = document.getElementById('dh-menu');
     var nav = document.getElementById('top-nav');
@@ -495,13 +537,23 @@
   // INSTANTLY. driver.js does the same: smooth scrolling leaves the cutout
   // parked while the page glides, which reads as a lag after pressing Next.
   // The cutout's own tween is the motion the eye follows.
+  // "In view" must exclude the bottom sheet on mobile: an element tucked under
+  // the card counted as visible, got no scroll, and its cutout was painted
+  // underneath the sheet — the tour looked like it was spotlighting nothing.
   function inView(el) {
     var r = el.getBoundingClientRect();
-    return r.top >= 8 && r.bottom <= (window.innerHeight - 8);
+    return r.top >= 8 && r.bottom <= bandBottom();
   }
+  // Centre inside the area that is actually visible (above the sheet), and
+  // top-align anything taller than that band so no part starts off-screen.
   function revealTarget(el) {
     if (!el || inView(el)) return;
-    try { el.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (e) {}
+    var r = el.getBoundingClientRect();
+    var band = Math.max(bandBottom() - 8, 1);
+    var delta = r.top - 8 - Math.max(0, (band - Math.min(r.height, band)) / 2);
+    try { window.scrollTo({ top: window.scrollY + delta, behavior: 'auto' }); } catch (e) {
+      try { el.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch (e2) {}
+    }
   }
 
   function visible(el) {
@@ -534,6 +586,7 @@
     if (st.target && !visible(el)) { if (dir < 0) back(); else next(); return; }
     tweenTo(cutoutFor(el), TWEEN_MS);
     placeCard(el);
+    if (el) track(el, my);
     clearDoIt();
     if (st.doIt && el) {
       doItEl = el;
@@ -546,6 +599,7 @@
     var st = steps[idx];
     if (!st) return finish();
     clearDoIt();
+    stopTrack();
     var my = ++seq; // any earlier async work is now stale
 
     // side effects first, so the layout we measure is the layout we keep
@@ -554,12 +608,12 @@
     // Let the initiating click finish bubbling before opening, or the account
     // menu's outside-click handler immediately closes it again.
     if (st.openAcct) setTimeout(function () { if (my === seq) setAcct(true); }, 0);
-    if (st.closeAcct) setAcct(false);
+    else setAcct(false);
     block.hidden = !!st.doIt;
 
     var needsTab = false;
-    if (st.tab) curTab = st.tab;
-    if (curTab && curTab !== appliedTab && typeof window.setTab === 'function') {
+    curTab = tabFor(idx);
+    if (curTab !== appliedTab && typeof window.setTab === 'function') {
       appliedTab = curTab;
       needsTab = true;
     }
@@ -570,10 +624,17 @@
 
     if (!needsTab) {
       // FAST PATH: no panel change, so the cutout can move on the next frame.
-      whenVisible(st, my, function (el) {
-        revealTarget(el);
-        requestAnimationFrame(function () { arrive(st, el, my); });
-      });
+      // The drawer slides in — measure after it lands, or the spotlight is
+      // drawn where the panel was on its way in. Already open = no wait.
+      var dh = document.getElementById('dh-menu');
+      var wait = st.drawer === true && dh && !dh.classList.contains('dh-open') ? drawerSlideMs() : 0;
+      setTimeout(function () {
+        if (my !== seq) return;
+        whenVisible(st, my, function (el) {
+          revealTarget(el);
+          requestAnimationFrame(function () { arrive(st, el, my); });
+        });
+      }, wait);
       return;
     }
 
@@ -588,7 +649,7 @@
       // look the target up only now: the panel has just been rendered
       whenVisible(st, my, function (el2) {
         revealTarget(el2);
-        settle(el2, function () { arrive(st, el2, my); }, 900);
+        arrive(st, el2, my);
       });
     }, TAB_SETTLE);
   }
@@ -598,8 +659,6 @@
     if (doItEl && doItHandler) doItEl.removeEventListener('click', doItHandler);
     doItEl = null; doItHandler = null;
   }
-  function onDoIt() { next(); }
-
   function go(i) {
     idx = Math.max(0, Math.min(i, steps.length - 1));
     paint();
@@ -658,6 +717,7 @@
     if (!root) return;
     seq++;
     clearDoIt();
+    stopTrack();
     cancelAnimationFrame(rafId);
     root.hidden = true;
     stage = null;
@@ -681,7 +741,10 @@
     var t = e.target && e.target.closest ? e.target.closest('[data-tour]') : null;
     if (!t) return;
     e.preventDefault();
-    e.stopPropagation(); // do not let the app's outside-click handler close a tour-opened drawer
+    // stopPropagation does NOT stop same-node listeners. The app's outside-click
+    // handler also sits on document (registered after this file) and closed the
+    // drawer on every Next. Immediate is what actually holds the drawer open.
+    e.stopImmediatePropagation();
     var act = t.getAttribute('data-tour');
     if (act === 'next') next();
     else if (act === 'back') back();
@@ -693,5 +756,10 @@
     auto: function () { start(false); },
     reset: function () { try { localStorage.removeItem(KEY); } catch (e) {} },
     seen: seen,
+    // read-only: what the tour is showing right now (used by the audits/e2e)
+    state: function () {
+      var st = steps[idx] || {};
+      return { idx: idx, total: steps.length, title: st.title || '', target: st.target || null, tab: curTab };
+    },
   };
 })();
