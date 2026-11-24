@@ -679,6 +679,10 @@
     curTab = 'home';
     appliedTab = 'home';   // the welcome step needs no tab switch, so skip the slow path
     try { if (typeof window.setTab === 'function') window.setTab('home'); } catch (e) {}
+    // Replay is launched from the drawer / account menu. Close them first or
+    // step 1 sits on top of an open menu.
+    setDrawer(false);
+    setAcct(false);
     root.hidden = false;
     document.body.classList.add('dh-lock');
     paintStage(null);
