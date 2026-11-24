@@ -300,7 +300,27 @@ try {
   };
   assert.equal(await askMe(), false, 'an admin-read failure must fail safe (no false accusation)');
 
-  console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media, mount-path persona login, vault request lane + KV list quota, temp-password signal');
+  // Username availability: authentikResults returns the {results:[...]} envelope.
+  // Calling .some() on the envelope used to throw -> every request 502'd.
+  kv.map.clear(); cacheStore.clear();
+  kv.map.set('sess:un', JSON.stringify(validSession()));
+  fetchImpl = async (url) => {
+    const u = String(url);
+    if (u.includes('/core/users/?username=')) return Response.json({ results: [{ username: 'taken' }, { username: 'other' }] });
+    if (u.endsWith('/core/users/me/')) return memberMe();
+    throw new Error('unexpected un fetch ' + u);
+  };
+  const unPost = (desired) => worker.handle(request('/api/username/request', {
+    method: 'POST', headers: { ...cookie('un'), origin: env.APP_URL, 'content-type': 'application/json' },
+    body: JSON.stringify({ desired }),
+  }), env, ctx);
+  const takenRes = await unPost('taken');
+  assert.equal(takenRes.status, 409, 'existing username must be rejected, not 502');
+  const freeRes = await unPost('free-name');
+  assert.equal(freeRes.status, 200, 'free username must be accepted');
+  assert.equal((await freeRes.json()).desired, 'free-name');
+
+  console.log('PASS dashboard worker: stale-session rejection, mutation origin guard, SWR dedupe, OIDC binding, per-member media, mount-path persona login, vault request lane + KV list quota, temp-password signal, username availability');
 } finally {
   globalThis.fetch = realFetch;
   globalThis.caches = realCaches;

@@ -495,13 +495,16 @@ a.btn{min-height:40px;display:inline-flex;align-items:center;justify-content:cen
 /* ---- nav-compress band (761-1099px): full tab row stays (hamburger is
    mobile-only per user directive). The row + brand + right cluster needs
    ~1100px at default sizing, so this band compacts: tighter tab padding,
-   smaller gap, slimmer nav padding — everything visible, no hamburger,
-   no scroll-hiding. Verified: no overflow down to 761px. */
+   smaller gap, slimmer nav padding. Below ~820px the compacted row still
+   overflows, so it scrolls: `safe flex-end` right-aligns when it fits and
+   falls back to start (reachable, never clipped left) when it doesn't, with
+   a thin scrollbar as the visible cue. */
 @media (min-width:761px) and (max-width:1099px){
 .top-nav{padding:10px 18px;gap:10px}
 .top-nav.nav-scrolled{padding:8px 18px}
-.nav-tabs{gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none;justify-content:flex-end}
-.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tabs{gap:2px;min-width:0;overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.35) transparent;justify-content:safe flex-end}
+.nav-tabs::-webkit-scrollbar{height:4px}
+.nav-tabs::-webkit-scrollbar-thumb{background:rgba(151,146,255,.35);border-radius:2px}
 .tab{padding:7px 12px;font-size:.84rem}
 .site-back{padding:0 10px}
 .nav-search{width:34px;height:34px}
@@ -1682,8 +1685,8 @@ a.hm-req{text-decoration:none;color:var(--text)}
   .dh-scrim{position:absolute;inset:0;background:rgba(4,5,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .3s ease}
   #dh-menu.dh-open .dh-scrim{opacity:1}
   body.dh-lock{overflow:hidden}
-  .dh-panel{position:absolute;top:0;right:0;bottom:0;width:min(344px,88vw);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.35) transparent;padding:calc(14px + env(safe-area-inset-top)) 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(168deg,rgba(30,26,60,.94),rgba(13,14,26,.96));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:1px solid rgba(151,146,255,.22);transform:translateX(102%);opacity:.6;visibility:hidden;transition:transform .42s cubic-bezier(.22,1,.36,1),opacity .3s ease,visibility .42s}
-  #dh-menu.dh-open .dh-panel{transform:none;opacity:1;visibility:visible}
+  .dh-panel{position:absolute;top:0;right:0;bottom:0;width:min(344px,88vw);display:flex;flex-direction:column;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(151,146,255,.35) transparent;padding:calc(14px + env(safe-area-inset-top)) 0 calc(12px + env(safe-area-inset-bottom));background:linear-gradient(168deg,rgba(30,26,60,.94),rgba(13,14,26,.96));backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:1px solid rgba(151,146,255,.22);transform:translateX(102%);opacity:.6;visibility:hidden;transition:transform .42s cubic-bezier(.22,1,.36,1),opacity .3s ease,visibility 0s linear .42s}
+  #dh-menu.dh-open .dh-panel{transform:none;opacity:1;visibility:visible;transition:transform .42s cubic-bezier(.22,1,.36,1),opacity .3s ease,visibility 0s}
   /* panel children must never flex-shrink (they were compressing the hero
      into its own overflow:hidden clip); overflow scrolls instead */
   .dh-panel>*{flex:none}
@@ -1787,7 +1790,18 @@ a.hm-req{text-decoration:none;color:var(--text)}
 @media (prefers-reduced-motion: reduce){.skel{animation:none}}
 </style>
 
-</head><body>
+<style id="msp-type-floor">
+/* 11px micro-label floor — same member-readiness decision the site got on
+   Nov-19. The 2026-11-20 render sweep measured these labels at 8.3-10.9px
+   across desktop/mobile. Only classes that are always sub-11px are listed
+   (never shrink a larger variant); decorative ASCII (.ripple-strip) exempt. */
+.bell-dot,.hm-date,.stat .l,.hm-stat .l,.hm-tile-tt,.hm-tile-sub,.hm-kicker,
+.hm-more,.hm-orb-bl,.hm-orb-up,.uc-when,.eyebrow,.hm-seed-pill,.mrate,
+.tier-badge,.sv-cat,.sv-live,.sv-uppill,.sv-glbl,.sv-sort-lbl,.sv-sort-car,
+.sc-donut-l,.gp-dev,.gp-count,.gp-cap,.plat-cap,.plat-mono,.hm-pbadge,
+.m-genre,.md-mood-chip,.pw-req,.sess-head span,#sec-uptime h3,#sv-upsum-txt,
+.footer-status{font-size:11px !important}
+</style></head><body>
 <a href="#main" class="skip-link">Skip to content</a>
 <div class="aurora" aria-hidden="true"></div>
 <div class="grain-overlay" aria-hidden="true"></div>
@@ -2421,6 +2435,8 @@ function mergeStats(d) {
     episodes: num(s.episodes), users: num(s.users),
     videos: num(s.videos), usage_mb: num(s.usage_mb), jf_resume: num(s.jf_resume),
     jf_watch_hours: num(s.jf_watch_hours), jf_played_titles: num(s.jf_played_titles),
+    jf_top_title: (typeof s.jf_top_title === 'string' && s.jf_top_title) ? s.jf_top_title : null,
+    jf_periods: (s.jf_periods && typeof s.jf_periods === 'object') ? s.jf_periods : null,
     nc_files: num(s.nc_files), nc_shares: num(s.nc_shares), nc_activity: num(s.nc_activity),
     vw_users: num(s.vw_users), vw_items: num(s.vw_items),
     affine_workspaces: num(s.affine_workspaces), affine_users: num(s.affine_users), affine_docs: num(s.affine_docs),
@@ -5128,12 +5144,14 @@ function mspSessionBanner() {
     avatar_set: ACT_SVG + '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
     avatar_delete: ACT_SVG + '<path d="M1 5v14a2 2 0 0 0 2 2h13a2 2 0 0 0 1.4-.6"/><path d="M10.7 5H11l2-3h6l2 3h1a2 2 0 0 1 2 2v8.7"/><path d="M9.3 9.3A4 4 0 0 0 12 17a4 4 0 0 0 3.7-2.3"/><path d="m2 2 20 20"/></svg>',
     avatar_removed: ACT_SVG + '<path d="M1 5v14a2 2 0 0 0 2 2h13a2 2 0 0 0 1.4-.6"/><path d="M10.7 5H11l2-3h6l2 3h1a2 2 0 0 1 2 2v8.7"/><path d="M9.3 9.3A4 4 0 0 0 12 17a4 4 0 0 0 3.7-2.3"/><path d="m2 2 20 20"/></svg>',
-    device_removed: ACT_SVG + '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="m2 2 20 20"/></svg>'
+    device_removed: ACT_SVG + '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="m2 2 20 20"/></svg>',
+    password_changed: ACT_SVG + '<path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>'
   };
   const ACT_LABEL = { login: 'Signed in', logout: 'Signed out', session_revoked: 'Signed out a device',
     totp_removed: 'Removed 2FA app', passkey_removed: 'Removed a passkey', device_removed: 'Device removed',
     consent_revoked: 'Revoked app access', profile_updated: 'Updated profile',
-    avatar_set: 'Updated profile photo', avatar_delete: 'Removed profile photo', avatar_removed: 'Removed profile photo' };
+    avatar_set: 'Updated profile photo', avatar_delete: 'Removed profile photo', avatar_removed: 'Removed profile photo',
+    password_changed: 'Changed password' };
   fetch('/api/audit').then(r => r.ok ? r.json() : []).then(list => {
     const el = $('#sec-activity');
     if (!el) return;

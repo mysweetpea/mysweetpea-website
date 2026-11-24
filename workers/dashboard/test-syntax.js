@@ -98,5 +98,30 @@ console.log('  ok   no redaction artifacts in code');
   }
 }
 
+/* mergeStats must pass through every field the stats renderers read. The
+   explicit whitelist silently dropped jf_periods + jf_top_title (found by the
+   2026-11-20 live-key audit), which left the Stats hero permanently on
+   "Nothing watched yet" and the period pills dead. Guard against re-drop. */
+{
+  const src = blocks.find((b) => b.includes('function mergeStats'));
+  if (!src) bad('mergeStats block not found');
+  else {
+    const m = src.match(/function mergeStats\(d\) \{[\s\S]*?\n\}/);
+    if (!m) bad('mergeStats source not extractable');
+    else {
+      const mergeStats = new Function(m[0] + '; return mergeStats;')();
+      const sample = { movies: 3, jf_watch_hours: 1.5, jf_played_titles: 2, jf_top_title: 'Chowder',
+        jf_periods: { week: { hours: 1, titles: 1, items: 2 }, month: { hours: 2, titles: 2, items: 4 }, all: { hours: 3, titles: 3, items: 6 } } };
+      const out = mergeStats(sample);
+      if (!out.jf_periods || out.jf_periods.week.hours !== 1) bad('mergeStats drops jf_periods (Stats hero + pills go empty)');
+      if (out.jf_top_title !== 'Chowder') bad('mergeStats drops jf_top_title');
+      if (out.movies !== 3 || out.jf_watch_hours !== 1.5) bad('mergeStats num() passthrough broken');
+      const nulls = mergeStats({});
+      if (nulls.jf_periods !== null || nulls.jf_top_title !== null || nulls.movies !== null) bad('mergeStats empty-input guards broken');
+      console.log('  ok   mergeStats: jf_periods + jf_top_title survive, empty input nulls');
+    }
+  }
+}
+
 if (fail) { console.error(`\nFAIL — ${fail} syntax problem(s)`); process.exit(1); }
 console.log('\nPASS dashboard syntax: inline blocks, tour.js, no redaction artifacts, item-link resolver');

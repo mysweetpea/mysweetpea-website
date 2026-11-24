@@ -9,6 +9,13 @@ import {
   buildUpdate,
 } from './lib/updates-pipeline.mjs';
 
+/* One shared swallow-logger: trust-boundary JSON/upstream failures are
+   observable in `wrangler tail` instead of vanishing silently. */
+function swallow(label: string, err?: unknown): void {
+  try { console.warn('[dashboard] ' + label, err instanceof Error ? err.message : String(err ?? '')); }
+  catch { /* logging must never throw */ }
+}
+
 export interface Env {
   SESSIONS: KVNamespace;
   ASSETS: Fetcher;
@@ -296,7 +303,7 @@ async function usernameTaken(env: Env, username: string): Promise<boolean> {
     `/api/v3/core/users/?username=${encodeURIComponent(username)}`);
   if (!r.ok) throw new Error('authentik ' + r.status);
   const d = await authentikResults(r);
-  return d.some((u: any) => String(u.username || '').toLowerCase() === username.toLowerCase());
+  return d.results.some((u: any) => String(u.username || '').toLowerCase() === username.toLowerCase());
 }
 
 async function requireSession(request: Request, env: Env): Promise<{ sess: SessionData; sid: string } | Response> {
@@ -1002,7 +1009,7 @@ export default {
             id: 'bug-' + Date.now().toString(36), user: 'worker', name: 'dashboard worker',
             where: path0(request), what, url: request.url, auto: true, at: Date.now(),
           });
-        } catch { /* reporting must never throw */ }
+        } catch (e) { swallow('bug.report', e); }
       })());
       res = new Response(JSON.stringify({ error: 'internal error' }), {
         status: 500, headers: { 'content-type': 'application/json; charset=utf-8' },
@@ -1082,9 +1089,11 @@ export default {
       // fetch profile as the user
       const me = await authentikFetch(env, tokens.access_token, '/api/v3/core/users/me/');
       if (!me.ok) return new Response('Profile fetch failed', { status: 502 });
-      const meData = await me.json() as { user: { pk: string; username: string; name: string; email: string; is_active: boolean; groups?: Array<{ name?: string }> } };
-      if (!meData.user.is_active) return new Response('Account disabled', { status: 403 });
-      const groups = (meData.user.groups || []).map((g) => String(g.name || '').toLowerCase());
+      const meData = await me.json().catch(() => null) as any;
+      const user = meData && meData.user ? meData.user : null;
+      if (!user) return new Response('Profile fetch failed', { status: 502 });
+      if (!user.is_active) return new Response('Account disabled', { status: 403 });
+      const groups = (user.groups || []).map((g: any) => String((g && g.name) || '').toLowerCase());
       if (!groups.includes('sweetpea') && !groups.includes('seedling')) {
         return new Response('This account does not have dashboard access', { status: 403 });
       }
@@ -1261,7 +1270,8 @@ export default {
       if (!username || !status) return json({ error: 'bad payload' }, 400);
       const raw = await env.SESSIONS.get('ureq:' + username);
       if (!raw) return json({ error: 'not found' }, 404);
-      const rec = JSON.parse(raw);
+      let rec: any;
+      try { rec = JSON.parse(raw); } catch { return json({ error: 'corrupt request' }, 400); }
       rec.status = status;
       rec.resolvedAt = Date.now();
       await env.SESSIONS.put('ureq:' + username, JSON.stringify(rec), { expirationTtl: 30 * 86400 });
@@ -1287,7 +1297,11 @@ export default {
          Telegram send retries on the next poll. */
       if (!(await env.SESSIONS.get('vault-inbox'))) return json({ requests: [] });
       await env.SESSIONS.delete('vault-inbox');
-      const all = await listVaultRequests(env);
+      const all = await listVaultRequests(env).catch(async () => {
+        await kvPutBestEffort(env, 'vault-inbox', '1', 90 * 86400);
+        return null;
+      });
+      if (!all) return json({ error: 'inbox read failed' }, 502);
       const pending = all.filter((r) => !r.notified);
       if (pending.length) await kvPutBestEffort(env, 'vault-inbox', '1', 90 * 86400);
       const requests = pending
@@ -1321,7 +1335,8 @@ export default {
       if (!id || !REFERRAL_STATUSES_OK.has(status)) return json({ error: 'bad id/status' }, 400);
       const raw = await env.SESSIONS.get('referral:' + id);
       if (!raw) return json({ error: 'not found' }, 404);
-      const rec = JSON.parse(raw);
+      let rec: any;
+      try { rec = JSON.parse(raw); } catch { return json({ error: 'corrupt referral' }, 400); }
       rec.status = status;
       await env.SESSIONS.put('referral:' + id, JSON.stringify(rec), { expirationTtl: 180 * 86400 });
       return json({ ok: true });
@@ -1366,7 +1381,7 @@ export default {
           const groupNames = (user.groups || []).map((g: any) => String(g && g.name || '').toLowerCase());
           user.tier = groupNames.includes('sweetpea') ? 'sweetpea'
                     : groupNames.includes('seedling') ? 'seedling'
-                    : 'seedling';
+                    : '';
           /* Still on the emailed temporary password? authentik stamps
              password_change_date on EVERY set_password, including the admin
              call that creates the account, so an account that never changed it
@@ -1448,7 +1463,7 @@ export default {
       }
       if (path === '/api/avatar' && request.method === 'POST') {
         let body: { data?: string } = {};
-        try { body = await request.json() as { data?: string }; } catch {}
+        try { body = await request.json() as { data?: string }; } catch (e) { swallow('avatar.post.json', e); }
         if (!body.data || typeof body.data !== 'string') return json({ error: 'Missing image data' }, 400);
         // 512KB max after base64 decode (~700KB of base64 text); reject before decoding huge payloads
         if (body.data.length > 700000) return json({ error: 'Image too large (max 512KB)' }, 413);
@@ -1488,7 +1503,7 @@ export default {
         const data = await env.SESSIONS.get(`av:${sess.sub}`, { type: 'arrayBuffer' });
         if (!data) return json({ error: 'no avatar' }, 404);
         let mime = 'application/octet-stream';
-        try { mime = (JSON.parse(m) as { mime?: string }).mime || mime; } catch {}
+        try { mime = (JSON.parse(m) as { mime?: string }).mime || mime; } catch (e) { swallow('avatar.meta.json', e); }
         return new Response(data, {
           headers: { 'content-type': mime, 'cache-control': 'private, max-age=300' },
         });
@@ -1497,7 +1512,7 @@ export default {
       // ---------- profile edit (name + email) with password step-up ----------
       if (path === '/api/profile/update' && request.method === 'POST') {
         let body: { name?: unknown; email?: unknown; password?: unknown } = {};
-        try { body = await request.json() as typeof body; } catch {}
+        try { body = await request.json() as typeof body; } catch (e) { swallow('profile.update.json', e); }
         const password = typeof body.password === 'string' ? body.password : '';
         if (!password) return json({ error: 'Your password is required to save changes.' }, 400);
 
@@ -1554,7 +1569,7 @@ export default {
       // ---------- inline password change (verifies current, writes to authentik) ----------
       if (path === '/api/password/change' && request.method === 'POST') {
         let body: { currentPassword?: unknown; newPassword?: unknown } = {};
-        try { body = await request.json() as typeof body; } catch {}
+        try { body = await request.json() as typeof body; } catch (e) { swallow('password.change.json', e); }
         const currentPassword = typeof body.currentPassword === 'string' ? body.currentPassword : '';
         const newPassword = typeof body.newPassword === 'string' ? body.newPassword : '';
         if (!currentPassword || !newPassword) return json({ error: 'Both fields are required.' }, 400);
@@ -1601,7 +1616,7 @@ export default {
       }
       if (path === '/api/username/request' && request.method === 'POST') {
         let body: { desired?: unknown } = {};
-        try { body = await request.json() as typeof body; } catch {}
+        try { body = await request.json() as typeof body; } catch (e) { swallow('username.request.json', e); }
         const desired = typeof body.desired === 'string' ? body.desired.trim().toLowerCase() : '';
         if (!UN_RE.test(desired)) {
           return json({ error: 'Use 3-30 characters: lowercase letters, digits, dot, dash or underscore.' }, 400);
@@ -1615,7 +1630,7 @@ export default {
         if (n > 5) return json({ error: 'Too many requests today — try again tomorrow.' }, 429);
         let taken = false;
         try { taken = await usernameTaken(env, desired); }
-        catch { return json({ error: 'Could not check that username right now — try again in a minute.' }, 502); }
+        catch (e) { swallow('username.availability', e); return json({ error: 'Could not check that username right now — try again in a minute.' }, 502); }
         if (taken) return json({ error: 'That username is already taken.' }, 409);
 
         const rec = {
@@ -1740,7 +1755,7 @@ export default {
               // into the hero's week / month / all-time pills.
               // ponytail: one page of 500; a member past 500 plays under-reports
               // by the tail. Page it only if someone gets there.
-              let playedItems = 0;
+              let gotData = false;
               const seriesIds = new Set<string>();
               const movieIds = new Set<string>();
               const episodeIds = new Set<string>();
@@ -1760,7 +1775,7 @@ export default {
                 if (r.ok) {
                   const d = await r.json() as any;
                   const items = (Array.isArray(d.Items) ? d.Items : []) as any[];
-                  playedItems = items.length;
+                  gotData = true;
                   for (const it of items) {
                     if (!it) continue;
                     const ticks = Number(it.RunTimeTicks) || 0;
@@ -1779,7 +1794,7 @@ export default {
                     }
                   }
                 }
-              } catch {}
+              } catch (e) { swallow('stats.watched', e); }
               // in progress: its partial position still counts as watched time
               let resumeTicks = 0;
               try {
@@ -1815,22 +1830,25 @@ export default {
                       if (age <= WEEK) add(buckets.week, t, key);
                     }
                   }
+                  gotData = true;
                   out.jf_resume = typeof d.TotalRecordCount === 'number' ? d.TotalRecordCount : items.length;
                   const top = items[0];
                   out.jf_top_title = top ? (String(top.SeriesName || top.Name || '').trim() || null) : null;
                 }
-              } catch {}
-              out.movies = movieIds.size;
-              out.episodes = episodeIds.size;
-              out.series = seriesIds.size;
-              const hrs = (t: number) => (t > 0 ? Math.round((t / 3.6e10) * 10) / 10 : 0); // .NET ticks are 100ns
-              out.jf_watch_hours = hrs(buckets.all.ticks);
-              out.jf_played_titles = buckets.all.titles.size;
-              out.jf_periods = {
-                week: { hours: hrs(buckets.week.ticks), titles: buckets.week.titles.size, items: buckets.week.items },
-                month: { hours: hrs(buckets.month.ticks), titles: buckets.month.titles.size, items: buckets.month.items },
-                all: { hours: hrs(buckets.all.ticks), titles: buckets.all.titles.size, items: buckets.all.items },
-              };
+              } catch (e) { swallow('stats.nextup', e); }
+              if (gotData) {
+                out.movies = movieIds.size;
+                out.episodes = episodeIds.size;
+                out.series = seriesIds.size;
+                const hrs = (t: number) => (t > 0 ? Math.round((t / 3.6e10) * 10) / 10 : 0); // .NET ticks are 100ns
+                out.jf_watch_hours = hrs(buckets.all.ticks);
+                out.jf_played_titles = buckets.all.titles.size;
+                out.jf_periods = {
+                  week: { hours: hrs(buckets.week.ticks), titles: buckets.week.titles.size, items: buckets.week.items },
+                  month: { hours: hrs(buckets.month.ticks), titles: buckets.month.titles.size, items: buckets.month.items },
+                  all: { hours: hrs(buckets.all.ticks), titles: buckets.all.titles.size, items: buckets.all.items },
+                };
+              }
             })(),
             (async () => {
               try {
@@ -1842,7 +1860,7 @@ export default {
                   out.videos = d.videos ?? null;
                   if (typeof d.usage === 'number') out.usage_mb = Math.round(d.usage / 1048576);
                 }
-              } catch {}
+              } catch (e) { swallow('stats.immich', e); }
             })(),
             (async () => {
               try {
@@ -1863,13 +1881,13 @@ export default {
                   }
                 }
                 out.users = seen.size;
-              } catch {}
+              } catch (e) { swallow('stats.users', e); }
             })(),
             (async () => {
               try {
                 const s = await authentikFetch(env, sess.at, '/api/v3/core/authenticated_sessions/');
                 if (s.ok) { const d = await s.json() as any; out.sessions = (d.results ?? []).length; }
-              } catch {}
+              } catch (e) { swallow('stats.sessions', e); }
             })(),
           ]);
           return JSON.stringify(out);
@@ -2099,7 +2117,7 @@ export default {
         const id = crypto.randomUUID().slice(0, 8);
         const rec = { id, by: sess.sub, byName: sess.name || sess.username, name, service, note,
           status: 'pending', at: Date.now() };
-        await env.SESSIONS.put(`referral:${id}`, JSON.stringify(rec));
+        await env.SESSIONS.put(`referral:${id}`, JSON.stringify(rec), { expirationTtl: 180 * 86400 });
         // Gotify ping (best-effort — the referral is already stored)
         if (env.GOTIFY_REFERRAL_TOKEN) {
           try {
@@ -2145,13 +2163,13 @@ export default {
         // Auto-filed errors: one issue per signature per 24h, max 3/day/member.
         // ponytail: per-member counters, no global limiter — a broken deploy is
         // caught by the signature dedupe, which is the only realistic spam source.
+        const day = 'bugday:' + sess.sub + ':' + new Date().toISOString().slice(0, 10);
+        const n = parseInt((await env.SESSIONS.get(day)) || '0', 10);
+        if (n >= 3) return json({ ok: true, dup: true });
+        await kvPutBestEffort(env, day, String(n + 1), 86400);
         if (auto) {
           const sig = 'bugsig:' + (await bugSig(what.split('\n')[0] + '|' + (rec.errs?.[0] || '')));
-          const day = 'bugday:' + sess.sub + ':' + new Date().toISOString().slice(0, 10);
           if (await env.SESSIONS.get(sig)) return json({ ok: true, dup: true });
-          const n = parseInt((await env.SESSIONS.get(day)) || '0', 10);
-          if (n >= 3) return json({ ok: true, dup: true });
-          await kvPutBestEffort(env, day, String(n + 1), 86400);
           await kvPutBestEffort(env, sig, '1', 86400);
         }
         await env.SESSIONS.put('bug:' + rec.id, JSON.stringify(rec), { expirationTtl: 90 * 86400 });
@@ -2201,7 +2219,7 @@ export default {
         if (path.startsWith('/api/sessions/')) {
           const uuid = path.split('/')[3];
           const r = await authentikFetch(env, sess.at, `/api/v3/core/authenticated_sessions/${uuid}/`, { method: 'DELETE' });
-          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'session_revoked', target: uuid }));
+          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'session_revoked', target: uuid }), { expirationTtl: 90 * 86400 });
           return json({ ok: r.ok }, r.status);
         }
         if (path.startsWith('/api/devices/')) {
@@ -2209,13 +2227,13 @@ export default {
           const map: Record<string, string> = { totp: 'totp', webauthn: 'webauthn', static: 'static' };
           if (!map[kind]) return json({ error: 'bad device type' }, 400);
           const r = await authentikFetch(env, sess.at, `/api/v3/authenticators/${map[kind]}/${pk}/`, { method: 'DELETE' });
-          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'device_removed', target: kind + ':' + pk }));
+          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'device_removed', target: kind + ':' + pk }), { expirationTtl: 90 * 86400 });
           return json({ ok: r.ok }, r.status);
         }
         if (path.startsWith('/api/consents/')) {
           const id = path.split('/')[3];
           const r = await authentikFetch(env, sess.at, `/api/v3/core/user_consent/${id}/`, { method: 'DELETE' });
-          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'consent_revoked', target: id }));
+          await env.SESSIONS.put(`audit:${sess.sub}:${Date.now()}`, JSON.stringify({ t: Date.now(), event: 'consent_revoked', target: id }), { expirationTtl: 90 * 86400 });
           return json({ ok: r.ok }, r.status);
         }
       }
