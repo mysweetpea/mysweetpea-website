@@ -613,7 +613,7 @@ async function postProvision(env: Env, body: Record<string, unknown>, timeoutMs 
   });
 }
 
-async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdentity> {
+async function provisionMember(env: Env, sess: SessionData, provisionTimeoutMs = PROVISION_TIMEOUT_MS): Promise<MemberIdentity> {
   if (!env.MOONBASE_ADMIN_TOKEN || !env.MOONBASE_MOUNT) {
     return { ok: false, error: 'media access is not configured yet', status: 503 };
   }
@@ -671,7 +671,7 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
       name: (liveName || username).slice(0, 80),
       tier,
       rename: !!liveName,
-    });
+    }, provisionTimeoutMs);
   } catch {
     return { ok: false, error: 'media service is unreachable right now', status: 502 };
   }
@@ -778,7 +778,9 @@ async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string;
   let who = await provisionMember(env, sess);
   if (!who.ok) {
     await new Promise((r) => setTimeout(r, 250));
-    who = await provisionMember(env, sess);
+    // The retry is on the media tab's critical path: cap it short so a hung
+    // shim fails the row instead of blocking ~2x the create timeout.
+    who = await provisionMember(env, sess, 6000);
   }
   if (!who.ok) return null;
   /* Everyone — the owner included — reads their own persona. The owner used to

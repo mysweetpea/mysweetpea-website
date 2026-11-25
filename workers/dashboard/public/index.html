@@ -3899,8 +3899,8 @@ function mspSessionBanner() {
             // the new persona name (no extra provisioning call now).
             if (typeof window.mpPinInvalidate === 'function') window.mpPinInvalidate();
             toast(d.mediaName === false
-              ? 'Name saved. Moonfin may still show the old name; it will retry when you open the Media tab.'
-              : 'Name updated — Moonfin shows it next time you open the Media tab.',
+              ? 'Name saved. Moonfin may still show the old name; it retries when you open the Media tab.'
+              : 'Name updated — Moonfin shows it the next time it loads.',
               { ok: d.mediaName !== false, err: d.mediaName === false });
           } else {
             toast('Profile updated — your account is changed everywhere');
@@ -4566,6 +4566,7 @@ function mspSessionBanner() {
      the same PIN it already issued — so this is safe to call on every visit
      and never invalidates a login the member already has. */
   let mpPinLoaded = false;
+  let mpPinGen = 0; // bumped when the cached card is invalidated
 
   function mpPinRender(body, d) {
     const COPY_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>';
@@ -4622,7 +4623,9 @@ function mspSessionBanner() {
   }
   window.mpPinInvalidate = function () {
     // Name changed elsewhere: drop the cached card so the next Media visit
-    // re-provisions instead of repainting a stale persona name.
+    // re-provisions instead of repainting a stale persona name. The generation
+    // bump makes an in-flight response unable to re-cache the old card.
+    mpPinGen++;
     mpPinLoaded = false;
     try { sessionStorage.removeItem(MP_CACHE_KEY); } catch (e) { /* private mode */ }
   };
@@ -4630,6 +4633,7 @@ function mspSessionBanner() {
     const body = document.getElementById('pin-body');
     if (!body || (mpPinLoaded && !force)) return;
     mpPinLoaded = true;
+    const gen = mpPinGen;
     // Paint the card from this session's last response before the network
     // answers — the fetch stays authoritative and overwrites it a moment later.
     const cached = mpCacheRead();
@@ -4642,6 +4646,7 @@ function mspSessionBanner() {
       });
       d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(d.error || 'Could not reach the media service.');
+      if (gen !== mpPinGen) return; // invalidated while this request was in flight
       if (d.ok === false) {
         body.innerHTML = '<p class="mp-sub">' + esc(d.message || 'Media access is not part of your tier.') + '</p>';
         return;
@@ -4653,6 +4658,7 @@ function mspSessionBanner() {
         }));
       } catch (e) { /* private mode */ }
     } catch (e) {
+      if (gen !== mpPinGen) return; // a newer load owns the card now
       mpPinLoaded = false; // allow a retry
       body.innerHTML = '<p class="mp-sub">' + esc(e.message || 'Something went wrong.') +
         '</p><button type="button" class="mp-btn" id="mp-retry">Try again</button>';
