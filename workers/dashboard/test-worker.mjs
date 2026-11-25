@@ -168,7 +168,7 @@ try {
   // changed the secret's shape passed CI while every member's personal rows
   // blanked in prod. Keep it token-shaped.
   kv.map.clear(); cacheStore.clear();
-  const second = { ...validSession(), sub: 'user-2', username: 'second', name: 'Second' };
+  const second = { ...validSession(), sub: 'user-2', username: 'second', name: 'Second', at: 'token-two' };
   kv.map.set('sess:one', JSON.stringify(validSession())); kv.map.set('sess:two', JSON.stringify(second));
   Object.assign(env, { AIOS_UUID: 'service', AIOS_PASSWORD: 'pw', MOONBASE_ADMIN_TOKEN: 'admin', MOONBASE_MOUNT: 'config/mount' });
   const mediaAuth = [];
@@ -176,7 +176,13 @@ try {
   const personaLogins = [];
   fetchImpl = async (url, options = {}) => {
     const u = String(url);
-    if (u.includes('auth.example')) return Response.json({ user: { is_active: true, groups: [{ name: 'sweetpea' }] } });
+    if (u.includes('auth.example')) {
+      // Distinct display names per member, delivered by authentik (not the
+      // session doc), so the Provision body can be asserted.
+      const auth = String(options.headers?.authorization || '');
+      const name = auth.includes('token-two') ? 'Second Display' : 'Member Display';
+      return Response.json({ user: { name, is_active: true, groups: [{ name: 'sweetpea' }] } });
+    }
     if (u.endsWith('/Moonfin/Admin/Provision')) { provBodies.push(JSON.parse(String(options.body || '{}'))); return Response.json({ pin: '123456' }); }
     if (u.endsWith('/Users/AuthenticateByName')) {
       const body = JSON.parse(String(options.body || '{}'));
@@ -198,9 +204,11 @@ try {
   assert.equal((await two.json()).items[0].name, 'Second movie');
   assert.equal(mediaAuth.length, 2, 'each member needs their own upstream query');
   assert.equal(mediaAuth.every(a => a.includes('member-')), true);
-  // Persona names are LOGIN names, never display names — a display-name persona
-  // would split a member's watch history in two.
-  assert.deepEqual(provBodies.map((b) => b.name), ['member', 'second']);
+  // The persona is keyed by USERNAME (so watch history never splits) while its
+  // NAME follows authentik's current display name — that is what Moonfin's
+  // Who's-watching tile and the mount sign-in show.
+  assert.deepEqual(provBodies.map((b) => [b.username, b.name, b.rename]),
+    [['member', 'Member Display', true], ['second', 'Second Display', true]]);
   // The persona sign-in MUST be an absolute URL on the composed mount path.
   // Concatenating the raw token secret produced 'config/mount/Users/...' —
   // an invalid URL that threw, was swallowed, and blanked every personal row.

@@ -583,24 +583,30 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   // access. Groups come from authentik; SessionData has no groups field.
   let tier = '';
   let isAdmin = false;
+  // The display name must come from authentik, not the session doc: other
+  // browser sessions keep their own stale copy, and renaming from one of those
+  // would revert a name the member just set elsewhere.
+  let liveName = '';
   const tierKey = 'cache:tier:' + String(sess.sub || '');
   const tierRaw = await cacheGetJson(tierKey);
   if (tierRaw) {
     try {
-      const t = JSON.parse(tierRaw) as { tier?: string; admin?: boolean };
+      const t = JSON.parse(tierRaw) as { tier?: string; admin?: boolean; name?: string };
       tier = String(t.tier || '');
       isAdmin = !!t.admin;
+      liveName = typeof t.name === 'string' ? t.name.trim() : '';
     } catch { /* re-derive below */ }
   }
-  if (!tier) try {
+  if (!tier || !liveName) try {
     const r = await authentikFetch(env, sess.at, '/api/v3/core/users/me/');
     const d = await r.json() as any;
     const u = d && d.user ? d.user : d;
     const names = (u && u.groups ? u.groups : []).map((g: any) => String((g && g.name) || '').toLowerCase());
     tier = names.includes('sweetpea') ? 'sweetpea' : names.includes('seedling') ? 'seedling' : '';
     isAdmin = names.includes('authentik admins');
+    liveName = typeof (u && u.name) === 'string' ? String(u.name).trim() : '';
     if (tier) {
-      try { await cachePutJson(tierKey, JSON.stringify({ tier, admin: isAdmin }), 300); } catch { /* cache is optional */ }
+      try { await cachePutJson(tierKey, JSON.stringify({ tier, admin: isAdmin, name: liveName }), 300); } catch { /* cache is optional */ }
     }
   } catch { /* fall through to the no-tier error below */ }
   if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
@@ -621,10 +627,19 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
         'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
         'user-agent': 'msp-dashboard/1.0',
       },
-      // Persona name = the login name, for everyone. Using the display name
-      // here would mint "Faraz" alongside the existing "sweetpea" persona and
-      // silently start a second, empty watch history.
-      body: JSON.stringify({ username, name: username, tier }),
+      // The persona is keyed by USERNAME, so renaming here can never mint a
+      // second identity: it only keeps the Who's-watching tile and the mount
+      // sign-in name in step with the member's CURRENT display name. Every
+      // PIN-card load therefore reconciles the name, so a rename that failed
+      // earlier (or happened in admin) heals on the next visit.
+      body: JSON.stringify({
+        username,
+        // authentik's CURRENT display name (5-min cache); session docs go
+        // stale and would revert a rename made in another browser.
+        name: (liveName || username).slice(0, 80),
+        tier,
+        rename: !!liveName,
+      }),
     });
   } catch {
     return { ok: false, error: 'media service is unreachable right now', status: 502 };
@@ -1586,6 +1601,9 @@ export default {
         const now = Date.now();
         await env.SESSIONS.put(`audit:${sess.sub}:${now}`, JSON.stringify({ t: now, event: 'profile_updated', fields: Object.keys(updates) }), { expirationTtl: 90 * 86400 });
         await cacheDeleteJson('cache:me:' + sess.sub); // invalidate /api/me cache
+        // The tier cache also carries the display name; drop it so the next
+        // PIN-card load reads the new name instead of renaming the persona back.
+        if (updates.name) await cacheDeleteJson('cache:tier:' + sess.sub);
         // A display-name change must reach Moonfin too: its Who's-watching tile
         // and mount sign-in name are the persona's name, not the authentik name.
         const mediaName = updates.name ? await renamePersona(env, sess, updates.name) : true;
