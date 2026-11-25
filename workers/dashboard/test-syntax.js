@@ -45,9 +45,10 @@ for (const [name, src] of targets) {
 }
 console.log('  ok   no redaction artifacts in code');
 
-/* The item-link resolver decides where a poster tap goes: the web player when
-   the member's mount address is known, the setup guide otherwise. Run its real
-   source against a stub DOM so a regression in either branch fails here. */
+/* The item-link resolver decides where a poster tap goes. Members are kept out
+   of the AIOStreams web app, so EVERY tap lands on the Moonfin setup guide —
+   with or without a mount address. Run the real source so a regression that
+   reintroduces a web-player URL fails here. */
 {
   const src = blocks.find((b) => b.includes('window.mspItemHref'));
   if (!src) bad('mspItemHref resolver block not found');
@@ -67,17 +68,17 @@ console.log('  ok   no redaction artifacts in code');
     };
     const M = 'https://x.example/jellyfin/uuid/eyJtok';
     const cases = [
-      ['dom mount', run(M, null)('abc'), M + '/web/#/item/abc'],
-      ['cache mount', run('', M)('abc'), M + '/web/#/item/abc'],
-      ['trailing slash', run(M + '/', null)('abc'), M + '/web/#/item/abc'],
-      ['no mount -> guide', run('', null)('abc'), '#guides/moonfin'],
-      ['no id -> guide', run(M, null)(''), '#guides/moonfin'],
-      ['id encoded', run(M, null)('a/b'), M + '/web/#/item/a%2Fb'],
+      ['dom mount', run(M, null)('abc')],
+      ['cache mount', run('', M)('abc')],
+      ['trailing slash', run(M + '/', null)('abc')],
+      ['no mount', run('', null)('abc')],
+      ['no id', run(M, null)('')],
+      ['id encoded', run(M, null)('a/b')],
     ];
-    for (const [name, got, want] of cases) {
-      if (got !== want) bad(`mspItemHref ${name}: got ${got}, want ${want}`);
+    for (const [name, got] of cases) {
+      if (got !== '#guides/moonfin') bad(`mspItemHref ${name}: got ${got}, want #guides/moonfin`);
     }
-    console.log(`  ok   mspItemHref: ${cases.length} resolver cases`);
+    console.log(`  ok   mspItemHref: ${cases.length} guide-only cases`);
     /* The bare-root interception must catch the operator sign-in page and
        never a member mount URL (those carry uuid/token path segments). */
     const re = /\/jellyfin\/?$/;

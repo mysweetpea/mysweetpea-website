@@ -408,6 +408,8 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .gate-join a:hover{color:var(--gold)}
 .b-go.loading{opacity:.75;cursor:progress}
 .sgf-submit.loading{opacity:.75;cursor:progress}
+.b-go.loading::after,.sgf-submit.loading::after{content:'';display:inline-block;width:12px;height:12px;margin-left:8px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;vertical-align:-2px;animation:msp-spin .7s linear infinite}
+@keyframes msp-spin{to{transform:rotate(360deg)}}
 .pwf-actions{display:flex;justify-content:flex-end;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
 .pwf-adv{font-size:.82rem;color:var(--text-dim);text-decoration:underline;text-underline-offset:3px}
 .pwf-adv:hover{color:var(--gold)}
@@ -1992,59 +1994,32 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 <script>
-/* Moonfin gained a real browser player in AIOStreams v2.38: the mount path
-   serves /web/ (hash routing, /item/$itemId), signs members in with their
-   display name + PIN, and plays the H.264 sources the edge filter already
-   selects for browsers. Tapping a title used to open the setup guide because
-   no web client existed; that premise is gone. Verified E2E with a throwaway
-   persona: sign-in -> #/item/<id> renders the title page with a Play button.
-   Resolved at CLICK time so it works whether or not the PIN card has loaded,
-   and falls back to the guide for a member with no media access yet. */
+/* Members watch through Moonfin (server + PIN from the Media tab). The
+   AIOStreams web app at <mount>/web/ is deliberately NOT offered: it is the
+   operator-facing engine UI, easy to land in by accident, and the owner wants
+   members kept out of it. Every media tap therefore lands on the Moonfin
+   setup guide. Kept as one resolver so all rails behave the same. */
 (function () {
-  function mount() {
-    var el = document.getElementById('mp-server');
-    var m = el ? el.textContent : '';
-    if (!m) {
-      try {
-        for (var i = 0; i < sessionStorage.length; i++) {
-          var k = sessionStorage.key(i);
-          if (k && k.indexOf('msp_pin_v2:') === 0) {
-            var c = JSON.parse(sessionStorage.getItem(k) || 'null');
-            if (c && c.mount) { m = c.mount; break; }
-          }
-        }
-      } catch (e) { /* private mode */ }
-    }
-    return String(m || '').trim().replace(/\/+$/, '');
-  }
-  window.mspItemHref = function (id) {
-    var m = mount();
-    if (!m || !id) return '#guides/moonfin';
-    return m + '/web/#/item/' + encodeURIComponent(id);
-  };
-  window.mspPlayerHome = function () {
-    var m = mount();
-    return m ? m + '/web/' : null;
-  };
+  window.mspItemHref = function () { return '#guides/moonfin'; };
+  window.mspPlayerHome = function () { return '#guides/moonfin'; };
   document.addEventListener('click', function (e) {
     var t = e.target && e.target.closest ? e.target : null;
     if (!t) return;
     var a = t.closest('a[data-msp-item]');
     if (a) {
-      var href = window.mspItemHref(a.getAttribute('data-msp-item'));
-      if (href && href !== a.getAttribute('href')) { e.preventDefault(); window.location.href = href; }
+      if (a.getAttribute('href') !== '#guides/moonfin') {
+        e.preventDefault();
+        window.location.href = '#guides/moonfin';
+      }
       return;
     }
-    /* The bare /jellyfin root is the OPERATOR sign-in (config UUID + password),
-       which a member cannot use. Every guide/chip link to it must land on the
-       member's own mount player instead. Matched by path so it survives an
-       origin rewrite and never touches a mount URL (those have more path). */
+    /* Bare /jellyfin root is the OPERATOR sign-in (config UUID + password);
+       a member cannot use it, so it lands on the guide as well. */
     var b = t.closest('a[href]');
     if (!b) return;
-    var u = b.getAttribute('href') || '';
-    if (/\/jellyfin\/?$/.test(u)) {
-      var home = window.mspPlayerHome();
-      if (home) { e.preventDefault(); window.location.href = home; }
+    if (/\/jellyfin\/?$/.test(b.getAttribute('href') || '')) {
+      e.preventDefault();
+      window.location.href = '#guides/moonfin';
     }
   });
 })();
@@ -3908,23 +3883,30 @@ function mspSessionBanner() {
       const name = nm.value.trim(), email = em.value.trim(), password = pw.value;
       if (!validate()) return;
       if (!password) { err.textContent = 'Your password is required to save changes.'; return; }
-      posting = true; btn.disabled = true; btn.classList.add('loading'); btn.textContent = 'Saving\u2026';
+      posting = true; btn.disabled = true; btn.classList.add('loading'); btn.setAttribute('aria-busy', 'true'); btn.textContent = 'Saving\u2026';
       try {
         const r = await fetch('/api/profile/update', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: name, email: email, password: password }) });
         const d = await r.json().catch(() => ({}));
-        posting = false; btn.classList.remove('loading'); btn.textContent = 'Save changes';
+        posting = false; btn.classList.remove('loading'); btn.removeAttribute('aria-busy'); btn.textContent = 'Save changes';
         if (r.ok && d.ok) {
+          const renamed = (d.name || name) !== me.name;
           me.name = d.name || name;
           me.email = d.email || email;
           window.applyProfile();
           closeModal();
-          toast('Profile updated — your account is changed everywhere');
+          if (renamed) {
+            toast(d.mediaName === false
+              ? 'Name saved — Moonfin could not be updated. Try again in a minute.'
+              : 'Name updated — Moonfin shows it next time you open the app.', { ok: d.mediaName !== false });
+          } else {
+            toast('Profile updated — your account is changed everywhere');
+          }
         } else {
           btn.disabled = false;
           err.textContent = d.error || 'Update failed.';
         }
       } catch (e) {
-        posting = false; btn.classList.remove('loading'); btn.textContent = 'Save changes';
+        posting = false; btn.classList.remove('loading'); btn.removeAttribute('aria-busy'); btn.textContent = 'Save changes';
         btn.disabled = false; err.textContent = 'Update failed.';
       }
     };
@@ -3990,12 +3972,14 @@ function mspSessionBanner() {
       posting = true;
       btn.disabled = true;
       btn.classList.add('loading');
+      btn.setAttribute('aria-busy', 'true');
       btn.textContent = 'Updating\u2026';
       try {
         const r = await fetch('/api/password/change', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ currentPassword: cur.value, newPassword: nw.value }) });
         const d = await r.json().catch(() => ({}));
         posting = false;
         btn.classList.remove('loading');
+        btn.removeAttribute('aria-busy');
         btn.textContent = 'Update password';
         if (r.ok && d.ok) {
           cur.value = ''; nw.value = ''; cf.value = '';
@@ -4009,6 +3993,7 @@ function mspSessionBanner() {
       } catch (e) {
         posting = false;
         btn.classList.remove('loading');
+        btn.removeAttribute('aria-busy');
         btn.textContent = 'Update password';
         err.textContent = 'Password change failed.';
         btn.disabled = false;
@@ -4049,6 +4034,8 @@ function mspSessionBanner() {
       }
       posting = true;
       btn.disabled = true;
+      btn.classList.add('loading');
+      btn.setAttribute('aria-busy', 'true');
       btn.textContent = 'Sending...';
       try {
         const r = await fetch('/api/username/request', {
@@ -4070,6 +4057,8 @@ function mspSessionBanner() {
         btn.disabled = false;
       }
       posting = false;
+      btn.classList.remove('loading');
+      btn.removeAttribute('aria-busy');
       btn.textContent = 'Request change';
     });
   })();

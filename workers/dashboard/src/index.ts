@@ -638,8 +638,31 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   if (!pin) return { ok: false, error: 'no pin came back — try again in a moment', status: 502 };
   // ⚠️ The sign-in NAME is the persona's name, NOT the authentik display name.
   // parseSignIn treats any non-uuid username on a mount as the persona name,
-  // and personaByName matches on `name`; we provision with the login name.
-  return { ok: true, pin, name: String(username).trim(), isAdmin };
+  // and personaByName matches on `name`; the shim returns the persona's actual
+  // name (n8n creates some personas with the display name, not the username).
+  return { ok: true, pin, name: String(d.name || username).trim(), isAdmin };
+}
+
+/* Rename the member's Moonfin persona after a display-name change.
+   Best-effort: the authentik name is already saved; a false return only means
+   the Who's-watching tile keeps the old label until the next successful sync. */
+async function renamePersona(env: Env, sess: SessionData, name: string): Promise<boolean> {
+  if (!env.MOONBASE_ADMIN_TOKEN) return false;
+  const ownName = String(sess.username || '').toLowerCase();
+  const username = (await env.SESSIONS.get('unmap:' + ownName)) || ownName;
+  if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) return false;
+  try {
+    const r = await fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
+        'user-agent': 'msp-dashboard/1.0',
+      },
+      body: JSON.stringify({ username, name, rename: true }),
+    });
+    return r.ok;
+  } catch { return false; }
 }
 
 /* Base URL + auth header scoped to ONE member, for per-user rows.
@@ -1563,7 +1586,10 @@ export default {
         const now = Date.now();
         await env.SESSIONS.put(`audit:${sess.sub}:${now}`, JSON.stringify({ t: now, event: 'profile_updated', fields: Object.keys(updates) }), { expirationTtl: 90 * 86400 });
         await cacheDeleteJson('cache:me:' + sess.sub); // invalidate /api/me cache
-        return json({ ok: true, name: updates.name ?? sess.name, email: updates.email ?? sess.email });
+        // A display-name change must reach Moonfin too: its Who's-watching tile
+        // and mount sign-in name are the persona's name, not the authentik name.
+        const mediaName = updates.name ? await renamePersona(env, sess, updates.name) : true;
+        return json({ ok: true, name: updates.name ?? sess.name, email: updates.email ?? sess.email, mediaName });
       }
 
       // ---------- inline password change (verifies current, writes to authentik) ----------
