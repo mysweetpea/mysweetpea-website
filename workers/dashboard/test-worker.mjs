@@ -174,6 +174,7 @@ try {
   const mediaAuth = [];
   const provBodies = [];
   const personaLogins = [];
+  const personaNames = [];
   fetchImpl = async (url, options = {}) => {
     const u = String(url);
     if (u.includes('auth.example')) {
@@ -183,11 +184,17 @@ try {
       const name = auth.includes('token-two') ? 'Second Display' : 'Member Display';
       return Response.json({ user: { name, is_active: true, groups: [{ name: 'sweetpea' }] } });
     }
-    if (u.endsWith('/Moonfin/Admin/Provision')) { provBodies.push(JSON.parse(String(options.body || '{}'))); return Response.json({ pin: '123456' }); }
+    if (u.endsWith('/Moonfin/Admin/Provision')) {
+      const body = JSON.parse(String(options.body || '{}'));
+      provBodies.push(body);
+      // Echo the persona name like the shim does: provisioning must hand back
+      // the name that sign-in will actually use.
+      return Response.json({ pin: '123456', name: body.name, renamed: body.rename ? true : undefined });
+    }
     if (u.endsWith('/Users/AuthenticateByName')) {
       const body = JSON.parse(String(options.body || '{}'));
-      if (body.Username !== 'service') personaLogins.push(u);
-      const token = u.includes('/config/mount/') ? (body.Username === 'second' ? 'member-2' : 'member-1') : 'service-token';
+      if (body.Username !== 'service') { personaLogins.push(u); personaNames.push(String(body.Username)); }
+      const token = u.includes('/config/mount/') ? (body.Username === 'Second Display' ? 'member-2' : 'member-1') : 'service-token';
       return Response.json({ AccessToken: token });
     }
     if (u.endsWith('/UserViews')) return Response.json({ Items: [{ Id: 'trend', Name: 'Trending Movies' }] });
@@ -213,6 +220,8 @@ try {
   // Concatenating the raw token secret produced 'config/mount/Users/...' —
   // an invalid URL that threw, was swallowed, and blanked every personal row.
   assert.equal(personaLogins.length, 2, 'each member signs in once');
+  // Sign-in uses the persona's returned name — which is now the display name.
+  assert.deepEqual(personaNames, ['Member Display', 'Second Display']);
   assert.equal(personaLogins.every((u) => /^https:\/\/aiostreams\.mysweetpea\.cc\/jellyfin\/service\/config\/mount\/Users\/AuthenticateByName$/.test(u)), true,
     'persona login must use fullMount(env), not the raw secret: ' + personaLogins.join(' | '));
 

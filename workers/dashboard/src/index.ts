@@ -676,7 +676,10 @@ async function renamePersona(env: Env, sess: SessionData, name: string): Promise
       },
       body: JSON.stringify({ username, name, rename: true }),
     });
-    return r.ok;
+    const d: any = await r.json().catch(() => ({}));
+    // The shim keeps the old label when the new name is already taken by
+    // another persona (sign-in resolves by name, so duplicates would collide).
+    return r.ok && d.renamed !== false;
   } catch { return false; }
 }
 
