@@ -395,8 +395,9 @@ img.svc-guide-ico{object-fit:contain;padding:2px}
 .pw-eye.on{color:var(--c)}
 .pw-req{display:block;margin-top:6px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.62rem;letter-spacing:.06em;color:var(--text-faint);transition:color .25s}
 .pw-req.met{color:var(--sage)}
-.pw-ok{display:flex;align-items:center;gap:8px;color:var(--sage);font-size:.86rem;margin-top:8px}
+.pw-ok{display:flex;align-items:center;gap:8px;color:var(--sage);font-size:.86rem;margin-top:8px;flex-wrap:wrap}
 .pw-ok[hidden]{display:none}
+.pw-ok .pw-next{margin-left:auto}
 .pf-bad{border-color:var(--error)!important}
 .pf-pass-wrap{margin-top:2px}
 .gate-links{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px;font-size:.82rem;flex-wrap:wrap}
@@ -3288,6 +3289,7 @@ function mspSessionBanner() {
     '<div class="row"><div class="left"><b>Username</b><span class="dim">@' + esc(me.username) + ' &middot; You can request a change below.</span></div></div>' +
     '</div>' +
     '<button class="mini primary" onclick="openProfileModal()">Edit profile</button>' +
+    '<button class="mini" onclick="setTab(\'services\')">Your services</button>' +
     '</div></section>' +
     '<section class="card" id="sec-password" style="--i:1"><p class="eyebrow">Password</p><h3>Change password</h3>' +
     '<p class="dim" style="margin-bottom:14px">At least 12 characters. This updates your sign-in password for every MySweetPea service.</p>' +
@@ -3297,7 +3299,7 @@ function mspSessionBanner() {
     '<div><label for="pw-confirm">Confirm new password</label><span class="pw-wrap"><input type="password" id="pw-confirm" autocomplete="new-password"/><button type="button" class="pw-eye" data-eye="pw-confirm" aria-label="Show password" tabindex="-1"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pw-req" id="pw-match" aria-live="polite">Must match the new password</span></div>' +
     '</form>' +
     '<div class="merr" id="pw-err" aria-live="polite" style="margin-top:8px"></div>' +
-    '<div class="pw-ok" id="pw-ok" aria-live="polite" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Password updated &mdash; use it next time you sign in.</div>' +
+    '<div class="pw-ok" id="pw-ok" aria-live="polite" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg> Password updated &mdash; use it next time you sign in.<button type="button" class="mini primary pw-next" onclick="setTab(\'services\')">Open your services</button></div>' +
     '<div class="pwf-actions"><a class="pwf-adv" href="#" onclick="ceremony(\'password\',\'Password change\');return false">Advanced options</a>' +
     '<button type="submit" form="pwf" class="sgf-submit" id="pw-save" disabled>Update password</button></div></section>' +
     '<section class="card" id="sec-username" style="--i:2"><p class="eyebrow">Username</p><h3>Change username</h3>' +
@@ -6325,4 +6327,64 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
     .catch(function(){});
 })();
 </script>
+<style id="light-theme-fix">
+/* ===== LIGHT THEME REPAIR (2026-11-24) =====
+   The dashboard is built dark. The OS-light variant only remapped tokens, so
+   every surface that hardcodes a dark colour kept it while its text flipped
+   dark: the nav, mobile menus, dialogs, form fields, modals, the command
+   palette and toasts. This is the last stylesheet, so it wins ties. */
+@media (prefers-color-scheme: light) {
+  :root { --v:#6B5BD2; --c:#2E7D74; --up:#2F6B4E; --down:#A33B3B; --warn:#8A6428; }
+
+  .top-nav, .top-nav.nav-scrolled {
+    background: linear-gradient(180deg, rgba(233,239,240,.94), rgba(233,239,240,.82));
+    border-bottom-color: rgba(20,32,36,.12);
+    box-shadow: 0 8px 28px rgba(16,25,28,.08);
+  }
+  .top-nav.nav-scrolled {
+    background: linear-gradient(180deg, rgba(233,239,240,.97), rgba(233,239,240,.9));
+    box-shadow: 0 10px 34px rgba(16,25,28,.12);
+  }
+  .nav-tabs { background:#FBFCFC; }
+  .dh-panel {
+    background: linear-gradient(168deg, rgba(251,252,252,.97), rgba(238,243,244,.98));
+    border-left-color: rgba(20,32,36,.14);
+  }
+
+  .mcard, .palette { background:#FBFCFC; border-color: rgba(20,32,36,.14); }
+  dialog#sg-dialog, dialog#rf-dialog, dialog#bug-dialog {
+    background: linear-gradient(150deg, rgba(107,91,210,.08) 0%, transparent 45%), #FBFCFC;
+  }
+  dialog#sg-dialog .sgf input, dialog#sg-dialog .sgf select, dialog#sg-dialog .sgf textarea,
+  #rf-dialog .sgf input, #rf-dialog .sgf textarea,
+  .sgf input, .sgf select, .sgf textarea, .mcard input {
+    background:#FFFFFF;
+    border-color: rgba(20,32,36,.18);
+    color: var(--text);
+    box-shadow:none;
+  }
+  dialog#sg-dialog .sgf input:focus, dialog#sg-dialog .sgf select:focus, dialog#sg-dialog .sgf textarea:focus,
+  #rf-dialog .sgf input:focus, #rf-dialog .sgf textarea:focus,
+  .sgf input:focus, .sgf select:focus, .sgf textarea:focus, .mcard input:focus {
+    background:#FFFFFF;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(78,122,131,.16);
+  }
+  .sgf input::placeholder, .sgf textarea::placeholder, .mcard input::placeholder { color:#6B7F85; }
+
+  .toast { background:#FFFFFF; border-color: rgba(20,32,36,.14); color: var(--text); box-shadow: var(--e2); }
+
+  /* filled primary buttons: --bg label on --primary was borderline here */
+  .sgf-submit, .b-go, a.btn { background: var(--primary-dim); color: #FFFFFF; }
+
+  /* drawer quick-action chips: fixed lavender on a light tint */
+  .dh-chip { color:#3F3A72; border-color: rgba(107,91,210,.22); background: rgba(107,91,210,.08); }
+  .dh-chip:hover { background: rgba(107,91,210,.14); }
+
+  #sv-spot .sv-refresh { background: rgba(255,255,255,.85); }
+  #panel-services .sv-card.isdev, .hm-svcrow.isdev, .svc-guide-chip.isdev { background: rgba(20,32,36,.04); }
+  #panel-services .sv-live.dev { color:#4A5568; border-color: rgba(74,85,104,.35); background: rgba(74,85,104,.08); }
+  #panel-services .sv-livedot.dev { background:#4A5568; box-shadow:none; }
+}
+</style>
 </body></html>
