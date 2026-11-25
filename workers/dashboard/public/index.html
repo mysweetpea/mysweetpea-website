@@ -1843,7 +1843,7 @@ body.pwg-lock{overflow:hidden}
   text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 </style>
 <div id="pw-gate" hidden>
-  <div class="pwg-card" role="dialog" aria-modal="true" aria-labelledby="pwg-h">
+  <div class="pwg-card" role="dialog" aria-modal="true" aria-labelledby="pwg-h" tabindex="-1">
     <p class="pwg-eyebrow">One thing first</p>
     <h2 id="pwg-h">Set your new password</h2>
     <p>We emailed you a <b>temporary password</b>. Replace it in the <b>Account</b> tab to secure your account.</p>
@@ -1855,9 +1855,9 @@ body.pwg-lock{overflow:hidden}
   </div>
 </div>
 <script>
-/* First-run gate. Sits above the tour and cannot be dismissed for 5 seconds, so
+/* First-run gate. Sits above the page and cannot be dismissed for 8 seconds, so
    the one instruction that matters (change the temp password) is actually read.
-   Dismissing hands straight over to the tour. */
+   It does not open the tour — the tour is started only from its own button. */
 window.mspPwGate = function (username) {
   var KEY = 'msp_pw_gate_v1:' + String(username || '').toLowerCase(), seen = false;
   try { seen = localStorage.getItem(KEY) === '1'; } catch (e) {}
@@ -1865,6 +1865,8 @@ window.mspPwGate = function (username) {
   if (!el || seen) return;
   el.hidden = false;
   document.body.classList.add('pwg-lock');
+  var card = el.querySelector('.pwg-card');
+  if (card) { try { card.focus(); } catch (e) {} }
   var go = document.getElementById('pwg-go'), ok = document.getElementById('pwg-ok'), n = 8;
   /* Both buttons stay dead for 8 seconds. The user clicked "Change password"
      straight through the warning on the first test, so the read time is the
@@ -6345,7 +6347,7 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
     background: linear-gradient(180deg, rgba(233,239,240,.97), rgba(233,239,240,.9));
     box-shadow: 0 10px 34px rgba(16,25,28,.12);
   }
-  .nav-tabs { background:#FBFCFC; }
+  .nav-tabs { background:#FBFCFC; box-shadow:none; }
   .dh-panel {
     background: linear-gradient(168deg, rgba(251,252,252,.97), rgba(238,243,244,.98));
     border-left-color: rgba(20,32,36,.14);
@@ -6357,18 +6359,20 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
   }
   dialog#sg-dialog .sgf input, dialog#sg-dialog .sgf select, dialog#sg-dialog .sgf textarea,
   #rf-dialog .sgf input, #rf-dialog .sgf textarea,
+  #bug-dialog .sgf input, #bug-dialog .sgf textarea,
   .sgf input, .sgf select, .sgf textarea, .mcard input {
-    background:#FFFFFF;
+    background-color:#FFFFFF;
     border-color: rgba(20,32,36,.18);
     color: var(--text);
     box-shadow:none;
   }
   dialog#sg-dialog .sgf input:focus, dialog#sg-dialog .sgf select:focus, dialog#sg-dialog .sgf textarea:focus,
   #rf-dialog .sgf input:focus, #rf-dialog .sgf textarea:focus,
+  #bug-dialog .sgf input:focus, #bug-dialog .sgf textarea:focus,
   .sgf input:focus, .sgf select:focus, .sgf textarea:focus, .mcard input:focus {
-    background:#FFFFFF;
+    background-color:#FFFFFF;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(78,122,131,.16);
+    box-shadow: var(--ring);
   }
   .sgf input::placeholder, .sgf textarea::placeholder, .mcard input::placeholder { color:#6B7F85; }
 

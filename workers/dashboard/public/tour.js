@@ -756,6 +756,8 @@
 
   window.mspTour = {
     start: start,
+    // reset/seen are kept for the e2e harness even though the tour no longer
+    // auto-starts; finish() still records completion so a reset is meaningful.
     reset: function () { try { localStorage.removeItem(KEY); } catch (e) {} },
     seen: seen,
     // read-only: what the tour is showing right now (used by the audits/e2e)
