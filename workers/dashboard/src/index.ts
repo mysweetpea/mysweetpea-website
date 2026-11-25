@@ -578,16 +578,24 @@ type MemberIdentity =
    records the mapping in unmap:<username>), so every persona call resolves the
    same way. KV read failures must not break callers: provisioning is best-effort
    on the profile path and already guarded on the PIN path. */
-async function personaUsername(env: Env, sess: SessionData): Promise<string> {
+async function personaUsername(env: Env, sess: SessionData): Promise<string | null> {
   const ownName = String(sess.username || '').toLowerCase();
   let mapped: string | null = null;
-  try { mapped = await env.SESSIONS.get('unmap:' + ownName); } catch { /* fall back */ }
+  try {
+    mapped = await env.SESSIONS.get('unmap:' + ownName);
+  } catch (e) {
+    // Falling back to the CURRENT username would target a key that does not
+    // exist for a renamed member — i.e. mint a second persona and orphan their
+    // watch history. Fail closed instead; callers report "unavailable".
+    swallow('persona.unmap.kv', e);
+    return null;
+  }
   return String(mapped || ownName || '');
 }
 
 /* One place owns the provisioning contract (headers, admin token, timeout) so
    the PIN path and the rename path cannot drift apart. */
-async function postProvision(env: Env, body: Record<string, unknown>): Promise<Response> {
+async function postProvision(env: Env, body: Record<string, unknown>, timeoutMs = 6000): Promise<Response> {
   return fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
     method: 'POST',
     headers: {
@@ -596,7 +604,7 @@ async function postProvision(env: Env, body: Record<string, unknown>): Promise<R
       'user-agent': 'msp-dashboard/1.0',
     },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(6000),
+    signal: AbortSignal.timeout(timeoutMs),
   });
 }
 
@@ -638,6 +646,9 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
 
   const username = await personaUsername(env, sess);
+  if (!username) {
+    return { ok: false, error: 'media service is unavailable right now', status: 502 };
+  }
   if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) {
     return { ok: false, error: 'your username cannot be used for media access', status: 400 };
   }
@@ -650,12 +661,14 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
     // earlier (or happened in admin) heals on the next visit. The name comes
     // from authentik (5-min cache) because session docs go stale and would
     // revert a rename made in another browser.
+    // 15s: the CREATE leg may mint a persona (config PUT + avatar) and a slow
+    // success must not be reported as an outage.
     r = await postProvision(env, {
       username,
       name: (liveName || username).slice(0, 80),
       tier,
       rename: !!liveName,
-    });
+    }, 15000);
   } catch {
     return { ok: false, error: 'media service is unreachable right now', status: 502 };
   }
@@ -680,7 +693,7 @@ async function renamePersona(env: Env, sess: SessionData, name: string): Promise
   if (!env.MOONBASE_ADMIN_TOKEN) return false;
   try {
     const username = await personaUsername(env, sess);
-    if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) return false;
+    if (!username || !/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) return false;
     const r = await postProvision(env, { username, name, rename: true });
     const d: any = await r.json().catch(() => ({}));
     // The shim keeps the old label when the new name is already taken by
@@ -1615,9 +1628,10 @@ export default {
         if (updates.name) await cacheDeleteJson('cache:tier:' + sess.sub);
         // A display-name change must reach Moonfin too: its Who's-watching tile
         // and mount sign-in name are the persona's name, not the authentik name.
-        const mediaName = (updates.name && updates.name !== sess.name)
-          ? await renamePersona(env, sess, updates.name)
-          : true;
+        // Always rename when a name was submitted: sess.name is the sign-in
+        // snapshot and is stale in other browsers, so comparing against it can
+        // skip a rename that is actually needed. The shim call is idempotent.
+        const mediaName = updates.name ? await renamePersona(env, sess, updates.name) : true;
         return json({ ok: true, name: updates.name ?? sess.name, email: updates.email ?? sess.email, mediaName });
       }
 

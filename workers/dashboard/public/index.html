@@ -3895,8 +3895,12 @@ function mspSessionBanner() {
           window.applyProfile();
           closeModal();
           if (renamed) {
+            // Refresh the PIN card in place: it caches its last response per
+            // session, so without this the card would keep the old name even
+            // after a successful rename (and a failed one never retries).
+            if (typeof window.mpLoadPin === 'function') window.mpLoadPin(true);
             toast(d.mediaName === false
-              ? 'Name saved. Moonfin still shows the old name — open the Media tab to sync it.'
+              ? 'Name saved. Moonfin may still show the old name — another member may already use it.'
               : 'Name updated — Moonfin shows it next time you open the app.',
               { ok: d.mediaName !== false, err: d.mediaName === false });
           } else {
