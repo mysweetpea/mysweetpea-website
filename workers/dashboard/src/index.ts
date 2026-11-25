@@ -597,6 +597,10 @@ async function personaUsername(env: Env, sess: SessionData): Promise<string | nu
    leg that MINTS the persona (config PUT + avatar) for a member who never
    opened the Media tab, so both paths get the same generous cap. */
 const PROVISION_TIMEOUT_MS = 15000;
+/* The media-row retry runs after a failed first attempt; that retry can be the
+   call that mints the persona, so it keeps most of the budget (a 6s cap would
+   abort the mint it exists for) while still halving the hung-shim worst case. */
+const PROVISION_RETRY_TIMEOUT_MS = 10000;
 
 /* One place owns the provisioning contract (headers, admin token, timeout) so
    the PIN path and the rename path cannot drift apart. */
@@ -780,7 +784,7 @@ async function aiosUserSrc(env: Env, sess: SessionData): Promise<{ base: string;
     await new Promise((r) => setTimeout(r, 250));
     // The retry is on the media tab's critical path: cap it short so a hung
     // shim fails the row instead of blocking ~2x the create timeout.
-    who = await provisionMember(env, sess, 6000);
+    who = await provisionMember(env, sess, PROVISION_RETRY_TIMEOUT_MS);
   }
   if (!who.ok) return null;
   /* Everyone — the owner included — reads their own persona. The owner used to
