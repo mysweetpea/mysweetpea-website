@@ -258,3 +258,15 @@ test('every FAQ is the shared native-details card', () => {
   assert.ok(!read('assets/css/home.css').includes('.fq-cards'), 'home.css must not keep page-scoped FAQ styles');
   assert.ok(!read('assets/js/site.js').includes('toggle-faq'), 'site.js still carries the retired accordion handler');
 });
+
+test('only the available access tier carries the CTA pill', () => {
+  const html = read('form.html');
+  const sweet = html.slice(html.indexOf('data-tier="sweetpea"'), html.indexOf('data-tier="seedling"'));
+  const seedlingStart = html.indexOf('data-tier="seedling"');
+  const seedling = html.slice(seedlingStart, html.indexOf('</button>', seedlingStart));
+  assert.ok(sweet.includes('access-choice-cta'), 'Sweet Pea card lost its CTA pill');
+  assert.ok(!seedling.includes('access-choice-cta'), 'Seedling card must not advertise a CTA');
+  const css = read('assets/css/premium.css');
+  assert.ok(/body\[data-page='form'\] \.access-choice-cta\s*\{/.test(css), 'CTA pill styles missing from premium.css');
+  assert.ok(css.includes("body[data-page='form'] .access-choice-card:not(.coming-soon) .access-choice-copy"), 'copy margin must stay scoped to the card that has the CTA');
+});

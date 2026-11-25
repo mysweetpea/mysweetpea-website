@@ -4277,7 +4277,7 @@ body[data-page='form'] .access-choice-card {
     flex-direction: column;
     align-items: flex-start;
 }
-body[data-page='form'] .access-choice-copy { margin-bottom: 18px; }
+body[data-page='form'] .access-choice-card:not(.coming-soon) .access-choice-copy { margin-bottom: 18px; }
 body[data-page='form'] .access-choice-cta {
     margin-top: auto;
     display: inline-flex;
@@ -4285,8 +4285,8 @@ body[data-page='form'] .access-choice-cta {
     gap: 8px;
     padding: 11px 18px;
     border-radius: 999px;
-    background: linear-gradient(135deg, #E9C08A, #D9A86C 55%, #C68F4D);
-    color: #1B1206;
+    background: linear-gradient(135deg, #D9A86C, var(--gold-dim, #B8874F));
+    color: var(--ink-on-gold, #14100A);
     font-family: inherit;
     font-size: .88rem;
     font-weight: 700;
@@ -4301,7 +4301,7 @@ body[data-page='form'] .access-choice-card:focus-visible .access-choice-cta {
 }
 body[data-page='form'] .access-choice-card:active .access-choice-cta { transform: translateX(1px) scale(.99); }
 body[data-page='form'] .access-choice-card.selected .access-choice-cta {
-    background: linear-gradient(135deg, #F0CBA0, #E2B57C 55%, #D09A58);
+    filter: brightness(1.06);
 }
 @media (max-width: 640px) {
     body[data-page='form'] .access-choice-cta { width: 100%; justify-content: center; }
