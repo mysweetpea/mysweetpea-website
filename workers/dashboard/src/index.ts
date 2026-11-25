@@ -574,6 +574,32 @@ type MemberIdentity =
   | { ok: true; pin: string; name: string; isAdmin: boolean }
   | { ok: false; error: string; status: number };
 
+/* A renamed member keeps the Moonfin persona they started with (the bot
+   records the mapping in unmap:<username>), so every persona call resolves the
+   same way. KV read failures must not break callers: provisioning is best-effort
+   on the profile path and already guarded on the PIN path. */
+async function personaUsername(env: Env, sess: SessionData): Promise<string> {
+  const ownName = String(sess.username || '').toLowerCase();
+  let mapped: string | null = null;
+  try { mapped = await env.SESSIONS.get('unmap:' + ownName); } catch { /* fall back */ }
+  return String(mapped || ownName || '');
+}
+
+/* One place owns the provisioning contract (headers, admin token, timeout) so
+   the PIN path and the rename path cannot drift apart. */
+async function postProvision(env: Env, body: Record<string, unknown>): Promise<Response> {
+  return fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'X-Admin-Token': String(env.MOONBASE_ADMIN_TOKEN || ''),
+      'user-agent': 'msp-dashboard/1.0',
+    },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(6000),
+  });
+}
+
 async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdentity> {
   if (!env.MOONBASE_ADMIN_TOKEN || !env.MOONBASE_MOUNT) {
     return { ok: false, error: 'media access is not configured yet', status: 503 };
@@ -611,35 +637,24 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
   } catch { /* fall through to the no-tier error below */ }
   if (!tier) return { ok: false, error: 'could not verify your account tier', status: 502 };
 
-  const ownName = String(sess.username || '').toLowerCase();
-  // A renamed member keeps the Moonfin persona they started with, so their
-  // watch history survives (the bot records this mapping in /rename).
-  const username = (await env.SESSIONS.get('unmap:' + ownName)) || ownName;
+  const username = await personaUsername(env, sess);
   if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) {
     return { ok: false, error: 'your username cannot be used for media access', status: 400 };
   }
   let r: Response;
   try {
-    r = await fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
-        'user-agent': 'msp-dashboard/1.0',
-      },
-      // The persona is keyed by USERNAME, so renaming here can never mint a
-      // second identity: it only keeps the Who's-watching tile and the mount
-      // sign-in name in step with the member's CURRENT display name. Every
-      // PIN-card load therefore reconciles the name, so a rename that failed
-      // earlier (or happened in admin) heals on the next visit.
-      body: JSON.stringify({
-        username,
-        // authentik's CURRENT display name (5-min cache); session docs go
-        // stale and would revert a rename made in another browser.
-        name: (liveName || username).slice(0, 80),
-        tier,
-        rename: !!liveName,
-      }),
+    // The persona is keyed by USERNAME, so renaming here can never mint a
+    // second identity: it only keeps the Who's-watching tile and the mount
+    // sign-in name in step with the member's CURRENT display name. Every
+    // PIN-card load therefore reconciles the name, so a rename that failed
+    // earlier (or happened in admin) heals on the next visit. The name comes
+    // from authentik (5-min cache) because session docs go stale and would
+    // revert a rename made in another browser.
+    r = await postProvision(env, {
+      username,
+      name: (liveName || username).slice(0, 80),
+      tier,
+      rename: !!liveName,
     });
   } catch {
     return { ok: false, error: 'media service is unreachable right now', status: 502 };
@@ -663,19 +678,10 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
    the Who's-watching tile keeps the old label until the next successful sync. */
 async function renamePersona(env: Env, sess: SessionData, name: string): Promise<boolean> {
   if (!env.MOONBASE_ADMIN_TOKEN) return false;
-  const ownName = String(sess.username || '').toLowerCase();
-  const username = (await env.SESSIONS.get('unmap:' + ownName)) || ownName;
-  if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) return false;
   try {
-    const r = await fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'X-Admin-Token': env.MOONBASE_ADMIN_TOKEN,
-        'user-agent': 'msp-dashboard/1.0',
-      },
-      body: JSON.stringify({ username, name, rename: true }),
-    });
+    const username = await personaUsername(env, sess);
+    if (!/^[a-z0-9][a-z0-9_-]{0,31}$/.test(username)) return false;
+    const r = await postProvision(env, { username, name, rename: true });
     const d: any = await r.json().catch(() => ({}));
     // The shim keeps the old label when the new name is already taken by
     // another persona (sign-in resolves by name, so duplicates would collide).
@@ -1609,7 +1615,9 @@ export default {
         if (updates.name) await cacheDeleteJson('cache:tier:' + sess.sub);
         // A display-name change must reach Moonfin too: its Who's-watching tile
         // and mount sign-in name are the persona's name, not the authentik name.
-        const mediaName = updates.name ? await renamePersona(env, sess, updates.name) : true;
+        const mediaName = (updates.name && updates.name !== sess.name)
+          ? await renamePersona(env, sess, updates.name)
+          : true;
         return json({ ok: true, name: updates.name ?? sess.name, email: updates.email ?? sess.email, mediaName });
       }
 

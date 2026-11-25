@@ -3896,8 +3896,9 @@ function mspSessionBanner() {
           closeModal();
           if (renamed) {
             toast(d.mediaName === false
-              ? 'Name saved — Moonfin could not be updated. Try again in a minute.'
-              : 'Name updated — Moonfin shows it next time you open the app.', { ok: d.mediaName !== false });
+              ? 'Name saved. Moonfin still shows the old name — open the Media tab to sync it.'
+              : 'Name updated — Moonfin shows it next time you open the app.',
+              { ok: d.mediaName !== false, err: d.mediaName === false });
           } else {
             toast('Profile updated — your account is changed everywhere');
           }
