@@ -69,8 +69,8 @@
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
     { target: '#sec-pin h3',
-      title: 'Your password, ready to copy',
-      body: 'This card hands you two things: your Moonfin password and your server address. Copy password and Copy address put them on your clipboard \u2014 paste them into Moonfin, never type them. There is a 30-second walkthrough right below if you want to watch it done.' },
+      title: 'Your sign-in code, ready to copy',
+      body: 'This card hands you two things: your Moonfin sign-in code and your server address \u2014 the code is not your MySweetPea password. Copy code and Copy address put them on your clipboard; paste them into Moonfin, never type them. The same two values also sit at the top of the Moonfin guide.' },
 
     { target: '#sec-media-m > .card:first-child',
       title: 'Browse or search',
@@ -147,8 +147,8 @@
       body: 'Everything you can watch lives here. Let me show you how it works.' },
 
     { target: '#sec-pin h3',
-      title: 'Your password, ready to copy',
-      body: 'This card hands you two things: your Moonfin password and your server address. Copy password and Copy address put them on your clipboard \u2014 paste them into Moonfin, never type them. There is a 30-second walkthrough right below if you want to watch it done.' },
+      title: 'Your sign-in code, ready to copy',
+      body: 'This card hands you two things: your Moonfin sign-in code and your server address \u2014 the code is not your MySweetPea password. Copy code and Copy address put them on your clipboard; paste them into Moonfin, never type them. The same two values also sit at the top of the Moonfin guide.' },
 
     { target: '#sec-media-m > .card:first-child',
       title: 'Browse or search',

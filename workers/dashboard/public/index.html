@@ -1733,7 +1733,7 @@ dialog#sg-dialog::backdrop{animation:sgFade .25s ease}
 .mp-row code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.82rem;
   flex:1 1 240px;min-width:0;color:var(--text,#EAF2F4);
   background:rgba(255,255,255,.05);padding:.6rem .75rem;border-radius:8px;line-height:1.5;
-  display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  display:block;white-space:normal;overflow-wrap:anywhere}
 .mp-btn{font:inherit;font-size:.86rem;font-weight:600;cursor:pointer;
   padding:.55rem 1.05rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.07);color:inherit}
@@ -1841,6 +1841,35 @@ dialog#sg-dialog::backdrop{animation:sgFade .25s ease}
 #pwg-ok[disabled]{opacity:.6;cursor:not-allowed}
 #pwg-go[disabled]{opacity:.55;cursor:not-allowed;filter:saturate(.55)}
 body.pwg-lock{overflow:hidden}
+
+/* Guide handoff sheet + inline setup block (Moonfin) */
+#goh-dialog{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  padding:20px;background:rgba(4,5,10,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#goh-dialog[hidden]{display:none!important}
+.goh-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 10px;padding:10px 12px;
+  border-radius:12px;background:rgba(139,126,246,.07);border:1px solid rgba(139,126,246,.20)}
+.goh-lbl{flex:0 0 auto;font-size:.7rem;letter-spacing:1.2px;text-transform:uppercase;color:#8B7EF6}
+.goh-row code,.goh-row .goh-code{font-family:var(--mono,'JetBrains Mono',monospace);font-size:.86rem;
+  color:#EEF0FB;word-break:break-all;min-width:0}
+.goh-row .goh-code{font-size:1.5rem;letter-spacing:3px;color:#45D6C8}
+.goh-hint{margin:0 0 14px;font-size:.82rem;line-height:1.55;color:#B7BDD9}
+.goh-hint b{color:#F0DDB8;font-weight:650}
+.goh-copies{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+.goh-copies .mp-btn{min-height:40px;flex:1 1 auto}
+#goh-go[disabled]{opacity:.55;cursor:not-allowed;filter:saturate(.55)}
+/* inline block at the top of the Moonfin guide */
+.gpin{margin:0 0 18px;padding:16px 16px 14px;border-radius:16px;background:rgba(139,126,246,.06);
+  border:1px solid rgba(139,126,246,.22)}
+.gpin-cap{margin:0 0 12px;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;color:#8B7EF6}
+.gpin-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 8px}
+.gpin-row>span{flex:0 0 auto;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:#9AA1C4}
+.gpin-row code,.gpin-row .gpin-code{font-family:var(--mono,'JetBrains Mono',monospace);color:#EEF0FB;word-break:break-all;min-width:0;font-size:.86rem}
+.gpin-row .gpin-code{font-size:1.35rem;letter-spacing:3px;color:#45D6C8}
+.gpin-hint{margin:2px 0 12px;font-size:.8rem;line-height:1.55;color:#B7BDD9}
+.gpin-hint b{color:#F0DDB8;font-weight:650}
+.gpin-copies{display:flex;gap:9px;flex-wrap:wrap}
+.gpin-copies .mp-btn{min-height:38px}
+.gpin-err{margin:10px 0 0;font-size:.82rem;color:#E8C98F}
 .gp-jump{appearance:none;border:0;background:none;padding:0;margin:0;font:inherit;color:#45D6C8;
   text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 </style>
@@ -1853,6 +1882,26 @@ body.pwg-lock{overflow:hidden}
     <div class="pwg-row">
       <button type="button" class="mp-btn mp-btn-primary" id="pwg-go" disabled>Change password (8)</button>
       <button type="button" class="mp-btn pwg-ghost" id="pwg-ok" disabled>Remind me later</button>
+    </div>
+  </div>
+</div>
+<div id="goh-dialog" hidden>
+  <div class="pwg-card" role="dialog" aria-modal="true" aria-labelledby="goh-h" tabindex="-1">
+    <p class="pwg-eyebrow">Before you go</p>
+    <h2 id="goh-h">Install it, then come back</h2>
+    <p id="goh-text">Keep this page open — the rest of the setup happens here in the dashboard.</p>
+    <div id="goh-values" hidden>
+      <div class="goh-row"><span class="goh-lbl">Server address</span><code id="goh-addr"></code></div>
+      <div class="goh-row"><span class="goh-lbl">Sign-in code</span><b class="goh-code" id="goh-code"></b></div>
+      <p class="goh-hint"><b>Not your MySweetPea password.</b> This 6-digit code only unlocks Moonfin.</p>
+      <div class="goh-copies">
+        <button type="button" class="mp-btn pwg-ghost" id="goh-copy-addr">Copy address</button>
+        <button type="button" class="mp-btn pwg-ghost" id="goh-copy-code">Copy code</button>
+      </div>
+    </div>
+    <div class="pwg-row">
+      <button type="button" class="mp-btn mp-btn-primary" id="goh-go" disabled>Continue (8)</button>
+      <button type="button" class="mp-btn pwg-ghost" id="goh-stay" disabled>Stay here</button>
     </div>
   </div>
 </div>
@@ -1897,6 +1946,82 @@ window.mspPwGate = function (username) {
   });
   ok.addEventListener('click', close);
 };
+/* Store links inside guides: a sheet that carries the values the member needs,
+   so leaving the dashboard never loses them. Timed like the password gate —
+   the read time is the feature. */
+var MSP_STORE_HOSTS = ['apps.apple.com', 'play.google.com', 'channelstore.roku.com', 'moonfin.io'];
+function mspIsStoreUrl(u) {
+  try {
+    var h = new URL(u, location.href).hostname.toLowerCase();
+    return MSP_STORE_HOSTS.some(function (d) { return h === d || h.slice(-(d.length + 1)) === '.' + d; });
+  } catch (e) { return false; }
+}
+window.mspIsStoreUrl = mspIsStoreUrl;
+window.mspHandoff = function (url) {
+  var el = document.getElementById('goh-dialog');
+  if (!el) { window.open(url, '_blank', 'noopener'); return; }
+  var a = document.getElementById('gpin-addr'), c = document.getElementById('gpin-code');
+  var addr = a ? (a.textContent || '').trim() : '', code = c ? (c.textContent || '').trim() : '';
+  var hasVals = !!(addr && code && code !== '······' && code !== '—' && addr !== '—');
+  var vals = document.getElementById('goh-values');
+  if (vals) vals.hidden = !hasVals;
+  if (hasVals) {
+    var ea = document.getElementById('goh-addr'), ec = document.getElementById('goh-code');
+    if (ea) ea.textContent = addr;
+    if (ec) ec.textContent = code;
+  }
+  var txt = document.getElementById('goh-text');
+  if (txt) txt.textContent = hasVals
+    ? 'The app installs first. Once it is on your device, come back to this page — your address and sign-in code are below, and again at the top of the guide.'
+    : 'Keep this page open — the rest of the setup happens here in the dashboard.';
+  el.hidden = false;
+  document.body.classList.add('pwg-lock');
+  var card = el.querySelector('.pwg-card');
+  if (card) { try { card.focus(); } catch (e) {} }
+  var go = document.getElementById('goh-go'), stay = document.getElementById('goh-stay'), n = 8, unlocked = false;
+  function paint() { if (go) go.textContent = n > 0 ? 'Continue (' + n + ')' : 'Continue'; }
+  paint();
+  if (go) go.disabled = true;
+  if (stay) stay.disabled = true;
+  var t = setInterval(function () {
+    n--; paint();
+    if (n <= 0) { clearInterval(t); unlocked = true; if (go) go.disabled = false; if (stay) stay.disabled = false; try { go.focus(); } catch (e) {} }
+  }, 1000);
+  function close() { clearInterval(t); el.hidden = true; document.body.classList.remove('pwg-lock'); }
+  function wire(sel, text) {
+    var b = document.getElementById(sel);
+    if (!b) return;
+    b.onclick = async function () {
+      var o = b.textContent;
+      try { await navigator.clipboard.writeText(text); b.textContent = 'Copied'; }
+      catch (e) { b.textContent = 'Select and copy'; }
+      setTimeout(function () { b.textContent = o; }, 1600);
+    };
+  }
+  if (hasVals) { wire('goh-copy-addr', addr); wire('goh-copy-code', code); }
+  if (go) go.onclick = function () { close(); window.open(url, '_blank', 'noopener'); };
+  if (stay) stay.onclick = function () { if (unlocked) close(); };
+  el.onclick = function (ev) { if (ev.target === el && unlocked) close(); };
+  document.addEventListener('keydown', function esc(ev) {
+    if (ev.key === 'Escape' && unlocked) { close(); document.removeEventListener('keydown', esc); }
+  });
+};
+/* Delegated: install steps inside any guide open the sheet first. Two signals —
+   a known store host, or a button that literally says Get/Install (the guides
+   use that wording for every "install this app" step, including direct
+   downloads like bitwarden.com/download). */
+function mspIsInstallStep(a) {
+  if (!a) return false;
+  if (mspIsStoreUrl(a.getAttribute('href') || '')) return true;
+  return /^\s*(get|install)\b/i.test(a.textContent || '');
+}
+window.mspIsInstallStep = mspIsInstallStep;
+document.addEventListener('click', function (e) {
+  var a = e.target && e.target.closest ? e.target.closest('a.svc-guide-btn') : null;
+  if (!mspIsInstallStep(a)) return;
+  e.preventDefault();
+  window.mspHandoff(a.getAttribute('href'));
+});
 /* Guides: the "from here" jump switches to the Media tab. */
 document.addEventListener('click', function (e) {
   var b = e.target.closest && e.target.closest('.gp-jump');
@@ -1994,7 +2119,8 @@ document.addEventListener('click', function (e) {
 })();
 </script>
 <script>
-/* Members watch through Moonfin (server + PIN from the Media tab). The
+/* Members watch through Moonfin (server + sign-in code, shown in the guide and
+   the Media tab). The
    AIOStreams web app at <mount>/web/ is deliberately NOT offered: it is the
    operator-facing engine UI, easy to land in by accident, and the owner wants
    members kept out of it. Every media tap therefore lands on the Moonfin
@@ -2595,11 +2721,11 @@ const GUIDES = {
     url: 'https://aiostreams.mysweetpea.cc/jellyfin/',
     plain: 'Movies, shows and anime — on your phone, TV and browser.',
     steps: [
-      { title: 'Copy your address', text: 'Open the Media tab in this dashboard. The \u201cYour Moonfin Password\u201d card at the top shows a long server address and your password — tap Copy address.' },
-      { title: 'Watch in your browser', text: 'No install needed — pick your name, enter your Moonfin password, and watch. Use the address from the Media tab [[from here]] if you are asked for it.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
+      { title: 'Your two setup values', text: 'They are at the top of this page: a server address and a 6-digit sign-in code. Tap Copy next to either one when the app asks for it.' },
+      { title: 'Watch in your browser', text: 'No install needed — pick your name, enter your Moonfin sign-in code, and watch. Both are at the top of this page.', url: 'https://aiostreams.mysweetpea.cc/jellyfin/', btn: 'Open Moonfin' },
       { title: 'Or install the app', text: 'Moonfin is also an app for your phone, tablet and TV. Pick your device below for the exact steps.' },
-      { title: 'Add the server', text: 'In Moonfin choose Add Server, then Server Address. Paste the long link you copied \u2014 do not type it, it carries your account key. Tap Connect and Moonfin finds MySweetPea.' },
-      { title: 'Sign in', text: 'Tap Continue, then pick your own name on the \u201cWho\u2019s watching?\u201d screen. Moonfin asks for your password next \u2014 copy it from the Media tab and paste it in.' },
+      { title: 'Add the server', text: 'In Moonfin choose Add Server, then Server Address. Paste the address from the top of this page \u2014 do not type it, it carries your account key. Tap Connect and Moonfin finds MySweetPea.' },
+      { title: 'Sign in', text: 'Tap Continue, pick your own name on the \u201cWho\u2019s watching?\u201d screen, then enter the 6-digit sign-in code from the top of this page. It is not your MySweetPea password.' },
       { title: 'That is it', text: 'Moonfin remembers the server, so this is a one-time setup. Your progress syncs on every device.' },
     ],
     video: {
@@ -2670,38 +2796,38 @@ const guidePlatSel = {};
 const PLATFORMS_MOONFIN = [
   { p: 'iphone', label: 'iPhone', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the App Store', text: 'Install Moonfin from the App Store.', url: 'https://apps.apple.com/us/app/moonfin/id6761283970', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the server address shown at the top of this page \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
   { p: 'android', label: 'Android', glyph: 'phone', platformSteps: [
     { title: 'Get Moonfin from the Play Store', text: 'One app covers phones, tablets and Android TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the server address shown at the top of this page \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
   { p: 'androidtv', label: 'Android TV', glyph: 'tv', platformSteps: [
     { title: 'Install Moonfin on your TV', text: 'Find Moonfin in the Play Store on your TV.', url: 'https://play.google.com/store/apps/details?id=org.moonfin.androidtv', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Paste the address from the Media tab [[from here]], tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Paste the server address shown at the top of this page, tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
   { p: 'appletv', label: 'Apple TV', glyph: 'tv', platformSteps: [
     { title: 'Use Swiftfin on Apple TV', text: 'Moonfin has no Apple TV app yet — Swiftfin is the official Jellyfin client for Apple TV. Install it from the App Store.', url: 'https://apps.apple.com/us/app/swiftfin/id1604098728', btn: 'Get Swiftfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the server address shown at the top of this page \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
   { p: 'roku', label: 'Roku', glyph: 'tv', platformSteps: [
     { title: 'Add Moonfin from the Channel Store', text: 'Search "Moonfin" in the Roku Channel Store and add the channel.', url: 'https://channelstore.roku.com/details/92a83c9f4112b76a7bcee3dc076254ca:3251a91bf7af7339652d5409ccfdcb39/moonfin', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the server address shown at the top of this page \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
   { p: 'smarttv', label: 'Samsung / LG / Fire TV', glyph: 'tv', platformSteps: [
     { title: 'Get Moonfin for Smart TV', text: 'For Samsung (Tizen 2016+), LG (webOS 3.0+) and Fire TV sticks (Vega OS). Not in the TV stores — install the package from the releases page.', url: 'https://github.com/Moonfin-Client/Smart-TV/releases/latest', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the server address shown at the top of this page \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
   { p: 'desktop', label: 'Desktop', glyph: 'desktop', platformSteps: [
     { title: 'Get the Moonfin desktop app', text: 'Native app for Windows, macOS and Linux.', url: 'https://moonfin.io/#clients', btn: 'Get Moonfin' },
-    { title: 'Add the server', text: 'Tap Add server, then paste the address you copied from the Media tab [[from here]] \u2014 never retype it. Tap Connect, then Continue.' },
-    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then paste your Moonfin password from the Media tab. One-time setup.', url: '', btn: '' },
+    { title: 'Add the server', text: 'Tap Add server, then paste the server address shown at the top of this page \u2014 never retype it. Tap Connect, then Continue.' },
+    { title: 'Sign in', text: 'On \u201cWho\u2019s watching?\u201d pick your own name, then enter your Moonfin sign-in code from the top of this page (it is not your MySweetPea password). One-time setup.', url: '', btn: '' },
   ] },
 ];
 const PLATFORMS_JELLYFIN = [
@@ -2897,6 +3023,55 @@ function mspCfgUrl(u) {
   }
   return u;
 }
+/* Setup values at the top of the Moonfin guide: members were expected to hop to
+   the Media tab mid-setup and never came back. Same loader as the Media card. */
+function guidePinBlockHtml() {
+  return '<div class="gpin" id="gpin">' +
+    '<p class="gpin-cap">Your Moonfin setup</p>' +
+    '<div class="gpin-row"><span>Server address</span><code id="gpin-addr">Loading\u2026</code></div>' +
+    '<div class="gpin-row"><span>Sign-in code</span><b class="gpin-code" id="gpin-code">\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7</b></div>' +
+    '<p class="gpin-hint"><b>Not your MySweetPea password.</b> This 6-digit code only unlocks Moonfin.</p>' +
+    '<div class="gpin-copies">' +
+      '<button type="button" class="mp-btn pwg-ghost" id="gpin-copy-addr">Copy address</button>' +
+      '<button type="button" class="mp-btn pwg-ghost" id="gpin-copy-code">Copy code</button>' +
+    '</div>' +
+    '<p class="gpin-err" id="gpin-err" hidden>Could not load your setup just now. <button type="button" class="gp-jump" data-jump="media">Open the Media tab</button></p>' +
+    '</div>';
+}
+let gpinLoaded = false;
+async function mspGuidePinFill(force) {
+  const box = document.getElementById('gpin');
+  /* Only skip when a previous run actually painted — an early bail (guide not
+     rendered yet, endpoint not ready) must not freeze the block on "Loading…". */
+  if (!box || (gpinLoaded && !force && box.dataset.ready === '1')) return;
+  const addr = document.getElementById('gpin-addr'), code = document.getElementById('gpin-code');
+  if (!addr || !code) return;
+  function paint(d) {
+    addr.textContent = d.mount || '';
+    code.textContent = d.pin || '';
+    box.dataset.ready = '1';
+    const wire = (b, get) => { if (!b) return; b.onclick = async () => {
+      const o = b.textContent;
+      try { await navigator.clipboard.writeText(get()); b.textContent = 'Copied'; }
+      catch (e) { b.textContent = 'Select and copy'; }
+      setTimeout(() => { b.textContent = o; }, 1600);
+    }; };
+    wire(document.getElementById('gpin-copy-addr'), () => addr.textContent);
+    wire(document.getElementById('gpin-copy-code'), () => code.textContent);
+  }
+  try {
+    const d = await window.mpPinData(!!force);
+    gpinLoaded = true;
+    if (!d || d.ok === false || !d.pin) throw new Error('no-setup');
+    paint(d);
+    const err = document.getElementById('gpin-err'); if (err) err.hidden = true;
+  } catch (e) {
+    gpinLoaded = true;
+    addr.textContent = '\u2014'; code.textContent = '\u00b7\u00b7\u00b7\u00b7\u00b7\u00b7';
+    const err = document.getElementById('gpin-err'); if (err) err.hidden = false;
+  }
+}
+window.mspGuidePinFill = mspGuidePinFill;   /* the guides wiring lives in a nested scope */
 function guideStepHtml(s, i) {
   return '<div class="svc-guide-step"><span class="svc-guide-num">' + (i + 1) + '</span><div class="svc-guide-body"><h4>' + esc(s.title) + '</h4><p>' +
       esc(s.text).replace(/\[\[from here\]\]/g, '<button type="button" class="gp-jump" data-jump="media">from here</button>') + '</p>' +
@@ -2958,6 +3133,7 @@ function guideDetailHtml(key) {
   if (!g) return '';
   let h = '<div class="svc-guide-title">' + esc(g.name) + '</div><p class="svc-guide-intro">' + esc(g.plain) + '</p>';
   if (key === 'vaultwarden') h += vaultCardHtml();
+  if (key === 'moonfin') h += guidePinBlockHtml();
   if (svcDev(key)) {
     h += '<p class="gp-devnote"><span aria-hidden="true">\u25CB</span> Still being built — these steps are written down here, but the service is not open to every member yet.</p>';
   }
@@ -3206,7 +3382,7 @@ function mspSessionBanner() {
     '</div>' +
     '<div class="tabpanel" id="panel-media" role="tabpanel" aria-labelledby="tab-media">' +
     '<div class="md-head"><p class="eyebrow">Media</p><h2 class="md-title">Tonight&rsquo;s picks<span class="md-dot">.</span></h2></div>' +
-    '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin Password</h3><div id="pin-body"><div class="skel"></div></div></section>' +
+    '<section class="card mp-card" id="sec-pin"><p class="eyebrow">Watch on your devices</p><h3>Your Moonfin setup</h3><div id="pin-body"><div class="skel"></div></div></section>' +
     '<section id="sec-media-m" class="media-sec"></section>' +
     '</div>' +
     '<div class="tabpanel" id="panel-services" role="tabpanel" aria-labelledby="tab-services">' +
@@ -4576,14 +4752,14 @@ function mspSessionBanner() {
       '<div class="mp-panel"><p class="mp-label">Server address</p>' +
       '<div class="mp-row"><code id="mp-server">' + esc(d.mount || '') + '</code></div>' +
       '<button type="button" class="mp-btn mp-copybtn" id="mp-copy">' + COPY_ICON + ' Copy address</button></div>' +
-      '<div class="mp-panel"><p class="mp-label">Your Moonfin password</p>' +
+      '<div class="mp-panel"><p class="mp-label">Moonfin sign-in code</p>' +
       '<div class="mp-pinrow"><p class="mp-pin">' + esc(d.pin) + '</p></div>' +
-      '<button type="button" class="mp-btn mp-copybtn" id="mp-copy-pin">' + COPY_ICON + ' Copy password</button></div>' +
-      '<p class="mp-sub">This is the password Moonfin asks for. It stays the same every visit. Brand-new accounts can take a minute &mdash; if Moonfin says it\u2019s wrong, wait a moment and try again.</p>' +
+      '<button type="button" class="mp-btn mp-copybtn" id="mp-copy-pin">' + COPY_ICON + ' Copy code</button></div>' +
+      '<p class="mp-sub"><b>Not your MySweetPea password.</b> This 6-digit code only unlocks Moonfin. It stays the same every visit. Brand-new accounts can take a minute &mdash; if Moonfin says it\u2019s wrong, wait a moment and try again.</p>' +
       '<ol class="mp-steps">' +
       '<li>Open <strong>Moonfin</strong> and choose <strong>Add Server</strong> \u2192 <strong>Server Address</strong>.</li>' +
       '<li>Paste the address above, tap <strong>Connect</strong>, then <strong>Continue</strong>.</li>' +
-      '<li>On <strong>Who\u2019s watching?</strong> pick <strong>' + esc(d.name || d.username || 'your name') + '</strong> \u2014 then paste this password.</li>' +
+      '<li>On <strong>Who\u2019s watching?</strong> pick <strong>' + esc(d.name || d.username || 'your name') + '</strong> \u2014 then enter this sign-in code.</li>' +
       '</ol></div>' +
       '<div class="mp-side">' +
       '<figure class="mp-fig">' +
@@ -4591,7 +4767,7 @@ function mspSessionBanner() {
       '<span class="mp-dur">0:30</span>' +
       '<span class="mp-play" id="mp-play" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg></span>' +
       '<video id="mp-video" src="/media/moonfin-pin.mp4?v=12" poster="/media/moonfin-pin.jpg?v=12" controls muted playsinline preload="none" ' +
-      'aria-label="30-second walkthrough: adding MySweetPea in Moonfin and signing in with your password"></video>' +
+      'aria-label="30-second walkthrough: adding MySweetPea in Moonfin and signing in with your sign-in code"></video>' +
       '</div></figure>' +
       '<p class="mp-demo-h">Watch it once</p>' +
       '<p class="mp-demo-sub">Thirty seconds, no sound. Copy your address first, then play.</p>' +
@@ -4610,7 +4786,7 @@ function mspSessionBanner() {
         setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('is-copied'); }, 1800);
       });
     }
-    mpCopy(document.getElementById('mp-copy-pin'), () => String(d.pin || ''), 'Copy password');
+    mpCopy(document.getElementById('mp-copy-pin'), () => String(d.pin || ''), 'Copy code');
     mpCopy(document.getElementById('mp-copy'), () => {
       const t = document.getElementById('mp-server');
       return t ? t.textContent : '';
@@ -4629,6 +4805,24 @@ function mspSessionBanner() {
     mpPinLoaded = false;
     try { sessionStorage.removeItem(MP_CACHE_KEY); } catch (e) { /* private mode */ }
   };
+  /* One loader for the setup values — the Media card and the Moonfin guide read
+     the same endpoint and the same session cache, so a member sees one truth. */
+  window.mpPinData = async function (force) {
+    if (!force) { const c = mpCacheRead(); if (c && c.pin) return c; }
+    const r = await fetch('/api/media/pin', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Could not reach the media service.');
+    if (d.ok !== false) {
+      try {
+        sessionStorage.setItem(MP_CACHE_KEY, JSON.stringify({
+          ok: true, pin: d.pin, name: d.name, username: d.username, mount: d.mount,
+        }));
+      } catch (e) { /* private mode */ }
+    }
+    return d;
+  };
   window.mpLoadPin = async function (force) {
     const body = document.getElementById('pin-body');
     if (!body || (mpPinLoaded && !force)) return;
@@ -4641,22 +4835,13 @@ function mspSessionBanner() {
     else body.innerHTML = '<div class="skel"></div>';
     let d = {};
     try {
-      const r = await fetch('/api/media/pin', {
-        method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
-      });
-      d = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(d.error || 'Could not reach the media service.');
+      d = await window.mpPinData(true);
       if (gen !== mpPinGen) return; // invalidated while this request was in flight
       if (d.ok === false) {
         body.innerHTML = '<p class="mp-sub">' + esc(d.message || 'Media access is not part of your tier.') + '</p>';
         return;
       }
       mpPinRender(body, d);
-      try {
-        sessionStorage.setItem(MP_CACHE_KEY, JSON.stringify({
-          ok: true, pin: d.pin, name: d.name, username: d.username, mount: d.mount,
-        }));
-      } catch (e) { /* private mode */ }
     } catch (e) {
       if (gen !== mpPinGen) return; // a newer load owns the card now
       mpPinLoaded = false; // allow a retry
@@ -4812,6 +4997,7 @@ function mspSessionBanner() {
       guideSel = key;
       guideNav.querySelectorAll('.svc-guide-chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.guide === key ? 'true' : 'false'));
       guideBody.innerHTML = guideDetailHtml(key);
+      if (key === 'moonfin') { try { window.mspGuidePinFill(); } catch (e) {} }
       if (key === 'vaultwarden') vaultRefresh();
       const dd = document.getElementById('m-guide-dd');
       if (dd) {
@@ -4839,6 +5025,7 @@ function mspSessionBanner() {
     if (deepGuide) guideSel = deepGuide;
     guideNav.innerHTML = GUIDE_ORDER.map((k) => guideChipHtml(k, guideSel)).join('');
     guideBody.innerHTML = guideDetailHtml(guideSel);
+    if (guideSel === 'moonfin') { try { window.mspGuidePinFill(); } catch (e) {} }
     if (deepGuide) mspApplyGuide(deepGuide, {});
     const mDD0 = document.getElementById('m-guide-dd');
     const mLab0 = document.getElementById('m-guide-sum-t');
@@ -6394,6 +6581,18 @@ body.st-top-absent .st3-hero{grid-column:1/-1}
   #panel-services .sv-card.isdev, .hm-svcrow.isdev, .svc-guide-chip.isdev { background: rgba(20,32,36,.04); }
   #panel-services .sv-live.dev { color:#4A5568; border-color: rgba(74,85,104,.35); background: rgba(74,85,104,.08); }
   #panel-services .sv-livedot.dev { background:#4A5568; box-shadow:none; }
+
+  /* Moonfin setup block sits on page content, so it needs light tokens — the
+     dark-theme colours were invisible on the light card (measured 1.05:1). */
+  .gpin { background: rgba(107,91,210,.07); border-color: rgba(107,91,210,.24); }
+  .gpin-cap { color:#5B4CC4; }
+  .gpin-row > span { color:#5A6079; }
+  .gpin-row code { color:#10191C; }
+  .gpin-row .gpin-code { color:#2E7D74; }
+  .gpin-hint { color:#3F4657; }
+  .gpin-hint b { color:#7A5A20; }
+  .gpin-err { color:#7A5A20; }
+  .gpin-copies .mp-btn { color:#2A2F45; border-color: rgba(20,32,36,.20); background:#FFFFFF; }
 }
 </style>
 </body></html>
