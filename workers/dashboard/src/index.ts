@@ -593,9 +593,14 @@ async function personaUsername(env: Env, sess: SessionData): Promise<string | nu
   return String(mapped || ownName || '');
 }
 
+/* How long a provisioning call may take. Even a rename-only call can be the
+   leg that MINTS the persona (config PUT + avatar) for a member who never
+   opened the Media tab, so both paths get the same generous cap. */
+const PROVISION_TIMEOUT_MS = 15000;
+
 /* One place owns the provisioning contract (headers, admin token, timeout) so
    the PIN path and the rename path cannot drift apart. */
-async function postProvision(env: Env, body: Record<string, unknown>, timeoutMs = 6000): Promise<Response> {
+async function postProvision(env: Env, body: Record<string, unknown>, timeoutMs = PROVISION_TIMEOUT_MS): Promise<Response> {
   return fetch(AIOS_HOST + '/Moonfin/Admin/Provision', {
     method: 'POST',
     headers: {
@@ -661,14 +666,12 @@ async function provisionMember(env: Env, sess: SessionData): Promise<MemberIdent
     // earlier (or happened in admin) heals on the next visit. The name comes
     // from authentik (5-min cache) because session docs go stale and would
     // revert a rename made in another browser.
-    // 15s: the CREATE leg may mint a persona (config PUT + avatar) and a slow
-    // success must not be reported as an outage.
     r = await postProvision(env, {
       username,
       name: (liveName || username).slice(0, 80),
       tier,
       rename: !!liveName,
-    }, 15000);
+    });
   } catch {
     return { ok: false, error: 'media service is unreachable right now', status: 502 };
   }

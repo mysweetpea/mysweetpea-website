@@ -2,8 +2,12 @@ import assert from 'node:assert/strict';
 import worker from './src/index.ts';
 
 class MemoryKV {
-  constructor() { this.map = new Map(); this.lists = 0; this.reads = 0; }
-  async get(key) { this.reads++; return this.map.get(key) ?? null; }
+  constructor() { this.map = new Map(); this.lists = 0; this.reads = 0; this.failKeys = new Set(); }
+  async get(key) {
+    this.reads++;
+    if (this.failKeys.has(key)) throw new Error('KV unavailable: ' + key);
+    return this.map.get(key) ?? null;
+  }
   async put(key, value) { this.map.set(key, String(value)); }
   async delete(key) { this.map.delete(key); }
   async list({ prefix = '' } = {}) { this.lists++; return { keys: [...this.map.keys()].filter(k => k.startsWith(prefix)).map(name => ({ name })), list_complete: true, cursor: null }; }
@@ -224,6 +228,50 @@ try {
   assert.deepEqual(personaNames, ['Member Display', 'Second Display']);
   assert.equal(personaLogins.every((u) => /^https:\/\/aiostreams\.mysweetpea\.cc\/jellyfin\/service\/config\/mount\/Users\/AuthenticateByName$/.test(u)), true,
     'persona login must use fullMount(env), not the raw secret: ' + personaLogins.join(' | '));
+
+  // A display-name save always reconciles the persona (even when the name
+  // matches the session snapshot), and a KV failure fails CLOSED: no Provision
+  // under the post-rename username, which would mint a second persona.
+  kv.map.clear(); kv.failKeys.clear(); cacheStore.clear();
+  kv.map.set('sess:prof', JSON.stringify(validSession()));
+  Object.assign(env, { AUTHENTIK_ADMIN_TOKEN: 'admin', MOONBASE_ADMIN_TOKEN: 'admin' });
+  const profProvisions = [];
+  fetchImpl = async (url, options = {}) => {
+    const u = String(url);
+    if (u.includes('/api/v3/flows/executor/')) {
+      const body = options.method === 'POST' ? JSON.parse(String(options.body || '{}')) : {};
+      if (body.component === 'ak-stage-password') {
+        return Response.json({ component: 'xak-flow-redirect', to: '/', type: 'redirect' });
+      }
+      return Response.json({ component: body.component || 'ak-stage-identification', challenge: 'c' });
+    }
+    if (u.endsWith('/api/v3/core/users/me/')) return Response.json({ user: { is_active: true, groups: [{ name: 'sweetpea' }] } });
+    if (u.includes('/api/v3/core/users/?username=')) return Response.json({ results: [{ pk: 7 }] });
+    if (u.includes('/api/v3/core/users/7/')) return Response.json({ pk: 7 });
+    if (u.endsWith('/Moonfin/Admin/Provision')) {
+      profProvisions.push(JSON.parse(String(options.body || '{}')));
+      return Response.json({ success: true, pin: '1', name: 'Member', renamed: true });
+    }
+    throw new Error('unexpected profile fetch ' + u);
+  };
+  const profile = (name) => worker.handle(request('/api/profile/update', {
+    method: 'POST',
+    headers: { ...cookie('prof'), origin: env.APP_URL, 'content-type': 'application/json' },
+    body: JSON.stringify({ name, password: 'pw' }),
+  }), env, ctx);
+  let profRes = await profile('Member');
+  assert.equal(profRes.status, 200);
+  assert.equal((await profRes.json()).mediaName, true);
+  assert.deepEqual(profProvisions.map(b => [b.username, b.name, b.rename]),
+    [['member', 'Member', true]], 'a submitted name must always reach Provision with rename:true');
+  kv.failKeys.add('unmap:member');
+  profProvisions.length = 0;
+  profRes = await profile('Mom');
+  const profBody = await profRes.json();
+  assert.equal(profRes.status, 200);
+  assert.equal(profBody.mediaName, false, 'unresolvable persona key must report the rename as not done');
+  assert.equal(profProvisions.length, 0, 'no Provision may run when the persona key cannot be resolved');
+  kv.failKeys.clear();
 
   // Vaultwarden request lane: member asks, Gardener sees it once, member closes it.
   kv.map.clear(); cacheStore.clear();

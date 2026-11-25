@@ -3895,13 +3895,12 @@ function mspSessionBanner() {
           window.applyProfile();
           closeModal();
           if (renamed) {
-            // Refresh the PIN card in place: it caches its last response per
-            // session, so without this the card would keep the old name even
-            // after a successful rename (and a failed one never retries).
-            if (typeof window.mpLoadPin === 'function') window.mpLoadPin(true);
+            // Drop the cached PIN card so the next Media visit refetches with
+            // the new persona name (no extra provisioning call now).
+            if (typeof window.mpPinInvalidate === 'function') window.mpPinInvalidate();
             toast(d.mediaName === false
-              ? 'Name saved. Moonfin may still show the old name — another member may already use it.'
-              : 'Name updated — Moonfin shows it next time you open the app.',
+              ? 'Name saved. Moonfin may still show the old name; it will retry when you open the Media tab.'
+              : 'Name updated — Moonfin shows it next time you open the Media tab.',
               { ok: d.mediaName !== false, err: d.mediaName === false });
           } else {
             toast('Profile updated — your account is changed everywhere');
@@ -4621,6 +4620,12 @@ function mspSessionBanner() {
   function mpCacheRead() {
     try { return JSON.parse(sessionStorage.getItem(MP_CACHE_KEY) || 'null'); } catch (e) { return null; }
   }
+  window.mpPinInvalidate = function () {
+    // Name changed elsewhere: drop the cached card so the next Media visit
+    // re-provisions instead of repainting a stale persona name.
+    mpPinLoaded = false;
+    try { sessionStorage.removeItem(MP_CACHE_KEY); } catch (e) { /* private mode */ }
+  };
   window.mpLoadPin = async function (force) {
     const body = document.getElementById('pin-body');
     if (!body || (mpPinLoaded && !force)) return;
