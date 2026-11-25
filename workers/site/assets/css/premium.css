@@ -4267,3 +4267,42 @@ body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-t {
     }
     body[data-page='about'] .about-x-blk:nth-of-type(4) .about-x-mf-link { justify-content: center; }
 }
+
+/* ===== ACCESS FORM: make the available tier read as a button (2026-11-24) =====
+   The whole card was already a <button>, but the first user test could not tell
+   the tiers were tappable — the card read as static copy. The pill is a span
+   (a button cannot contain a button); the card handles the click. */
+body[data-page='form'] .access-choice-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+body[data-page='form'] .access-choice-copy { margin-bottom: 18px; }
+body[data-page='form'] .access-choice-cta {
+    margin-top: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #E9C08A, #D9A86C 55%, #C68F4D);
+    color: #1B1206;
+    font-family: inherit;
+    font-size: .88rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    box-shadow: 0 6px 18px rgba(217, 168, 108, .24), inset 0 1px 0 rgba(255, 255, 255, .38);
+    transition: transform .25s var(--ease-premium), box-shadow .25s var(--ease-premium);
+}
+body[data-page='form'] .access-choice-card:hover .access-choice-cta,
+body[data-page='form'] .access-choice-card:focus-visible .access-choice-cta {
+    transform: translateX(3px);
+    box-shadow: 0 8px 22px rgba(217, 168, 108, .34), inset 0 1px 0 rgba(255, 255, 255, .45);
+}
+body[data-page='form'] .access-choice-card:active .access-choice-cta { transform: translateX(1px) scale(.99); }
+body[data-page='form'] .access-choice-card.selected .access-choice-cta {
+    background: linear-gradient(135deg, #F0CBA0, #E2B57C 55%, #D09A58);
+}
+@media (max-width: 640px) {
+    body[data-page='form'] .access-choice-cta { width: 100%; justify-content: center; }
+}
